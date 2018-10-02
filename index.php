@@ -36,6 +36,14 @@
     border-top: none;
 
 }
+
+.tabcontent3 {
+    display: none;
+    padding: 6px 12px;
+    border: 0px solid #ccc;
+    border-top: none;
+
+}
 @media (min-width: 767px) {
     .col-sm-4{
     width: 32.23333333%;
@@ -311,8 +319,8 @@ $data_hoje = date('Y-m-d H:i');
                             <?php
                         }
                         ?>
-                            <li class="tm-nav-item"><a href="#contact<?php echo $contCursos ?>" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>O aluno</a>
+                            <li class="tm-nav-item"><a href="#contact<?php echo $contCursos ?>" style="font-size: 1.35em;" class="tm-nav-item-link tm-button">
+                                <i class="fa fa-clock-o tm-nav-fa"></i>Inscreva-se</a>
                             </li>
                         </ul>
                     </nav>
@@ -564,9 +572,20 @@ $data_hoje = date('Y-m-d H:i');
 
                         <div class="tm-flex">
                         	
+
                             <div class="tm-contact-left-half tm-gray-bg">
                                 <div class="tm-contact-inner-pad">
-                                    <h2 class="tm-section-title">Dados do aluno:</h2>
+                                	<h1 style="font-family: 'ibm'">Inscreva-se - Dados do aluno</h1><br>
+                                	<div class="container">
+                                	<div>
+                                	<a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'login<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 0px;">Já possuo conta</a>
+                                	</div>
+                                    <div> 
+                                        <a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 5px;">Registre-se</a>
+                                        </div>
+                                        </div>
+                                        <br>
+                                    <div class="tabcontent2" id="login<?php echo $rowCurso['id']; ?>">
                                     <form action="#cadastro" method="post" class="contact-form">
                                         <input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
                                         <div class="form-group">
@@ -599,19 +618,12 @@ $data_hoje = date('Y-m-d H:i');
 										<?php
 											// }
 										?> -->
-                                        
+                                    
                                         <button type="submit" class="btn btn-primary pull-xs-left tm-button tm-button-normal" name="login">Prosseguir</button>
                                         <br><br>
                                         </form>
-                                    </div>
-                                    	<a href="" onclick=""></a>
-                                    	<div class="form-group">
-                                        <a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 25px;">Registre-se</a>
                                         </div>
-                                   <br>
-                                   <br>
-                                   <br>
-                                   <br>
+                                    </div>
 
                                     <section id="cadastro">
 
@@ -735,7 +747,6 @@ $data_hoje = date('Y-m-d H:i');
 
                                     
                                 </div>
-                                
                                     
                                     	<?php 
                                             if (!empty($rowCurso['local'])) {
@@ -871,11 +882,11 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 
 
 
-                <!-- <section class="tm-content-box tm-banner margin-b-10">
+                <section class="tm-content-box tm-banner margin-b-10">
                 <div class="tm-banner-inner" style="background-image: url('img/page.jpg');">
-                    <h1 class="tm-banner-title" style="background-color: rgba(255,255,255,0.9); padding: 12px; font-family: 'ibm'"><b>The Other Song Brazil</b></h1>                        
+                   <!--  <h1 class="tm-banner-title" style="background-color: rgba(255,255,255,0.9); padding: 12px; font-family: 'ibm'"><b>The Other Song Brazil</b></h1>  -->                       
                 </div>                    
-            </section> -->
+            </section>
 
                     <footer class="tm-footer">
                         <p class="text-xs-center">Copyright &copy; 2018 -<a href="http://www.clinicasimilia.com.br" target="_parent"> Clínica Similia</a>- <a href="painel.php" style="font-size: 1em;">Acessar painel</a></p>
@@ -1023,6 +1034,21 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 function openMenu(evt, cityName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent2");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+<script>
+function openMenu2(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent3");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
