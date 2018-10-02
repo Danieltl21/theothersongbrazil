@@ -123,17 +123,25 @@ ul.thumbnails {
 	date_default_timezone_set('America/Sao_Paulo');
 $data_hoje = date('Y-m-d H:i');
 ?>
-        <div class="container-fluid">
 
-            <section class="tm-content-box tm-banner margin-b-10">
-                <div class="tm-banner-inner" style="background-image: url('img/fundo.png');">
-                    <h1 class="tm-banner-title" style="background-color: rgba(255,255,255,0.3); padding: 12px;"><b>The Other Song Brazil</b></h1>                        
+
+        <div class="container-fluid">
+        	<section class="tm-content-box tm-banner margin-b-10">
+                <div style="height: 25%; background-color: #3b3e46">
+                	<h5 style="color: #d8d8d8; padding: 15px;">TEACHING | TREATING | TRANSFORMING</h5>
                 </div>                    
+                <div style="height: 50%; background-color: white;">
+                	<img src="img/TOS-LOGO-small.png" alt="The Other Song Brazil" style="float: left; height: 100%; margin-left: 25px; margin-top: 5px;">
+                </div>
+                <div style="height: 25%;background-color: #303030" align="center">
+                	<h5 style="color: #d8d8d8; padding: 15px;">International Academy of Advanced Homeopathy - Brazil</h5>
+                </div>
             </section>
+            
 
             <div class="tm-body">
-                <div class="tm-box-pad tm-bordered-box" style="height: 50px; background-color: rgba(105, 63, 16, 1); margin-bottom: 15px; border-radius: 7px;">
-                                <h1 class="tm-section-title" align="center" style="margin-top: -5px;font-size: 2em; color: white; margin-top: -16px;"><b>ESCOLHA O CURSO:</b></h1>
+                <div class="tm-box-pad tm-bordered-box" style="height: 50px; background-color: #3f2b24; margin-bottom: 15px; border-radius: 7px;">
+                                <h1 class="tm-section-title" align="center" style="font-family: 'ibm';margin-top: -5px;font-size: 2em; color: white; margin-top: -16px;"><b>ESCOLHA O CURSO:</b></h1>
                             </div>
                 <div class="tm-main-content">
                 	
@@ -181,11 +189,13 @@ $data_hoje = date('Y-m-d H:i');
                                     echo "<div class=\"item active\">
         
                                     <ul class=\"thumbnails\">";
+
                                 }
+
                                 ?>
-                                    <li class="col-sm-4" style=" background-color: rgba(105, 63, 16, 1);border-radius: 7px;padding: 5px; margin: 5px;">      
+                                    <li class="col-sm-4" style=" background-color: #3f2b24;border-radius: 7px;padding: 5px; margin: 5px;">      
                                         <div class="thumbnail">
-                                          <a href="#"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
+                                          <a href="<?php echo "#Curso".$contCursos."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$contCursos."')"; ?>"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
                                           	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ></a>
                                         </div>
                                         <div class="caption-box" style="padding: 1px;" align="center">
@@ -365,7 +375,7 @@ $data_hoje = date('Y-m-d H:i');
                                 $exibeHorarios2->execute(); 
                                 while ($row=$exibeHorarios2->fetch()) { 
                                     echo "<div class=\"tm-box-pad tm-bordered-box\">
-                                            <h2 class=\"tm-section-title\" align=\"center\">Módulo ".$row['numero'].": ".$row['nome']." - ".$row['valor']."</h2><br><h5>Conteúdo: ".$row['conteudo']."</h5>
+                                            <h2 class=\"tm-section-title\" align=\"center\">Módulo ".$row['numero'].": ".$row['nome']." - R$".$row['valor'].",00</h2><br><h5>Conteúdo: ".$row['conteudo']."</h5>
                                         </div><div class=\"tm-flex\" style=\"display: inline\">";
 
                                         $exibeHorarios3=$conn->prepare("SELECT * FROM tbDatas LEFT JOIN tbModulos ON (`tbDatas`.`id_curso`= :pid) WHERE `tbModulos`.`numero` = :pnumero");
@@ -550,7 +560,7 @@ $data_hoje = date('Y-m-d H:i');
                         ?>                       
                     </div>
 
-                    <section id="contact<?php echo $rowCurso['id'] ?>" class="tm-content-box">
+                    <section id="contact<?php echo $contCursos; ?>" class="tm-content-box">
 
                         <div class="tm-flex">
                         	
@@ -565,7 +575,7 @@ $data_hoje = date('Y-m-d H:i');
                                         <div class="form-group">
                                             <input type="password" id="contact_password" name="senha" class="form-control" placeholder="Senha"  required/>
                                         </div>
-                                        <a href="" style="font-size: 0.6em">Esqueci a senha</a><br><br>
+                                        <a  data-toggle="modal" data-target="#myModal" style="font-size: 0.6em">Esqueci a senha</a><br><br>
                                         <!-- <?php
             //                             	$datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
 												// $datas_curso->bindValue(':pid',$rowCurso['id']);
@@ -594,8 +604,9 @@ $data_hoje = date('Y-m-d H:i');
                                         <br><br>
                                         </form>
                                     </div>
+                                    	<a href="" onclick=""></a>
                                     	<div class="form-group">
-                                        <button class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 25px;">Registre-se</button>
+                                        <a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 25px;">Registre-se</a>
                                         </div>
                                    <br>
                                    <br>
@@ -605,10 +616,12 @@ $data_hoje = date('Y-m-d H:i');
                                     <section id="cadastro">
 
                                     	<div class="tabcontent2" id="registro<?php echo $rowCurso['id']; ?>">
-                                    			<form action="#registro" method="post" class="contact-form">
+                                    			<form action="#registro" method="POST" class="contact-form">
+                                    				<input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
                                     			<div class="form-group">
                                             <input type="email" id="contact_email" name="email" class="form-control" placeholder="E-mail"  required/>
                                         </div>
+                                        
                                         <div class="form-group">
                                             <input type="password" id="contact_password" name="senha" class="form-control" placeholder="Senha"  required/>
                                         </div>
@@ -622,10 +635,7 @@ $data_hoje = date('Y-m-d H:i');
                                             <input type="text" id="contact_address" name="endereco" class="form-control" placeholder="Endereço" required/>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" id="contact_crm" name="crm" class="form-control" placeholder="CRM/CRO" required/>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="number" id="contact_cpf" name="cpf" class="form-control" placeholder="CPF" required/>
+                                            <input type="number" id="contact_cpf" name="cpf" class="form-control" placeholder="CPF" maxlength="11" required/>
                                         </div>
                                         <button type="submit" class="btn btn-primary pull-xs-left tm-button tm-button-normal" name="registrando">Prosseguir</button>
                                     	</form>
@@ -673,8 +683,46 @@ $data_hoje = date('Y-m-d H:i');
                                     	<section id="registro">
                                     		<?php
                                     			if (isset($_POST['registrando'])) {
+                                    				$email=$_POST['email'];
+                                    				$senha=$_POST['senha'];
+                                    				$nome=$_POST['nome'];
+                                    				$telefone=$_POST['telefone'];
+                                    				$endereco=$_POST['endereco'];
+                                    				$cpf=$_POST['cpf'];
+                                    				$id_curso=$_POST['id_curso'];
+
+
+                                    				$ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu');
+													$ver_login->bindValue(':pusu',$email);
+													$ver_login->execute();
+													if ($ver_login->rowCount()!=0) {
+
+														echo "<h2>Já existe uma conta com esse endereço de email</h2>";
+														
+													}else{
+
+
+														$grava2=$conn->prepare('INSERT INTO tbUsuario (id, nome, cpf, senha, email, telefone, endereco, created_at, updated_at) VALUES (NULL, :pnome, :pcpf, :psenha, :pemail, :ptelefone, :pendereco, NULL, NULL)');
+													    $grava2->bindValue(':pnome',$nome);
+													    $grava2->bindValue(':pcpf',$cpf);
+													    $grava2->bindValue(':psenha',$senha);
+													    $grava2->bindValue(':pemail',$email);
+													    $grava2->bindValue(':ptelefone',$telefone);
+													    $grava2->bindValue(':pendereco',$endereco);
+													    $grava2->execute();
+
+													    $ver_login2=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu ORDER BY id DESC');
+														$ver_login2->bindValue(':pusu',$email);
+														$ver_login2->execute();
+														if ($ver_login2->rowCount()!=0) {
+															$rowUsu=$ver_login2->fetch();
+															echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$rowUsu['id']."&c=".$id_curso."&cadastrado\">";
+														}
+														
+													}
+
                                     				// echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"http://clinicasimilia.com.br/usuario/registrar\">";
-                                                    echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?c=".$rowCurso['id']."\">";
+                                                    // echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?c=".$rowCurso['id']."\">";
 
                                     			}
                                     		?>
@@ -684,11 +732,13 @@ $data_hoje = date('Y-m-d H:i');
 
 
                                     </section> 
+
+                                    
                                 </div>
                                 
                                     
                                     	<?php 
-                                            if (empty($rowCurso['local'])) {
+                                            if (!empty($rowCurso['local'])) {
                                                 echo "<div class=\"tm-contact-right-half tm-purple-bg\">
                                 <div class=\"tm-address-box\"><address>
                                     <h2 class=\"tm-section-title\">Local do curso:</h2>";
@@ -751,15 +801,84 @@ $data_hoje = date('Y-m-d H:i');
 
 
 
+                <div class="modal fade" id="myModal" role="dialog">
+										    <div class="modal-dialog">
+										    
+										      <!-- Modal content-->
+										      <div class="modal-content">
+										        <div class="modal-header">
+										          <button type="button" class="close" data-dismiss="modal">&times;</button>
+										          <h4 class="modal-title">Esqueci a senha</h4>
+										        </div>
+										        <div class="modal-body">
+										          <form action="#esqueciasenha" method="POST" class="contact-form">
+                                    			<div class="form-group">
+                                            <input type="email" id="contact_email" name="email" class="form-control" placeholder="E-mail"  required/>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary pull-xs-left tm-button tm-button-normal" name="esqueciasenha">Prosseguir</button>
+                                    	</form>
+										        </div>
+										        <div class="modal-footer">
+										        	<section id="esqueciasenha">
+										  <?php
+
+										  	if (isset($_POST['esqueciasenha'])) {
+										  		$email=$_POST['email'];
+										  		$ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu');
+													$ver_login->bindValue(':pusu',$email);
+													$ver_login->execute();
+													if ($ver_login->rowCount()!=0) {
+														$user=$ver_login->fetch();
+														$senha=$user['senha'];
+														$para= "$email";
+                                    $assunto= "Recuperação de Senha - The Other Song Brazil";
+
+                                    $corpo = "<strong> </strong><br><br>";
+                                    $corpo .= "<strong> Sua senha é: </strong> $senha";
+        
+                                    $header= "Content-Type: text/html; charset= utf-8\n";
+                                    $header.="From: $email Reply-to: naoresponder@theothersongbrazil.com.br\n";
+        
+                                    mail($para,$assunto,$corpo,$header);
+echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
+														echo"<script type='text/javascript'>";
+
+				echo "alert('Um e-mail foi enviado com instruções de recuperação de senha');";
+
+			echo "</script>";
+														
+													}else{
+														echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
+														echo"<script type='text/javascript'>";
+
+				echo "alert('E-mail inválido');";
+
+			echo "</script>";
+													}
+										  	}
+										  ?>
+										  </section>
+										          <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+										        </div>
+										      </div>
+										      
+										    </div>
+										  </div>
 
 
 
 
 
 
+                <!-- <section class="tm-content-box tm-banner margin-b-10">
+                <div class="tm-banner-inner" style="background-image: url('img/page.jpg');">
+                    <h1 class="tm-banner-title" style="background-color: rgba(255,255,255,0.9); padding: 12px; font-family: 'ibm'"><b>The Other Song Brazil</b></h1>                        
+                </div>                    
+            </section> -->
 
                     <footer class="tm-footer">
-                        <p class="text-xs-center">Copyright &copy; 2018 -<a href="http://www.clinicasimilia.com.br" target="_parent"> Clinica Similia</a></p>
+                        <p class="text-xs-center">Copyright &copy; 2018 -<a href="http://www.clinicasimilia.com.br" target="_parent"> Clínica Similia</a>- <a href="painel.php" style="font-size: 1em;">Acessar painel</a></p>
                     </footer>
 
                 </div>
@@ -811,7 +930,7 @@ $data_hoje = date('Y-m-d H:i');
         } 
 
         function setNavbar() {
-            if ($(document).scrollTop() > 800) {
+            if ($(document).scrollTop() > 850) {
                 $('.tm-sidebar').addClass('sticky');
             } else {
                 $('.tm-sidebar').removeClass('sticky');
@@ -846,7 +965,18 @@ $data_hoje = date('Y-m-d H:i');
         });
     
         </script>   
-
+        <script type="text/javascript">
+        	 $("nav a").click(function(event){
+   event.preventDefault();
+   var dest=0;
+   if($(this.hash).offset().top > $(document).height()-$(window).height()){
+     dest=$(document).height()-$(window).height();
+   }else{
+     dest=$(this.hash).offset().top;
+   }
+   $('html,body').animate({scrollTop:dest}, 1000,'swing');
+ });
+        </script>
         <script type="text/javascript">
             function openCity(evt, tabName) {
     // Declare all variables

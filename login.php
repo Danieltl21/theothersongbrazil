@@ -135,7 +135,7 @@ input:focus { box-shadow: inset 0 -5px 45px rgba(100,100,100,0.4), 0 1px 1px rgb
 
 </head>
 
-
+<meta charset="utf-8">
 
 </head>
 <body>
@@ -160,12 +160,14 @@ if(isset($_POST['logar'])){
 	// $ver_login->bindValue(':psenha',sha1($senha));
 	// $ver_login->execute();
 	// if($ver_login->rowCount()==0){
-	if (strcmp($usu,$senha)!=0) {
-		echo "<div align=\"center\" style=\"color:#fff;\"><br>Login ou Senha inválido.</div>";
-	}else{ 
+	// if (strcmp($usu,$senha)!=0) {
+	if ((strcmp($usu,"drcarloshomeopatia@icloud.com")==0)&&(strcmp($senha,"india2019")==0)) {
 		ob_start();
 		$_SESSION['login']=1;
 		echo "<meta http-equiv=\"refresh\" content=0;url=\"painel.php\">";
+		
+	}else{ 
+		echo "<div align=\"center\" style=\"color:#fff;\"><br>Login ou Senha inválido.</div>";
 	}
 }
 ?>

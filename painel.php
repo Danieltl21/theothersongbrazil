@@ -1,4 +1,5 @@
 <?php session_start();
+
 	if(!isset($_SESSION['login'])){
 		header('location:login.php');
 	}
@@ -9,8 +10,11 @@
 	error_reporting(0);
 @ini_set('display_errors', 0);
 	require_once "connect.php";
-
+$conn->exec('SET CHARACTER SET utf8'); 
 ?>
+<head>
+	<meta charset="utf-8">
+</head>
 <div class="container">
 
 
@@ -922,7 +926,7 @@ $data_hoje = date('Y-m-d H:i');
 	<tr>
 		<th width="20%">Nome</th>
 		<th width="10%">CPF</th>
-		<th width="10%">CRM</th>
+		<th width="10%">Endereço</th>
 		<th width="10%">Telefone</th>
 		<th width="15%">E-mail</th>
 		<th>Cadastrado em</th>
@@ -1000,9 +1004,11 @@ $data_hoje = date('Y-m-d H:i');
 	<br><a href="painel.php">Voltar</a>
 	<table border="1" width="100%">
 	<tr>
+		<th width="10%">Inscrição registrada em</th>
 		<th width="20%">Nome</th>
 		<th width="10%">CPF</th>
-		<th width="10%">CRM</th>
+		<th width="10%">Módulo</th>
+		<th width="10%">Valor</th>
 		<th width="10%">Telefone</th>
 		<th width="15%">E-mail</th>
 		<th style="background-color: orange">STATUS PAGAMENTO</th>
@@ -1013,19 +1019,21 @@ $data_hoje = date('Y-m-d H:i');
 	</tr>
 
 	<?php
-		$reqAlunos=$conn->prepare('SELECT * FROM tbAluno WHERE id_curso=:pid ORDER BY usuario_id ASC');
+		$reqAlunos=$conn->prepare('SELECT * FROM tbAluno WHERE id_curso=:pid ORDER BY datainscricao DESC');
 		$reqAlunos->bindValue(':pid', $id_curso);
 		$reqAlunos->execute();
 		while ($aluno1=$reqAlunos->fetch()) {
-			$reqAlunos2=$conn->prepare('SELECT * FROM tbUsuario WHERE id=:pid ORDER BY last_update DESC');
+			$reqAlunos2=$conn->prepare('SELECT * FROM tbUsuario WHERE id=:pid ORDER BY updated_at DESC');
 			$reqAlunos2->bindValue(':pid', $aluno1['usuario_id']);
 			$reqAlunos2->execute();
 			while ($aluno=$reqAlunos2->fetch()) {
-				
 			
 			?>
 
 				<tr>
+					<td width="10%">
+						<?php echo date('d/m/Y', strtotime($aluno1['datainscricao'])); ?>
+					</td>
 					<td width="20%">
 						<?php echo $aluno['nome']; ?>
 					</td>
@@ -1033,7 +1041,29 @@ $data_hoje = date('Y-m-d H:i');
 						<?php echo $aluno['cpf']; ?>
 					</td>
 					<td width="10%">
-						<?php echo $aluno['crm']; ?>
+						<?php 
+							$livros32=$conn->prepare('SELECT * FROM tbModulos WHERE id = :pid');
+							$livros32->bindValue(':pid',$aluno1['id_modulo']);
+							$livros32->execute();
+							while ($rowModulo=$livros32->fetch()) {
+								$valorMod=$rowModulo['valor'];
+								echo "Módulo".$rowModulo['numero']." - ".$rowModulo['nome'];
+							}
+						 ?>
+					</td>
+					
+					<td width="10%">
+						<?php 
+							$curso45=$conn->prepare('SELECT * FROM tbCurso WHERE id=:pid ORDER BY nome ASC');
+		            			$curso45->bindValue(':pid', $id_curso);
+								$curso45->execute();
+								$rowValor=$curso45->fetch();
+								if (empty($valorMod)) {
+									echo $rowValor['valor'];
+								}else{
+									echo "R$".$valorMod.",00";
+								}
+						 ?>
 					</td>
 					<td width="10%">
 						<?php echo $aluno['telefone']; ?>
@@ -1048,14 +1078,14 @@ $data_hoje = date('Y-m-d H:i');
 								<td style="background-color: orangered;">
 									<b>
 									Pagamento não registrado</b><br>
-									<a href="painel.php?registrarpag&id=<?php echo $aluno1['usuario_id']; ?>&curso=<?php echo $id_curso; ?>">Registrar pagamento</a>
+									<a href="painel.php?registrarpag&id=<?php echo $aluno1['id']; ?>&curso=<?php echo $id_curso; ?>">Registrar pagamento</a>
 								</td>
 								<?php
 							}else{
 								?>
 								<td style="background-color: lawngreen;">
-									Pagamento registrado<br>
-									<a href="painel.php?cancelarpag&id=<?php echo $aluno1['usuario_id']; ?>&curso=<?php echo $id_curso; ?>">Cancelar pagamento</a>
+									Pagamento registrado dia <?php echo date('d/m/Y', strtotime($aluno1['datapagamento'])); ?><br>
+									<a href="painel.php?cancelarpag&id=<?php echo $aluno1['id']; ?>&curso=<?php echo $id_curso; ?>">Cancelar pagamento</a>
 								</td>
 								<?php
 							}
@@ -1065,21 +1095,21 @@ $data_hoje = date('Y-m-d H:i');
 							if (strcmp($aluno1['datacomparecimento'],"0000-00-00")==0) {
 								?><td style="background-color: orangered;">
 									<b>Comparecimento não registrado</b><br>
-									<a href="painel.php?registrarcomp&id=<?php echo $aluno1['usuario_id']; ?>&curso=<?php echo $id_curso; ?>">Confirmar comparecimento</a>
+									<a href="painel.php?registrarcomp&id=<?php echo $aluno1['id']; ?>&curso=<?php echo $id_curso; ?>">Confirmar comparecimento</a>
 								</td>
 								<?php
 							}else{
 								?>
 								<td style="background-color: lawngreen;">
-									Comparecimento registrado<br>
-									<a href="painel.php?cancelarcomp&id=<?php echo $aluno1['usuario_id']; ?>&curso=<?php echo $id_curso; ?>">Cancelar comparecimento</a>
+									Comparecimento registrado dia <?php echo date('d/m/Y', strtotime($aluno1['datacomparecimento'])); ?><br>
+									<a href="painel.php?cancelarcomp&id=<?php echo $aluno1['id']; ?>&curso=<?php echo $id_curso; ?>">Cancelar comparecimento</a>
 								</td>
 								<?php
 							}
 						?>
 					
 					<td width="15%">
-						<a href="painel.php?excluiralunocurso&id=<?php echo $aluno1['usuario_id']; ?>&curso=<?php echo $id_curso; ?>">Excluir</a>
+						<a href="painel.php?excluiralunocurso&id=<?php echo $aluno1['id']; ?>&curso=<?php echo $id_curso; ?>">Excluir</a>
 					</td>
 
 				</tr>
@@ -1100,7 +1130,7 @@ $data_hoje = date('Y-m-d H:i');
 		if (isset($_GET['registrarpag'])&&isset($_SESSION['login'])) {
 			$id=$_GET['id'];
 			$curso=$_GET['curso'];
-			$grava3=$conn->prepare('UPDATE tbAluno SET datapagamento = :pdata WHERE usuario_id = :pid AND id_curso=:pcurso');
+			$grava3=$conn->prepare('UPDATE tbAluno SET datapagamento = :pdata WHERE id = :pid AND id_curso=:pcurso');
 			$grava3->bindValue(':pid',$id);
 			$grava3->bindValue(':pdata',$data_hoje);
 			$grava3->bindValue(':pcurso',$curso);
@@ -1121,7 +1151,7 @@ $data_hoje = date('Y-m-d H:i');
 		if (isset($_GET['cancelarpag']) && isset($_SESSION['login'])) {
 			$id=$_GET['id'];
 			$curso=$_GET['curso'];
-			$grava3=$conn->prepare('UPDATE tbAluno SET datapagamento = :pdata WHERE usuario_id = :pid AND id_curso=:pcurso');
+			$grava3=$conn->prepare('UPDATE tbAluno SET datapagamento = :pdata WHERE id = :pid AND id_curso=:pcurso');
 			$grava3->bindValue(':pid',$id);
 			$grava3->bindValue(':pdata',"0000-00-00 00:00:00");
 			$grava3->bindValue(':pcurso',$curso);
@@ -1143,7 +1173,7 @@ $data_hoje = date('Y-m-d H:i');
 		if (isset($_GET['registrarcomp'])&& isset($_SESSION['login'])) {
 			$id=$_GET['id'];
 			$curso=$_GET['curso'];
-			$grava3=$conn->prepare('UPDATE tbAluno SET datacomparecimento = :pdata WHERE usuario_id = :pid AND id_curso=:pcurso');
+			$grava3=$conn->prepare('UPDATE tbAluno SET datacomparecimento = :pdata WHERE id = :pid AND id_curso=:pcurso');
 			$grava3->bindValue(':pid',$id);
 			$grava3->bindValue(':pdata',$data_hoje);
 			$grava3->bindValue(':pcurso',$curso);
@@ -1164,7 +1194,7 @@ $data_hoje = date('Y-m-d H:i');
 		if (isset($_GET['cancelarcomp'])&&isset($_SESSION['login'])) {
 			$id=$_GET['id'];
 			$curso=$_GET['curso'];
-			$grava3=$conn->prepare('UPDATE tbAluno SET datacomparecimento = :pdata WHERE usuario_id = :pid AND id_curso=:pcurso');
+			$grava3=$conn->prepare('UPDATE tbAluno SET datacomparecimento = :pdata WHERE id = :pid AND id_curso=:pcurso');
 			$grava3->bindValue(':pid',$id);
 			$grava3->bindValue(':pdata',"0000-00-00");
 			$grava3->bindValue(':pcurso',$curso);
@@ -1188,7 +1218,7 @@ $data_hoje = date('Y-m-d H:i');
 		if (isset($_GET['excluiralunocurso'])&&isset($_SESSION['login'])) {
 			$id=$_GET['id'];
 			$curso=$_GET['curso'];
-			$grava3=$conn->prepare('DELETE FROM tbAluno WHERE usuario_id = :pid AND id_curso=:pcurso');
+			$grava3=$conn->prepare('DELETE FROM tbAluno WHERE id = :pid AND id_curso=:pcurso');
 			$grava3->bindValue(':pid',$id);
 			$grava3->bindValue(':pcurso',$curso);
 			$grava3->execute();
@@ -1381,11 +1411,17 @@ $data_hoje = date('Y-m-d H:i');
 			if (isset($_POST['gravar_data'])) {
 				$nome=$_POST['data1'];
 				$autor=$_POST['data2'];
+				$estado=$_POST['data3'];
+				$cidade=$_POST['data4'];
 				$id_curso2=$_POST['id_curso2'];
-				$grava3=$conn->prepare('INSERT INTO tbDatas (id, id_curso, mes, dias) VALUES (NULL, :pid, :pnome, :pautor)');
+				$id_curso3=$_POST['id_curso3'];
+				$grava3=$conn->prepare('INSERT INTO tbDatas (id, id_curso, id_modulo, mes, dias, cidade, local) VALUES (NULL, :pid, :pid_modulo, :pnome, :pautor, :pestado, :pcidade)');
 			    $grava3->bindValue(':pid',$id_curso2);
+			    $grava3->bindValue(':pid_modulo',$id_curso3);
 			    $grava3->bindValue(':pnome',$nome);
 			    $grava3->bindValue(':pautor',$autor);
+			    $grava3->bindValue(':pestado',$estado);
+			    $grava3->bindValue(':pcidade',$cidade);
 			    $grava3->execute();
 			    echo "<meta http-equiv=\"refresh\" content=0;url=\"painel.php\">";
 			    echo"<script type='text/javascript'>";
