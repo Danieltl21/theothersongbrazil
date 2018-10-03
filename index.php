@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,15 +11,15 @@
 
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400">
     <link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css">                 
-    <link rel="stylesheet" href="css/magnific-popup.css"> 
+    <link rel="stylesheet" href="/css/bootstrap.min.css">                 
+    <link rel="stylesheet" href="/css/magnific-popup.css"> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" type="text/javascript"></script> 
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/style.css"> 
     
      
     <?php
-        include "connect.php";
+        include "/connect.php";
     ?>
       </head>
       <style type="text/css">
@@ -897,15 +897,13 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
         </div>
         
         <!-- load JS files -->
-        <script
-  src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-  <script
-  src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-        <script src="js/jquery-1.11.3.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        
+        <script src="/js/jquery-1.11.3.min.js"></script>
         <script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
-        <script src="js/jquery.magnific-popup.min.js"></script>
-        <script src="js/jquery.singlePageNav.min.js"></script>
+        <script src="/js/jquery.magnific-popup.min.js"></script>
+        <script src="/js/jquery.singlePageNav.min.js"></script>
         <script>  
 
         var map = '';

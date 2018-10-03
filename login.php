@@ -164,8 +164,7 @@ if(isset($_POST['logar'])){
 	if ((strcmp($usu,"drcarloshomeopatia@icloud.com")==0)&&(strcmp($senha,"india2019")==0)) {
 		ob_start();
 		$_SESSION['login']=1;
-		echo "<meta http-equiv=\"refresh\" content=0;url=\"painel.php\">";
-		
+		echo "<meta http-equiv=\"refresh\" content=0;url=\"admin/cursos\">";
 	}else{ 
 		echo "<div align=\"center\" style=\"color:#fff;\"><br>Login ou Senha inválido.</div>";
 	}

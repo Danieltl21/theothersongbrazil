@@ -1,24 +1,23 @@
-<?php session_start();
+<?php
+	session_start();
 
 	if(!isset($_SESSION['login'])){
-		header('location:login.php');
+		header('location:/login.php');
 	}
 	if(isset($_GET['logout'])){
 		session_destroy();
-		header('location:index.php');
+		header('location:/index.php');
 	}
-	error_reporting(0);
-@ini_set('display_errors', 0);
-	require_once "connect.php";
-$conn->exec('SET CHARACTER SET utf8'); 
+	//require_once "../connect.php";
 ?>
 <head>
 	<meta charset="utf-8">
+	<title>Painel Administrador - theothersongbrazil</title>
 </head>
 <div class="container">
 
 
-<link rel="stylesheet" href="css/bootstrap.min.css"> 
+<link rel="stylesheet" href="/css/bootstrap.min.css"> 
 
 <style type="text/css">
 	fieldset{
@@ -44,24 +43,10 @@ $conn->exec('SET CHARACTER SET utf8');
 }
 
 /* Style the buttons that are used to open the tab content */
-.tab button {
-    background-color: inherit;
+.tab .tablinks {
     float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-    background-color: #ddd;
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-    background-color: #ccc;
 }
 
 /* Style the tab content */
@@ -84,18 +69,19 @@ $data_hoje = date('Y-m-d H:i');
 ?>
 <script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
 <script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
-<a href="painel.php?logout">Fazer Logout</a>
-<h3>Olá, você logou no painel Administrativo - The Other Song Brazil. É recomendável o uso do navegador <span style="color: #d00">Google Chrome</span>.</h3>
-<a href="painel.php">Recarregar</a><br><br/>
-<div class="tab">
-  <button class="tablinks" onclick="openMenu(event, '1Cursos')">Cursos</button>
-  <button class="tablinks" onclick="openMenu(event, '1Bibliografias')">Bibliografias</button>
-  <button class="tablinks" onclick="openMenu(event, '1Datas')">Datas/Horários/Cidades</button>
-  <button class="tablinks" onclick="openMenu(event, '1Instrutores')">Instrutores</button>
-  <button class="tablinks" onclick="openMenu(event, '1Modulos')">Módulos</button>
-  <button class="tablinks" onclick="openMenu(event, '1Alunos')">Alunos</button>
-</div>
 
+<a href="painel.php?logout" style="float:right;">Fazer Logout</a>
+<h3 style="margin-top: 30px;">Painel Administrativo - theothersongbrazil</h3>
+<br>
+<div class="tab">
+  <a class="btn btn-secondary tablinks" href="cursos.php">Cursos</a>
+  <a class="btn btn-secondary tablinks" href="bibliografias.php">Bibliografias</a>
+  <a class="btn btn-secondary tablinks" href="agenda.php")">Datas/Horários/Cidades</a>
+  <a class="btn btn-secondary tablinks" href="instrutores.php")">Instrutores</a>
+  <a class="btn btn-secondary tablinks" href="módulos.php">Módulos</a>
+  <a class="btn btn-secondary tablinks" href="alunos.php">Alunos</a>
+
+</div>
 
 
 
