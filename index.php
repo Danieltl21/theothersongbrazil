@@ -6,13 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>The Other Song Brazil</title>
+    <link rel="canonical" href="http://www.theothersongbrazil.com.br/" />
 
+    <meta name="google-site-verification" content="6eRdN_Ni6yLQrdi5vuMcMaIGQKRsT2GzFFb0IWAXgig" />
+    <META NAME="author" CONTENT="Carlos Eduardo Leitão">
+    <META NAME="subject" CONTENT="The Other Song Brazil, treinamento e clínica de cursos homeopaticos">
+    <META NAME="Description" CONTENT="The Other Song Brazil é parte da Academia Internacional de Clínica e Treinamento para cursos relacionados à Homeopatia, The Other Song, sendo a única oficial no Brasil">
+    <META NAME="Classification" CONTENT="Cursos Homeopatia, Academia de Treinamento e Clínica, The Other Song Brazil">
+    <META NAME="Keywords" CONTENT="the other song, the other song brazil, the other song brasil, cursos homeopatia, clinica similia, simília, homeopatia, the other, other song brazil">
+    <META NAME="Geography" CONTENT="Brasil">
+    <META NAME="Language" CONTENT="Portuguese">
+    <META HTTP-EQUIV="Expires" CONTENT="never">
+    <META NAME="Copyright" CONTENT="Carlos Eduardo Leitão, The Other Song Brazil">
+    <META NAME="Designer" CONTENT="Rahula Palú Caleffi, IntraZone.com.br">
+    <META NAME="Publisher" CONTENT="The Other Song Brazil, IntraZone.com.br">
+    <META NAME="Revisit-After" CONTENT="30 days">
+    <META NAME="distribution" CONTENT="Global">
+    <META NAME="Robots" CONTENT="INDEX,FOLLOW">
+    <META NAME="city" CONTENT="Curitiba, Parana">
     <link rel="icon" href="img/icone.png" type="image/png">
 
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400">
     <link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">                 
-    <link rel="stylesheet" href="/css/magnific-popup.css"> 
+    <link rel="stylesheet" href="css/bootstrap.min.css">                 
+    <link rel="stylesheet" href="css/magnific-popup.css"> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" type="text/javascript"></script> 
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/style.css"> 
@@ -201,7 +218,7 @@ $data_hoje = date('Y-m-d H:i');
                                 }
 
                                 ?>
-                                    <li class="col-sm-4" style=" background-color: #3f2b24;border-radius: 7px;padding: 5px; margin: 5px;">      
+                                    <li class="col-sm-4" id="cardcurso" style=" background-color: #3f2b24;border-radius: 7px;padding: 5px; margin: 5px;">      
                                         <div class="thumbnail">
                                           <a href="<?php echo "#Curso".$contCursos."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$contCursos."')"; ?>"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
                                           	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ></a>
@@ -572,16 +589,23 @@ $data_hoje = date('Y-m-d H:i');
 
                         <div class="tm-flex">
                         	
+                            <div><?php
 
-                            <div class="tm-contact-left-half tm-gray-bg">
+                                if (!empty($rowCurso['local'])) {
+                                    echo "<div class=\"col-sm-6\">";
+                                }else{
+                                    echo "<div class=\"col-sm-12\">";
+                                }?>
+                                
+                                    <div class="tm-contact-left-half tm-gray-bg">
                                 <div class="tm-contact-inner-pad">
-                                	<h1 style="font-family: 'ibm'">Inscreva-se - Dados do aluno</h1><br>
-                                	<div class="container">
-                                	<div>
-                                	<a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'login<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 0px;">Já possuo conta</a>
-                                	</div>
-                                    <div> 
-                                        <a class="tablinks btn btn-primary pull-xs-left tm-button tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 5px;">Registre-se</a>
+                                    <h1 style="font-family: 'ibm'">Inscreva-se - Dados do aluno</h1><br>
+                                    <div class="container" style="display: inline">
+                                    <div style="display: inline">
+                                    <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'login<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 0px;">Já possuo conta</a>
+                                    </div>
+                                    <div style="display: inline"> 
+                                        <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;">Registre-se</a>
                                         </div>
                                         </div>
                                         <br>
@@ -596,28 +620,28 @@ $data_hoje = date('Y-m-d H:i');
                                         </div>
                                         <a  data-toggle="modal" data-target="#myModal" style="font-size: 0.6em">Esqueci a senha</a><br><br>
                                         <!-- <?php
-            //                             	$datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
-												// $datas_curso->bindValue(':pid',$rowCurso['id']);
-												// $datas_curso->execute();
-												// if ($contdatasa=$datas_curso->rowCount()!=0) {
-													
-												
+            //                              $datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
+                                                // $datas_curso->bindValue(':pid',$rowCurso['id']);
+                                                // $datas_curso->execute();
+                                                // if ($contdatasa=$datas_curso->rowCount()!=0) {
+                                                    
+                                                
                                         ?>
                                         <div class="form-group">
-	                                        <select name="id_data" required="required">
-											<?php
-												// $datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
-												// $datas_curso->bindValue(':pid',$rowCurso['id']);
-												// $datas_curso->execute();
-												// while ($curs=$datas_curso->fetch()) {
-												// 	echo "<option value=\"".$curs['id']."\">".$curs['mes']." - ".$curs['dias']."</option>";
-												// }
-											?>
-											</select>
-										</div>
-										<?php
-											// }
-										?> -->
+                                            <select name="id_data" required="required">
+                                            <?php
+                                                // $datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
+                                                // $datas_curso->bindValue(':pid',$rowCurso['id']);
+                                                // $datas_curso->execute();
+                                                // while ($curs=$datas_curso->fetch()) {
+                                                //  echo "<option value=\"".$curs['id']."\">".$curs['mes']." - ".$curs['dias']."</option>";
+                                                // }
+                                            ?>
+                                            </select>
+                                        </div>
+                                        <?php
+                                            // }
+                                        ?> -->
                                     
                                         <button type="submit" class="btn btn-primary pull-xs-left tm-button tm-button-normal" name="login">Prosseguir</button>
                                         <br><br>
@@ -627,17 +651,17 @@ $data_hoje = date('Y-m-d H:i');
 
                                     <section id="cadastro">
 
-                                    	<div class="tabcontent2" id="registro<?php echo $rowCurso['id']; ?>">
-                                    			<form action="#registro" method="POST" class="contact-form">
-                                    				<input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
-                                    			<div class="form-group">
+                                        <div class="tabcontent2" id="registro<?php echo $rowCurso['id']; ?>">
+                                                <form action="#registro" method="POST" class="contact-form">
+                                                    <input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
+                                                <div class="form-group">
                                             <input type="email" id="contact_email" name="email" class="form-control" placeholder="E-mail"  required/>
                                         </div>
                                         
                                         <div class="form-group">
                                             <input type="password" id="contact_password" name="senha" class="form-control" placeholder="Senha"  required/>
                                         </div>
-                                    			<div class="form-group">
+                                                <div class="form-group">
                                             <input type="text" id="contact_name" name="nome" class="form-control" placeholder="Nome" required/>
                                         </div>
                                         <div class="form-group">
@@ -650,95 +674,95 @@ $data_hoje = date('Y-m-d H:i');
                                             <input type="number" id="contact_cpf" name="cpf" class="form-control" placeholder="CPF" maxlength="11" required/>
                                         </div>
                                         <button type="submit" class="btn btn-primary pull-xs-left tm-button tm-button-normal" name="registrando">Prosseguir</button>
-                                    	</form>
-                                    	</div>
+                                        </form>
+                                        </div>
                                         
 
 
 
-                                    	<?php
-                                    		if (isset($_POST['login'])) {
-                                    			$email=$_POST['email'];
-                                    			$senha=$_POST['senha'];
-                                    			$id_data=$_POST['id_data'];
+                                        <?php
+                                            if (isset($_POST['login'])) {
+                                                $email=$_POST['email'];
+                                                $senha=$_POST['senha'];
+                                                $id_data=$_POST['id_data'];
                                                 $id_curso=$_POST['id_curso'];
-                                    			$ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu AND senha=:psenha;');
-												$ver_login->bindValue(':pusu',$email);
-												$ver_login->bindValue(':psenha',$senha);
-												$ver_login->execute();
-												if($ver_login->rowCount()!=0){
-													while ($inst=$ver_login->fetch()) {
-														// $grava3=$conn->prepare('INSERT INTO tbAluno (usuario_id, id_curso, datainscricao) VALUES (:pid_aluno, :pid_curso, :pid_data)');
-													 //    $grava3->bindValue(':pid_aluno',$inst['id']);
-													 //    $grava3->bindValue(':pid_curso',$rowCurso['id']);
-													 //    $grava3->bindValue(':pid_data',$data_hoje);
-													 //    $grava3->execute();
-													    // echo "Inscrição realizada com sucesso.<br> Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:<br> CC: 2214<br>AG: 0555<br>Banco: 014<br>Titular: The Other Song Brazil<br><br>Enviar comprovante para: theothersong@theothersong.com.br<br><br>Obrigado!";
-													    // echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"".$rowCurso['link_pagamento']."\">";
-													    echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$inst['id']."&c=".$id_curso."\">";
-													 //    echo"<script type='text/javascript'>";
+                                                $ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu AND senha=:psenha;');
+                                                $ver_login->bindValue(':pusu',$email);
+                                                $ver_login->bindValue(':psenha',$senha);
+                                                $ver_login->execute();
+                                                if($ver_login->rowCount()!=0){
+                                                    while ($inst=$ver_login->fetch()) {
+                                                        // $grava3=$conn->prepare('INSERT INTO tbAluno (usuario_id, id_curso, datainscricao) VALUES (:pid_aluno, :pid_curso, :pid_data)');
+                                                     //    $grava3->bindValue(':pid_aluno',$inst['id']);
+                                                     //    $grava3->bindValue(':pid_curso',$rowCurso['id']);
+                                                     //    $grava3->bindValue(':pid_data',$data_hoje);
+                                                     //    $grava3->execute();
+                                                        // echo "Inscrição realizada com sucesso.<br> Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:<br> CC: 2214<br>AG: 0555<br>Banco: 014<br>Titular: The Other Song Brazil<br><br>Enviar comprovante para: theothersong@theothersong.com.br<br><br>Obrigado!";
+                                                        // echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"".$rowCurso['link_pagamento']."\">";
+                                                        echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$inst['id']."&c=".$id_curso."\">";
+                                                     //    echo"<script type='text/javascript'>";
 
-														// echo "alert('Inscrição realizada com sucesso.\n Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:\n CC: 2214\nAG: 0555\nBanco: 014\nTitular: The Other Song Brazil\n\nEnviar comprovante para: theothersong@theothersong.com.br\n\nObrigado!');";
+                                                        // echo "alert('Inscrição realizada com sucesso.\n Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:\n CC: 2214\nAG: 0555\nBanco: 014\nTitular: The Other Song Brazil\n\nEnviar comprovante para: theothersong@theothersong.com.br\n\nObrigado!');";
 
-														// echo "</script>";
-													}
-												}else{
-													   echo"<script type='text/javascript'>";
+                                                        // echo "</script>";
+                                                    }
+                                                }else{
+                                                       echo"<script type='text/javascript'>";
 
-														echo "alert('Usuário ou senha incorretos. Selecione o curso e tente novamente');";
+                                                        echo "alert('Usuário ou senha incorretos. Selecione o curso e tente novamente');";
 
-														echo "</script>";
-												}
-                                    		}
+                                                        echo "</script>";
+                                                }
+                                            }
 
-                                    	?>
-                                    	<section id="registro">
-                                    		<?php
-                                    			if (isset($_POST['registrando'])) {
-                                    				$email=$_POST['email'];
-                                    				$senha=$_POST['senha'];
-                                    				$nome=$_POST['nome'];
-                                    				$telefone=$_POST['telefone'];
-                                    				$endereco=$_POST['endereco'];
-                                    				$cpf=$_POST['cpf'];
-                                    				$id_curso=$_POST['id_curso'];
-
-
-                                    				$ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu');
-													$ver_login->bindValue(':pusu',$email);
-													$ver_login->execute();
-													if ($ver_login->rowCount()!=0) {
-
-														echo "<h2>Já existe uma conta com esse endereço de email</h2>";
-														
-													}else{
+                                        ?>
+                                        <section id="registro">
+                                            <?php
+                                                if (isset($_POST['registrando'])) {
+                                                    $email=$_POST['email'];
+                                                    $senha=$_POST['senha'];
+                                                    $nome=$_POST['nome'];
+                                                    $telefone=$_POST['telefone'];
+                                                    $endereco=$_POST['endereco'];
+                                                    $cpf=$_POST['cpf'];
+                                                    $id_curso=$_POST['id_curso'];
 
 
-														$grava2=$conn->prepare('INSERT INTO tbUsuario (id, nome, cpf, senha, email, telefone, endereco, created_at, updated_at) VALUES (NULL, :pnome, :pcpf, :psenha, :pemail, :ptelefone, :pendereco, NULL, NULL)');
-													    $grava2->bindValue(':pnome',$nome);
-													    $grava2->bindValue(':pcpf',$cpf);
-													    $grava2->bindValue(':psenha',$senha);
-													    $grava2->bindValue(':pemail',$email);
-													    $grava2->bindValue(':ptelefone',$telefone);
-													    $grava2->bindValue(':pendereco',$endereco);
-													    $grava2->execute();
+                                                    $ver_login=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu');
+                                                    $ver_login->bindValue(':pusu',$email);
+                                                    $ver_login->execute();
+                                                    if ($ver_login->rowCount()!=0) {
 
-													    $ver_login2=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu ORDER BY id DESC');
-														$ver_login2->bindValue(':pusu',$email);
-														$ver_login2->execute();
-														if ($ver_login2->rowCount()!=0) {
-															$rowUsu=$ver_login2->fetch();
-															echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$rowUsu['id']."&c=".$id_curso."&cadastrado\">";
-														}
-														
-													}
+                                                        echo "<h2>Já existe uma conta com esse endereço de email</h2>";
+                                                        
+                                                    }else{
 
-                                    				// echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"http://clinicasimilia.com.br/usuario/registrar\">";
+
+                                                        $grava2=$conn->prepare('INSERT INTO tbUsuario (id, nome, cpf, senha, email, telefone, endereco, created_at, updated_at) VALUES (NULL, :pnome, :pcpf, :psenha, :pemail, :ptelefone, :pendereco, NULL, NULL)');
+                                                        $grava2->bindValue(':pnome',$nome);
+                                                        $grava2->bindValue(':pcpf',$cpf);
+                                                        $grava2->bindValue(':psenha',$senha);
+                                                        $grava2->bindValue(':pemail',$email);
+                                                        $grava2->bindValue(':ptelefone',$telefone);
+                                                        $grava2->bindValue(':pendereco',$endereco);
+                                                        $grava2->execute();
+
+                                                        $ver_login2=$conn->prepare('SELECT * FROM tbUsuario WHERE email=:pusu ORDER BY id DESC');
+                                                        $ver_login2->bindValue(':pusu',$email);
+                                                        $ver_login2->execute();
+                                                        if ($ver_login2->rowCount()!=0) {
+                                                            $rowUsu=$ver_login2->fetch();
+                                                            echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$rowUsu['id']."&c=".$id_curso."&cadastrado\">";
+                                                        }
+                                                        
+                                                    }
+
+                                                    // echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"http://clinicasimilia.com.br/usuario/registrar\">";
                                                     // echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?c=".$rowCurso['id']."\">";
 
-                                    			}
-                                    		?>
-                                    	</section>
+                                                }
+                                            ?>
+                                        </section>
 
 
 
@@ -747,17 +771,25 @@ $data_hoje = date('Y-m-d H:i');
 
                                     
                                 </div>
-                                    
-                                    	<?php 
+                                </div>
+                                <?php 
                                             if (!empty($rowCurso['local'])) {
+                                echo "<div class=\"col-sm-6\">";
+                                    
                                                 echo "<div class=\"tm-contact-right-half tm-purple-bg\">
                                 <div class=\"tm-address-box\"><address>
                                     <h2 class=\"tm-section-title\">Local do curso:</h2>";
                                                echo $rowCurso['local'];
                                                echo "</div></address></div> ";
                                             }
-                                    		
-                                    	?>
+                                            
+                                        
+                                echo "</div>";
+                                ?>
+                            </div>
+                            
+                                    
+                                    	
                                     	<!-- <?php 
                                     // $extensao = explode('-', $rowCurso['local']);
                                     // foreach ($extensao as $key) {
@@ -889,7 +921,7 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             </section>
 
                     <footer class="tm-footer">
-                        <p class="text-xs-center">Copyright &copy; 2018 -<a href="http://www.clinicasimilia.com.br" target="_parent"> Clínica Similia</a>- <a href="painel.php" style="font-size: 1em;">Acessar painel</a></p>
+                        <p class="text-xs-center" align="center">Copyright &copy; 2018 -<a href="http://www.clinicasimilia.com.br" target="_parent"> Clínica Similia</a>- <a href="painel.php" style="font-size: 1em;">Acessar painel</a></p>
                     </footer>
 
                 </div>
@@ -1027,6 +1059,7 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 
 
 </script>
+
 
 <script>
 function openMenu(evt, cityName) {
