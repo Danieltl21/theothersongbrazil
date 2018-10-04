@@ -5,6 +5,10 @@ include("../froala.php")
 
 <script type="text/javascript">
 	$("#cursos-link").addClass('btn-secondary').removeClass('btn-outline-secondary');
+
+	$(function(){
+		$(".fr-wrapper div:first-child").remove();
+	})
 </script>
 	
 <br><br>
@@ -132,7 +136,7 @@ include("../froala.php")
                 method: 'POST',
                 type: 'POST', // For jQuery < 1.9
                 success: function(data){
-                    //window.location = '/admin/cursos';
+                    window.location = '/admin/cursos';
                 }
             });
         });
