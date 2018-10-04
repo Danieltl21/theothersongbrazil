@@ -35,11 +35,16 @@ include("../froala.php")
 
 		    		$quantidade = intval($result["quantidade"]);
 		    		
+
 		    		for ($cont = 1; $cont <= $quantidade; $cont++) {
 		    			if(!(isset($_POST['id']) && $_POST['posicao'] == $cont)){
 		    				echo "<option value=\"".$cont."\">".$cont . " (" . $result['nome'] . ")</option>";
 		    			}
 		    			$result = $queryCount->fetch();
+		    	   	}
+
+		    	   	while ($result = $queryCount->fetch()) {
+		    	   		echo "<option value=\"".$cont."\">".$cont . " (" . $result['nome'] . ")</option>";
 		    	   	}
 
 		    	   	if(!isset($_POST['id'])){
