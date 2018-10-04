@@ -19,7 +19,7 @@
     
      
     <?php
-        include "/connect.php";
+        include "connect.php";
     ?>
       </head>
       <style type="text/css">
