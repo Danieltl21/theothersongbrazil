@@ -55,6 +55,14 @@ $data_hoje = date('Y-m-d H:i');
 							echo "<fieldset><form action=\"confirma.php#cadModulo1\" method=\"post\" enctype=\"multipart/form-data\" align=\"center\">";
 							echo "<input type=\"hidden\" name=\"id_curso\" value=\"".$id_curso."\">";
 							echo "<input type=\"hidden\" name=\"id_aluno\" value=\"".$id_aluno."\">";
+							echo "<div class=\"form-group\" style=\"margin-top: 25px;\">
+											<label>CRM/CRO</label>
+											<select name=\"crm\" required=\"required\">
+												<option value=\"crm\">CRM</option>
+												<option value=\"cro\">CRO</option>
+											</select>
+											<input type=\"text\" name=\"numero_crm\" required=\"required\">
+										</div>";
 							if ($rowCurso['tipo']==2) {
 								echo "<h3>Selecione os módulos de interesse:</h3>";
 								$livros=$conn->prepare('SELECT * FROM tbModulos WHERE id_curso = :pid');
@@ -117,6 +125,10 @@ $data_hoje = date('Y-m-d H:i');
 											?>
 											</select>
 										</div>
+										<br>
+
+
+										
                                         
 										<?php
 											}
@@ -137,14 +149,24 @@ $data_hoje = date('Y-m-d H:i');
 	            		$valortotal=0;
 	            		//Curso sem módulo
 	            		if (isset($_POST['id_data'])) {
+	            			echo "ENTROU ID DATA";
+	            			$crm=$_POST['crm'];
+
+	            			$numero=$_POST['numero_crm'];
 	            			$id_data=$_POST['id_data'];
 	            			$id_curso=$_POST['id_curso'];
 	            			$id_aluno=$_POST['id_aluno'];
 
-	            			$grava3=$conn->prepare('INSERT INTO tbAluno (id, id_curso, datainscricao, valorpago, id_data, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pid_curso, :pdatainscricao, 0, :pid_data, NULL, NULL, :pid_usuario)');
+	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
+		            			$curso45->bindValue(':pid_usu', $id_aluno);
+		            			$curso45->bindValue(':pcrx_tipo', $crm);
+		            			$curso45->bindValue(':pcrx_numero', $numero);
+								$curso45->execute();
+								$id_aluno=$conn->lastInsertId();
+
+	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, NULL, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+								$grava3->bindValue(':pid_aluno',$id_aluno);
 								$grava3->bindValue(':pid_curso',$id_curso);
-								$grava3->bindValue(':pid_usuario',$id_aluno);
-								$grava3->bindValue(':pdatainscricao',$data_hoje);
 								$grava3->bindValue(':pid_data',$id_data);
 								$grava3->execute();
 
@@ -156,9 +178,21 @@ $data_hoje = date('Y-m-d H:i');
 
 	            		}
 	            		//Curso com módulo
-	            		if (isset($_POST['array'])) {
+	            		elseif (isset($_POST['array'])) {
+	            			echo "ENTROU ARRAY";
+	            			$crm=$_POST['crm'];
+	            			$numero=$_POST['numero_crm'];
 	            			$id_curso=$_POST['id_curso'];
 	            			$id_aluno=$_POST['id_aluno'];
+
+	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
+		            			$curso45->bindValue(':pid_usu', $id_aluno);
+		            			$curso45->bindValue(':pcrx_tipo', $crm);
+		            			$curso45->bindValue(':pcrx_numero', $numero);
+								$curso45->execute();
+								echo "Id aluno antes:".$id_aluno;
+								$id_aluno=$conn->lastInsertId();
+								echo "<br>Id aluno dps:".$id_aluno;
 	            			foreach ($_POST['array'] as $key2) {
 
 	            				//Valor módulos
@@ -173,21 +207,38 @@ $data_hoje = date('Y-m-d H:i');
 
 	            				$aux="id_datamodulo".$key2;
 	            				$data=$_POST["$aux"];
-	            				$grava2=$conn->prepare('INSERT INTO tbAluno (id, id_curso, datainscricao, valorpago, id_modulo, id_data, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pid_curso, :pdatainscricao, 0, :pid_modulo, :pid_data, NULL, NULL, :pid_usuario)');
-								$grava2->bindValue(':pid_curso',$id_curso);
-								$grava2->bindValue(':pid_usuario',$id_aluno);
-								$grava2->bindValue(':pdatainscricao',$data_hoje);
-								$grava2->bindValue(':pid_modulo',$key2);
-								$grava2->bindValue(':pid_data',$data);
-								$grava2->execute();
+	            				$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, :pid_modulo, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+								$grava3->bindValue(':pid_aluno',$id_aluno);
+								$grava3->bindValue(':pid_curso',$id_curso);
+								$grava3->bindValue(':pid_modulo',$key2);
+								$grava3->bindValue(':pid_data',$data);
+								$grava3->execute();
+
 													    
 							}
 							unset($key2);
 	            		}
 	            		
-	            		if (!isset($_POST['id_data']) && !isset($_POST['array'])) {
+	            		elseif (!isset($_POST['id_data']) && !isset($_POST['array'])) {
+	            			echo "ENTROU DIF DATA DIF ARRAY";
+	            			$crm=$_POST['crm'];
+	            			$numero=$_POST['numero_crm'];
 	            			$id_curso=$_POST['id_curso'];
 	            			$id_aluno=$_POST['id_aluno'];
+	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
+		            			$curso45->bindValue(':pid_usu', $id_aluno);
+		            			$curso45->bindValue(':pcrx_tipo', $crm);
+		            			$curso45->bindValue(':pcrx_numero', $numero);
+								$curso45->execute();
+								
+								$id_aluno=$conn->lastInsertId();
+
+	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, NULL, NULL, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+								$grava3->bindValue(':pid_aluno',$id_aluno);
+								$grava3->bindValue(':pid_curso',$id_curso);
+								$grava3->execute();
+	            		}
+	            		else{
 	            			echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$id_aluno."&c=".$id_curso."\">";
 						    echo"<script type='text/javascript'>";
 
