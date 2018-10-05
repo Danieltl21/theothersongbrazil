@@ -118,15 +118,11 @@ ul.thumbnails {
         display: inline-block;
         font-size: 34px;
         font-weight: 200;
-        line-height: 18px;
+        line-height: 60px;
         opacity: 0.9;
         padding: 4px 10px;
-        margin: 30px -20px 0;
-        height: 30px;
-        width: 30px;
+        height: 71px;
         }
-
-
 
 /* Mobile only
 ------------------------------------------------ */
@@ -136,6 +132,12 @@ ul.thumbnails {
 @media (max-width: 479px) {
     .caption-box { word-break: break-all; }
     ul.thumbnails li { margin-bottom: 30px; }
+}
+@media (max-width: 489px) {
+    .carousel-control { height: 110px; line-height: 100px;} 
+}
+@media (max-width: 303px) {
+    .carousel-control { height: 149px; line-height: 138px;} 
 }
 
 
@@ -153,20 +155,20 @@ $data_hoje = date('Y-m-d H:i');
         <div class="container-fluid">
         	<section class="tm-content-box tm-banner margin-b-10">
                 <div style="height: 25%; background-color: #3b3e46">
-                	<h5 style="color: #d8d8d8; padding: 15px;">TEACHING | TREATING | TRANSFORMING</h5>
+                	<h5 style="color: #d8d8d8; padding: 15px;">TRATANDO | ENSINANDO | TRANSFORMANDO</h5>
                 </div>                    
                 <div style="height: 50%; background-color: white;">
                 	<img src="img/TOS-LOGO-small.png" alt="The Other Song Brazil" style="float: left; height: 100%; margin-left: 25px; margin-top: 5px;">
                 </div>
                 <div style="height: 25%;background-color: #303030" align="center">
-                	<h5 style="color: #d8d8d8; padding: 15px;">International Academy of Advanced Homeopathy - Brazil</h5>
+                	<h5 style="color: #d8d8d8; padding: 15px;">Academia de Homeopatia Avançada - Brasil</h5>
                 </div>
             </section>
             
 
             <div class="tm-body">
-                <div class="tm-box-pad tm-bordered-box" style="height: 50px; background-color: #3f2b24; margin-bottom: 15px; border-radius: 7px;">
-                                <h1 class="tm-section-title" align="center" style="font-family: 'ibm';margin-top: -5px;font-size: 2em; color: white; margin-top: -16px;"><b>ESCOLHA O CURSO:</b></h1>
+                <div class="tm-box-pad tm-bordered-box" style="background-color: #3f2b24; margin-bottom: 15px; border-radius: 7px; padding: 15px 40px">
+                                <h1 class="tm-section-title" align="center" style="font-family: 'ibm';font-size: 2em; color: white; margin-bottom: 0"><b>ESCOLHA O CURSO:</b></h1>
                             </div>
                 <div class="tm-main-content">
                 	
@@ -206,7 +208,7 @@ $data_hoje = date('Y-m-d H:i');
         <?php
                             $contCursos=1;
                             $totalCursos=0;
-                            $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1");
+                            $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
                             $exib->execute();
                             $totalCursos=$exib->rowCount();
                             while ($rowCurso=$exib->fetch()) {
@@ -271,8 +273,8 @@ $data_hoje = date('Y-m-d H:i');
 
   </div><!-- /#myCarousel -->
 <div class="control-box">                            
-      <a data-slide="prev" href="#myCarousel" class="carousel-control left" style="width: 60px; background-color: white; color: black; background: color;">‹</a>
-      <a data-slide="next" href="#myCarousel" class="carousel-control right" style="width: 60px; background-color: white; color: black; background: color; !important">›</a>
+      <a data-slide="prev" href="#myCarousel" class="carousel-control left" style="width: 40px; background-color: white; color: black; border-top-left-radius: 6px; border-bottom-left-radius: 6px;">‹</a>
+      <a data-slide="next" href="#myCarousel" class="carousel-control right" style="width: 40px; background-color: white; color: black;border-top-right-radius: 6px; border-bottom-right-radius: 6px;">›</a>
     </div><!-- /.control-box -->  
                     
                         
@@ -501,37 +503,28 @@ $data_hoje = date('Y-m-d H:i');
 
                     <!-- slider -->
                     <div id="about<?php echo $contCursos ?>" class="tm-content-box">
-                    	<?php
-
-                    		$exibeInstrutores=$conn->prepare("SELECT id_instrutor FROM tbCurso WHERE id = :pid");
-                                $exibeInstrutores->bindValue(':pid',$rowCurso['id']);
-                                $exibeInstrutores->execute();
-                                if (($continstrutor=$exibeInstrutores->rowCount())!=1) {
-                                	
-                                
-                    	?>
-                        <div class="tm-box-pad tm-bordered-box">
+                        
                         	<?php
 
-                                $exibeInstrutores=$conn->prepare("SELECT id_instrutor FROM tbCurso WHERE id = :pid");
+                                $exibeInstrutores=$conn->prepare("SELECT tbInstrutores.* FROM tbCurso LEFT JOIN tbInstrutores ON tbCurso.id_instrutor = tbInstrutores.id WHERE tbCurso.id = :pid");
                                 $exibeInstrutores->bindValue(':pid',$rowCurso['id']);
                                 $exibeInstrutores->execute();
-                                while ($rowInstrutor=$exibeInstrutores->fetch()) {
-                                	$exibeInstrutores2=$conn->prepare("SELECT * FROM tbInstrutores WHERE id = :pid");
-	                                $exibeInstrutores2->bindValue(':pid',$rowInstrutor['id_instrutor']);
-	                                $exibeInstrutores2->execute();
-	                                while ($rowInstrutor2=$exibeInstrutores2->fetch()) {
-	                                	echo "<h2 class=\"tm-section-title\">".$rowInstrutor2['nome']."</h2>
-                            <p>".$rowInstrutor2['bio']."</p>
-                            <a href=\"".$rowInstrutor2['link']."\" class=\"tm-button tm-button-normal\">Saiba mais</a>";
-	                                }
+
+                                if($rowInstrutor = $exibeInstrutores->fetch()){
+                                    echo '<div class="tm-box-pad tm-bordered-box">';
+
+                                    do{
+                                        echo "<h2 class=\"tm-section-title\">".$rowInstrutor['nome']."</h2>
+                                        <p>".$rowInstrutor['bio']."</p>
+                                        <a href=\"".$rowInstrutor['link']."\" class=\"tm-button tm-button-normal\">Saiba mais</a>";
+                                    } while ($rowInstrutor = $exibeInstrutores->fetch());
+
+                                    echo "</div>";
                                 }
                             ?>
+
+                        <br>
                             
-                        </div>
-                        <?php
-                    		}
-                        ?>
                         <div class="tm-box-pad tm-bordered-box">
                             <h2 class="tm-section-title">* Nossos cursos são exclusivos para médicos ou dentistas *</h2>
                             

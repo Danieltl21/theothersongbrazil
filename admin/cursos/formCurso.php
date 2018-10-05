@@ -6,9 +6,9 @@ include("../froala.php")
 <script type="text/javascript">
 	$("#cursos-link").addClass('btn-secondary').removeClass('btn-outline-secondary');
 
-	$(function(){
-		$(".fr-wrapper div:first-child").remove();
-	})
+	// $(function(){
+	// 	$(".fr-wrapper div:first-child").remove();
+	// })
 </script>
 	
 <br><br>
