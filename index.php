@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=500, initial-scale=1">
+    <meta name="viewport" content="width=500, initial-scale=0.7">
 
     <title>The Other Song Brazil</title>
     <link rel="canonical" href="http://www.theothersongbrazil.com.br/" />
