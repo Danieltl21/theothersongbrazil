@@ -50,9 +50,9 @@
             -moz-background-size: cover;
             -o-background-size: cover;
             background-size: cover;
-    		background-attachment: fixed;
-    		background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
-    		background-repeat: no-repeat;
+           background-attachment: fixed;
+           background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
+           background-repeat: no-repeat;
             max-height: 100%;
             max-width: 100%;
 		}
@@ -148,25 +148,6 @@ ul.thumbnails {
 }
 @media (max-width: 303px) {
     .carousel-control { height: 149px; line-height: 138px;} 
-}
-
-/*For IOS*/
-@media only screen 
-and (max-device-width : 767px) {
-    .page-header { text-align: center; }
-}
-@media only screen 
-and (max-device-width : 479px) {
-    .caption-box { word-break: break-all; }
-    ul.thumbnails li { margin-bottom: 30px; }
-}
-@media only screen 
-and (max-device-width : 489px) {
-    .carousel-control { height: 110px; line-height: 100px;} 
-}
-@media only screen 
-and (max-device-width : 303px) {
-     .carousel-control { height: 149px; line-height: 138px;} 
 }
 
     /*GMAP*/
@@ -321,7 +302,7 @@ $data_hoje = date('Y-m-d H:i');
 
             <?php
                 $contCursos=1;
-                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
+                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1");
                 $exib->execute();
                 while ($rowCurso=$exib->fetch()) {
 
