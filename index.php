@@ -46,19 +46,13 @@
       }
 
       	#bg {
-<<<<<<< HEAD
     		webkit-background-size: cover;
             -moz-background-size: cover;
             -o-background-size: cover;
             background-size: cover;
-           background-attachment: fixed;
-           background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
-           background-repeat: no-repeat;
-=======
-    		
-    		background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
+            background-attachment: fixed;
+            background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
     		background-repeat: repeat-x;
->>>>>>> a883976517d56630b6dee0877986f188f1d7f262
             max-height: 100%;
             max-width: 100%;
 		}
@@ -77,10 +71,25 @@
     border-top: none;
 
 }
-@media (min-width: 767px) {
-    .col-sm-4{
+
+.carousel-inner li{
+    display: inline-block;
+    background-color: #3f2b24;
+    border-radius: 7px;
+    padding: 5px;
+    margin: 5px;
+}
+
+.carousel-inner .col-sm-4{
     width: 32.23333333%;
 }
+
+.carousel-inner .col-sm-6{
+    width: 47%;
+}
+
+.unactive {
+    display: none !important;
 }
 
 a {
@@ -234,51 +243,31 @@ $data_hoje = date('Y-m-d H:i');
     <div class="carousel-inner">
         
         <?php
-                            $contCursos=1;
-                            $totalCursos=0;
                             $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
                             $exib->execute();
                             $totalCursos=$exib->rowCount();
-                            while ($rowCurso=$exib->fetch()) {
-                                if ($contCursos==1) {
-                                    echo "<div class=\"item active\">
-        
-                                    <ul class=\"thumbnails\">";
+                            if($rowCurso=$exib->fetch()){
+                                $posicao = $rowCurso['posicao'];
 
-                                }
-
+                                echo "<div class=\"item active\">
+                                     <ul class='thumbnails'>";
+                                do{
                                 ?>
-                                    <li class="col-sm-4" id="cardcurso" style=" background-color: #3f2b24;border-radius: 7px;padding: 5px; margin: 5px;">      
+                                    <li class="unactive" id="cardcurso">      
                                         <div class="thumbnail">
-                                          <a href="<?php echo "#Curso".$contCursos."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$contCursos."')"; ?>"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
+                                          <a href="<?php echo "#Curso".$posicao."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$posicao."')"; ?>"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
                                           	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ></a>
                                         </div>
                                         <div class="caption-box" style="padding: 1px;" align="center">
                                             <h1 class="tm-section-title" style="color: white;"><strong><?php echo $rowCurso['nome']; ?></strong></h1>
-                                            <h2 class="tm-section-title" style="color: white;">
-                                            <?php if ($rowCurso['tipo']==1) {
-                                          	echo "Curso semanal";
-                                          }elseif ($rowCurso['tipo']==2) {
-                                          	echo "Curso em módulos";
-                                          }elseif ($rowCurso['tipo']==3){
-                                          	echo "Evento";
-                                          }else{
-                                          	//echo $rowCurso['subtitulo'];
-                                          } ?></h2>
-                                          <?php echo "<a href=\"#Curso".$contCursos."Section\" onclick=\"openCity(event, 'Curso".$contCursos."')\" style=\"font-size:1.1em; background-color: #2f2f2f; border-color: white;\"  class=\"btn btn-success\">Saiba mais</a>"; ?>
+                                            <h2 class="tm-section-title" style="color: white;"><?php $rowCurso["tipo"] ?></h2>
+                                            <?php
+                                            echo "<a href=\"#Curso".$posicao."Section\" onclick=\"openCity(event, 'Curso".$posicao."')\" style=\"font-size:1.1em; background-color: #2f2f2f; border-color: white;\"  class=\"btn btn-success\">Saiba mais</a>"; ?>
                                         </div>
                                       </li>
-                            <?php 
-                            if (($contCursos%3==0) && ($contCursos!=$totalCursos)) {
-                                    echo "</ul></div>
-                                    <div class=\"item\"><ul class=\"thumbnails\">";
-                                }
-                                if ($contCursos==$totalCursos) {
-                                    echo "</ul>
-                                     </div>";
-                                }
-                            $contCursos++;
-
+                                    <?php 
+                                }while($rowCurso=$exib->fetch());
+                                echo "</ul></div>";
                             }
                             ?>
 
@@ -312,7 +301,7 @@ $data_hoje = date('Y-m-d H:i');
 
             <?php
                 $contCursos=1;
-                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1");
+                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
                 $exib->execute();
                 while ($rowCurso=$exib->fetch()) {
 
@@ -975,13 +964,60 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             } else {
                 $('.tm-sidebar').removeClass('sticky');
             }
-        }  
+        }
 
-        // var columns = 3;
+        var columns = 0;
 
-        // function adjustCarousel(columns){
+        function calculateCarrouselColumns(){
+            var result;
+            width = $("body").width();
+            if(width > 948){
+                result = 3;
+            } else if (width > 530){
+                result = 2
+            } else {
+                result = 1;
+            }
 
-        // }                 
+            if(columns != result){
+                columns = result;
+                console.log(columns);
+                adjustCarousel(result);
+            }
+        }
+
+        function adjustCarousel(columns){
+            var items = new Array();
+
+            $(".carousel-inner li").each(function (){
+                console.log($(this).html());
+                items.push($(this).html());
+            });
+
+            console.log(items);
+
+            if(items.length > 0){
+                $(".carousel-inner .item").remove();
+
+                var columnCont = 0;
+                var coluna;
+
+                for(itemCount = 0; itemCount < items.length; itemCount++){
+                    if(columnCont == 0){
+                        $(".carousel-inner").append("<div class='item'><ul class='thumbnails'></ul></div>");
+                        coluna = $(".carousel-inner ul.thumbnails").last();
+                        columnCont = columns;
+                    }
+                    
+                    $(coluna).append("<li class='col-sm-" + (12/columns) + "'></li>");
+                    $(".carousel-inner li").last().append(items[itemCount]);
+
+                    columnCont--;
+                }
+
+                $(".carousel-inner .item").first().addClass("active");
+            }
+        }                 
     
         $(function(){
             
@@ -1009,13 +1045,16 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             // Google Map
             loadGoogleMap();  
 
-            // //Adjust number of itens shown in carousel
-            // $("body").resize(function(){
-            //     width = $(this).width();
-            //     if(width > 948){
-            //         columns = 3;
-            //     } else if (width >)
-            // })
+            //Adjust number of itens shown in carousel
+            $(window).resize(function(){
+                console
+                calculateCarrouselColumns();
+            });
+
+            //Initialize carrousel after a 5 seconds
+            var timeoutID = window.setTimeout(function(){
+                calculateCarrouselColumns();
+            }, 5000);
         });
     
         </script>   
