@@ -140,6 +140,14 @@ ul.thumbnails {
     .carousel-control { height: 149px; line-height: 138px;} 
 }
 
+    /*GMAP*/
+    .mapouter{
+        text-align:center;
+    }
+    .gmap_canvas {
+        overflow:hidden
+        ;
+
 
 
 
@@ -158,7 +166,7 @@ $data_hoje = date('Y-m-d H:i');
                 	<h5 style="color: #d8d8d8; padding: 15px;">TRATANDO | ENSINANDO | TRANSFORMANDO</h5>
                 </div>                    
                 <div style="height: 50%; background-color: white;">
-                	<img src="img/TOS-LOGO-small.png" alt="The Other Song Brazil" style="float: left; height: 100%; margin-left: 25px; margin-top: 5px;">
+                	<a href="/"><img src="img/TOS-LOGO-small.png" alt="The Other Song Brazil" style="float: left; height: 100%; margin-left: 25px; margin-top: 5px;"></a>
                 </div>
                 <div style="height: 25%;background-color: #303030" align="center">
                 	<h5 style="color: #d8d8d8; padding: 15px;">Academia de Homeopatia Avançada - Brasil</h5>
@@ -234,7 +242,7 @@ $data_hoje = date('Y-m-d H:i');
                                           }elseif ($rowCurso['tipo']==3){
                                           	echo "Evento";
                                           }else{
-                                          	echo $rowCurso['subtitulo'];
+                                          	//echo $rowCurso['subtitulo'];
                                           } ?></h2>
                                           <?php echo "<a href=\"#Curso".$contCursos."Section\" onclick=\"openCity(event, 'Curso".$contCursos."')\" style=\"font-size:1.1em; background-color: #2f2f2f; border-color: white;\"  class=\"btn btn-success\">Saiba mais</a>"; ?>
                                         </div>
@@ -372,7 +380,6 @@ $data_hoje = date('Y-m-d H:i');
                         <div class="tm-box-pad tm-services-description-container">
                         	
                             <h1 class="tm-section-title"><strong><?php echo $rowCurso['nome'] ?></strong></h1>
-                            <h2 class="tm-section-title"><?php echo $rowCurso['subtitulo'] ?></h2>
                             <p class="tm-section-description"><?php echo $rowCurso['conteudo'] ?></p> 
     
                         </div>
@@ -580,16 +587,25 @@ $data_hoje = date('Y-m-d H:i');
 
                     <section id="contact<?php echo $contCursos; ?>" class="tm-content-box">
 
-                        <div class="tm-flex">
+                         <?php 
+                                     if (!empty($rowCurso['local'])) {
+                         ?>
+                         <div class="col-sm-12">
+                             <div class="tm-contact-right-half tm-purple-bg">
+                                 <div class="tm-address-box"><address>
+                                     <h2 class="tm-section-title">Local do curso:</h2>
+                                     <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe width="424" height="339" id="gmap_canvas" src="https://www.google.com.br/maps?q=<?php echo $rowCurso['local']; ?>,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div></div></div>
+                                        
+                                     </div>
+                                 </address>
+                             </div>
+                        </div>
+                         <?php
+                             }
+                         ?>
                         	
-                            <div><?php
-
-                                if (!empty($rowCurso['local'])) {
-                                    echo "<div class=\"col-sm-6\">";
-                                }else{
-                                    echo "<div class=\"col-sm-12\">";
-                                }?>
-                                
+                            <div>
+                                <div class="col-sm-12">
                                     <div class="tm-contact-left-half tm-gray-bg">
                                 <div class="tm-contact-inner-pad">
                                     <h1 style="font-family: 'ibm'">Inscreva-se - Dados do aluno</h1><br>
@@ -765,45 +781,7 @@ $data_hoje = date('Y-m-d H:i');
                                     
                                 </div>
                                 </div>
-                                <?php 
-                                            if (!empty($rowCurso['local'])) {
-                                echo "<div class=\"col-sm-6\">";
-                                    
-                                                echo "<div class=\"tm-contact-right-half tm-purple-bg\">
-                                <div class=\"tm-address-box\"><address>
-                                    <h2 class=\"tm-section-title\">Local do curso:</h2>";
-                                               echo $rowCurso['local'];
-                                               echo "</div></address></div> ";
-                                            }
-                                            
-                                        
-                                echo "</div>";
-                                ?>
                             </div>
-                            
-                                    
-                                    	
-                                    	<!-- <?php 
-                                    // $extensao = explode('-', $rowCurso['local']);
-                                    // foreach ($extensao as $key) {
-                                    // 	echo $key;
-                                    // 	echo "<br>";
-                                    // }
-                                    // unset($key);
-                                    ?> -->
-                                        
-                                                               
-                                <!-- <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe width="424" height="339" id="gmap_canvas" src="https://www.google.com.br/maps?q=rua+pra%C3%A7a+os%C3%B3rio,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div><style>.mapouter{text-align:right;height:339px;width:424px;}.gmap_canvas {overflow:hidden;background:none!important;height:339px;width:424px;}</style></div></div> -->
-                            
-                                                               
-                            </div>
-
-
-
-
-
-
-                            
                         </div>
                         
                     </section> 
@@ -925,7 +903,6 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
         
-        <script src="/js/jquery-1.11.3.min.js"></script>
         <script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
         <script src="/js/jquery.magnific-popup.min.js"></script>
         <script src="/js/jquery.singlePageNav.min.js"></script>
@@ -969,9 +946,15 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             } else {
                 $('.tm-sidebar').removeClass('sticky');
             }
-        }                   
+        }  
+
+        // var columns = 3;
+
+        // function adjustCarousel(columns){
+
+        // }                 
     
-        $(document).ready(function(){
+        $(function(){
             
             // Single page nav
             $('.tm-main-nav').singlePageNav({
@@ -995,7 +978,15 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             });
 
             // Google Map
-            loadGoogleMap();            
+            loadGoogleMap();  
+
+            // //Adjust number of itens shown in carousel
+            // $("body").resize(function(){
+            //     width = $(this).width();
+            //     if(width > 948){
+            //         columns = 3;
+            //     } else if (width >)
+            // })
         });
     
         </script>   
@@ -1044,9 +1035,9 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 <script type="text/javascript">
   
 // Carousel Auto-Cycle
-  $(document).ready(function() {
+  $(function() {
     $('.carousel').carousel({
-      interval: 6000
+      interval: 10000
     })
   });
 
