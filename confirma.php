@@ -21,7 +21,10 @@
     <?php
         include "connect.php";
     ?>
+  
+
 </head>
+
 <body id="bg">
       	<?php
 	date_default_timezone_set('America/Sao_Paulo');
@@ -37,16 +40,20 @@ $data_hoje = date('Y-m-d H:i');
             <div class="col-sm-12" align="center">
             	
             	<?php
+            	$nomecurso;
             		if (isset($_GET['cadastrado'])) {
             			echo "<h3 align=\"center\">Registro de conta realizado com sucesso.</h3>";
             		}
             		if (isset($_GET['a'])&&isset($_GET['c'])) {
             			$id_aluno=$_GET['a'];
             			$id_curso=$_GET['c'];
+            			
+            		
             			$curso44=$conn->prepare('SELECT * FROM tbCurso WHERE id=:pid ORDER BY nome ASC');
             			$curso44->bindValue(':pid', $id_curso);
 						$curso44->execute();
 						while ($rowCurso=$curso44->fetch()) {
+							$nomecurso=$rowCurso['nome'];
 							echo "<h1 align=\"center\">Preencha os campos para confirmar sua inscrição:</h1>";
 							echo "<h1 align=\"center\">Curso: ".$rowCurso['nome']."</h1>";
 							?>
@@ -55,6 +62,7 @@ $data_hoje = date('Y-m-d H:i');
 							echo "<fieldset><form action=\"confirma.php#cadModulo1\" method=\"post\" enctype=\"multipart/form-data\" align=\"center\">";
 							echo "<input type=\"hidden\" name=\"id_curso\" value=\"".$id_curso."\">";
 							echo "<input type=\"hidden\" name=\"id_aluno\" value=\"".$id_aluno."\">";
+							echo "<input type=\"hidden\" name=\"nomecurso\" value=\"".$rowCurso['nome']."\">";
 							echo "<div class=\"form-group\" style=\"margin-top: 25px;\">
 											<label>CRM/CRO</label>
 											<select name=\"crm\" required=\"required\">
@@ -70,7 +78,7 @@ $data_hoje = date('Y-m-d H:i');
 								$livros->execute();
 								while ($categ=$livros->fetch()) {
 									echo "<br><label>Módulo nº".$categ['numero']." - ".$categ['nome']."</label><br>";
-									echo "<input type=\"checkbox\" name=\"array[]\" value=\"".$categ['id']."\"/>R$".$categ['valor'].",00 - <span>Módulo nº".$categ['numero']." - ".$categ['nome']."</span> <br>";
+									echo "<input type=\"checkbox\" name=\"array[]\" value=\"".$categ['id']."\"/>R$".$categ['valor']." - <span>Módulo nº".$categ['numero']." - ".$categ['nome']."</span> <br>";
 
 									?>
 										<div class="form-group">
@@ -83,7 +91,7 @@ $data_hoje = date('Y-m-d H:i');
 												$datas_curso4->bindValue(':pid_modulo',$categ['id']);
 												$datas_curso4->execute();
 												while ($curs4=$datas_curso4->fetch()) {
-													echo "<option value=\"".$curs4['id']."\">".$curs4['mes']." - ".$curs4['dias']." - ".$curs4['cidade']." - ".$curs4['local']."</option>";
+													echo "<option value=\"".$curs4['id']."\">".$curs4['mes']." - ".$curs4['dias']." - ".$categ['cidade']."</option>";
 												}
 											?>
 											</select>
@@ -146,10 +154,11 @@ $data_hoje = date('Y-m-d H:i');
             <section id="cadModulo1">
 	            <?php
 	            	if (isset($_POST['finaliza'])) {
+
+	            			$nomecurso=$_POST['nomecurso'];
 	            		$valortotal=0;
 	            		//Curso sem módulo
 	            		if (isset($_POST['id_data'])) {
-	            			echo "ENTROU ID DATA";
 	            			$crm=$_POST['crm'];
 
 	            			$numero=$_POST['numero_crm'];
@@ -175,24 +184,42 @@ $data_hoje = date('Y-m-d H:i');
 								$curso45->execute();
 								$rowValor=$curso45->fetch();
 								$valorvalor=$rowValor['valor'];
+								$valortotal=$rowValor['valor'];
+
+								
+
+$para= "rahulacaleffi@gmail.com";
+	            			$emailsender="contato@theothersongbrazi.com.br";
+                                    $assunto= "Incrição The Other Song Brazil";
+
+                                    $corpo = "Sucesso Finaliza inscrição";
+        
+                                    $header= "Content-Type: text/html; charset= utf-8\n";
+                                    $header.="From: $email Reply-to: $email\n";
+        
+                                    mail($para,$assunto,$corpo,$header,"-r".$emailsender);
+                                    
+                                    
+
 
 	            		}
 	            		//Curso com módulo
 	            		elseif (isset($_POST['array'])) {
-	            			echo "ENTROU ARRAY";
 	            			$crm=$_POST['crm'];
 	            			$numero=$_POST['numero_crm'];
 	            			$id_curso=$_POST['id_curso'];
 	            			$id_aluno=$_POST['id_aluno'];
+
+
+
+	            				
 
 	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
 		            			$curso45->bindValue(':pid_usu', $id_aluno);
 		            			$curso45->bindValue(':pcrx_tipo', $crm);
 		            			$curso45->bindValue(':pcrx_numero', $numero);
 								$curso45->execute();
-								echo "Id aluno antes:".$id_aluno;
 								$id_aluno=$conn->lastInsertId();
-								echo "<br>Id aluno dps:".$id_aluno;
 	            			foreach ($_POST['array'] as $key2) {
 
 	            				//Valor módulos
@@ -217,10 +244,25 @@ $data_hoje = date('Y-m-d H:i');
 													    
 							}
 							unset($key2);
+
+							
+
+$para= "rahulacaleffi@gmail.com";
+	            			$emailsender="contato@theothersongbrazi.com.br";
+                                    $assunto= "Incrição The Other Song Brazil";
+
+                                    $corpo = "Sucesso Finaliza inscrição";
+        
+                                    $header= "Content-Type: text/html; charset= utf-8\n";
+                                    $header.="From: $email Reply-to: $email\n";
+        
+                                    mail($para,$assunto,$corpo,$header,"-r".$emailsender);
+                                    
+                                    
+
 	            		}
 	            		
 	            		elseif (!isset($_POST['id_data']) && !isset($_POST['array'])) {
-	            			echo "ENTROU DIF DATA DIF ARRAY";
 	            			$crm=$_POST['crm'];
 	            			$numero=$_POST['numero_crm'];
 	            			$id_curso=$_POST['id_curso'];
@@ -237,6 +279,22 @@ $data_hoje = date('Y-m-d H:i');
 								$grava3->bindValue(':pid_aluno',$id_aluno);
 								$grava3->bindValue(':pid_curso',$id_curso);
 								$grava3->execute();
+
+								
+
+$para= "rahulacaleffi@gmail.com";
+	            			$emailsender="contato@theothersongbrazi.com.br";
+                                    $assunto= "Incrição The Other Song Brazil";
+
+                                    $corpo = "Sucesso Finaliza inscrição";
+        
+                                    $header= "Content-Type: text/html; charset= utf-8\n";
+                                    $header.="From: $email Reply-to: $email\n";
+        
+                                    mail($para,$assunto,$corpo,$header,"-r".$emailsender);
+                                    
+                                    
+
 	            		}
 	            		else{
 	            			echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$id_aluno."&c=".$id_curso."\">";
@@ -252,16 +310,18 @@ $data_hoje = date('Y-m-d H:i');
 		            		<div class="tm-box-pad tm-bordered-box">
 	                            <h2 class="tm-section-title" align="center">Pré-inscrição realizada com sucesso. Obrigado!</h2>
 	                            <h2 class="tm-section-title" align="center">Valor total à pagar: <?php if (isset($valorvalor)) {
+	                            	$valoremail=$valorvalor;
 	                            	echo $valorvalor;
 	                            }else{
+	                            	$valoremail="R$".$valortotal;
 	                            	echo "R$".$valortotal.",00";
 	                            }  ?></h2>
 	                            <h3 class="tm-section-title" align="center">Faça um depósito na AGÊNCIA XXXX<br>
 	                            C/C: XXXXXX-X<br>
-	                        Banco Bradesco<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: email@email.com.br</strong><br><strong>Enviar juntamente o número do CRO/CRM</strong></h3>
+	                        Banco Bradesco<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: drcarloshomeopatia@icloud.com</strong><br><strong>Enviar juntamente o número do CRO/CRM</strong></h3>
 	                        </div>
                         </div>
-
+                        
 
 	            		<?php 
 
@@ -271,4 +331,5 @@ $data_hoje = date('Y-m-d H:i');
 
 </div>
 </body>
+
 </html>
