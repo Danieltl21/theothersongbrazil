@@ -46,6 +46,7 @@
       }
 
       	#bg {
+<<<<<<< HEAD
     		webkit-background-size: cover;
             -moz-background-size: cover;
             -o-background-size: cover;
@@ -53,6 +54,11 @@
            background-attachment: fixed;
            background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
            background-repeat: no-repeat;
+=======
+    		
+    		background-image:linear-gradient(rgba(255, 244, 233, 1), rgba(255,244,233,0.7));
+    		background-repeat: repeat-x;
+>>>>>>> a883976517d56630b6dee0877986f188f1d7f262
             max-height: 100%;
             max-width: 100%;
 		}
@@ -143,21 +149,25 @@ ul.thumbnails {
     .caption-box { word-break: break-all; }
     ul.thumbnails li { margin-bottom: 30px; }
 }
-@media (max-width: 489px) {
-    .carousel-control { height: 110px; line-height: 100px;} 
-}
-@media (max-width: 303px) {
-    .carousel-control { height: 149px; line-height: 138px;} 
-}
 
+
+<<<<<<< HEAD
     /*GMAP*/
     .mapouter{
         text-align:center;
     }
+=======
+/*For IOS*/
+@media only screen 
+and (max-device-width : 767px) {
+    .page-header { text-align: center; }
+}
+
+>>>>>>> a883976517d56630b6dee0877986f188f1d7f262
     .gmap_canvas {
         overflow:hidden
         ;
-
+}
 
 
 
