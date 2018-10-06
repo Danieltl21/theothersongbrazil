@@ -234,8 +234,9 @@ $data_hoje = date('Y-m-d H:i');
                                           	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ></a>
                                         </div>
                                         <div class="caption-box" style="padding: 1px;" align="center">
-                                          <h1 class="tm-section-title" style="color: white;"><strong><?php echo $rowCurso['nome']; ?></strong></h1>
-                                          <h2 class="tm-section-title" style="color: white;"><?php if ($rowCurso['tipo']==1) {
+                                            <h1 class="tm-section-title" style="color: white;"><strong><?php echo $rowCurso['nome']; ?></strong></h1>
+                                            <h2 class="tm-section-title" style="color: white;">
+                                            <?php if ($rowCurso['tipo']==1) {
                                           	echo "Curso semanal";
                                           }elseif ($rowCurso['tipo']==2) {
                                           	echo "Curso em módulos";
@@ -368,18 +369,23 @@ $data_hoje = date('Y-m-d H:i');
                                 // }
                             ?>  
                         <!-- </div>  -->
-                        <div class="tm-box-pad tm-bordered-box" style="height: 50px;">
-                                <h1 class="tm-section-title" align="center" style="margin-top: -5px;font-size: 1.5em;"><b><?php if ($rowCurso['tipo']==1) {
-                                          	echo "Curso semanal";
-                                          }elseif ($rowCurso['tipo']==2) {
-                                          	echo "Módulo";
-                                          }elseif ($rowCurso['tipo']==3){
-                                          	echo "Evento";
-                                          }?></b></h1>
+                        <div class="tm-box-pad tm-bordered-box">
+                                <h1 class="tm-section-title" align="center" style="margin: 0;font-size: 1.5em;"><b><?php echo $rowCurso['nome'] ?></b></h1>
                             </div>    
                         <div class="tm-box-pad tm-services-description-container">
                         	
-                            <h1 class="tm-section-title"><strong><?php echo $rowCurso['nome'] ?></strong></h1>
+                            <h1 class="tm-section-title">
+                                <strong>
+                                <?php
+                                    if ($rowCurso['tipo']==1) {
+                                        echo "Curso semanal";
+                                    }elseif ($rowCurso['tipo']==2) {
+                                        echo "Módulo";
+                                    }elseif ($rowCurso['tipo']==3){
+                                        echo "Evento";
+                                  }?>
+                                </strong>
+                            </h1>
                             <p class="tm-section-description"><?php echo $rowCurso['conteudo'] ?></p> 
     
                         </div>
@@ -521,9 +527,12 @@ $data_hoje = date('Y-m-d H:i');
                                     echo '<div class="tm-box-pad tm-bordered-box">';
 
                                     do{
-                                        echo "<h2 class=\"tm-section-title\">".$rowInstrutor['nome']."</h2>
-                                        <p>".$rowInstrutor['bio']."</p>
-                                        <a href=\"".$rowInstrutor['link']."\" class=\"tm-button tm-button-normal\">Saiba mais</a>";
+                                        echo "<h2 class=\"tm-section-title\">".$rowInstrutor['nome']."</h2>";
+                                        echo " <p>".$rowInstrutor['bio']."</p>";
+
+                                        if(!empty($rowInstrutor['link'])){
+                                            echo "<a href=\"".$rowInstrutor['link']."\" class=\"tm-button tm-button-normal\">Saiba mais</a>";
+                                        }
                                     } while ($rowInstrutor = $exibeInstrutores->fetch());
 
                                     echo "</div>";
