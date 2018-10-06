@@ -321,7 +321,7 @@ $data_hoje = date('Y-m-d H:i');
 
             <?php
                 $contCursos=1;
-                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1");
+                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
                 $exib->execute();
                 while ($rowCurso=$exib->fetch()) {
 
