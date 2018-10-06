@@ -160,19 +160,16 @@ ul.thumbnails {
 }
 
 
-<<<<<<< HEAD
     /*GMAP*/
     .mapouter{
         text-align:center;
     }
-=======
 /*For IOS*/
 @media only screen 
 and (max-device-width : 767px) {
     .page-header { text-align: center; }
 }
 
->>>>>>> a883976517d56630b6dee0877986f188f1d7f262
     .gmap_canvas {
         overflow:hidden
         ;
@@ -612,7 +609,7 @@ $data_hoje = date('Y-m-d H:i');
                              <div class="tm-contact-right-half tm-purple-bg">
                                  <div class="tm-address-box"><address>
                                      <h2 class="tm-section-title">Local do curso:</h2>
-                                     <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe width="424" height="339" id="gmap_canvas" src="https://www.google.com.br/maps?q=<?php echo $rowCurso['local']; ?>,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div></div></div>
+                                     <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe id="gmap_canvas" src="https://www.google.com.br/maps?q=<?php echo $rowCurso['local']; ?>,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div></div></div>
                                         
                                      </div>
                                  </address>
@@ -1054,7 +1051,7 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             //Initialize carrousel after a 5 seconds
             var timeoutID = window.setTimeout(function(){
                 calculateCarrouselColumns();
-            }, 5000);
+            }, 2000);
         });
     
         </script>   
