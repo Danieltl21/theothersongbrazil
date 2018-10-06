@@ -244,11 +244,10 @@ $data_hoje = date('Y-m-d H:i');
                             $exib->execute();
                             $totalCursos=$exib->rowCount();
                             if($rowCurso=$exib->fetch()){
-                                $posicao = $rowCurso['posicao'];
-
                                 echo "<div class=\"item active\">
                                      <ul class='thumbnails'>";
                                 do{
+                                    $posicao = $rowCurso['posicao'];
                                 ?>
                                     <li class="unactive" id="cardcurso">      
                                         <div class="thumbnail">
@@ -978,7 +977,6 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 
             if(columns != result){
                 columns = result;
-                console.log(columns);
                 adjustCarousel(result);
             }
         }
@@ -987,11 +985,8 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
             var items = new Array();
 
             $(".carousel-inner li").each(function (){
-                console.log($(this).html());
                 items.push($(this).html());
             });
-
-            console.log(items);
 
             if(items.length > 0){
                 $(".carousel-inner .item").remove();
@@ -1044,7 +1039,6 @@ echo "<meta http-equiv=\"refresh\" content=0;url=\"index.php\">";
 
             //Adjust number of itens shown in carousel
             $(window).resize(function(){
-                console
                 calculateCarrouselColumns();
             });
 
