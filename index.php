@@ -96,6 +96,10 @@ a {
     font-size: 1.5em;
 }
 
+.tm-main-nav{
+    text-align: center;
+}
+
 
 
 /* Global */
@@ -204,7 +208,7 @@ $data_hoje = date('Y-m-d H:i');
                 <div class="tm-box-pad tm-bordered-box" style="background-color: #3f2b24; margin-bottom: 15px; border-radius: 7px; padding: 15px 40px">
                                 <h1 class="tm-section-title" align="center" style="font-family: 'ibm';font-size: 2em; color: white; margin-bottom: 0"><b>ESCOLHA O CURSO:</b></h1>
                             </div>
-                <div class="tm-main-content">
+                <div class="tm-main-content" style="height: 570px">
                 	
                         <!-- <img src="img/fundo.png" alt="The Other Song Brazil" class="img-fluid tm-welcome-img" style="height: 400px;">       
 
@@ -236,33 +240,30 @@ $data_hoje = date('Y-m-d H:i');
                         <div id="myCarousel" class="row carousel slide" data-ride="carousel" style="padding-left: 20px;padding-right: 20px;">
 
 
-    <!-- Wrapper for slides -->
-    <div class="carousel-inner">
-        
-        <?php
-                            $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
-                            $exib->execute();
-                            $totalCursos=$exib->rowCount();
-                            if($rowCurso=$exib->fetch()){
+                        <!-- Wrapper for slides -->
+                        <div class="carousel-inner">
+                            
+                            <?php
+                            require_once("query_cursos_sql.php");
+
+                            foreach($cursos as $curso){
                                 echo "<div class=\"item active\">
                                      <ul class='thumbnails'>";
-                                do{
-                                    $posicao = $rowCurso['posicao'];
-                                ?>
+                                    $posicao = $curso['posicao'];
+                            ?>
                                     <li class="unactive" id="cardcurso">      
                                         <div class="thumbnail">
-                                          <a href="<?php echo "#Curso".$posicao."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$posicao."')"; ?>"><img style="max-height: 400px; " src="<?php if($rowCurso['img']!=null){
-                                          	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ></a>
+                                          <a href="<?php echo "#Curso".$posicao."Section"; ?>" onclick="<?php echo "openCity(event, 'Curso".$posicao."')"; ?>"><img style="max-height: 400px; " src="<?php if($curso['img']!=null){
+                                          	echo "img/cursos/".$curso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $curso['nome'] ?>" ></a>
                                         </div>
                                         <div class="caption-box" style="padding: 1px;" align="center">
-                                            <h1 class="tm-section-title" style="color: white;"><strong><?php echo $rowCurso['nome']; ?></strong></h1>
-                                            <h2 class="tm-section-title" style="color: white;"><?php $rowCurso["tipo"] ?></h2>
+                                            <h1 class="tm-section-title" style="color: white;"><strong><?php echo $curso['nome']; ?></strong></h1>
+                                            <h2 class="tm-section-title" style="color: white;"><?php $curso["tipo"] ?></h2>
                                             <?php
                                             echo "<a href=\"#Curso".$posicao."Section\" onclick=\"openCity(event, 'Curso".$posicao."')\" style=\"font-size:1.1em; background-color: #2f2f2f; border-color: white;\"  class=\"btn btn-success\">Saiba mais</a>"; ?>
                                         </div>
                                       </li>
-                                    <?php 
-                                }while($rowCurso=$exib->fetch());
+                            <?php 
                                 echo "</ul></div>";
                             }
                             ?>
@@ -296,71 +297,50 @@ $data_hoje = date('Y-m-d H:i');
 
 
             <?php
-                $contCursos=1;
-                $exib=$conn->prepare("SELECT * FROM tbCurso WHERE status=1 ORDER BY posicao ASC");
-                $exib->execute();
-                while ($rowCurso=$exib->fetch()) {
-
-
+                foreach ($cursos as $curso) {
             ?>
             <section id="welcome" style="margin-top: 30px;"></section>
 
-            <section id="Curso<?php echo $contCursos ?>Section"> 
-                <div id="Curso<?php echo $contCursos ?>" class="tabcontent container"> 
+            <section id="Curso<?php echo $curso['posicao'] ?>Section"> 
+                <div id="Curso<?php echo $curso['posicao'] ?>" class="tabcontent container"> 
                 	<div class="col-sm-3">
                 	<div class="tm-sidebar">
                     <nav class="tm-main-nav">
                         <ul class="tm-main-nav-ul">
-                            <li class="tm-nav-item"><a href="#welcome" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>O curso</a>
+                            <li class="tm-nav-item">
+                                <a href="#welcome" class="tm-nav-item-link tm-button">O curso</a>
                             </li>
-                            <li class="tm-nav-item"><a href="#gallery<?php echo $contCursos ?>" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>Conteúdo</a>
-                            </li>
-                            <?php
-			                    $contData=0;
-			                    $contHorario=0;
-			                    $exibeHorarios=$conn->prepare("SELECT * FROM tbHhorarios WHERE id_curso = :pid");
-			                    $exibeHorarios->bindValue(':pid',$rowCurso['id']);
-                                $exibeHorarios->execute();
-                                $contHorario=$exibeHorarios->rowCount();
-                    			$exibeDatas=$conn->prepare("SELECT * FROM tbDatas WHERE id_curso = :pid");
-                                $exibeDatas->bindValue(':pid',$rowCurso['id']);
-                                $exibeDatas->execute();
-                                $contData=$exibeDatas->rowCount();
-                                if ($contData!=0 || $contHorario!=0) {
-                                	?>
-                            <li class="tm-nav-item"><a href="#services<?php echo $contCursos ?>" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>Datas</a>
-                                
+                            <li class="tm-nav-item">
+                                <a href="#gallery<?php echo $curso['posicao'] ?>" class="tm-nav-item-link tm-button">Conteúdo</a>
                             </li>
                             <?php
-		                            } 
-		                        ?>
-		                     <?php
-
-                    		$exibeInstrutores=$conn->prepare("SELECT id_instrutor FROM tbCurso WHERE id = :pid");
-                                $exibeInstrutores->bindValue(':pid',$rowCurso['id']);
-                                $exibeInstrutores->execute();
-                                if (($continstrutor=$exibeInstrutores->rowCount())!=1) {
-                                	
-                                
-                    	?>
-                            <li class="tm-nav-item"><a href="#about<?php echo $contCursos ?>" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>Instrutor</a>
+			                    if(isset($curso["datas"])){
+                            ?>
+                            <li class="tm-nav-item">
+                                <a href="#services<?php echo $curso['posicao'] ?>" class="tm-nav-item-link tm-button">Datas</a>
                             </li>
                             <?php
-                        }
-                        ?>
-                            <li class="tm-nav-item"><a href="#contact<?php echo $contCursos ?>" style="font-size: 1.35em;" class="tm-nav-item-link tm-button">
-                                <i class="fa fa-clock-o tm-nav-fa"></i>Inscreva-se</a>
+		                            }
+		                    ?>
+		                    <?php
+                                if (isset($curso["instrutores"])) {
+                    	    ?>
+                            <li class="tm-nav-item">
+                                <a href="#about<?php echo $curso['posicao'] ?>" class="tm-nav-item-link tm-button">Instrutores</a>
+                            </li>
+                            <?php
+                                }
+                            ?>
+                            
+                            <li class="tm-nav-item">
+                                <a href="#contact<?php echo $curso['posicao'] ?>" class="tm-nav-item-link tm-button">Inscreva-se</a>
                             </li>
                         </ul>
                     </nav>
                 </div>
                 </div>
                 <div class="col-sm-9">
-                    <div id="gallery<?php echo $contCursos ?>" class="tm-content-box">
+                    <div id="gallery<?php echo $curso['posicao'] ?>" class="tm-content-box">
 
                     <!-- Tab content -->
                          
@@ -375,23 +355,18 @@ $data_hoje = date('Y-m-d H:i');
                             ?>  
                         <!-- </div>  -->
                         <div class="tm-box-pad tm-bordered-box">
-                                <h1 class="tm-section-title" align="center" style="margin: 0;font-size: 1.5em;"><b><?php echo $rowCurso['nome'] ?></b></h1>
+                                <h1 class="tm-section-title" align="center" style="margin: 0;font-size: 1.5em;"><b><?php echo $curso['nome'] ?></b></h1>
                             </div>    
                         <div class="tm-box-pad tm-services-description-container">
                         	
                             <h1 class="tm-section-title">
                                 <strong>
                                 <?php
-                                    if ($rowCurso['tipo']==1) {
-                                        echo "Curso semanal";
-                                    }elseif ($rowCurso['tipo']==2) {
-                                        echo "Módulo";
-                                    }elseif ($rowCurso['tipo']==3){
-                                        echo "Evento";
-                                  }?>
+                                    echo $curso['tipo'];
+                                ?>
                                 </strong>
                             </h1>
-                            <p class="tm-section-description"><?php echo $rowCurso['conteudo'] ?></p> 
+                            <p class="tm-section-description"><?php echo $curso['conteudo'] ?></p> 
     
                         </div>
                          
@@ -402,38 +377,36 @@ $data_hoje = date('Y-m-d H:i');
 
                     <!-- Módulos -->
                     <?php
-                    $contModulos=0;
-                    $exibeHorarios=$conn->prepare("SELECT * FROM tbModulos WHERE id_curso = :pid");
-                                $exibeHorarios->bindValue(':pid',$rowCurso['id']);
-                                $exibeHorarios->execute();
-                                $contHorario=$exibeHorarios->rowCount();
-                                if ($contHorario!=0) {
-                                    
-                                
-
+                        if(isset($curso["modulos"])){
                     ?>
-                    <div id="modulos<?php echo $contCursos ?>" class="tm-content-box tm-gray-bg tm-services">
+                    <div id="modulos<?php echo $curso['posicao'] ?>" class="tm-content-box tm-gray-bg tm-services">
                         <?php
-                                
-                                $exibeHorarios2=$conn->prepare("SELECT * FROM tbModulos WHERE id_curso = :pid ORDER BY numero ASC");
-                                $exibeHorarios2->bindValue(':pid',$rowCurso['id']);
-                                $exibeHorarios2->execute(); 
-                                while ($row=$exibeHorarios2->fetch()) { 
-                                    echo "<div class=\"tm-box-pad tm-bordered-box\">
-                                            <h2 class=\"tm-section-title\" align=\"center\">Módulo ".$row['numero'].": ".$row['nome']." - R$".$row['valor'].",00</h2><br><h5>Conteúdo: ".$row['conteudo']."</h5>
-                                        </div><div class=\"tm-flex\" style=\"display: inline\">";
+                            foreach ($modulo as $curso["modulos"]) { 
+                        ?>
+                                <div class="tm-box-pad tm-bordered-box">
+                                    <h2 class="tm-section-title" align="center">
+                                        <?php echo "Módulo ".$modulo['numero']."(".$modulo['cidade']."): ".$modulo['nome']." - R$".$modulo['valor'].",00"; ?>
+                                    </h2><br>
+                                    <h5>Conteúdo: <?php echo $modulo['conteudo'] ?></h5>
+                                </div><div class="tm-flex" style="display: inline">";
 
-                                        $exibeHorarios3=$conn->prepare("SELECT * FROM tbDatas LEFT JOIN tbModulos ON (`tbDatas`.`id_curso`= :pid) WHERE `tbModulos`.`numero` = :pnumero");
-                                        $exibeHorarios3->bindValue(':pid',$rowCurso['id']);
-                                        $exibeHorarios3->bindValue(':pnumero',$row['numero']);
-                                        $exibeHorarios3->execute(); 
-                                        while ($row2=$exibeHorarios3->fetch()) { 
-                                            echo "<p><span><i class=\"fa fa-calendar tm-nav-fa\" style=\"margin-left: 10px;\"></i></span><strong>".$row2['mes'].": </strong> ".$row2['dias']." - ".$row2['cidade']." - ".$row2['local']."</p><br>";
-                                        }
-                                     echo "</div>";  
+                            <?php
+                                if(isset($modulo["datas"])){
+                                    foreach ($data as $modulo["datas"]) {
+                                ?>
+                                    <p>
+                                        <span><i class="fa fa-calendar tm-nav-fa" style="margin-left: 10px;"></i></span><strong><?php echo $modulo['mes'];?>: </strong><?php echo $modulo['dias'];?>
+                                    </p><br>
+                                <?php
                                     }
-                                    echo "</div>";
-                                    }  
+                                    
+                                }
+                                echo "</div>";  
+                            }
+                            ?>
+                    </div>
+                    <?php
+                        }
                     ?>
                     <!-- Fim módulos -->
 
@@ -445,73 +418,48 @@ $data_hoje = date('Y-m-d H:i');
 
 
                     <?php
-                    $contData=0;
-                    $contHorario=0;
-                    $exibeHorarios=$conn->prepare("SELECT * FROM tbHhorarios WHERE id_curso = :pid");
-                                $exibeHorarios->bindValue(':pid',$rowCurso['id']);
-                                $exibeHorarios->execute();
-                                $contHorario=$exibeHorarios->rowCount();
-                    	$exibeDatas=$conn->prepare("SELECT * FROM tbDatas WHERE id_curso = :pid");
-                                $exibeDatas->bindValue(':pid',$rowCurso['id']);
-                                $exibeDatas->execute();
-                                $contData=$exibeDatas->rowCount();
-                                if (($contData!=0 || $contHorario!=0)&&$rowCurso['tipo']!=2) {
-                                	
-                                
-
+                        if (isset($curso["datas"])) {
                     ?>
-                    <div id="services<?php echo $contCursos ?>" class="tm-content-box tm-gray-bg tm-services">
+                    <div id="services<?php echo $curso['posicao'] ?>" class="tm-content-box tm-gray-bg tm-services">
 
                         <div class="tm-box-pad tm-bordered-box">
                             <h2 class="tm-section-title" align="center">Datas e Horários</h2>
                         </div>
                         <div class="tm-flex">
-                        	<?php
-                        		if ($contData!=0) {
-                        			
-                        		
-                        	?>
                             <div class="tm-purple-bg tm-box-pad tm-bordered-box tm-no-border-top">
                                 <h2 class="tm-section-title">Datas</h2>
                                 <p>
                                 <?php
-
-                                $exibeDatas=$conn->prepare("SELECT * FROM tbDatas WHERE id_curso = :pid");
-                                $exibeDatas->bindValue(':pid',$rowCurso['id']);
-                                $exibeDatas->execute();
-                                while ($rowDatas=$exibeDatas->fetch()) {
-                                    echo "<p><span><i class=\"fa fa-calendar tm-nav-fa\"></i></span><strong>".$rowDatas['mes'].": </strong> ".$rowDatas['dias']."</p>
-                                </p>";
-                                }
+                                    foreach ($curso["datas"] as $data) {
+                                ?>
+                                    <p>
+                                        <span><i class="fa fa-calendar tm-nav-fa"></i></span>
+                                        <strong><?php echo $data['mes'];?>: </strong><?php echo $data['dias'];?>
+                                    </p>
+                                <?php
+                                    }
                                 ?>
 
                             </div>
-
-                            <?php
-                        		}
-                            ?>
-                            <?php
-                        		if ($contHorario!=0) {
-                        			
-                        		
-                        	?>
                             <div class="tm-gray-bg tm-box-pad tm-bordered-box tm-no-border-top">
                                 <h2 class="tm-section-title">Horários</h2>
 
                                 <?php
-
-                                $exibeHorarios=$conn->prepare("SELECT * FROM tbHhorarios WHERE id_curso = :pid");
-                                $exibeHorarios->bindValue(':pid',$rowCurso['id']);
-                                $exibeHorarios->execute();
-                                while ($rowHorarios=$exibeHorarios->fetch()) {
-                                    echo "<p><span><i class=\"fa fa-clock-o tm-nav-fa\"></i></span><strong>".$rowHorarios['dia'].": </strong>".$rowHorarios['hora']."</p>";
-                                }
+                                    foreach ($curso["datas"] as $data) {
+                                        if ($data["horario"] != null) {
+                                ?>
+                                    <p>
+                                        <span><i class="fa fa-clock-o tm-nav-fa"></i></span>
+                                        <strong>Dia <?php echo $data['dias'];?>: </strong><?php echo $data['horario'];?>
+                                    </p>
+                                <?php
+                                        }
                                 ?>
 
                             </div>   
-                            <?php
-                            	}
-                            ?> 
+                                <?php
+                                	}
+                                ?> 
                         </div>                                             
                         
                     </div>
@@ -520,29 +468,31 @@ $data_hoje = date('Y-m-d H:i');
                     ?>
 
                     <!-- slider -->
-                    <div id="about<?php echo $contCursos ?>" class="tm-content-box">
+                    <div id="about<?php echo $curso['posicao'] ?>" class="tm-content-box">
                         
-                        	<?php
-
-                                $exibeInstrutores=$conn->prepare("SELECT tbInstrutores.* FROM tbCurso LEFT JOIN tbInstrutores ON tbCurso.id_instrutor = tbInstrutores.id WHERE tbCurso.id = :pid");
-                                $exibeInstrutores->bindValue(':pid',$rowCurso['id']);
-                                $exibeInstrutores->execute();
-
-                                if($rowInstrutor = $exibeInstrutores->fetch()){
-                                    echo '<div class="tm-box-pad tm-bordered-box">';
-
-                                    do{
-                                        echo "<h2 class=\"tm-section-title\">".$rowInstrutor['nome']."</h2>";
-                                        echo " <p>".$rowInstrutor['bio']."</p>";
-
-                                        if(!empty($rowInstrutor['link'])){
-                                            echo "<a href=\"".$rowInstrutor['link']."\" class=\"tm-button tm-button-normal\">Saiba mais</a>";
-                                        }
-                                    } while ($rowInstrutor = $exibeInstrutores->fetch());
-
-                                    echo "</div>";
+                	<?php
+                        if(isset($curso["instrutores"])){
+                    ?>
+                        <div class="tm-box-pad tm-bordered-box">
+                        <?php
+                            foreach ($curso["instrutores"] as $instrutor) {
+                        ?>
+                            <h2 class="tm-section-title"><?php echo $instrutor['nome'] ?></h2>
+                            <p>
+                                <?php echo $instrutor['bio'] ?>
+                            </p>
+                        <?php
+                                if(!empty($instrutor['link'])){
+                        ?>
+                                    <a href="<?php echo $rowInstrutor['link'];?>" class="tm-button tm-button-normal">Saiba mais</a>
+                        <?php
                                 }
-                            ?>
+                            }
+                        ?>
+                        </div>
+                    <?php
+                        }
+                    ?>
 
                         <br>
                             
@@ -553,40 +503,32 @@ $data_hoje = date('Y-m-d H:i');
 
 
                         <?php
-                        	$contBiblio=0;
-                        	$exibeLivros=$conn->prepare("SELECT * FROM tbBibliografia WHERE id_curso = :pid");
-                            $exibeLivros->bindValue(':pid',$rowCurso['id']);
-                            $exibeLivros->execute();
-                            $contBiblio=$exibeLivros->rowCount();
-                            if ($contBiblio > 0 || $rowCurso['valor'] != null) {
-                            
-                            
+                            if (isset($curso["bibliografias"]) || $curso['valor'] != null) {
                         ?>
                         <div class="tm-flex">
                         	<?php
-                        	if ($rowCurso['valor']!=null) {
-                        		?>
+                        	   if ($curso['valor'] != null) {
+                        	?>
                         	
                             <div class="tm-purple-bg tm-box-pad tm-bordered-box tm-no-border-top">
                                 <h2 class="tm-section-title">Investimento</h2>
-                                <h3><?php echo $rowCurso['valor'];?></h3>
+                                <h3><?php echo $curso['valor'];?></h3>
                             </div>
                             <?php
                             	}
-                            	if ($contBiblio > 0) {
-                            		
-                            	
+                            	if (isset($curso["bibliografias"])) {
                             ?>
                             <div class="tm-gray-bg tm-box-pad tm-bordered-box tm-no-border-top">
                                 <h2 class="tm-section-title">Bibliografia e Material Didático</h2>
                                 <?php
-
-                                $exibeLivros=$conn->prepare("SELECT * FROM tbBibliografia WHERE id_curso = :pid");
-                                $exibeLivros->bindValue(':pid',$rowCurso['id']);
-                                $exibeLivros->execute();
-                                while ($rowLivros=$exibeLivros->fetch()) {
-                                    echo "<p><span><i class=\"fa fa-book tm-nav-fa\"></i></span><strong>".$rowLivros['nome']." </strong> ".$rowLivros['autor']."</p>";
-                                }
+                                    foreach ($curso["bibliografias"] as $bibliografia) {
+                                ?>
+                                    <p>
+                                        <span><i class="fa fa-book tm-nav-fa"></i></span>
+                                        <strong><?php echo $bibliografia['nome'];?></strong> - <?php echo $bibliografia['autor']?>
+                                    </p>
+                                <?php
+                                    }
                                 ?>
                                 
                             </div>
@@ -599,23 +541,23 @@ $data_hoje = date('Y-m-d H:i');
                         ?>                       
                     </div>
 
-                    <section id="contact<?php echo $contCursos; ?>" class="tm-content-box">
+                    <section id="contact<?php echo $curso['posicao']; ?>" class="tm-content-box">
 
                          <?php 
-                                     if (!empty($rowCurso['local'])) {
+                            if (!empty($curso['local'])) {
                          ?>
                          <div class="col-sm-12">
                              <div class="tm-contact-right-half tm-purple-bg">
-                                 <div class="tm-address-box"><address>
+                                 <div class="tm-address-box">
+                                    <address>
                                      <h2 class="tm-section-title">Local do curso:</h2>
-                                     <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe id="gmap_canvas" src="https://www.google.com.br/maps?q=<?php echo $rowCurso['local']; ?>,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div></div></div>
-                                        
-                                     </div>
-                                 </address>
-                             </div>
+                                     <div align="center"><div class="mapouter"><div class="gmap_canvas"><iframe id="gmap_canvas" src="https://www.google.com.br/maps?q=<?php echo $curso['local']; ?>,+115&um=1&ie=UTF-8&sa=X&ved=0ahUKEwjWqKPj5JDdAhVMHZAKHff-BtIQ_AUICigB&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><a href="https://www.pureblack.de"></a></div></div></div>
+                                    </address>
+                                </div>
+                            </div>
                         </div>
                          <?php
-                             }
+                            }
                          ?>
                         	
                             <div>
@@ -625,16 +567,16 @@ $data_hoje = date('Y-m-d H:i');
                                     <h1 style="font-family: 'ibm'">Inscreva-se - Dados do aluno</h1><br>
                                     <div class="container" style="display: inline">
                                     <div style="display: inline">
-                                    <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'login<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;  margin-left: 0px;">Já possuo conta</a>
+                                    <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'login<?php echo $curso['id']; ?>')" style="margin-top: 20px;  margin-left: 0px;">Já possuo conta</a>
                                     </div>
                                     <div style="display: inline"> 
-                                        <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $rowCurso['id']; ?>')" style="margin-top: 20px;">Registre-se</a>
+                                        <a class="tablinks btn btn-primary pull-xs-left tm-button-normal" href="#cadastro" onclick="openMenu(event, 'registro<?php echo $curso['id']; ?>')" style="margin-top: 20px;">Registre-se</a>
                                         </div>
                                         </div>
                                         <br>
-                                    <div class="tabcontent2" id="login<?php echo $rowCurso['id']; ?>">
+                                    <div class="tabcontent2" id="login<?php echo $curso['id']; ?>">
                                     <form action="#cadastro" method="post" class="contact-form">
-                                        <input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
+                                        <input type="hidden" name="id_curso" value="<?php echo $curso['id'] ?>">
                                         <div class="form-group">
                                             <input type="email" id="contact_email" name="email" class="form-control" placeholder="E-mail"  required/>
                                         </div>
@@ -674,9 +616,9 @@ $data_hoje = date('Y-m-d H:i');
 
                                     <section id="cadastro">
 
-                                        <div class="tabcontent2" id="registro<?php echo $rowCurso['id']; ?>">
+                                        <div class="tabcontent2" id="registro<?php echo $curso['id']; ?>">
                                                 <form action="#registro" method="POST" class="contact-form">
-                                                    <input type="hidden" name="id_curso" value="<?php echo $rowCurso['id'] ?>">
+                                                    <input type="hidden" name="id_curso" value="<?php echo $curso['id'] ?>">
                                                 <div class="form-group">
                                             <input type="email" id="contact_email" name="email" class="form-control" placeholder="E-mail"  required/>
                                         </div>
@@ -804,9 +746,7 @@ $data_hoje = date('Y-m-d H:i');
             </section>
 
             <?php
-            $contCursos++;
-                } 
-
+                }
             ?>
 
 

@@ -27,9 +27,9 @@
 
 <body id="bg">
       	<?php
-	date_default_timezone_set('America/Sao_Paulo');
-$data_hoje = date('Y-m-d H:i');
-?>
+			date_default_timezone_set('America/Sao_Paulo');
+			$data_hoje = date('Y-m-d H:i');
+		?>
 <div class="container-fluid">
 
             <section class="tm-content-box tm-banner margin-b-10">
@@ -40,7 +40,7 @@ $data_hoje = date('Y-m-d H:i');
             <div class="col-sm-12" align="center">
             	
             	<?php
-            	$nomecurso;
+            		$nomecurso;
             		if (isset($_GET['cadastrado'])) {
             			echo "<h3 align=\"center\">Registro de conta realizado com sucesso.</h3>";
             		}
@@ -54,33 +54,42 @@ $data_hoje = date('Y-m-d H:i');
 						$curso44->execute();
 						while ($rowCurso=$curso44->fetch()) {
 							$nomecurso=$rowCurso['nome'];
-							echo "<h1 align=\"center\">Preencha os campos para confirmar sua inscrição:</h1>";
-							echo "<h1 align=\"center\">Curso: ".$rowCurso['nome']."</h1>";
-							?>
-							<img style="max-height: 400px;" src="<?php if($rowCurso['img']!=null){
-                                          	echo "img/cursos/".$rowCurso['img'];}else{ echo "http://placehold.it/360x240";} ?>" alt="<?php echo $rowCurso['nome'] ?>" ><?
-							echo "<fieldset><form action=\"confirma.php#cadModulo1\" method=\"post\" enctype=\"multipart/form-data\" align=\"center\">";
-							echo "<input type=\"hidden\" name=\"id_curso\" value=\"".$id_curso."\">";
-							echo "<input type=\"hidden\" name=\"id_aluno\" value=\"".$id_aluno."\">";
-							echo "<input type=\"hidden\" name=\"nomecurso\" value=\"".$rowCurso['nome']."\">";
-							echo "<div class=\"form-group\" style=\"margin-top: 25px;\">
-											<label>CRM/CRO</label>
-											<select name=\"crm\" required=\"required\">
-												<option value=\"crm\">CRM</option>
-												<option value=\"cro\">CRO</option>
-											</select>
-											<input type=\"text\" name=\"numero_crm\" required=\"required\">
-										</div>";
+				?>
+							<h1 align="center">Preencha os campos para confirmar sua inscrição:</h1>
+							<h1 align="center">Curso: <?php $rowCurso['nome']?></h1>
+							<img style="max-height: 400px;" src="
+								<?php
+									if($rowCurso['img']!=null){
+                                        echo "img/cursos/".$rowCurso['img'];
+                                    }else{
+                                    	echo "http://placehold.it/360x240";
+                                    }
+                                ?>" alt="<?php echo $rowCurso['nome'] ?>" >
+                        
+							<fieldset><form action="confirma.php#cadModulo1" method="post" enctype="multipart/form-data" align="center">
+							<input type="hidden" name="id_curso" value="<?php echo $id_curso;?>">
+							<input type="hidden" name="id_aluno" value="<?php echo $id_aluno;?>">
+							<input type="hidden" name="nomecurso" value="<?php echo $rowCurso['nome'];?>">
+							<div class="form-group" style="margin-top: 25px;">
+								<label>CRM/CRO/CRMV</label>
+								<select name="crm" required="required">
+									<option value="crm">CRM</option>
+									<option value="cro">CRO</option>
+									<option value="crmv">CRMV</option>
+								</select>
+								<input type="text" name="numero_crm" required="required">
+							</div>
+							<?php
 							if ($rowCurso['tipo']==2) {
 								echo "<h3>Selecione os módulos de interesse:</h3>";
 								$livros=$conn->prepare('SELECT * FROM tbModulos WHERE id_curso = :pid');
 								$livros->bindValue(':pid',$rowCurso['id']);
 								$livros->execute();
 								while ($categ=$livros->fetch()) {
-									echo "<br><label>Módulo nº".$categ['numero']." - ".$categ['nome']."</label><br>";
-									echo "<input type=\"checkbox\" name=\"array[]\" value=\"".$categ['id']."\"/>R$".$categ['valor']." - <span>Módulo nº".$categ['numero']." - ".$categ['nome']."</span> <br>";
+							?>
+									<br><label>Módulo nº<?php echo $categ['numero']?> - <?php echo $categ['nome']?></label><br>
+									<input type="checkbox" name="array[]" value="<?php echo $categ['id']?>"/>R$<?php echo $categ['valor']?> - <span>Módulo nº<?php echo $categ['numero']?> - <?php echo $categ['nome']?></span> <br>
 
-									?>
 										<div class="form-group">
                                         	<h5>Selecionar data do módulo <?php echo $categ['numero'] ?>:</h5>
 	                                        <select name="id_datamodulo<?php echo $categ['id'] ?>" required="required" style="font-size: 0.9em;">
@@ -112,10 +121,10 @@ $data_hoje = date('Y-m-d H:i');
 								<?php
 							}
 
-                                        	$datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
-												$datas_curso->bindValue(':pid',$rowCurso['id']);
-												$datas_curso->execute();
-												if ($contdatasa=$datas_curso->rowCount()!=0 && $rowCurso['tipo']!=2) {
+                            	$datas_curso=$conn->prepare('SELECT * FROM tbDatas WHERE id_curso=:pid ORDER BY mes ASC');
+									$datas_curso->bindValue(':pid',$rowCurso['id']);
+									$datas_curso->execute();
+									if ($contdatasa=$datas_curso->rowCount()!=0 && $rowCurso['tipo']!=2) {
 													
 												
                                         ?>
@@ -147,7 +156,7 @@ $data_hoje = date('Y-m-d H:i');
 						}
 
 					
-				?>
+				 ?>
 
 
             </div>
@@ -316,9 +325,9 @@ $para= "rahulacaleffi@gmail.com";
 	                            	$valoremail="R$".$valortotal;
 	                            	echo "R$".$valortotal.",00";
 	                            }  ?></h2>
-	                            <h3 class="tm-section-title" align="center">Faça um depósito na AGÊNCIA XXXX<br>
-	                            C/C: XXXXXX-X<br>
-	                        Banco Bradesco<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: drcarloshomeopatia@icloud.com</strong><br><strong>Enviar juntamente o número do CRO/CRM</strong></h3>
+	                            <h3 class="tm-section-title" align="center">Faça um depósito na AGÊNCIA 1012<br>
+	                            C/C: 01006748-8<br>Carlos Eduardo Leitão<br>
+	                        Banco Bradesco<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: drcarloshomeopatia@icloud.com</strong><br><strong>Enviar juntamente o número do CRO/CRM/CRMV</strong></h3>
 	                        </div>
                         </div>
                         
