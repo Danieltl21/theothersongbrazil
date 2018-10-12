@@ -327,7 +327,7 @@ $para= "rahulacaleffi@gmail.com";
 	                            }  ?></h2>
 	                            <h3 class="tm-section-title" align="center">Faça um depósito na AGÊNCIA 1012<br>
 	                            C/C: 01006748-8<br>Carlos Eduardo Leitão<br>
-	                        Banco Bradesco<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: drcarloshomeopatia@icloud.com</strong><br><strong>Enviar juntamente o número do CRO/CRM/CRMV</strong></h3>
+	                        Banco Santander<br>CPF: 803.828.199-34<br><br>*<strong>Não esqueça de enviar o comprovante para o e-mail: drcarloshomeopatia@icloud.com</strong><br><strong>Enviar juntamente o número do CRO/CRM/CRMV</strong></h3>
 	                        </div>
                         </div>
                         
