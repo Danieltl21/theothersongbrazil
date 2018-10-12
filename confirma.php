@@ -171,25 +171,24 @@
 	            			$crm=$_POST['crm'];
 
 	            			$numero=$_POST['numero_crm'];
-	            			$id_data=$_POST['id_data'];
-	            			$id_curso=$_POST['id_curso'];
-	            			$id_aluno=$_POST['id_aluno'];
+	            			$pid_data=$_POST['id_data'];
+	            			$pid_curso=$_POST['id_curso'];
+	            			$pid_aluno=$_POST['id_aluno'];
 
 	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
 		            			$curso45->bindValue(':pid_usu', $id_aluno);
 		            			$curso45->bindValue(':pcrx_tipo', $crm);
 		            			$curso45->bindValue(':pcrx_numero', $numero);
 								$curso45->execute();
-								$id_aluno=$conn->lastInsertId();
 
-	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, NULL, CURRENT_TIMESTAMP, NULL, NULL, 0);');
-								$grava3->bindValue(':pid_aluno',$id_aluno);
-								$grava3->bindValue(':pid_curso',$id_curso);
-								$grava3->bindValue(':pid_data',$id_data);
+	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+								$grava3->bindValue(':pid_aluno',$pid_aluno);
+								$grava3->bindValue(':pid_curso',$pid_curso);
+								$grava3->bindValue(':pid_data',$pid_data);
 								$grava3->execute();
 
 								$curso45=$conn->prepare('SELECT * FROM tbCurso WHERE id=:pid ORDER BY nome ASC');
-		            			$curso45->bindValue(':pid', $id_curso);
+		            			$curso45->bindValue(':pid', $pid_curso);
 								$curso45->execute();
 								$rowValor=$curso45->fetch();
 								$valorvalor=$rowValor['valor'];
@@ -211,102 +210,101 @@ $para= "rahulacaleffi@gmail.com";
                                     
 
 
-	            		}
-	            		//Curso com módulo
-	            		elseif (isset($_POST['array'])) {
-	            			$crm=$_POST['crm'];
-	            			$numero=$_POST['numero_crm'];
-	            			$id_curso=$_POST['id_curso'];
-	            			$id_aluno=$_POST['id_aluno'];
+// 	            		}
+// 	            		//Curso com módulo
+// 	            		elseif (isset($_POST['array'])) {
+// 	            			$crm=$_POST['crm'];
+// 	            			$numero=$_POST['numero_crm'];
+// 	            			$id_curso=$_POST['id_curso'];
+// 	            			$id_aluno=$_POST['id_aluno'];
 
 
 
 	            				
 
-	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
-		            			$curso45->bindValue(':pid_usu', $id_aluno);
-		            			$curso45->bindValue(':pcrx_tipo', $crm);
-		            			$curso45->bindValue(':pcrx_numero', $numero);
-								$curso45->execute();
-								$id_aluno=$conn->lastInsertId();
-	            			foreach ($_POST['array'] as $key2) {
+// 	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
+// 		            			$curso45->bindValue(':pid_usu', $id_aluno);
+// 		            			$curso45->bindValue(':pcrx_tipo', $crm);
+// 		            			$curso45->bindValue(':pcrx_numero', $numero);
+// 								$curso45->execute();
+// 								$id_aluno=$conn->lastInsertId();
+// 	            			foreach ($_POST['array'] as $key2) {
 
-	            				//Valor módulos
-	            				$livros34=$conn->prepare('SELECT * FROM tbModulos WHERE id = :pid');
-								$livros34->bindValue(':pid',$key2);
-								$livros34->execute();
-								while ($rowValor=$livros34->fetch()) {
-									$valortotal=$valortotal+$rowValor['valor'];
-								}
+// 	            				//Valor módulos
+// 	            				$livros34=$conn->prepare('SELECT * FROM tbModulos WHERE id = :pid');
+// 								$livros34->bindValue(':pid',$key2);
+// 								$livros34->execute();
+// 								while ($rowValor=$livros34->fetch()) {
+// 									$valortotal=$valortotal+$rowValor['valor'];
+// 								}
 
 
 
-	            				$aux="id_datamodulo".$key2;
-	            				$data=$_POST["$aux"];
-	            				$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, :pid_modulo, CURRENT_TIMESTAMP, NULL, NULL, 0);');
-								$grava3->bindValue(':pid_aluno',$id_aluno);
-								$grava3->bindValue(':pid_curso',$id_curso);
-								$grava3->bindValue(':pid_modulo',$key2);
-								$grava3->bindValue(':pid_data',$data);
-								$grava3->execute();
+// 	            				$aux="id_datamodulo".$key2;
+// 	            				$data=$_POST["$aux"];
+// 	            				$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, :pid_data, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+// 								$grava3->bindValue(':pid_aluno',$id_aluno);
+// 								$grava3->bindValue(':pid_curso',$id_curso);
+// 								$grava3->bindValue(':pid_data',$data);
+// 								$grava3->execute();
 
 													    
-							}
-							unset($key2);
+// 							}
+// 							unset($key2);
 
 							
 
-$para= "rahulacaleffi@gmail.com";
-	            			$emailsender="contato@theothersongbrazi.com.br";
-                                    $assunto= "Incrição The Other Song Brazil";
+// $para= "rahulacaleffi@gmail.com";
+// 	            			$emailsender="contato@theothersongbrazi.com.br";
+//                                     $assunto= "Incrição The Other Song Brazil";
 
-                                    $corpo = "Sucesso Finaliza inscrição";
+//                                     $corpo = "Sucesso Finaliza inscrição";
         
-                                    $header= "Content-Type: text/html; charset= utf-8\n";
-                                    $header.="From: $email Reply-to: $email\n";
+//                                     $header= "Content-Type: text/html; charset= utf-8\n";
+//                                     $header.="From: $email Reply-to: $email\n";
         
-                                    mail($para,$assunto,$corpo,$header,"-r".$emailsender);
+//                                     mail($para,$assunto,$corpo,$header,"-r".$emailsender);
                                     
                                     
 
-	            		}
+// 	            		}
 	            		
-	            		elseif (!isset($_POST['id_data']) && !isset($_POST['array'])) {
-	            			$crm=$_POST['crm'];
-	            			$numero=$_POST['numero_crm'];
-	            			$id_curso=$_POST['id_curso'];
-	            			$id_aluno=$_POST['id_aluno'];
-	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
-		            			$curso45->bindValue(':pid_usu', $id_aluno);
-		            			$curso45->bindValue(':pcrx_tipo', $crm);
-		            			$curso45->bindValue(':pcrx_numero', $numero);
-								$curso45->execute();
+// 	            		elseif (!isset($_POST['id_data']) && !isset($_POST['array'])) {
+// 	            			$crm=$_POST['crm'];
+// 	            			$numero=$_POST['numero_crm'];
+// 	            			$id_curso=$_POST['id_curso'];
+// 	            			$id_aluno=$_POST['id_aluno'];
+// 	            			$curso45=$conn->prepare('INSERT INTO tbAluno (id, crx_tipo, crx_numero, usuario_id) VALUES (NULL, :pcrx_tipo, :pcrx_numero, :pid_usu)');
+// 		            			$curso45->bindValue(':pid_usu', $id_aluno);
+// 		            			$curso45->bindValue(':pcrx_tipo', $crm);
+// 		            			$curso45->bindValue(':pcrx_numero', $numero);
+// 								$curso45->execute();
 								
-								$id_aluno=$conn->lastInsertId();
+// 								$id_aluno=$conn->lastInsertId();
 
-	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`, `id_modulo`, `data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, NULL, NULL, CURRENT_TIMESTAMP, NULL, NULL, 0);');
-								$grava3->bindValue(':pid_aluno',$id_aluno);
-								$grava3->bindValue(':pid_curso',$id_curso);
-								$grava3->execute();
+// 	            			$grava3=$conn->prepare('INSERT INTO `tbControle` (`id`, `id_aluno`, `id_curso`, `id_data`,`data_inscricao`, `valor_pago`, `data_pagamento`, `comparecimento`) VALUES (NULL, :pid_aluno, :pid_curso, NULL, CURRENT_TIMESTAMP, NULL, NULL, 0);');
+// 								$grava3->bindValue(':pid_aluno',$id_aluno);
+// 								$grava3->bindValue(':pid_curso',$id_curso);
+// 								$grava3->execute();
 
 								
 
-$para= "rahulacaleffi@gmail.com";
-	            			$emailsender="contato@theothersongbrazi.com.br";
-                                    $assunto= "Incrição The Other Song Brazil";
+// $para= "rahulacaleffi@gmail.com";
+// 	            			$emailsender="contato@theothersongbrazi.com.br";
+//                                     $assunto= "Incrição The Other Song Brazil";
 
-                                    $corpo = "Sucesso Finaliza inscrição";
+//                                     $corpo = "Sucesso Finaliza inscrição";
         
-                                    $header= "Content-Type: text/html; charset= utf-8\n";
-                                    $header.="From: $email Reply-to: $email\n";
+//                                     $header= "Content-Type: text/html; charset= utf-8\n";
+//                                     $header.="From: $email Reply-to: $email\n";
         
-                                    mail($para,$assunto,$corpo,$header,"-r".$emailsender);
+//                                     mail($para,$assunto,$corpo,$header,"-r".$emailsender);
                                     
                                     
 
 	            		}
 	            		else{
-	            			echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$id_aluno."&c=".$id_curso."\">";
+	            			echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$pid_aluno."&c=".$pid_curso."\">";
 						    echo"<script type='text/javascript'>";
 
 								echo "alert('Selecionar pelo menos um módulo');";

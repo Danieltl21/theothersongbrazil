@@ -664,7 +664,9 @@ $data_hoje = date('Y-m-d H:i');
                                                      //    $grava3->execute();
                                                         // echo "Inscrição realizada com sucesso.<br> Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:<br> CC: 2214<br>AG: 0555<br>Banco: 014<br>Titular: The Other Song Brazil<br><br>Enviar comprovante para: theothersong@theothersong.com.br<br><br>Obrigado!";
                                                         // echo "<meta http-equiv=\"refresh\" target=\"_blank\" content=0;url=\"".$rowCurso['link_pagamento']."\">";
+
                                                         echo "<meta http-equiv=\"refresh\" content=0;url=\"confirma.php?a=".$inst['id']."&c=".$id_curso."\">";
+                                                        
                                                      //    echo"<script type='text/javascript'>";
 
                                                         // echo "alert('Inscrição realizada com sucesso.\n Para confirmá-la efetue o depósito do valor correspondente ao curso na conta:\n CC: 2214\nAG: 0555\nBanco: 014\nTitular: The Other Song Brazil\n\nEnviar comprovante para: theothersong@theothersong.com.br\n\nObrigado!');";
