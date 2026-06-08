@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulação LMS Homeopatia - The Other Song Brasil</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>" />
+  <!-- Fontes Premium -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- React, ReactDOM, Babel Standalone da CDN para rodar no navegador direto -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --color-primary: #064e3b;
+      --color-primary-light: #e6f0eb;
+      --color-secondary: #0f172a;
+      --color-accent: #0d9488;
+      --color-bg-base: #fbfaf7;
+      --color-bg-card: #ffffff;
+      --color-text-main: #334155;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-success: #15803d;
+      --color-error: #be123c;
+      --color-warning: #b45309;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-sans); background-color: var(--color-bg-base); color: var(--color-text-main); line-height: 1.6; }
+    h1, h2, h3, h4 { font-family: var(--font-serif); color: var(--color-secondary); font-weight: 600; }
+    .app-container { display: flex; flex-direction: column; min-height: 100vh; }
+    .tosb-header { background-color: var(--color-bg-card); border-bottom: 1px solid var(--color-border); padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .logo-symbol { font-size: 1.75rem; }
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: bold; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; }
+    .logo-subtitle { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--color-text-muted); text-transform: uppercase; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-link { text-decoration: none; color: var(--color-text-main); font-weight: 500; font-size: 0.95rem; transition: var(--transition-smooth); padding: 0.5rem 0.75rem; border-radius: var(--border-radius-sm); }
+    .nav-link:hover { color: var(--color-primary); background-color: var(--color-primary-light); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem 1.25rem; font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; border-radius: var(--border-radius-md); border: none; cursor: pointer; transition: var(--transition-smooth); text-decoration: none; gap: 0.5rem; }
+    .btn-primary { background-color: var(--color-primary); color: white; }
+    .btn-primary:hover { background-color: #043a2c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2); }
+    .btn-secondary { background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main); }
+    .btn-secondary:hover { background-color: var(--color-primary-light); color: var(--color-primary); border-color: var(--color-primary); }
+    .btn-danger { background-color: var(--color-error); color: white; }
+    .btn-danger:hover { background-color: #9d0c32; }
+    .card { background-color: var(--color-bg-card); border-radius: var(--border-radius-lg); border: 1px solid var(--color-border); padding: 1.75rem; box-shadow: var(--shadow-md); transition: var(--transition-smooth); }
+    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .main-content { flex: 1; padding: 2.5rem 2rem; max-width: 1200px; width: 100%; margin: 0 auto; }
+    .tosb-footer { background-color: var(--color-secondary); color: #94a3b8; padding: 3rem 2rem 1.5rem; margin-top: auto; border-top: 4px solid var(--color-primary); }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto; padding-bottom: 2rem; border-bottom: 1px solid #334155; }
+    .footer-section h4 { color: white; margin-bottom: 1.25rem; font-size: 1.1rem; }
+    .footer-links { list-style: none; }
+    .footer-link { color: #94a3b8; text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 0.6rem; transition: var(--transition-smooth); }
+    .footer-link:hover { color: var(--color-accent); padding-left: 4px; }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 1rem; }
+    .alert { padding: 1rem 1.25rem; border-radius: var(--border-radius-md); margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start; font-size: 0.92rem; }
+    .alert-danger { background-color: #fff1f2; border: 1px solid #fecdd3; color: var(--color-error); }
+    .alert-success { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: var(--color-success); }
+    .alert-warning { background-color: #fffbeb; border: 1px solid #fde68a; color: var(--color-warning); }
+    .auth-box { max-width: 480px; width: 100%; margin: 3rem auto; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-main); margin-bottom: 0.4rem; }
+    .form-input { width: 100%; padding: 0.7rem 0.9rem; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); font-family: var(--font-sans); font-size: 0.95rem; transition: var(--transition-smooth); background-color: #fafafa; }
+    .form-input:focus { outline: none; border-color: var(--color-primary); background-color: white; box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1); }
+    .terms-container { max-height: 150px; overflow-y: scroll; border: 1px solid var(--color-border); padding: 0.75rem; border-radius: var(--border-radius-sm); background-color: #f8fafc; font-size: 0.8rem; margin-bottom: 0.75rem; }
+    .player-container { position: relative; width: 100%; padding-top: 56.25%; background-color: #000; border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; }
+    .player-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .quiz-container { background-color: var(--color-bg-card); padding: 2rem; border-radius: var(--border-radius-lg); border: 1px solid var(--color-border); margin-top: 2rem; }
+    .quiz-question-card { margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px dashed var(--color-border); }
+    .quiz-question-text { font-size: 1.05rem; margin-bottom: 1rem; color: var(--color-secondary); }
+    .quiz-option-label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); margin-bottom: 0.5rem; cursor: pointer; transition: var(--transition-smooth); }
+    .quiz-option-label:hover { background-color: var(--color-primary-light); border-color: var(--color-primary); }
+    .quiz-option-label.selected { background-color: var(--color-primary-light); border-color: var(--color-primary); font-weight: 600; }
+    @media (max-width: 768px) {
+      .tosb-header { flex-direction: column; gap: 1rem; padding: 1rem; }
+      .nav-links { width: 100%; justify-content: center; flex-wrap: wrap; gap: 0.75rem; }
+      .main-content { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Lógica React Completa compilada dinamicamente pelo navegador -->
+  <script type="text/babel">
+    const TERMS_TEXT = `TERMOS DE USO E ACEITE PARA HOMEOPATAS E PROFISSIONAIS DA SAÚDE
+Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e concorda que:
+1. Este conteúdo é destinado a profissionais da saúde (Médicos, Dentistas, Farmacêuticos, Veterinários e terapeutas integrativos autorizados).
+2. O material científico, incluindo casos clínicos expostos em vídeo, é estritamente confidencial e protegido por sigilo médico, sendo vedado qualquer tipo de download, gravação de tela ou compartilhamento externo sob pena de suspensão de acesso e medidas legais cabíveis.
+3. A prescrição de medicamentos homeopáticos e a aplicação clínica do Método Sensação são de inteira responsabilidade técnica do profissional matriculado.
+4. A plataforma proíbe o compartilhamento de senhas. A identificação de acessos simultâneos em localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.`;
+
+    function App() {
+      const [currentPage, setCurrentPage] = React.useState('login');
+      const [user, setUser] = React.useState(null);
+      const [error, setError] = React.useState('');
+      const [success, setSuccess] = React.useState('');
+      
+      const [courses, setCourses] = React.useState([]);
+      const [selectedCourse, setSelectedCourse] = React.useState(null);
+      const [selectedLesson, setSelectedLesson] = React.useState(null);
+      const [lessonProgress, setLessonProgress] = React.useState(null);
+      
+      const [quizData, setQuizData] = React.useState(null);
+      const [quizAnswers, setQuizAnswers] = React.useState({});
+      const [quizResult, setQuizResult] = React.useState(null);
+
+      const [myInvoices, setMyInvoices] = React.useState([]);
+      const [checkoutCourse, setCheckoutCourse] = React.useState(null);
+      const [paymentMethod, setPaymentMethod] = React.useState('PIX');
+      const [installments, setInstallments] = React.useState(12);
+
+      const [teacherReportData, setTeacherReportData] = React.useState([]);
+      const [adminReportData, setAdminReportData] = React.useState(null);
+      const [securityLogs, setSecurityLogs] = React.useState([]);
+      const [ofxInput, setOfxInput] = React.useState('');
+      const [conciliationResults, setConciliationResults] = React.useState(null);
+
+      const videoRef = React.useRef(null);
+      const progressIntervalRef = React.useRef(null);
+
+      // Banco de Dados Local Simulado (localStorage)
+      const [mockDb, setMockDb] = React.useState(() => {
+        const saved = localStorage.getItem('demo_db');
+        if (saved) return JSON.parse(saved);
+
+        const initialDb = {
+          users: [
+            { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123' },
+            { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.' },
+            { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765' }
+          ],
+          courses: [
+            { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
+            { id: 'course-sub', title: 'Clube TOSB: Estudo Continuado de Matéria Médica', description: 'Curso recorrente mensal focado no estudo aprofundado dos reinos animal, vegetal e mineral na clínica homeopática.', type: 'SUBSCRIPTION', duration_days: 30, finishing_message: 'Parabéns por concluir mais um ciclo de estudos continuados em nossa Matéria Médica!', teacher_id: 'teacher-id', active: true },
+            { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true }
+          ],
+          modules: {
+            'course-free': [
+              { id: 'mod-f1', title: 'Módulo 1: Fundamentos da Homeopatia', lessons: [
+                { id: 'les-f1', title: 'Aula 1: A Lei dos Semelhantes e a história', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
+              ]}
+            ],
+            'course-sub': [
+              { id: 'mod-s1', title: 'Módulo 1: O Reino Mineral', lessons: [
+                { id: 'les-s1', title: 'Aula 1: Elementos da Tabela Periódica na Homeopatia', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
+              ]}
+            ],
+            'course-post': [
+              { id: 'mod-p1', title: 'Módulo de Especialização 1: Método Sensação na Prática', lessons: [
+                { id: 'les-p1', title: 'Aula 1.1: O Conceito de Sensação Vital no Reino Vegetal', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10, quiz: {
+                  id: 'quiz-p1', title: 'Quiz: Avaliação do Reino Vegetal e Sensação Vital', max_attempts: 2, passing_score: 70.00,
+                  questions: [
+                    { id: 'q1', question_text: 'Qual é o foco principal do Método Sensação de Rajan Sankaran?', options: ['Identificar apenas sintomas locais', 'Encontrar a Sensação Vital profunda que conecta mente e corpo', 'Prescrever com base na cor da pele do paciente', 'Nenhuma das anteriores'], correct: 1 },
+                    { id: 'q2', question_text: 'A Sensação Vital expressa-se através de quais reinos da natureza?', options: ['Apenas Mineral', 'Apenas Vegetal', 'Vegetal, Mineral e Animal', 'Nenhum reino da natureza'], correct: 2 }
+                  ]
+                }}
+              ]}
+            ]
+          },
+          enrollments: [
+            { id: 'enroll-1', student_id: 'student-id', course_id: 'course-free', enrolled_at: new Date().toISOString(), expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(), status: 'ACTIVE' }
+          ],
+          payments: [
+            { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString() }
+          ],
+          lesson_progress: {},
+          quiz_attempts: {},
+          logs: [
+            { id: 'log-1', user_name: 'Dra. Ana Paula', user_email: 'ana@lms.com', ip_address: '189.12.34.56', user_agent: 'Chrome/Windows', content_accessed: 'LOGIN_SUCCESS', created_at: new Date().toISOString() }
+          ]
+        };
+        localStorage.setItem('demo_db', JSON.stringify(initialDb));
+        return initialDb;
+      });
+
+      React.useEffect(() => {
+        localStorage.setItem('demo_db', JSON.stringify(mockDb));
+      }, [mockDb]);
+
+      const clearAlerts = () => { setError(''); setSuccess(''); };
+
+      const redirectToDashboard = (role) => {
+        if (role === 'STUDENT') setCurrentPage('student-dash');
+        else if (role === 'TEACHER') { setCurrentPage('teacher-dash'); loadTeacherReport(); }
+        else if (role === 'ADMIN') { setCurrentPage('admin-dash'); loadAdminReport(); }
+      };
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        clearAlerts();
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const simulateDifferentIp = e.target.simulateIp.checked;
+
+        const foundUser = mockDb.users.find(u => u.email === email && u.password === password);
+        if (!foundUser) {
+          setError('E-mail ou senha incorretos.');
+          return;
+        }
+
+        if (foundUser.status === 'SUSPENDED') {
+          setError('⚠️ BLOQUEIO: Esta conta foi suspensa temporariamente devido a acessos simultâneos geograficamente distantes.');
+          return;
+        }
+
+        if (foundUser.role === 'STUDENT' && simulateDifferentIp) {
+          setMockDb(prev => {
+            const updatedUsers = prev.users.map(u => u.id === foundUser.id ? { ...u, status: 'SUSPENDED' } : u);
+            const newLog = {
+              id: 'log_' + Date.now(),
+              user_name: foundUser.name,
+              user_email: foundUser.email,
+              ip_address: '200.180.12.34 (Geograficamente Distante)',
+              user_agent: 'Safari/iPhone',
+              content_accessed: 'CONCURRENT_LOGIN_LOCKOUT',
+              created_at: new Date().toISOString()
+            };
+            return { ...prev, users: updatedUsers, logs: [newLog, ...prev.logs] };
+          });
+          setError('⚠️ BLOQUEIO DE SEGURANÇA: Detectada sessão ativa de outro endereço IP. Sua conta foi suspensa temporariamente (Regra de Compartilhamento).');
+          return;
+        }
+
+        setUser(foundUser);
+        setSuccess('Login efetuado com sucesso!');
+        redirectToDashboard(foundUser.role);
+      };
+
+      const handleLogout = () => {
+        clearAlerts();
+        setUser(null);
+        setCurrentPage('login');
+      };
+
+      const handleRegister = (e) => {
+        e.preventDefault();
+        clearAlerts();
+        const name = e.target.name.value;
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const registrationType = e.target.registrationType.value;
+        const registrationNumber = e.target.registrationNumber.value;
+        const acceptTerms = e.target.acceptTerms.checked;
+
+        if (!acceptTerms) {
+          setError('Você precisa aceitar os Termos de Uso e Sigilo de dados.');
+          return;
+        }
+
+        const exists = mockDb.users.some(u => u.email === email);
+        if (exists) {
+          setError('E-mail já cadastrado.');
+          return;
+        }
+
+        const newUserId = 'student_' + Date.now();
+        const newStudent = {
+          id: newUserId, name, email, password, role: 'STUDENT', status: 'ACTIVE',
+          registrationType, registrationNumber, terms_accepted: true, terms_accepted_at: new Date().toISOString()
+        };
+
+        const newEnrollment = {
+          id: 'enroll_' + Date.now(),
+          student_id: newUserId,
+          course_id: 'course-free',
+          enrolled_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+          status: 'ACTIVE'
+        };
+
+        setMockDb(prev => ({
+          ...prev,
+          users: [...prev.users, newStudent],
+          enrollments: [...prev.enrollments, newEnrollment]
+        }));
+
+        setSuccess('Cadastro realizado! Matrícula no curso introdutório liberada por 6 meses.');
+        setCurrentPage('login');
+      };
+
+      const handleUnlock = (e) => {
+        e.preventDefault();
+        clearAlerts();
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const verificationCode = e.target.verificationCode.value;
+
+        const found = mockDb.users.find(u => u.email === email && u.password === password);
+        if (!found) {
+          setError('Dados incorretos.');
+          return;
+        }
+        if (verificationCode !== '123456') {
+          setError('Código inválido. Digite o código de teste "123456".');
+          return;
+        }
+        setMockDb(prev => {
+          const updated = prev.users.map(u => u.id === found.id ? { ...u, status: 'ACTIVE' } : u);
+          return { ...prev, users: updated };
+        });
+        setSuccess('Conta desbloqueada com sucesso!');
+        setCurrentPage('login');
+      };
+
+      const loadCourses = () => {
+        const myEnrollments = mockDb.enrollments.filter(e => e.student_id === user.id);
+        const enrollMap = {};
+        myEnrollments.forEach(e => {
+          const isExpired = new Date(e.expires_at) < new Date();
+          enrollMap[e.course_id] = {
+            enrolled: true,
+            status: isExpired ? 'EXPIRED' : e.status,
+            expiresAt: e.expires_at
+          };
+        });
+
+        const coursesWithEnrollment = mockDb.courses.map(c => ({
+          ...c,
+          enrollment: enrollMap[c.id] || { enrolled: false }
+        }));
+        setCourses(coursesWithEnrollment);
+      };
+
+      React.useEffect(() => {
+        if (user && user.role === 'STUDENT' && currentPage === 'student-dash') {
+          loadCourses();
+          loadInvoices();
+        }
+      }, [user, currentPage]);
+
+      const enrollFreeCourse = (courseId) => {
+        const newEnroll = {
+          id: 'enroll_' + Date.now(),
+          student_id: user.id,
+          course_id: courseId,
+          enrolled_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+          status: 'ACTIVE'
+        };
+        setMockDb(prev => ({ ...prev, enrollments: [...prev.enrollments, newEnroll] }));
+        setSuccess('Matrícula efetuada! Acesso liberado por 6 meses.');
+        loadCourses();
+      };
+
+      const viewCourseDetails = (courseId) => {
+        const enroll = mockDb.enrollments.find(e => e.student_id === user.id && e.course_id === courseId);
+        if (!enroll || enroll.status !== 'ACTIVE' || new Date(enroll.expires_at) < new Date()) {
+          setError('Acesso expirado ou matrícula inativa.');
+          return;
+        }
+        const course = mockDb.courses.find(c => c.id === courseId);
+        const rawModules = mockDb.modules[courseId] || [];
+
+        const populatedModules = rawModules.map(m => {
+          const populatedLessons = m.lessons.map(l => {
+            const prog = mockDb.lesson_progress[`${user.id}_${l.id}`] || { seconds_watched: 0, completed: false };
+            return { ...l, ...prog };
+          });
+          return { ...m, lessons: populatedLessons };
+        });
+
+        setSelectedCourse({ course, enrollment: enroll, modules: populatedModules });
+        setCurrentPage('course-view');
+      };
+
+      const selectLesson = (lesson) => {
+        setSelectedLesson(lesson);
+        const key = `${user.id}_${lesson.id}`;
+        const prog = mockDb.lesson_progress[key] || { seconds_watched: 0, completed: false };
+        setLessonProgress(prog);
+        setQuizData(null);
+        setQuizResult(null);
+        setQuizAnswers({});
+
+        if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      };
+
+      const handleVideoPlay = () => {
+        if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = setInterval(() => {
+          if (videoRef.current) {
+            const currentSeconds = Math.floor(videoRef.current.currentTime);
+            const duration = Math.floor(videoRef.current.duration) || selectedLesson.duration_seconds;
+            const completed = currentSeconds >= Math.floor(duration * 0.60);
+            
+            setLessonProgress(prev => ({
+              seconds_watched: currentSeconds,
+              completed: prev ? prev.completed || completed : completed
+            }));
+
+            setMockDb(prev => {
+              const key = `${user.id}_${selectedLesson.id}`;
+              const currentProg = prev.lesson_progress[key] || { completed: false, seconds_watched: 0 };
+              return {
+                ...prev,
+                lesson_progress: {
+                  ...prev.lesson_progress,
+                  [key]: {
+                    student_id: user.id,
+                    lesson_id: selectedLesson.id,
+                    seconds_watched: Math.max(currentProg.seconds_watched, currentSeconds),
+                    completed: currentProg.completed || completed,
+                    updated_at: new Date().toISOString()
+                  }
+                }
+              };
+            });
+          }
+        }, 1000);
+      };
+
+      const handleVideoPause = () => {
+        if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      };
+
+      const loadQuiz = () => {
+        if (!selectedLesson.quiz) return;
+        const attemptsKey = `${user.id}_${selectedLesson.quiz.id}`;
+        const attempts = mockDb.quiz_attempts[attemptsKey] || [];
+        setQuizData({ ...selectedLesson.quiz, attempts });
+      };
+
+      const submitQuiz = () => {
+        const answersList = quizData.questions.map(q => quizAnswers[q.id]);
+        if (answersList.includes(undefined)) {
+          setError('Por favor, responda todas as perguntas.');
+          return;
+        }
+
+        const attemptsKey = `${user.id}_${quizData.id}`;
+        const prevAttempts = mockDb.quiz_attempts[attemptsKey] || [];
+        const attemptNum = prevAttempts.length + 1;
+
+        if (attemptNum > quizData.max_attempts) {
+          setError('Número máximo de tentativas esgotado.');
+          return;
+        }
+
+        let correct = 0;
+        quizData.questions.forEach((q, idx) => {
+          if (answersList[idx] === q.correct) correct++;
+        });
+
+        const score = Math.round((correct / quizData.questions.length) * 100);
+        const passed = score >= quizData.passing_score;
+
+        const newAttempt = { score, passed, attempt_number: attemptNum, completed_at: new Date().toISOString() };
+
+        setMockDb(prev => {
+          const attempts = prev.quiz_attempts[attemptsKey] || [];
+          return {
+            ...prev,
+            quiz_attempts: { ...prev.quiz_attempts, [attemptsKey]: [...attempts, newAttempt] }
+          };
+        });
+
+        setQuizResult(newAttempt);
+        // Atualiza a visualização com a nova tentativa
+        setQuizData(prev => ({ ...prev, attempts: [...prev.attempts, newAttempt] }));
+      };
+
+      const loadInvoices = () => {
+        const userInvoices = mockDb.payments
+          .filter(p => p.student_id === user.id)
+          .map(p => {
+            const c = mockDb.courses.find(course => course.id === p.course_id);
+            return { ...p, course_title: c ? c.title : 'Curso' };
+          });
+        setMyInvoices(userInvoices);
+      };
+
+      const startCheckout = (course) => {
+        setCheckoutCourse(course);
+        setCurrentPage('checkout');
+      };
+
+      const handleProcessCheckout = (e) => {
+        e.preventDefault();
+        clearAlerts();
+        const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
+        let price = checkoutCourse.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
+
+        const newPayments = [];
+        if (paymentMethod === 'CARNE' && checkoutCourse.type === 'POSTGRAD') {
+          const count = installments;
+          const partAmt = (price / count).toFixed(2);
+          for (let i = 1; i <= count; i++) {
+            const dueDate = new Date();
+            dueDate.setMonth(dueDate.getMonth() + (i - 1));
+            newPayments.push({
+              id: `pay-${Date.now()}-${i}`,
+              student_id: user.id,
+              course_id: checkoutCourse.id,
+              amount: parseFloat(partAmt),
+              payment_method: 'CARNE',
+              status: 'PENDING',
+              transaction_code: `${transactionCode}_PARC${i}`,
+              due_date: dueDate.toISOString().split('T')[0],
+              asaas_payment_id: `${asaasPaymentId}_${i}`
+            });
+          }
+        } else {
+          const dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + 3);
+          newPayments.push({
+            id: `pay-${Date.now()}`,
+            student_id: user.id,
+            course_id: checkoutCourse.id,
+            amount: price,
+            payment_method: paymentMethod,
+            status: 'PENDING',
+            transaction_code: transactionCode,
+            due_date: dueDate.toISOString().split('T')[0],
+            asaas_payment_id: asaasPaymentId
+          });
+        }
+
+        setMockDb(prev => ({ ...prev, payments: [...prev.payments, ...newPayments] }));
+        setSuccess('Faturas geradas! Efetue o pagamento na listagem ao lado.');
+        setCurrentPage('student-dash');
+      };
+
+      const simulatePaymentWebhook = (asaasPaymentId) => {
+        clearAlerts();
+        const matchPayments = mockDb.payments.filter(p => p.asaas_payment_id === asaasPaymentId || p.asaas_payment_id.startsWith(`${asaasPaymentId}_`));
+        if (matchPayments.length === 0) return;
+
+        setMockDb(prev => {
+          const updatedPayments = prev.payments.map(p => {
+            if (p.asaas_payment_id === asaasPaymentId || p.asaas_payment_id.startsWith(`${asaasPaymentId}_`)) {
+              return { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
+            }
+            return p;
+          });
+
+          const targetCourseId = matchPayments[0].course_id;
+          const course = prev.courses.find(c => c.id === targetCourseId);
+          const duration = course ? course.duration_days : 180;
+
+          let enrollmentExists = false;
+          const updatedEnrollments = prev.enrollments.map(e => {
+            if (e.student_id === user.id && e.course_id === targetCourseId) {
+              enrollmentExists = true;
+              return { ...e, status: 'ACTIVE', expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() };
+            }
+            return e;
+          });
+
+          if (!enrollmentExists) {
+            updatedEnrollments.push({
+              id: 'enroll_' + Date.now(),
+              student_id: user.id,
+              course_id: targetCourseId,
+              enrolled_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString(),
+              status: 'ACTIVE'
+            });
+          }
+
+          return { ...prev, payments: updatedPayments, enrollments: updatedEnrollments };
+        });
+
+        setSuccess('Sucesso: Pagamento recebido e matrícula ativada por 6 meses.');
+        loadInvoices();
+      };
+
+      const loadTeacherReport = () => {
+        const myCourses = mockDb.courses.filter(c => c.teacher_id === 'teacher-id');
+        const myCourseIds = myCourses.map(c => c.id);
+
+        const reports = mockDb.enrollments
+          .filter(e => myCourseIds.includes(e.course_id))
+          .map(e => {
+            const student = mockDb.users.find(u => u.id === e.student_id);
+            const course = myCourses.find(c => c.id === e.course_id);
+            
+            const courseModules = mockDb.modules[course.id] || [];
+            let totalLessons = 0;
+            let completedLessons = 0;
+            let quizPassed = 0;
+            let presenceCount = 0;
+
+            courseModules.forEach(mod => {
+              mod.lessons.forEach(l => {
+                totalLessons++;
+                const progKey = `${student.id}_${l.id}`;
+                const prog = mockDb.lesson_progress[progKey];
+                if (prog && prog.completed) completedLessons++;
+
+                if (l.quiz) {
+                  const quizKey = `${student.id}_${l.quiz.id}`;
+                  const attempts = mockDb.quiz_attempts[quizKey] || [];
+                  const passed = attempts.some(a => a.passed);
+                  if (passed) quizPassed++;
+                  if (prog && prog.completed && passed) presenceCount++;
+                }
+              });
+            });
+
+            return {
+              studentName: student ? student.name : 'Aluno',
+              studentEmail: student ? student.email : '',
+              courseTitle: course.title,
+              courseType: course.type,
+              enrolledAt: e.enrolled_at,
+              expiresAt: e.expires_at,
+              enrollmentStatus: e.status,
+              totalLessons,
+              completedLessons,
+              quizzesPassed: quizPassed,
+              presenceCount,
+              progressPercent: totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+            };
+          });
+        setTeacherReportData(reports);
+      };
+
+      const loadAdminReport = () => {
+        const received = mockDb.payments.filter(p => p.status === 'RECEIVED').reduce((sum, p) => sum + p.amount, 0);
+        const pending = mockDb.payments.filter(p => p.status === 'PENDING').reduce((sum, p) => sum + p.amount, 0);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const overdue = mockDb.payments.filter(p => p.status === 'PENDING' && p.due_date < todayStr).reduce((sum, p) => sum + p.amount, 0);
+        const mrr = mockDb.payments.filter(p => p.status === 'RECEIVED' && p.course_id === 'course-sub').reduce((sum, p) => sum + p.amount, 0);
+
+        setAdminReportData({
+          summary: { totalReceived: received, totalPending: pending, totalOverdue: overdue, mrr },
+          salesByMethod: [
+            { payment_method: 'PIX', count: mockDb.payments.filter(p => p.payment_method === 'PIX').length, total: mockDb.payments.filter(p => p.payment_method === 'PIX').reduce((s, p) => s + p.amount, 0) },
+            { payment_method: 'CREDIT_CARD', count: mockDb.payments.filter(p => p.payment_method === 'CREDIT_CARD').length, total: mockDb.payments.filter(p => p.payment_method === 'CREDIT_CARD').reduce((s, p) => s + p.amount, 0) },
+            { payment_method: 'CARNE', count: mockDb.payments.filter(p => p.payment_method === 'CARNE').length, total: mockDb.payments.filter(p => p.payment_method === 'CARNE').reduce((s, p) => s + p.amount, 0) }
+          ]
+        });
+        setSecurityLogs(mockDb.logs);
+      };
+
+      const handleConciliation = (e) => {
+        e.preventDefault();
+        clearAlerts();
+
+        const trnRegex = /<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;
+        const parsedTx = [];
+        let m;
+        while ((m = trnRegex.exec(ofxInput)) !== null) {
+          const block = m[1];
+          const amtMatch = block.match(/<TRNAMT>([^<\r\n]+)/i);
+          const refMatch = block.match(/<REFNUM>([^<\r\n]+)/i);
+          const memoMatch = block.match(/<MEMO>([^<\r\n]+)/i);
+
+          const amt = amtMatch ? parseFloat(amtMatch[1].trim()) : 0;
+          const ref = refMatch ? refMatch[1].trim() : '';
+          const memo = memoMatch ? memoMatch[1].trim() : '';
+          parsedTx.push({ amount: amt, ref, memo });
+        }
+
+        const results = { reconciled: [], divergent: [], unmatched: [], processedCount: parsedTx.length };
+        
+        setMockDb(prev => {
+          const currentPayments = [...prev.payments];
+          const currentEnrollments = [...prev.enrollments];
+
+          parsedTx.forEach(tx => {
+            const rawCode = tx.memo || tx.ref || '';
+            const codeMatch = rawCode.match(/ASAAS_[A-Z0-9_]+/i);
+            const code = codeMatch ? codeMatch[0].toUpperCase() : null;
+
+            if (!code) {
+              results.unmatched.push({ description: 'Transação bancária sem código Asaas', amount: tx.amount });
+              return;
+            }
+
+            const payIdx = currentPayments.findIndex(p => p.transaction_code === code);
+            if (payIdx === -1) {
+              results.unmatched.push({ description: `Código ${code} não encontrado no LMS`, amount: tx.amount });
+              return;
+            }
+
+            const p = currentPayments[payIdx];
+            const bankAmt = Math.abs(tx.amount);
+            const localAmt = parseFloat(p.amount);
+
+            if (bankAmt !== localAmt) {
+              results.divergent.push({ transactionCode: code, bankAmount: bankAmt, localAmount: localAmt });
+              return;
+            }
+
+            if (p.status === 'PENDING') {
+              currentPayments[payIdx] = { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
+              
+              const c = prev.courses.find(course => course.id === p.course_id);
+              const duration = c ? c.duration_days : 180;
+              const enIdx = currentEnrollments.findIndex(e => e.student_id === p.student_id && e.course_id === p.course_id);
+              
+              if (enIdx !== -1) {
+                currentEnrollments[enIdx] = { ...currentEnrollments[enIdx], status: 'ACTIVE', expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() };
+              } else {
+                currentEnrollments.push({
+                  id: 'enroll_' + Date.now(),
+                  student_id: p.student_id,
+                  course_id: p.course_id,
+                  enrolled_at: new Date().toISOString(),
+                  expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString(),
+                  status: 'ACTIVE'
+                });
+              }
+              results.reconciled.push({ transactionCode: code, amount: bankAmt, statusChanged: true });
+            } else {
+              results.reconciled.push({ transactionCode: code, amount: bankAmt, statusChanged: false, message: 'Já confirmado' });
+            }
+          });
+
+          return { ...prev, payments: currentPayments, enrollments: currentEnrollments };
+        });
+
+        setConciliationResults(results);
+        setSuccess('Conciliação financeira simulada processada com sucesso!');
+        loadAdminReport();
+      };
+
+      const handleGenerateMockOfx = () => {
+        const pendingP = mockDb.payments.find(p => p.status === 'PENDING');
+        const code = pendingP ? pendingP.transaction_code : 'ASAAS_TEST999';
+        const amount = pendingP ? pendingP.amount : 99.00;
+
+        const ofxStr = `OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+
+<OFX>
+<BANKMSGSRSV1>
+<STMTTRNRS>
+<STATUS><CODE>0<SEVERITY>INFO</STATUS>
+<STMTRS>
+<CURDEF>BRL
+<BANKTRANLIST>
+<STMTTRN>
+<TRNTYPE>CREDIT
+<DTPOSTED>20260604120000
+<TRNAMT>${amount}
+<FITID>bank_tx_10012
+<REFNUM>${code}</REFNUM>
+<MEMO>Recebimento boleto ${code}</MEMO>
+</STMTTRN>
+</BANKTRANLIST>
+</STMTRS>
+</STMTTRNRS>
+</BANKMSGSRSV1>
+</OFX>`;
+
+        setOfxInput(ofxStr);
+        setSuccess('OFX gerado com o código da fatura pendente ativa! Clique em "Processar Conciliação".');
+      };
+
+      const handleSimulateDelinquency = () => {
+        clearAlerts();
+        setMockDb(prev => {
+          const updatedPayments = prev.payments.map(p => {
+            if (p.student_id === 'student-id' && p.status === 'PENDING') {
+              const oldDate = new Date();
+              oldDate.setDate(oldDate.getDate() - 12);
+              return { ...p, due_date: oldDate.toISOString().split('T')[0] };
+            }
+            return p;
+          });
+
+          const updatedEnroll = prev.enrollments.map(e => {
+            if (e.student_id === 'student-id' && e.course_id === 'course-free') {
+              return { ...e, status: 'SUSPENDED' };
+            }
+            return e;
+          });
+
+          return { ...prev, payments: updatedPayments, enrollments: updatedEnroll };
+        });
+        setSuccess('Simulação: Boleto vencido há 12 dias detectado. Matrícula da Dra. Ana Paula SUSPENSA por inadimplência.');
+        loadCourses();
+      };
+
+      const quickLogin = (role) => {
+        clearAlerts();
+        let email = '';
+        if (role === 'admin') email = 'admin@lms.com';
+        else if (role === 'teacher') email = 'carlos@tosb.com';
+        else if (role === 'student') email = 'ana@lms.com';
+
+        const form = document.getElementById('login-form');
+        if (form) {
+          form.email.value = email;
+          form.password.value = 'senha123';
+        }
+      };
+
+      return (
+        <div className="app-container">
+          <header className="tosb-header">
+            <div className="logo-container" style={{ cursor: 'pointer' }} onClick={() => user ? redirectToDashboard(user.role) : setCurrentPage('login')}>
+              <span className="logo-symbol">🌿</span>
+              <div className="logo-text">
+                <span className="logo-title">The Other Song</span>
+                <span className="logo-subtitle">Brasil | EAD</span>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#e2e8f0', color: '#475569', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+              🔬 Demonstração Interativa
+            </div>
+
+            <nav className="nav-links">
+              {user ? (
+                <>
+                  <span style={{ fontSize: '0.9rem' }}>Olá, <strong>{user.name}</strong></span>
+                  <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem' }} onClick={handleLogout}>Sair</button>
+                </>
+              ) : (
+                <>
+                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
+                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('unlock'); }}>Portal de Segurança</button>
+                </>
+              )}
+            </nav>
+          </header>
+
+          <div className="main-content" style={{ paddingBottom: 0 }}>
+            {error && <div className="alert alert-danger"><strong>Aviso:</strong> {error}</div>}
+            {success && <div className="alert alert-success"><strong>Sucesso:</strong> {success}</div>}
+          </div>
+
+          <main className="main-content">
+            
+            {/* TELA: LOGIN */}
+            {currentPage === 'login' && (
+              <div className="card auth-box">
+                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Acesso Acadêmico</h2>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                  Plataforma Científica de Homeopatia
+                </p>
+
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>VALIDAÇÃO RÁPIDA:</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('student')}>Dra. Ana (Aluna)</button>
+                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('teacher')}>Dr. Carlos (Prof)</button>
+                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('admin')}>Admin</button>
+                  </div>
+                  <small style={{ fontSize: '0.7rem', color: '#64748b' }}>Autopreenche os campos com a senha "senha123".</small>
+                </div>
+
+                <form id="login-form" onSubmit={handleLogin}>
+                  <div className="form-group">
+                    <label className="form-label">E-mail</label>
+                    <input className="form-input" type="email" name="email" required placeholder="ex: medico@exemplo.com" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Senha</label>
+                    <input className="form-input" type="password" name="password" required />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fff1f2', padding: '0.5rem', borderRadius: '6px', border: '1px solid #fecdd3' }}>
+                    <input type="checkbox" id="simulateIp" name="simulateIp" />
+                    <label htmlFor="simulateIp" style={{ fontSize: '0.8rem', color: 'var(--color-error)', cursor: 'pointer', fontWeight: 'bold' }}>
+                      Simular login em IP distante (Trava Compartilhamento)
+                    </label>
+                  </div>
+                  <button className="btn btn-primary" type="submit" style={{ width: '100%' }}>Entrar na Plataforma</button>
+                </form>
+              </div>
+            )}
+
+            {/* TELA: CADASTRO */}
+            {currentPage === 'register' && (
+              <div className="card auth-box" style={{ maxWidth: '550px' }}>
+                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Inscrição Profissional</h2>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                  Preencha seus dados de saúde para validação acadêmica
+                </p>
+                <form onSubmit={handleRegister}>
+                  <div className="form-group">
+                    <label className="form-label">Nome Completo</label>
+                    <input className="form-input" type="text" name="name" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">E-mail de Trabalho</label>
+                    <input className="form-input" type="email" name="email" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Senha de Acesso</label>
+                    <input className="form-input" type="password" name="password" required />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">Conselho</label>
+                      <select className="form-input" name="registrationType">
+                        <option value="CRM">CRM (Medicina)</option>
+                        <option value="CRO">CRO (Odontologia)</option>
+                        <option value="CRF">CRF (Farmácia)</option>
+                        <option value="CRV">CRV (Veterinária)</option>
+                        <option value="OUTROS">Outros Conselhos</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Número Registro</label>
+                      <input className="form-input" type="text" name="registrationNumber" required placeholder="ex: 12345-PR" />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Termos de Uso e Sigilo Científico</label>
+                    <div className="terms-container">{TERMS_TEXT}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="acceptTerms" name="acceptTerms" required />
+                      <label htmlFor="acceptTerms" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Li e aceito os termos específicos para Homeopatas.</label>
+                    </div>
+                  </div>
+                  <button className="btn btn-primary" type="submit" style={{ width: '100%' }}>Confirmar Cadastro</button>
+                </form>
+              </div>
+            )}
+
+            {/* TELA: PORTAL DE SEGURANÇA */}
+            {currentPage === 'unlock' && (
+              <div className="card auth-box">
+                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Portal de Desbloqueio</h2>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                  Ativação de conta suspensa por compartilhamento suspeito
+                </p>
+                <form onSubmit={handleUnlock}>
+                  <div className="form-group">
+                    <label className="form-label">E-mail</label>
+                    <input className="form-input" type="email" name="email" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Senha</label>
+                    <input className="form-input" type="password" name="password" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Código de Segurança do E-mail</label>
+                    <input className="form-input" type="text" name="verificationCode" required placeholder="Código de teste: 123456" />
+                  </div>
+                  <button className="btn btn-danger" type="submit" style={{ width: '100%' }}>Reativar Conta</button>
+                </form>
+              </div>
+            )}
+
+            {/* TELA: DASHBOARD ALUNO */}
+            {currentPage === 'student-dash' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div>
+                    <h1 style={{ fontFamily: 'var(--font-serif)' }}>Meus Estudos Homeopáticos</h1>
+                    <p style={{ color: 'var(--color-text-muted)' }}>Acompanhe suas disciplinas e faturas.</p>
+                  </div>
+                  <button className="btn btn-danger" onClick={handleSimulateDelinquency}>
+                    Simular Inadimplência (+10 dias de atraso)
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '2rem' }}>
+                  <div>
+                    <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Meus Cursos</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {courses.map(course => (
+                        <div key={course.id} className="card" style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem', alignItems: 'center' }}>
+                          <div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-accent)', textTransform: 'uppercase' }}>
+                              {course.type === 'FREE' ? 'Curso Livre' : course.type === 'SUBSCRIPTION' ? 'Mensalidade' : 'Especialização Pós'}
+                            </span>
+                            <h3 style={{ fontSize: '1.25rem', margin: '0.25rem 0' }}>{course.title}</h3>
+                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{course.description}</p>
+                            {course.enrollment.enrolled && (
+                              <small style={{ color: '#64748b' }}>Expira em: {new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</small>
+                            )}
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            {course.enrollment.enrolled ? (
+                              course.enrollment.status === 'ACTIVE' ? (
+                                <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
+                              ) : course.enrollment.status === 'SUSPENDED' ? (
+                                <span style={{ color: 'var(--color-error)', fontWeight: 'bold', fontSize: '0.85rem' }}>⚠️ Bloqueado por Atraso</span>
+                              ) : (
+                                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Acesso Expirado</span>
+                              )
+                            ) : (
+                              course.type === 'FREE' ? (
+                                <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
+                              ) : (
+                                <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar Curso</button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Faturas Asaas</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {myInvoices.length === 0 ? (
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Sem boletos em aberto.</p>
+                      ) : (
+                        myInvoices.map(inv => (
+                          <div key={inv.id} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '0.75rem', backgroundColor: '#fff', fontSize: '0.85rem' }}>
+                            <div style={{ fontWeight: 'bold' }}>{inv.course_title}</div>
+                            <div>R$ {parseFloat(inv.amount).toFixed(2)}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                              <span style={{
+                                padding: '0.1rem 0.3rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold',
+                                backgroundColor: inv.status === 'RECEIVED' ? '#dcfce7' : '#fee2e2',
+                                color: inv.status === 'RECEIVED' ? '#166534' : '#991b1b'
+                              }}>{inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}</span>
+                              {inv.status === 'PENDING' && (
+                                <button className="btn btn-primary" style={{ padding: '0.15rem 0.4rem', fontSize: '0.7rem' }} onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>Pagar</button>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.5rem' }}>Cód: {inv.transaction_code}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TELA: CHECKOUT */}
+            {currentPage === 'checkout' && checkoutCourse && (
+              <div className="card auth-box">
+                <h2>Finalizar Inscrição</h2>
+                <div style={{ margin: '1rem 0' }}>
+                  <h3>{checkoutCourse.title}</h3>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                    {checkoutCourse.type === 'SUBSCRIPTION' ? 'R$ 99,00 / mês' : 'R$ 3.600,00 total'}
+                  </div>
+                </div>
+                <form onSubmit={handleProcessCheckout}>
+                  <div className="form-group">
+                    <label className="form-label">Forma de Pagamento</label>
+                    <select className="form-input" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                      <option value="PIX">Pix Imediato</option>
+                      <option value="CREDIT_CARD">Cartão de Crédito</option>
+                      <option value="BOLETO">Boleto Bancário</option>
+                      {checkoutCourse.type === 'POSTGRAD' && <option value="CARNE">Boleto Parcelado (Carnê)</option>}
+                    </select>
+                  </div>
+                  {paymentMethod === 'CARNE' && (
+                    <div className="form-group">
+                      <label className="form-label">Parcelamento</label>
+                      <select className="form-input" value={installments} onChange={(e) => setInstallments(parseInt(e.target.value))}>
+                        <option value={6}>6x de R$ 600,00</option>
+                        <option value={12}>12x de R$ 300,00</option>
+                      </select>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="btn btn-secondary" style={{ flex: 1 }} type="button" onClick={() => setCurrentPage('student-dash')}>Voltar</button>
+                    <button className="btn btn-primary" style={{ flex: 2 }} type="submit">Confirmar Cobrança</button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* TELA: PLAYER DO CURSO */}
+            {currentPage === 'course-view' && selectedCourse && (
+              <div>
+                <button className="btn btn-secondary" style={{ marginBottom: '1.5rem' }} onClick={() => setCurrentPage('student-dash')}>← Painel Principal</button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+                  <div>
+                    <h2>{selectedCourse.course.title}</h2>
+                    <p style={{ color: 'var(--color-text-muted)' }}>{selectedCourse.course.description}</p>
+                    
+                    {selectedLesson ? (
+                      <div style={{ marginTop: '1rem' }}>
+                        <div className="player-container">
+                          <video ref={videoRef} key={selectedLesson.id} className="player-video" controls src={selectedLesson.video_url} onPlay={handleVideoPlay} onPause={handleVideoPause} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h3>{selectedLesson.title}</h3>
+                          <span>Assistido: <strong>{lessonProgress ? lessonProgress.seconds_watched : 0}s</strong> / {selectedLesson.duration_seconds}s</span>
+                        </div>
+
+                        {selectedLesson.quiz && (
+                          <div style={{ marginTop: '2.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <h3>{selectedLesson.quiz.title}</h3>
+                              {!quizData ? <button className="btn btn-primary" onClick={loadQuiz}>Responder Quiz</button> : <button className="btn btn-secondary" onClick={() => setQuizData(null)}>Recolher</button>}
+                            </div>
+                            {quizData && (
+                              <div className="quiz-container">
+                                {quizData.attempts.length > 0 && (
+                                  <div style={{ marginBottom: '1rem' }}>
+                                    <strong>Tentativas Anteriores:</strong>
+                                    <ul>
+                                      {quizData.attempts.map((a, idx) => (
+                                        <li key={idx} style={{ color: a.passed ? 'var(--color-success)' : 'var(--color-error)' }}>
+                                          Tentativa {a.attempt_number}: Nota {a.score}% ({a.passed ? 'Aprovado' : 'Reprovado'})
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {quizData.attempts.length < quizData.max_attempts && !quizData.attempts.some(a => a.passed) ? (
+                                  <div>
+                                    {quizData.questions.map((q, idx) => (
+                                      <div key={q.id} className="quiz-question-card">
+                                        <div className="quiz-question-text">Questão {idx+1}: {q.question_text}</div>
+                                        {q.options.map((opt, oIdx) => (
+                                          <div key={oIdx} className={`quiz-option-label ${quizAnswers[q.id] === oIdx ? 'selected' : ''}`} onClick={() => handleSelectQuizOption(q.id, oIdx)}>
+                                            <span>{opt}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ))}
+                                    <button className="btn btn-primary" style={{ width: '100%' }} onClick={submitQuiz}>Enviar Respostas</button>
+                                  </div>
+                                ) : (
+                                  <div className="alert alert-warning">Você atingiu o limite de tentativas ou já foi aprovado.</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ border: '2px dashed #ccc', padding: '3rem', textAlign: 'center', marginTop: '1rem', borderRadius: '8px' }}>🌿 Selecione uma aula da lista.</div>
+                    )}
+
+                    {selectedCourse.modules.every(m => m.lessons.every(l => {
+                      const pk = `${user.id}_${l.id}`;
+                      const prog = mockDb.lesson_progress[pk];
+                      return prog && prog.completed;
+                    })) && (
+                      <div className="card alert-success" style={{ marginTop: '2rem' }}>
+                        <h3>Curso Concluído!</h3>
+                        <p>"{selectedCourse.course.finishing_message}"</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3>Grade Horária</h3>
+                    {selectedCourse.modules.map(m => (
+                      <div key={m.id} style={{ marginTop: '1rem' }}>
+                        <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{m.title}</div>
+                        {m.lessons.map(l => {
+                          const pk = `${user.id}_${l.id}`;
+                          const isComp = mockDb.lesson_progress[pk]?.completed;
+                          return (
+                            <div key={l.id} onClick={() => selectLesson(l)} style={{ padding: '0.5rem', cursor: 'pointer', border: '1px solid #eee', marginTop: '0.25rem', backgroundColor: selectedLesson?.id === l.id ? 'var(--color-primary-light)' : '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{l.title}</span>
+                              <span>{isComp ? '✓' : ''}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TELA: PROFESSOR */}
+            {currentPage === 'teacher-dash' && (
+              <div>
+                <h2>Relatório de Presença e Alunos</h2>
+                <div className="card" style={{ marginTop: '1rem' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #ccc' }}>
+                        <th style={{ padding: '0.5rem' }}>Aluno</th>
+                        <th style={{ padding: '0.5rem' }}>Curso</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Assistido</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Aulas Concluídas</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Quizzes Aprovados</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Presença Oficial</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teacherReportData.map((rep, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '0.5rem' }}><strong>{rep.studentName}</strong><br/><small>{rep.studentEmail}</small></td>
+                          <td style={{ padding: '0.5rem' }}>{rep.courseTitle}</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.progressPercent}%</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.completedLessons}/{rep.totalLessons}</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.quizzesPassed}</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--color-success)' }}>{rep.presenceCount} presenças</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* TELA: ADMIN */}
+            {currentPage === 'admin-dash' && (
+              <div>
+                <h2>Painel Financeiro & Conciliação OFX</h2>
+                
+                {adminReportData && (
+                  <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0', flexWrap: 'wrap' }}>
+                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-primary)' }}>
+                      <div>Recebido Líquido</div>
+                      <h2>R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
+                    </div>
+                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-warning)' }}>
+                      <div>Boletos em Aberto</div>
+                      <h2>R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
+                    </div>
+                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-error)' }}>
+                      <div>Inadimplência Vencida</div>
+                      <h2>R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
+                    </div>
+                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-accent)' }}>
+                      <div>MRR Clubes</div>
+                      <h2>R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div className="card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3>Conciliação Bancária</h3>
+                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={handleGenerateMockOfx}>Gerar OFX para Teste</button>
+                    </div>
+                    <form onSubmit={handleConciliation} style={{ marginTop: '1rem' }}>
+                      <textarea className="form-input" style={{ minHeight: '150px', fontFamily: 'monospace', fontSize: '0.75rem' }} value={ofxInput} onChange={(e) => setOfxInput(e.target.value)} required />
+                      <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} type="submit">Processar OFX</button>
+                    </form>
+
+                    {conciliationResults && (
+                      <div style={{ marginTop: '1rem', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}>
+                        <div>Processados no OFX: <strong>{conciliationResults.processedCount}</strong></div>
+                        <div style={{ color: 'var(--color-success)' }}>✓ Conciliados com Matrícula Liberada: <strong>{conciliationResults.reconciled.length}</strong></div>
+                        <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes de valor: <strong>{conciliationResults.divergent.length}</strong></div>
+                        <div style={{ color: '#64748b' }}>✗ Não identificados no LMS: <strong>{conciliationResults.unmatched.length}</strong></div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card">
+                    <h3>Logs de Acesso e Trava de Segurança</h3>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #eee', padding: '0.5rem', marginTop: '1rem', backgroundColor: '#fafafa' }}>
+                      {securityLogs.map((log, idx) => (
+                        <div key={idx} style={{ borderBottom: '1px solid #eee', padding: '0.25rem', fontSize: '0.75rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <strong>{log.user_name}</strong>
+                            <span>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
+                          </div>
+                          <div>Ação: <span style={{ color: log.content_accessed.includes('LOCKOUT') ? 'red' : 'green' }}>{log.content_accessed}</span></div>
+                          <div>IP: {log.ip_address} | {log.user_agent}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          <footer className="tosb-footer">
+            <div className="footer-bottom">
+              <span>&copy; The Other Song Brasil - Plataforma Integrada de Homeopatia EAD</span>
+              <span>Desenvolvido com sofisticação acadêmica e segurança.</span>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
