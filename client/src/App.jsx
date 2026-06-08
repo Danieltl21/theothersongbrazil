@@ -1215,7 +1215,7 @@ NEWFILEENCODING:NONE
         </a>
 
         {isOfflineMode && (
-          <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', color: '#b45309', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+          <div className="offline-mode-badge">
             🔌 Modo de Simulação
           </div>
         )}
@@ -1223,7 +1223,7 @@ NEWFILEENCODING:NONE
         <nav className="nav-links">
           {user ? (
             <>
-              <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Olá, <strong>{user.name}</strong> ({user.role})</span>
+              <span className="user-greeting">Olá, <strong>{user.name}</strong> ({user.role})</span>
               <button className="btn btn-secondary" onClick={handleLogout}>Sair</button>
             </>
           ) : (
@@ -1237,7 +1237,7 @@ NEWFILEENCODING:NONE
       </header>
 
       {/* Alertas */}
-      <div className="main-content" style={{ paddingBottom: 0 }}>
+      <div className="main-content main-content-top">
         {error && <div className="alert alert-danger"><strong>Aviso:</strong> {error}</div>}
         {success && <div className="alert alert-success"><strong>Sucesso:</strong> {success}</div>}
       </div>
@@ -1248,20 +1248,20 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: LOGIN */}
         {currentPage === 'login' && (
           <div className="card auth-box">
-            <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Acesso Acadêmico</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 className="mb-2 text-center">Acesso Acadêmico</h2>
+            <p className="text-muted text-center mb-5">
               Plataforma Científica de Homeopatia
             </p>
 
             {/* LOGIN RÁPIDO ASSISTENTE */}
-            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-primary)', textTransform: 'uppercase' }}>Assistente de Validação Rápida:</span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('student')}>Ana (Aluno)</button>
-                <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('teacher')}>Carlos (Prof)</button>
-                <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('admin')}>Admin</button>
+            <div className="quick-login-container">
+              <span className="quick-login-title">Assistente de Validação Rápida:</span>
+              <div className="quick-login-buttons">
+                <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('student')}>Ana (Aluno)</button>
+                <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('teacher')}>Carlos (Prof)</button>
+                <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('admin')}>Admin</button>
               </div>
-              <small style={{ fontSize: '0.7rem', color: '#64748b' }}>Preenche automaticamente com a senha padrão <em>senha123</em>.</small>
+              <small className="helper-text">Preenche automaticamente com a senha padrão <em>senha123</em>.</small>
             </div>
 
             <form id="login-form" onSubmit={handleLogin}>
@@ -1275,23 +1275,23 @@ NEWFILEENCODING:NONE
                 <input className="form-input" type="password" name="password" required placeholder="Digite sua senha" />
               </div>
 
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fff1f2', padding: '0.5rem', borderRadius: '6px', border: '1px solid #fecdd3' }}>
+              <div className="form-group ip-warning-container">
                 <input type="checkbox" id="simulateIp" name="simulateIp" />
-                <label htmlFor="simulateIp" style={{ fontSize: '0.8rem', color: 'var(--color-error)', cursor: 'pointer' }}>
+                <label htmlFor="simulateIp" className="ip-warning-label">
                   <strong>Simular login em IP distante</strong> (Trava Opção B)
                 </label>
               </div>
 
-              <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: '0.5rem' }}>Entrar na Plataforma</button>
+              <button className="btn btn-primary w-full mt-2" type="submit">Entrar na Plataforma</button>
             </form>
           </div>
         )}
 
         {/* PÁGINA: CADASTRO */}
         {currentPage === 'register' && (
-          <div className="card auth-box" style={{ maxWidth: '600px' }}>
-            <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Inscrição Profissional</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div className="card auth-box auth-box-wide">
+            <h2 className="mb-2 text-center">Inscrição Profissional</h2>
+            <p className="text-muted text-center mb-5">
               Preencha seus dados de saúde para validação acadêmica
             </p>
 
@@ -1311,7 +1311,7 @@ NEWFILEENCODING:NONE
                 <input className="form-input" type="password" name="password" required placeholder="Mínimo 6 caracteres" />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="grid-2col">
                 <div className="form-group">
                   <label className="form-label">Conselho Profissional</label>
                   <select className="form-input" name="registrationType">
@@ -1334,13 +1334,13 @@ NEWFILEENCODING:NONE
                 <div className="terms-container">
                   {TERMS_TEXT}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="flex-center-gap">
                   <input type="checkbox" id="acceptTerms" name="acceptTerms" required />
-                  <label htmlFor="acceptTerms" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Li e aceito os termos específicos para Homeopatas.</label>
+                  <label htmlFor="acceptTerms" className="cursor-pointer">Li e aceito os termos específicos para Homeopatas.</label>
                 </div>
               </div>
 
-              <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: '1rem' }}>Criar Conta e Confirmar Registro</button>
+              <button className="btn btn-primary w-full mt-4" type="submit">Criar Conta e Confirmar Registro</button>
             </form>
           </div>
         )}
@@ -1348,8 +1348,8 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DESBLOQUEIO DE SEGURANÇA */}
         {currentPage === 'unlock' && (
           <div className="card auth-box">
-            <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Portal de Desbloqueio</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 className="mb-2 text-center">Portal de Desbloqueio</h2>
+            <p className="text-muted text-center mb-5">
               Ativação de conta suspensa por detecção de login simultâneo
             </p>
 
@@ -1369,7 +1369,7 @@ NEWFILEENCODING:NONE
                 <input className="form-input" type="text" name="verificationCode" required placeholder="Digite o código enviado (Código de teste: 123456)" />
               </div>
 
-              <button className="btn btn-danger" type="submit" style={{ width: '100%', marginTop: '1rem' }}>Reativar Conta</button>
+              <button className="btn btn-danger w-full mt-4" type="submit">Reativar Conta</button>
             </form>
           </div>
         )}
@@ -1377,10 +1377,10 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO ALUNO */}
         {currentPage === 'student-dash' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div className="dashboard-header">
               <div>
-                <h1 style={{ fontFamily: 'var(--font-serif)' }}>Meus Estudos Homeopáticos</h1>
-                <p style={{ color: 'var(--color-text-muted)' }}>Gerencie suas disciplinas, progresso acadêmico e financeiro.</p>
+                <h1 className="font-serif-title">Meus Estudos Homeopáticos</h1>
+                <p className="text-muted">Gerencie suas disciplinas, progresso acadêmico e financeiro.</p>
               </div>
 
               {isOfflineMode && (
@@ -1390,39 +1390,39 @@ NEWFILEENCODING:NONE
               )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '2rem' }}>
+            <div className="dashboard-layout">
               
               {/* Lista de Cursos */}
               <div>
-                <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Grade de Cursos</h3>
+                <h3 className="section-title-underlined">Grade de Cursos</h3>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="courses-list">
                   {courses.map(course => (
-                    <div key={course.id} className="card" style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem', alignItems: 'center' }}>
+                    <div key={course.id} className="card course-card-grid">
                       <div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-accent)', textTransform: 'uppercase', display: 'block', marginBottom: '0.25rem' }}>
+                        <span className="course-type-badge">
                           {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
                         </span>
-                        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{course.title}</h3>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{course.description}</p>
+                        <h3 className="course-card-title">{course.title}</h3>
+                        <p className="course-card-description">{course.description}</p>
                         
                         {course.enrollment.enrolled && (
-                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                          <div className="course-card-expires">
                             Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
                           </div>
                         )}
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'right' }}>
+                      <div className="course-card-actions">
                         {course.enrollment.enrolled ? (
                           course.enrollment.status === 'ACTIVE' ? (
                             <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
                           ) : course.enrollment.status === 'SUSPENDED' ? (
-                            <div style={{ color: 'var(--color-error)', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            <div className="error-text-bold">
                               ⚠️ Acesso Bloqueado por Inadimplência
                             </div>
                           ) : (
-                            <div style={{ color: 'var(--color-text-muted)', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            <div className="muted-text-bold">
                               ❌ Acesso Expirado (6 Meses)
                             </div>
                           )
@@ -1441,34 +1441,30 @@ NEWFILEENCODING:NONE
 
               {/* Faturamento / Financeiro do Aluno */}
               <div>
-                <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Financeiro</h3>
+                <h3 className="section-title-underlined">Financeiro</h3>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="invoices-list">
                   {myInvoices.length === 0 ? (
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Nenhuma fatura registrada.</p>
+                    <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
                   ) : (
                     myInvoices.map(inv => (
-                      <div key={inv.id} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '0.75rem', backgroundColor: '#fff', fontSize: '0.85rem' }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{inv.course_title}</div>
-                        <div style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
+                      <div key={inv.id} className="invoice-card">
+                        <div className="invoice-title">{inv.course_title}</div>
+                        <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{
-                            padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold',
-                            backgroundColor: inv.status === 'RECEIVED' ? '#dcfce7' : '#fee2e2',
-                            color: inv.status === 'RECEIVED' ? '#166534' : '#991b1b'
-                          }}>
+                        <div className="invoice-footer">
+                          <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
                             {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
                           </span>
 
                           {inv.status === 'PENDING' && (
-                            <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
+                            <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
                               Simular Pago
                             </button>
                           )}
                         </div>
-                        <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b' }}>Ref: {inv.transaction_code}</small>
-                        <small style={{ display: 'block', color: '#64748b' }}>Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
+                        <small className="invoice-ref">Ref: {inv.transaction_code}</small>
+                        <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
                       </div>
                     ))
                   )}
@@ -1481,14 +1477,14 @@ NEWFILEENCODING:NONE
 
         {/* PÁGINA: CHECKOUT */}
         {currentPage === 'checkout' && checkoutCourse && (
-          <div className="card auth-box" style={{ maxWidth: '550px' }}>
-            <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>Matrícula & Checkout Asaas</h2>
+          <div className="card auth-box">
+            <h2 className="section-title-underlined-thin">Matrícula & Checkout Asaas</h2>
             
-            <div style={{ marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-accent)', textTransform: 'uppercase' }}>Item Selecionado</span>
+            <div className="mb-5">
+              <span className="course-type-badge">Item Selecionado</span>
               <h3>{checkoutCourse.title}</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{checkoutCourse.description}</p>
-              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary)', marginTop: '0.5rem' }}>
+              <p className="course-card-description">{checkoutCourse.description}</p>
+              <div className="checkout-item-title">
                 {checkoutCourse.type === 'SUBSCRIPTION' ? 'R$ 99,00 / mês' : 'R$ 3.600,00 à vista'}
               </div>
             </div>
@@ -1517,9 +1513,9 @@ NEWFILEENCODING:NONE
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                <button className="btn btn-secondary" type="button" onClick={() => setCurrentPage('student-dash')} style={{ flex: 1 }}>Cancelar</button>
-                <button className="btn btn-primary" type="submit" style={{ flex: 2 }}>Gerar Fatura no Asaas</button>
+              <div className="checkout-actions">
+                <button className="btn btn-secondary flex-1" type="button" onClick={() => setCurrentPage('student-dash')}>Cancelar</button>
+                <button className="btn btn-primary flex-2" type="submit">Gerar Fatura no Asaas</button>
               </div>
             </form>
           </div>
