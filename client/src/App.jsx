@@ -1524,16 +1524,16 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: LMS / CURSO E PLAYER */}
         {currentPage === 'course-view' && selectedCourse && (
           <div>
-            <button className="btn btn-secondary" style={{ marginBottom: '1.5rem' }} onClick={() => setCurrentPage('student-dash')}>
+            <button className="btn btn-secondary mb-5" onClick={() => setCurrentPage('student-dash')}>
               ← Voltar ao Dashboard
             </button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+            <div className="lms-layout">
               
               {/* Player Principal e Aulas */}
               <div>
                 <h2>{selectedCourse.course.title}</h2>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>{selectedCourse.course.description}</p>
+                <p className="course-card-description mb-5">{selectedCourse.course.description}</p>
                 
                 {selectedLesson ? (
                   <div>
@@ -1549,30 +1549,26 @@ NEWFILEENCODING:NONE
                       />
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div className="lesson-info">
                       <h3>{selectedLesson.title}</h3>
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem' }}>
+                      <div className="lesson-progress-meta">
+                        <span className="course-card-expires">
                           Assistido: <strong>{lessonProgress ? lessonProgress.seconds_watched : 0}s</strong> / {selectedLesson.duration_seconds}s
                         </span>
                         
-                        <span style={{
-                          padding: '0.2rem 0.5rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold',
-                          backgroundColor: lessonProgress && lessonProgress.completed ? '#dcfce7' : '#f1f5f9',
-                          color: lessonProgress && lessonProgress.completed ? '#166534' : '#64748b'
-                        }}>
+                        <span className={lessonProgress && lessonProgress.completed ? 'lesson-progress-badge-completed' : 'lesson-progress-badge-pending'}>
                           {lessonProgress && lessonProgress.completed ? '✓ Concluído (60%+)' : 'Pendente'}
                         </span>
                       </div>
                     </div>
 
-                    {/* Exibir Questionário se hovar na aula (Exemplo na Pós) */}
+                    {/* Exibir Questionário se houver na aula (Exemplo na Pós) */}
                     {selectedLesson.quiz ? (
-                      <div style={{ marginTop: '2rem', borderTop: '2px solid var(--color-border)', paddingTop: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <div className="quiz-section-wrapper">
+                        <div className="quiz-header">
                           <div>
-                            <h3 style={{ fontFamily: 'var(--font-serif)' }}>{selectedLesson.quiz.title}</h3>
-                            <small style={{ color: 'var(--color-text-muted)' }}>Regras: Máx. 2 tentativas, aprovação mínima de 70%.</small>
+                            <h3 className="font-serif-title">{selectedLesson.quiz.title}</h3>
+                            <small className="text-muted">Regras: Máx. 2 tentativas, aprovação mínima de 70%.</small>
                           </div>
                           {!quizData ? (
                             <button className="btn btn-primary" onClick={loadQuiz}>Iniciar Quiz da Aula</button>
@@ -1584,11 +1580,11 @@ NEWFILEENCODING:NONE
                         {quizData && (
                           <div className="quiz-container">
                             {quizData.attempts.length > 0 && (
-                              <div style={{ marginBottom: '1.5rem' }}>
+                              <div className="mb-5">
                                 <strong>Suas tentativas anteriores:</strong>
-                                <ul style={{ fontSize: '0.85rem', marginTop: '0.5rem', paddingLeft: '1.25rem' }}>
+                                <ul className="quiz-attempts-list">
                                   {quizData.attempts.map((a, i) => (
-                                    <li key={i} style={{ color: a.passed ? 'var(--color-success)' : 'var(--color-error)' }}>
+                                    <li key={i} className={a.passed ? 'quiz-attempt-passed' : 'quiz-attempt-failed'}>
                                       Tentativa {a.attempt_number}: Nota {a.score}% ({a.passed ? 'Aprovado' : 'Reprovado'}) em {new Date(a.completed_at).toLocaleDateString('pt-BR')}
                                     </li>
                                   ))}
@@ -1613,7 +1609,7 @@ NEWFILEENCODING:NONE
                                           name={`q_${q.id}`}
                                           checked={quizAnswers[q.id] === oIdx}
                                           onChange={() => {}}
-                                          style={{ pointerEvents: 'none' }}
+                                          className="pointer-events-none"
                                         />
                                         <span>{opt}</span>
                                       </div>
@@ -1621,7 +1617,7 @@ NEWFILEENCODING:NONE
                                   </div>
                                 ))}
 
-                                <button className="btn btn-primary" style={{ width: '100%' }} onClick={submitQuiz}>Enviar Respostas do Quiz</button>
+                                <button className="btn btn-primary w-full" onClick={submitQuiz}>Enviar Respostas do Quiz</button>
                               </div>
                             ) : (
                               <div className="alert alert-warning">
@@ -1634,50 +1630,42 @@ NEWFILEENCODING:NONE
                         )}
                       </div>
                     ) : (
-                      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Esta aula não possui Quiz obrigatório.</p>
+                      <p className="course-card-description">Esta aula não possui Quiz obrigatório.</p>
                     )}
 
                   </div>
                 ) : (
-                  <div style={{ border: '2px dashed var(--color-border)', borderRadius: '12px', padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                  <div className="placeholder-box">
                     🌿 Selecione uma aula ao lado para assistir à gravação científica.
                   </div>
                 )}
 
                 {/* Mensagem personalizada ao finalizar todas as aulas do curso */}
                 {selectedCourse.modules.every(m => m.lessons.every(l => l.completed)) && (
-                  <div className="card alert-success" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '2rem', borderLeft: '8px solid var(--color-success)' }}>
-                    <h3 style={{ color: 'var(--color-success)', fontFamily: 'var(--font-serif)' }}>Curso Concluído!</h3>
-                    <p style={{ fontSize: '0.95rem' }}>"{selectedCourse.course.finishing_message}"</p>
+                  <div className="card alert-success course-conclusion-card">
+                    <h3 className="quiz-attempt-passed font-serif-title">Curso Concluído!</h3>
+                    <p className="fontSize-base">"{selectedCourse.course.finishing_message}"</p>
                   </div>
                 )}
 
               </div>
 
               {/* Lista de Módulos / Aulas Laterais */}
-              <div style={{ borderLeft: '1px solid var(--color-border)', paddingLeft: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Módulos do Curso</h3>
+              <div className="lms-sidebar">
+                <h3 className="sidebar-title">Módulos do Curso</h3>
                 
                 {selectedCourse.modules.map(mod => (
-                  <div key={mod.id} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>
+                  <div key={mod.id} className="modules-list-container">
+                    <div className="module-header-title">
                       {mod.title}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className="lessons-list-container">
                       {mod.lessons.map(lesson => (
                         <div
                           key={lesson.id}
                           onClick={() => selectLesson(lesson)}
-                          style={{
-                            padding: '0.6rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem',
-                            border: '1px solid',
-                            borderColor: selectedLesson && selectedLesson.id === lesson.id ? 'var(--color-primary)' : 'transparent',
-                            backgroundColor: selectedLesson && selectedLesson.id === lesson.id ? 'var(--color-primary-light)' : '#fff',
-                            color: selectedLesson && selectedLesson.id === lesson.id ? 'var(--color-primary)' : 'var(--color-text-main)',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                          }}
+                          className={`lesson-item-sidebar ${selectedLesson && selectedLesson.id === lesson.id ? 'active' : ''}`}
                         >
                           <span>{lesson.title}</span>
                           <span>{lesson.completed ? '✓' : ''}</span>
@@ -1695,61 +1683,57 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO PROFESSOR */}
         {currentPage === 'teacher-dash' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="teacher-dash-header">
               <div>
-                <h1 style={{ fontFamily: 'var(--font-serif)' }}>Portal do Professor</h1>
-                <p style={{ color: 'var(--color-text-muted)' }}>Gerencie o progresso e a presença dos seus alunos nas aulas gravadas.</p>
+                <h1 className="font-serif-title">Portal do Professor</h1>
+                <p className="text-muted">Gerencie o progresso e a presença dos seus alunos nas aulas gravadas.</p>
               </div>
               <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar Relatório</button>
             </div>
 
             <div className="card">
-              <h3 style={{ marginBottom: '1rem' }}>Relatório Consolidado de Alunos</h3>
+              <h3 className="mb-4">Relatório Consolidado de Alunos</h3>
               
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <div className="table-responsive">
+                <table className="lms-table">
                   <thead>
-                    <tr style={{ borderBottom: '2px solid var(--color-border)', color: 'var(--color-secondary)' }}>
-                      <th style={{ padding: '0.75rem' }}>Aluno</th>
-                      <th style={{ padding: '0.75rem' }}>Curso</th>
-                      <th style={{ padding: '0.75rem' }}>Data Matrícula</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'center' }}>Progresso Aulas</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'center' }}>Presenças</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'center' }}>Quizzes Feitos</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'center' }}>Status Acesso</th>
+                    <tr>
+                      <th>Aluno</th>
+                      <th>Curso</th>
+                      <th>Data Matrícula</th>
+                      <th className="text-center">Progresso Aulas</th>
+                      <th className="text-center">Presenças</th>
+                      <th className="text-center">Quizzes Feitos</th>
+                      <th className="text-center">Status Acesso</th>
                     </tr>
                   </thead>
                   <tbody>
                     {teacherReportData.length === 0 ? (
                       <tr>
-                        <td colSpan="7" style={{ padding: '2rem', textAlignment: 'center', color: 'var(--color-text-muted)' }}>
+                        <td colSpan="7" className="text-center text-muted" style={{ padding: '2rem' }}>
                           Nenhum aluno matriculado em seus cursos ainda.
                         </td>
                       </tr>
                     ) : (
                       teacherReportData.map((rep, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                          <td style={{ padding: '0.75rem' }}>
+                        <tr key={idx}>
+                          <td>
                             <strong>{rep.studentName}</strong>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{rep.studentEmail}</div>
+                            <div className="helper-text">{rep.studentEmail}</div>
                           </td>
-                          <td style={{ padding: '0.75rem' }}>{rep.courseTitle}</td>
-                          <td style={{ padding: '0.75rem' }}>{new Date(rep.enrolledAt).toLocaleDateString('pt-BR')}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                          <td>{rep.courseTitle}</td>
+                          <td>{new Date(rep.enrolledAt).toLocaleDateString('pt-BR')}</td>
+                          <td className="text-center">
                             {rep.completedLessons}/{rep.totalLessons} ({rep.progressPercent}%)
                           </td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                          <td className="text-center">
                             <span style={{ fontWeight: 'bold', color: rep.presenceCount > 0 ? 'var(--color-success)' : 'inherit' }}>
                               {rep.presenceCount}
                             </span>
                           </td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>{rep.quizzesPassed}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                            <span style={{
-                              padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold',
-                              backgroundColor: rep.enrollmentStatus === 'ACTIVE' ? '#dcfce7' : '#fee2e2',
-                              color: rep.enrollmentStatus === 'ACTIVE' ? '#166534' : '#991b1b'
-                            }}>
+                          <td className="text-center">{rep.quizzesPassed}</td>
+                          <td className="text-center">
+                            <span className={rep.enrollmentStatus === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
                               {rep.enrollmentStatus}
                             </span>
                           </td>
@@ -1766,101 +1750,96 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO ADMINISTRADOR */}
         {currentPage === 'admin-dash' && (
           <div>
-            <h1 style={{ fontFamily: 'var(--font-serif)', marginBottom: '1.5rem' }}>Painel Administrativo da Homeopatia EAD</h1>
+            <h1 className="font-serif-title mb-5">Painel Administrativo da Homeopatia EAD</h1>
 
             {/* Widgets Financeiros */}
             {adminReportData && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+              <div className="admin-stats-grid">
                 
-                <div className="card" style={{ borderLeft: '6px solid var(--color-primary)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Receita Total (Paga)</span>
-                  <h2 style={{ fontSize: '1.75rem', marginTop: '0.5rem' }}>R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
+                <div className="admin-stat-card primary">
+                  <span className="course-type-badge">Receita Total (Paga)</span>
+                  <h2 className="stat-value">R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
                 </div>
 
-                <div className="card" style={{ borderLeft: '6px solid var(--color-warning)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Receita em Aberto</span>
-                  <h2 style={{ fontSize: '1.75rem', marginTop: '0.5rem' }}>R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
+                <div className="admin-stat-card warning">
+                  <span className="course-type-badge">Receita em Aberto</span>
+                  <h2 className="stat-value">R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
                 </div>
 
-                <div className="card" style={{ borderLeft: '6px solid var(--color-error)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Valores Vencidos</span>
-                  <h2 style={{ fontSize: '1.75rem', marginTop: '0.5rem' }}>R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
+                <div className="admin-stat-card error">
+                  <span className="course-type-badge">Valores Vencidos</span>
+                  <h2 className="stat-value">R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
                 </div>
 
-                <div className="card" style={{ borderLeft: '6px solid var(--color-accent)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Recorrência Mensal (MRR)</span>
-                  <h2 style={{ fontSize: '1.75rem', marginTop: '0.5rem' }}>R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
+                <div className="admin-stat-card accent">
+                  <span className="course-type-badge">Recorrência Mensal (MRR)</span>
+                  <h2 className="stat-value">R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
                 </div>
 
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="admin-layout">
               
               {/* Conciliação OFX */}
               <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div className="quiz-header">
                   <h3>Conciliação Bancária (.OFX)</h3>
-                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={handleGenerateMockOfx}>
+                  <button className="btn btn-secondary btn-quick-login" onClick={handleGenerateMockOfx}>
                     Gerar OFX de Teste
                   </button>
                 </div>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                <p className="course-card-description mb-4">
                   Cole aqui o conteúdo textual do arquivo de extrato bancário (.OFX) para cruzar com as vendas no banco do LMS.
                 </p>
 
                 <form onSubmit={handleConciliation}>
                   <textarea
-                    className="form-input"
-                    style={{ minHeight: '180px', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '1rem' }}
+                    className="form-input ofx-textarea"
                     placeholder="Cole as tags XML do arquivo OFX ou use o botão 'Gerar OFX de Teste' acima..."
                     value={ofxInput}
                     onChange={(e) => setOfxInput(e.target.value)}
                     required
                   />
 
-                  <button className="btn btn-primary" style={{ width: '100%' }} type="submit">Processar Conciliação Financeira</button>
+                  <button className="btn btn-primary w-full" type="submit">Processar Conciliação Financeira</button>
                 </form>
 
                 {conciliationResults && (
-                  <div style={{ marginTop: '1.5rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
-                    <h4 style={{ marginBottom: '0.5rem' }}>Resultado do Processamento:</h4>
+                  <div className="conciliation-results">
+                    <h4 className="mb-2">Resultado do Processamento:</h4>
                     <div>Total de Lançamentos no Arquivo: <strong>{conciliationResults.processedCount}</strong></div>
                     <div style={{ color: 'var(--color-success)' }}>✓ Conciliados: <strong>{conciliationResults.reconciled.length}</strong></div>
                     <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes de valor: <strong>{conciliationResults.divergent.length}</strong></div>
-                    <div style={{ color: 'var(--color-text-muted)' }}>✗ Não localizados no LMS: <strong>{conciliationResults.unmatched.length}</strong></div>
+                    <div className="text-muted">✗ Não localizados no LMS: <strong>{conciliationResults.unmatched.length}</strong></div>
                   </div>
                 )}
               </div>
 
               {/* Logs de Acesso e Auditoria de Segurança */}
-              <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="card flex-col">
                 <h3>Registros de Acesso e Segurança</h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                <p className="course-card-description mb-4">
                   Auditoria em tempo real de IPs, agentes de usuário e travas de segurança acionadas.
                 </p>
 
-                <div style={{ flex: 1, maxHeight: '350px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: '8px', backgroundColor: '#f8fafc', padding: '0.5rem' }}>
+                <div className="logs-container">
                   {securityLogs.length === 0 ? (
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', padding: '1rem' }}>Nenhum log registrado.</p>
+                    <p className="course-card-description text-center mt-3">Nenhum log registrado.</p>
                   ) : (
                     securityLogs.map((log, idx) => (
-                      <div key={idx} style={{ borderBottom: '1px solid #e2e8f0', padding: '0.5rem 0', fontSize: '0.8rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                          <span style={{ fontWeight: 'bold' }}>{log.user_name || 'Sistema'}</span>
-                          <span style={{ color: 'var(--color-text-muted)' }}>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
+                      <div key={idx} className="log-item">
+                        <div className="invoice-footer mb-1">
+                          <span className="invoice-title mb-0">{log.user_name || 'Sistema'}</span>
+                          <span className="text-muted">{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{
-                            padding: '0.1rem 0.3rem', borderRadius: '3px', fontSize: '0.7rem', fontWeight: 'bold',
-                            backgroundColor: log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? '#fee2e2' : '#e2e8f0',
-                            color: log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? 'var(--color-error)' : '#475569'
-                          }}>
+                        <div className="invoice-footer">
+                          <span className={`badge-log-type ${log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? 'lockout' : ''}`}>
                             {log.content_accessed}
                           </span>
-                          <span style={{ color: '#475569' }}>IP: {log.ip_address}</span>
+                          <span className="helper-text">IP: {log.ip_address}</span>
                         </div>
-                        <small style={{ display: 'block', color: '#94a3b8', marginTop: '0.25rem' }}>{log.user_agent}</small>
+                        <small className="invoice-ref mt-1">{log.user_agent}</small>
                       </div>
                     ))
                   )}
@@ -1878,7 +1857,7 @@ NEWFILEENCODING:NONE
         <div className="footer-grid">
           <div className="footer-section">
             <h4>Sobre Nós</h4>
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>
+            <p className="footer-about-text">
               Plataforma autorizada The Other Song no Brasil. Compromisso científico no ensino acadêmico da Homeopatia e do Método Sensação.
             </p>
           </div>
@@ -1898,7 +1877,7 @@ NEWFILEENCODING:NONE
           </div>
           <div className="footer-section">
             <h4>Contato e Suporte</h4>
-            <p style={{ fontSize: '0.85rem' }}>
+            <p className="footer-contact-text">
               Curitiba - PR / Brasil<br />
               suporte@tosb.com.br<br />
               Atendimento exclusivo para profissionais de saúde.
