@@ -8,14 +8,72 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
 3. A prescrição de medicamentos homeopáticos e a aplicação clínica do Método Sensação são de inteira responsabilidade técnica do profissional matriculado.
 4. A plataforma proíbe o compartilhamento de senhas. A identificação de acessos simultâneos em localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.`;
 
+const BOOKS_DATA = [
+  { id: 'book-esquema', title: 'Esquema de Reinos e Subreinos 2.0', author: 'Dr. Rajan Sankaran', price: 220.00, desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.' },
+  { id: 'book-superclasses', title: 'Superclasses em Homeopatia', author: 'Dr. Rajan Sankaran', price: 180.00, desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.' },
+  { id: 'book-oito-caixas', title: 'O Método das Oito Caixas', author: 'Dr. Rajan Sankaran', price: 240.00, desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.' },
+  { id: 'book-followup', title: 'A Arte do Follow-up na Clínica', author: 'Dr. Gaurang Gaikwad', price: 190.00, desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.' }
+];
+
+const HOMEOPATHS_DATA = [
+  { name: 'Dr. Carlos Eduardo Leitão', reg: 'CRM-PR 12345', specialty: 'Método Sensação Vital', city: 'Curitiba - PR', phone: '(41) 3322-1100', email: 'carlos@tosb.com' },
+  { name: 'Dra. Ana Paula Santos', reg: 'CRM-SP 98765', specialty: 'Homeopatia Clássica e Infantil', city: 'São Paulo - SP', phone: '(11) 98888-7766', email: 'ana.paula@lms.com' },
+  { name: 'Dr. Roberto de Almeida', reg: 'CRM-RJ 44552', specialty: 'Homeopatia e Clínica Geral', city: 'Rio de Janeiro - RJ', phone: '(21) 2544-3322', email: 'roberto.almeida@gmail.com' },
+  { name: 'Dra. Teresa de Jesus', reg: 'CRO-PR 8877', specialty: 'Odontologia Homeopática', city: 'Curitiba - PR', phone: '(41) 99111-2233', email: 'teresa.dentista@hotmail.com' }
+];
+
+const GALLERY_DATA = [
+  { title: 'Turma de Especialização 2025', desc: 'Membros da Pós-Graduação reunidos em Curitiba.' },
+  { title: 'Seminário Internacional com Rajan Sankaran', desc: 'Evento científico transmitido ao vivo.' },
+  { title: 'Sede da The Other Song Brasil', desc: 'Espaço acadêmico e administrativo em Curitiba.' },
+  { title: 'Encontro Científico de Homeopatas', desc: 'Discussão de casos e evolução clínica.' }
+];
+
 export default function App() {
   // Controle de Estado Geral
-  const [currentPage, setCurrentPage] = useState('login'); // login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
+  const [currentPage, setCurrentPage] = useState('home'); // home, about, homeopaths, gallery, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  // Estados de Acessibilidade (público idoso)
+  const [fontMultiplier, setFontMultiplier] = useState(() => {
+    return parseFloat(localStorage.getItem('fontMultiplier')) || 1.0;
+  });
+  const [highContrast, setHighContrast] = useState(() => {
+    return localStorage.getItem('highContrast') === 'true';
+  });
+
+  // Estado do Carrinho de Compras
+  const [cartItems, setCartItems] = useState(() => {
+    const saved = localStorage.getItem('cart_items');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Estado da aba ativa no Dashboard do Aluno
+  const [studentActiveTab, setStudentActiveTab] = useState('panel'); // panel, courses, payments, downloads, addresses, account
+
+  // Sincronizar Acessibilidade com Documento e LocalStorage
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-multiplier', fontMultiplier);
+    localStorage.setItem('fontMultiplier', fontMultiplier);
+  }, [fontMultiplier]);
+
+  useEffect(() => {
+    if (highContrast) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+    localStorage.setItem('highContrast', highContrast);
+  }, [highContrast]);
+
+  // Sincronizar Carrinho
+  useEffect(() => {
+    localStorage.setItem('cart_items', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Estados de Negócio
   const [courses, setCourses] = useState([]);
@@ -162,6 +220,98 @@ export default function App() {
   const clearAlerts = () => {
     setError('');
     setSuccess('');
+  };
+
+  // MANIPULADORES DO CARRINHO DE COMPRAS
+  const addToCart = (product, type = 'book') => {
+    clearAlerts();
+    setCartItems(prev => {
+      const exists = prev.find(item => item.product.id === product.id);
+      if (exists) {
+        return prev.map(item =>
+          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { product, quantity: 1, type }];
+    });
+    setSuccess(`"${product.title}" adicionado ao carrinho!`);
+  };
+
+  const updateCartQty = (productId, delta) => {
+    setCartItems(prev => prev.map(item => {
+      if (item.product.id === productId) {
+        const newQty = item.quantity + delta;
+        return newQty > 0 ? { ...item, quantity: newQty } : item;
+      }
+      return item;
+    }).filter(item => item.quantity > 0));
+  };
+
+  const removeFromCart = (productId) => {
+    setCartItems(prev => prev.filter(item => item.product.id !== productId));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  // ATUALIZAÇÃO DO CADASTRO E PERFIL
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    clearAlerts();
+    
+    const formData = {
+      name: e.target.name.value,
+      email: e.target.email.value,
+      phone: e.target.phone.value,
+      cpf_cnpj: e.target.cpf_cnpj.value,
+      address_zip: e.target.address_zip.value,
+      address_street: e.target.address_street.value,
+      address_number: e.target.address_number.value,
+      address_complement: e.target.address_complement.value,
+      address_neighborhood: e.target.address_neighborhood.value,
+      address_city: e.target.address_city.value,
+      address_state: e.target.address_state.value,
+      professional_registration_type: e.target.professional_registration_type?.value || user.professional_registration_type || 'OUTROS',
+      professional_registration_number: e.target.professional_registration_number?.value || user.professional_registration_number || '',
+      crm: e.target.crm?.value || '',
+      rqe: e.target.rqe?.value || '',
+      bio: e.target.bio?.value || ''
+    };
+
+    if (isOfflineMode) {
+      setMockDb(prev => {
+        const updatedUsers = prev.users.map(u => {
+          if (u.id === user.id) {
+            return { ...u, ...formData };
+          }
+          return u;
+        });
+        return { ...prev, users: updatedUsers };
+      });
+      setUser(prev => ({ ...prev, ...formData }));
+      setSuccess('Cadastro atualizado com sucesso (Modo Simulação)!');
+    } else {
+      try {
+        const res = await fetch('/api/auth/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setUser(prev => ({ ...prev, ...formData }));
+          setSuccess(data.message);
+        } else {
+          setError(data.message);
+        }
+      } catch (err) {
+        setError('Erro ao salvar dados de cadastro.');
+      }
+    }
   };
 
   // LOGIN
@@ -717,22 +867,40 @@ export default function App() {
     e.preventDefault();
     clearAlerts();
 
-    if (isOfflineMode) {
-      const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-      const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
-      let price = checkoutCourse.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
+    const itemsToBuy = checkoutCourse ? [{ product: checkoutCourse, quantity: 1, type: 'course' }] : cartItems;
+    if (itemsToBuy.length === 0) {
+      setError('Seu carrinho está vazio.');
+      return;
+    }
 
+    const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
+    
+    // Calcular preço total
+    let totalAmt = 0;
+    itemsToBuy.forEach(item => {
+      if (item.type === 'course') {
+        totalAmt += item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
+      } else {
+        totalAmt += item.product.price * item.quantity;
+      }
+    });
+
+    if (isOfflineMode) {
       const newPayments = [];
-      if (paymentMethod === 'CARNE' && checkoutCourse.type === 'POSTGRAD') {
+      
+      // Se for boleto parcelado do curso pós-graduação
+      const hasPostgrad = itemsToBuy.some(item => item.type === 'course' && item.product.type === 'POSTGRAD');
+      if (paymentMethod === 'CARNE' && hasPostgrad) {
         const count = installments || 12;
-        const partAmt = (price / count).toFixed(2);
+        const partAmt = (totalAmt / count).toFixed(2);
         for (let i = 1; i <= count; i++) {
           const dueDate = new Date();
           dueDate.setMonth(dueDate.getMonth() + (i - 1));
           newPayments.push({
             id: `pay-${Date.now()}-${i}`,
             student_id: user.id,
-            course_id: checkoutCourse.id,
+            course_id: itemsToBuy.find(item => item.type === 'course').product.id,
             amount: parseFloat(partAmt),
             payment_method: 'CARNE',
             status: 'PENDING',
@@ -744,11 +912,14 @@ export default function App() {
       } else {
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 3);
+        const firstCourse = itemsToBuy.find(item => item.type === 'course');
+        const courseId = firstCourse ? firstCourse.product.id : null;
+
         newPayments.push({
           id: `pay-${Date.now()}`,
           student_id: user.id,
-          course_id: checkoutCourse.id,
-          amount: price,
+          course_id: courseId,
+          amount: totalAmt,
           payment_method: paymentMethod,
           status: 'PENDING',
           transaction_code: transactionCode,
@@ -762,25 +933,35 @@ export default function App() {
         payments: [...prev.payments, ...newPayments]
       }));
 
-      setSuccess('Faturas geradas em modo Sandbox do Asaas! Realize a simulação de pagamento na listagem financeira.');
+      setSuccess('Faturas geradas em modo Sandbox! Realize a simulação de pagamento na listagem financeira.');
+      clearCart();
+      setCheckoutCourse(null);
+      setStudentActiveTab('payments'); // Ir direto para financeiro
       setCurrentPage('student-dash');
     } else {
       try {
+        const firstCourse = itemsToBuy.find(item => item.type === 'course');
+        const body = {
+          courseId: firstCourse ? firstCourse.product.id : null,
+          paymentMethod,
+          installments: paymentMethod === 'CARNE' ? installments : 1,
+          amount: totalAmt
+        };
+
         const res = await fetch('/api/payments/checkout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            courseId: checkoutCourse.id,
-            paymentMethod,
-            installments: paymentMethod === 'CARNE' ? installments : 1
-          })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if (res.ok) {
           setSuccess(data.message);
+          clearCart();
+          setCheckoutCourse(null);
+          setStudentActiveTab('payments');
           setCurrentPage('student-dash');
         } else {
           setError(data.message);
@@ -1206,34 +1387,91 @@ NEWFILEENCODING:NONE
     <div className="app-container">
       {/* Cabeçalho */}
       <header className="tosb-header">
-        <a href="#home" className="logo-container" onClick={() => user ? redirectToDashboard(user.role) : setCurrentPage('login')}>
-          <span className="logo-symbol">🌿</span>
-          <div className="logo-text">
-            <span className="logo-title">The Other Song</span>
-            <span className="logo-subtitle">Brasil | EAD</span>
-          </div>
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <a href="#home" className="logo-container" onClick={() => { clearAlerts(); setCurrentPage('home'); }}>
+            <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
+            <div className="logo-text">
+              <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
+              <span className="logo-subtitle">Brasil | Homeopatia</span>
+            </div>
+          </a>
 
-        {isOfflineMode && (
-          <div className="offline-mode-badge">
-            🔌 Modo de Simulação
-          </div>
-        )}
-
-        <nav className="nav-links">
-          {user ? (
-            <>
-              <span className="user-greeting">Olá, <strong>{user.name}</strong> ({user.role})</span>
-              <button className="btn btn-secondary" onClick={handleLogout}>Sair</button>
-            </>
-          ) : (
-            <>
-              <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
-              <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
-              <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('unlock'); }}>Portal de Segurança</button>
-            </>
+          {isOfflineMode && (
+            <div className="offline-mode-badge" style={{ fontSize: '0.75rem' }}>
+              🔌 Simulação
+            </div>
           )}
+        </div>
+
+        {/* Menu Principal */}
+        <nav className="nav-links" style={{ gap: '0.75rem' }}>
+          <button className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('home'); }}>Início</button>
+          
+          <div className="nav-dropdown">
+            <button className={`nav-link ${['about', 'homeopaths', 'gallery'].includes(currentPage) ? 'active' : ''}`}>
+              Quem Somos ▾
+            </button>
+            <div className="nav-dropdown-content">
+              <a href="#about" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('about'); }}>Sobre Nós</a>
+              <a href="#homeopaths" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('homeopaths'); }}>Lista de Homeopatas</a>
+              <a href="#gallery" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('gallery'); }}>Galeria</a>
+            </div>
+          </div>
+
+          <div className="nav-dropdown">
+            <button className="nav-link">Cursos ▾</button>
+            <div className="nav-dropdown-content">
+              <a href="#online-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
+              <a href="#inperson-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
+            </div>
+          </div>
+
+          <button className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Livros</button>
+          <button className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Synergy Software</button>
+          <button className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Contato</button>
         </nav>
+
+        {/* Painel do Usuário, Carrinho e Acessibilidade */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          
+          {/* Controles de Acessibilidade */}
+          <div className="accessibility-bar">
+            <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.max(0.8, prev - 0.1))} title="Diminuir Fonte (A-)" aria-label="Diminuir Fonte">A-</button>
+            <button className="btn-acc" onClick={() => setFontMultiplier(1.0)} title="Tamanho Padrão (A)" aria-label="Restaurar Fonte">A</button>
+            <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.min(1.6, prev + 0.1))} title="Aumentar Fonte (A+)" aria-label="Aumentar Fonte">A+</button>
+            <button className="btn-acc btn-contrast" onClick={() => setHighContrast(prev => !prev)} title="Alternar Contraste" aria-label="Alternar Contraste">◐ Contraste</button>
+          </div>
+
+          {/* Carrinho de Compras */}
+          <button className="btn btn-secondary cart-badge-nav" onClick={() => { clearAlerts(); setCurrentPage('cart'); }} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>🛒</span>
+            {cartItems.length > 0 && (
+              <span className="cart-count">
+                {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+              </span>
+            )}
+          </button>
+
+          {/* Ações do Usuário */}
+          <div className="nav-links" style={{ gap: '0.5rem' }}>
+            {user ? (
+              <div className="nav-dropdown">
+                <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}>
+                  👤 Painel ▾
+                </button>
+                <div className="nav-dropdown-content" style={{ right: 0, left: 'auto' }}>
+                  <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                  <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
+                </div>
+              </div>
+            ) : (
+              <>
+                <button className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
+                <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+              </>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Alertas */}
@@ -1374,103 +1612,771 @@ NEWFILEENCODING:NONE
           </div>
         )}
 
+        {/* PÁGINA: HOME (PUBLIC LANDING PAGE) */}
+        {currentPage === 'home' && (
+          <div>
+            {/* Hero Section */}
+            <section className="hero-section">
+              <h1>Conheça nossos cursos online</h1>
+              <p className="hero-subtitle">🌿 A escola oficial do Método Sensação da The Other Song no Brasil. Ensino homeopático de elevado rigor científico e clínico.</p>
+              <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('register'); }} style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
+            </section>
+
+            {/* Cursos Online Catalog */}
+            <section id="online-courses" className="mb-7">
+              <h2 className="home-section-title">Cursos de Homeopatia Online</h2>
+              <div className="premium-card-grid">
+                
+                {/* Curso Livre */}
+                <div className="premium-card">
+                  <div className="premium-card-img-placeholder">🌿</div>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag">Gratuito</span>
+                    <h3 className="premium-card-title">Introdução à Homeopatia e Sensação Vital</h3>
+                    <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
+                    <div className="premium-card-footer">
+                      <span className="premium-card-price">Grátis</span>
+                      {user ? (
+                        <button className="btn btn-primary" onClick={() => enrollFreeCourse('course-free')}>Matricular-se</button>
+                      ) : (
+                        <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar para Matricular</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assinatura Clube */}
+                <div className="premium-card">
+                  <div className="premium-card-img-placeholder">📖</div>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag">Assinatura</span>
+                    <h3 className="premium-card-title">Clube TOSB: Estudos de Matéria Médica</h3>
+                    <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
+                    <div className="premium-card-footer">
+                      <span className="premium-card-price">R$ 99,00 / mês</span>
+                      <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Adicionar ao Carrinho</button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pós-Graduação */}
+                <div className="premium-card">
+                  <div className="premium-card-img-placeholder">🎓</div>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag">Especialização</span>
+                    <h3 className="premium-card-title">Pós-Graduação em Homeopatia Avançada</h3>
+                    <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
+                    <div className="premium-card-footer">
+                      <span className="premium-card-price">R$ 3.600,00</span>
+                      <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Adicionar ao Carrinho</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* Vídeo Institucional */}
+            <section className="video-section-home">
+              <div className="video-section-grid">
+                <div className="video-section-content">
+                  <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>Apresentação</span>
+                  <h3 className="font-serif-title mt-2">O Método de Sankaran e Níveis de Experiência</h3>
+                  <p>Assista a esta aula explicativa do Dr. Carlos Eduardo Leitão sobre como funciona o Método Sensação, aprofundando o diagnóstico homeopático além da abordagem convencional.</p>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('about'); }}>Ver Sobre Nós</button>
+                  </div>
+                </div>
+                <div>
+                  <div className="video-wrapper-embed">
+                    <iframe 
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                      title="Introdução ao Método de Sankaran"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Cursos Presenciais */}
+            <section id="inperson-courses" className="mb-7">
+              <h2 className="home-section-title">Seminários e Cursos Presenciais</h2>
+              <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+                
+                <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
+                    <h3 className="premium-card-title mt-2">Seminário Avançado de Homeopatia 2026</h3>
+                    <p className="premium-card-text">Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
+                    <div className="premium-card-footer">
+                      <div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
+                      </div>
+                      <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Mais Detalhes</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Encontro Prático</span>
+                    <h3 className="premium-card-title mt-2">Encontro de Matéria Médica Prática</h3>
+                    <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.</p>
+                    <div className="premium-card-footer">
+                      <div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
+                      </div>
+                      <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Mais Detalhes</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* Livros em Destaque */}
+            <section className="mb-7">
+              <h2 className="home-section-title">Livros Científicos Recomendados</h2>
+              <div className="premium-card-grid">
+                {BOOKS_DATA.slice(0, 3).map(book => (
+                  <div key={book.id} className="premium-card">
+                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '140px' }}>📚</div>
+                    <div className="premium-card-content">
+                      <span className="premium-card-tag">{book.author}</span>
+                      <h3 className="premium-card-title">{book.title}</h3>
+                      <p className="premium-card-text">{book.desc}</p>
+                      <div className="premium-card-footer">
+                        <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                        <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center">
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Ver Todos os Livros</button>
+              </div>
+            </section>
+
+            {/* Synergy Software Section */}
+            <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-primary-light)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
+              <span className="premium-card-tag" style={{ margin: '0 auto' }}>Parceria Tecnológica</span>
+              <h3 className="font-serif-title" style={{ fontSize: '1.75rem', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS)</h3>
+              <p className="text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                O software definitivo para repertorização de medicamentos homeopáticos e busca rápida do Método Sensação. Aprenda a usar através de nossos tutoriais exclusivos e facilite sua prática de consultório.
+              </p>
+              <div style={{ marginTop: '1rem' }}>
+                <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Conhecer Software e Tutoriais</button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* PÁGINA: SOBRE NÓS */}
+        {currentPage === 'about' && (
+          <div className="card">
+            <h2 className="mb-4 font-serif-title text-center" style={{ fontSize: '2rem' }}>Sobre a The Other Song Brasil</h2>
+            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8' }}>
+              <p className="mb-4">
+                A <strong>The Other Song Brasil (TOSB)</strong> é a filial brasileira autorizada da prestigiosa academia internacional *The Other Song - International Academy of Advanced Homeopathy*, sediada em Mumbai, Índia.
+              </p>
+              <p className="mb-4">
+                Nossa filial, sediada em <strong>Curitiba - PR</strong>, é liderada pelo renomado médico homeopata <strong>Dr. Carlos Eduardo Leitão</strong>. Temos como missão central difundir o **Método Sensação Vital**, desenvolvido pelo pioneiro **Dr. Rajan Sankaran**, e capacitar profissionais da saúde no Brasil para aplicarem essa metodologia clínica avançada.
+              </p>
+              <blockquote style={{ borderLeft: '4px solid var(--color-accent)', paddingLeft: '1.25rem', color: 'var(--color-primary)', fontStyle: 'italic', margin: '2rem 0', fontWeight: '600' }}>
+                "O Método Sensação nos permite ir além do diagnóstico físico e mental superficial, mergulhando no reino da natureza que expressa o desequilíbrio dinâmico mais profundo de cada indivíduo."
+              </blockquote>
+              <h3 className="font-serif-title mb-3 mt-5">Pilares Científicos da TOSB:</h3>
+              <ul style={{ paddingLeft: '1.5rem', marginBottom: '2rem' }}>
+                <li className="mb-2"><strong>Qualidade Acadêmica:</strong> Corpo docente credenciado internacionalmente e discussões científicas contínuas.</li>
+                <li className="mb-2"><strong>Casos Clínicos Reais:</strong> Ensino baseado em gravações reais de consultas, respeitando o sigilo de dados.</li>
+                <li className="mb-2"><strong>Integração de Tecnologias:</strong> Uso do Synergy Software como base para repertorização rápida.</li>
+              </ul>
+              <div className="text-center mt-6">
+                <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Voltar para Cursos</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: LISTA DE HOMEOPATAS */}
+        {currentPage === 'homeopaths' && (
+          <div className="card">
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Diretório de Profissionais Homeopatas</h2>
+            <p className="text-muted text-center mb-5">Encontre profissionais qualificados e credenciados no Método Sensação.</p>
+
+            <div className="directory-search-box">
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="Buscar homeopata por nome, CRM, conselho ou cidade..." 
+                value={homeopathsSearch} 
+                onChange={(e) => setHomeopathsSearch(e.target.value)} 
+              />
+              {homeopathsSearch && (
+                <button className="btn btn-secondary" onClick={() => setHomeopathsSearch('')}>Limpar</button>
+              )}
+            </div>
+
+            <div className="directory-grid">
+              {HOMEOPATHS_DATA.filter(h => {
+                const searchLower = homeopathsSearch.toLowerCase();
+                return h.name.toLowerCase().includes(searchLower) ||
+                       h.reg.toLowerCase().includes(searchLower) ||
+                       h.specialty.toLowerCase().includes(searchLower) ||
+                       h.city.toLowerCase().includes(searchLower);
+              }).map((h, idx) => (
+                <div key={idx} className="homeopath-card">
+                  <div className="homeopath-avatar">
+                    {h.name.split(' ').slice(1).map(n => n[0]).join('').substring(0,2).toUpperCase()}
+                  </div>
+                  <div className="homeopath-info">
+                    <h4>{h.name}</h4>
+                    <span className="homeopath-reg">{h.reg}</span>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>{h.specialty}</div>
+                    <div className="homeopath-contact-item">📍 {h.city}</div>
+                    <div className="homeopath-contact-item">📞 {h.phone}</div>
+                    <div className="homeopath-contact-item">✉️ {h.email}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: GALERIA DE FOTOS */}
+        {currentPage === 'gallery' && (
+          <div className="card">
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Galeria de Fotos Institucional</h2>
+            <p className="text-muted text-center mb-5">Veja registros de nossos seminários científicos, encontros de alunos e nossa sede em Curitiba.</p>
+
+            <div className="gallery-grid-photos">
+              {GALLERY_DATA.map((item, idx) => (
+                <div key={idx} className="gallery-item">
+                  <div className="gallery-placeholder-img">
+                    🌿
+                  </div>
+                  <div className="gallery-caption">
+                    <div style={{ fontWeight: 'bold' }}>{item.title}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: LOJA DE LIVROS */}
+        {currentPage === 'books' && (
+          <div className="card">
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
+            <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
+
+            <div className="premium-card-grid">
+              {BOOKS_DATA.map(book => (
+                <div key={book.id} className="premium-card">
+                  <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag">{book.author}</span>
+                    <h3 className="premium-card-title">{book.title}</h3>
+                    <p className="premium-card-text">{book.desc}</p>
+                    <div className="premium-card-footer">
+                      <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                      <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: SYNERGY SOFTWARE */}
+        {currentPage === 'synergy' && (
+          <div className="card">
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Synergy Homeopathic Software (SHS)</h2>
+            <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
+
+            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              <p className="mb-4">
+                O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
+              </p>
+              
+              <h3 className="font-serif-title mb-3 mt-5">Tutoriais Exclusivos da Filial Brasil:</h3>
+              <div className="invoices-list" style={{ gap: '1rem' }}>
+                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong>Tutorial 1: Como realizar a busca rápida de famílias botânicas</strong>
+                    <div className="helper-text">Assista ao vídeo explicativo passo-a-passo no SHS (15 min)</div>
+                  </div>
+                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                </div>
+
+                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong>Tutorial 2: Repertorização combinada com níveis de experiência</strong>
+                    <div className="helper-text">Estratégia para cruzar sintomas locais com o reino do paciente (22 min)</div>
+                  </div>
+                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                </div>
+
+                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong>Tutorial 3: Cadastrar e importar novos dados de matéria médica</strong>
+                    <div className="helper-text">Saiba como customizar suas anotações no SHS (10 min)</div>
+                  </div>
+                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: CONTATO */}
+        {currentPage === 'contact' && (
+          <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Contato e Suporte Acadêmico</h2>
+            <p className="text-muted text-center mb-5">Tem dúvidas sobre matrículas, certificados ou sobre o Synergy Software? Entre em contato.</p>
+
+            <div className="grid-2col-wide">
+              <div>
+                <h4 className="section-title-underlined-thin mb-3">Informações de Contato</h4>
+                <p className="mb-4" style={{ fontSize: '1.05rem' }}>
+                  <strong>The Other Song Brasil</strong><br />
+                  📍 Rua Brigadeiro Franco, 1234 - Batel<br />
+                  Curitiba - PR / CEP: 80420-000
+                </p>
+                <p className="mb-4">
+                  📞 Telefone: <strong>(41) 3322-1100</strong><br />
+                  🟢 WhatsApp: <strong>(41) 99111-2233</strong>
+                </p>
+                <p className="mb-4">
+                  ✉️ E-mail de Suporte:<br />
+                  <strong>suporte@tosb.com.br</strong>
+                </p>
+                <div className="alert alert-warning" style={{ margin: '0' }}>
+                  <strong>Atenção:</strong> Nosso atendimento é exclusivo para profissionais da saúde e estudantes da plataforma.
+                </div>
+              </div>
+
+              <div>
+                <h4 className="section-title-underlined-thin mb-3">Envie uma Mensagem</h4>
+                <form onSubmit={(e) => { e.preventDefault(); alert('Mensagem enviada com sucesso! Em breve retornaremos o contato.'); e.target.reset(); }}>
+                  <div className="form-group">
+                    <label className="form-label">Seu Nome</label>
+                    <input className="form-input" type="text" required placeholder="Dra. Roberta Silva" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Seu E-mail</label>
+                    <input className="form-input" type="email" required placeholder="exemplo@gmail.com" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Mensagem / Dúvida</label>
+                    <textarea className="form-input" required rows="4" placeholder="Descreva sua dúvida sobre nossos cursos..." style={{ minHeight: '120px' }}></textarea>
+                  </div>
+                  <button className="btn btn-primary w-full mt-2" type="submit">Enviar Mensagem</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: CARRINHO DE COMPRAS */}
+        {currentPage === 'cart' && (
+          <div>
+            <h2 className="mb-5 font-serif-title">Seu Carrinho de Compras</h2>
+            
+            {cartItems.length === 0 ? (
+              <div className="placeholder-box text-center">
+                <span style={{ fontSize: '3rem' }}>🛒</span>
+                <h3 className="mt-3 mb-3">Seu carrinho está vazio!</h3>
+                <p className="text-muted mb-4">Adicione livros de matéria médica ou cursos acadêmicos à sua sacola para prosseguir.</p>
+                <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Ver Cursos e Livros</button>
+              </div>
+            ) : (
+              <div className="cart-layout">
+                {/* Lista de Itens */}
+                <div className="cart-items-list">
+                  {cartItems.map((item, idx) => (
+                    <div key={idx} className="cart-item-row">
+                      <div className="cart-item-title-section">
+                        <span className="course-type-badge">{item.type === 'course' ? 'Curso / Assinatura' : 'Livro impresso'}</span>
+                        <h4 className="mt-1">{item.product.title}</h4>
+                        <span className="helper-text">{item.type === 'course' ? '' : `Autor: ${item.product.author}`}</span>
+                      </div>
+                      
+                      <div className="cart-item-actions">
+                        <span style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
+                          R$ {(item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00) : item.product.price * item.quantity).toFixed(2)}
+                        </span>
+                        
+                        {item.type === 'book' && (
+                          <div className="cart-quantity-selector">
+                            <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
+                            <span className="cart-qty-value">{item.quantity}</span>
+                            <button className="btn-qty" onClick={() => updateCartQty(item.product.id, 1)}>+</button>
+                          </div>
+                        )}
+
+                        <button className="btn-remove-cart" onClick={() => removeFromCart(item.product.id)}>Remover</button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+                    <button className="btn btn-secondary btn-quick-login" onClick={clearCart}>Esvaziar Carrinho</button>
+                  </div>
+                </div>
+
+                {/* Resumo da Compra */}
+                <div className="cart-summary-box">
+                  <h3 className="section-title-underlined-thin mb-4">Resumo do Pedido</h3>
+                  <div className="summary-row">
+                    <span>Itens ({cartItems.reduce((acc, item) => acc + item.quantity, 0)}):</span>
+                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Envio / Entrega:</span>
+                    <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>Grátis</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Descontos:</span>
+                    <span>R$ 0.00</span>
+                  </div>
+                  
+                  <div className="summary-total">
+                    <span>Total Geral:</span>
+                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                  </div>
+
+                  <button 
+                    className="btn btn-primary w-full mt-5" 
+                    onClick={() => {
+                      if (!user) {
+                        setError('Por favor, faça login ou crie uma conta para poder finalizar a compra do seu carrinho.');
+                        setCurrentPage('login');
+                      } else {
+                        setCheckoutCourse(null);
+                        setCurrentPage('checkout');
+                      }
+                    }}
+                  >
+                    Prosseguir para o Checkout
+                  </button>
+                  <button className="btn btn-secondary w-full mt-2" onClick={() => setCurrentPage('home')}>Continuar Comprando</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* PÁGINA: DASHBOARD DO ALUNO */}
         {currentPage === 'student-dash' && (
           <div>
             <div className="dashboard-header">
               <div>
-                <h1 className="font-serif-title">Meus Estudos Homeopáticos</h1>
-                <p className="text-muted">Gerencie suas disciplinas, progresso acadêmico e financeiro.</p>
+                <h1 className="font-serif-title">Painel de Estudos Homeopáticos</h1>
+                <p className="text-muted">Olá, <strong>{user?.name}</strong>! Gerencie seu aprendizado, dados cadastrais e financeiro.</p>
               </div>
-
-              {isOfflineMode && (
-                <button className="btn btn-danger" onClick={handleSimulateDelinquency}>
-                  Simular Inadimplência (Boleto Vencido)
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                {isOfflineMode && (
+                  <button className="btn btn-danger btn-quick-login" onClick={handleSimulateDelinquency}>
+                    Simular Inadimplência
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); handleLogout(); }}>Sair da Conta</button>
+              </div>
             </div>
 
-            <div className="dashboard-layout">
-              
-              {/* Lista de Cursos */}
-              <div>
-                <h3 className="section-title-underlined">Grade de Cursos</h3>
-                
-                <div className="courses-list">
-                  {courses.map(course => (
-                    <div key={course.id} className="card course-card-grid">
-                      <div>
-                        <span className="course-type-badge">
-                          {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
-                        </span>
-                        <h3 className="course-card-title">{course.title}</h3>
-                        <p className="course-card-description">{course.description}</p>
-                        
-                        {course.enrollment.enrolled && (
-                          <div className="course-card-expires">
-                            Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
+            <div className="student-panel-container">
+              {/* Menu Lateral de Abas */}
+              <aside className="student-sidebar">
+                <ul className="student-sidebar-menu">
+                  <li className={`student-sidebar-item ${studentActiveTab === 'panel' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('panel')}>📊 Painel Geral</button>
+                  </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('courses')}>🌿 Meus Cursos</button>
+                  </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('payments')}>💳 Pedidos / Financeiro</button>
+                  </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'downloads' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('downloads')}>📥 Downloads</button>
+                  </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'addresses' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('addresses')}>📍 Endereços</button>
+                  </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('account')}>⚙️ Detalhes da Conta</button>
+                  </li>
+                </ul>
+              </aside>
+
+              {/* Conteúdo da Aba Ativa */}
+              <div className="student-panel-content">
+                {studentActiveTab === 'panel' && (
+                  <div className="card">
+                    <h3 className="mb-4">Painel Geral</h3>
+                    <p style={{ marginBottom: '1.5rem' }}>
+                      A partir do seu painel de controle, você pode visualizar suas faturas pendentes, gerenciar seus endereços de entrega e faturamento, e editar sua senha e detalhes da conta.
+                    </p>
+                    <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+                      <div className="card" style={{ borderLeft: '4px solid var(--color-primary)', padding: '1.25rem' }}>
+                        <span className="course-type-badge">Acesso Acadêmico</span>
+                        <h4 className="mt-1">Cursos Ativos</h4>
+                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('courses')}>Acessar Aulas</button>
+                      </div>
+                      <div className="card" style={{ borderLeft: '4px solid var(--color-accent)', padding: '1.25rem' }}>
+                        <span className="course-type-badge">Financeiro</span>
+                        <h4 className="mt-1">Faturas & Cobranças</h4>
+                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('payments')}>Ver Cobranças</button>
+                      </div>
+                      <div className="card" style={{ borderLeft: '4px solid var(--color-success)', padding: '1.25rem' }}>
+                        <span className="course-type-badge">Dados Cadastrais</span>
+                        <h4 className="mt-1">Editar Perfil</h4>
+                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('account')}>Editar Cadastro</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {studentActiveTab === 'courses' && (
+                  <div className="card">
+                    <h3 className="mb-4">Meus Cursos e Disciplinas</h3>
+                    <div className="courses-list">
+                      {courses.map(course => (
+                        <div key={course.id} className="card course-card-grid">
+                          <div>
+                            <span className="course-type-badge">
+                              {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
+                            </span>
+                            <h3 className="course-card-title">{course.title}</h3>
+                            <p className="course-card-description">{course.description}</p>
+                            {course.enrollment.enrolled && (
+                              <div className="course-card-expires">
+                                Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
+                              </div>
+                            )}
                           </div>
+                          <div className="course-card-actions">
+                            {course.enrollment.enrolled ? (
+                              course.enrollment.status === 'ACTIVE' ? (
+                                <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
+                              ) : course.enrollment.status === 'SUSPENDED' ? (
+                                <div className="error-text-bold">
+                                  ⚠️ Acesso Bloqueado por Inadimplência
+                                </div>
+                              ) : (
+                                <div className="muted-text-bold">
+                                  ❌ Acesso Expirado (6 Meses)
+                                </div>
+                              )
+                            ) : (
+                              course.type === 'FREE' ? (
+                                <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
+                              ) : (
+                                <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar / Assinar</button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {studentActiveTab === 'payments' && (
+                  <div className="card">
+                    <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
+                    <div className="invoices-list">
+                      {myInvoices.length === 0 ? (
+                        <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
+                      ) : (
+                        myInvoices.map(inv => (
+                          <div key={inv.id} className="invoice-card">
+                            <div className="invoice-title">{inv.course_title}</div>
+                            <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
+                            <div className="invoice-footer">
+                              <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
+                                {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
+                              </span>
+                              {inv.status === 'PENDING' && (
+                                <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
+                                  Simular Webhook Asaas (Pago)
+                                </button>
+                              )}
+                            </div>
+                            <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
+                            <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {studentActiveTab === 'downloads' && (
+                  <div className="card">
+                    <h3 className="mb-4">Materiais para Download</h3>
+                    <p className="text-muted mb-4">Arquivos científicos e guias acadêmicos de suporte às aulas:</p>
+                    <ul className="invoices-list" style={{ gap: '0.75rem' }}>
+                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <strong>Esquema de Reinos e Subreinos PDF</strong>
+                          <div className="helper-text">Material oficial do Método Sensação Vital (1.2 MB)</div>
+                        </div>
+                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
+                      </li>
+                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <strong>Formulário de Anamnese Método Sensação</strong>
+                          <div className="helper-text">Roteiro prático para tomada de caso clínico (450 KB)</div>
+                        </div>
+                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
+                      </li>
+                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <strong>Tabela de Potências e Frequência</strong>
+                          <div className="helper-text">Guia rápido de escala LM e Cinquentamilesimal (600 KB)</div>
+                        </div>
+                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {studentActiveTab === 'addresses' && (
+                  <div className="card">
+                    <h3 className="mb-4">Endereços de Cadastro</h3>
+                    <p className="text-muted mb-4">Os seguintes endereços serão utilizados na finalização de compras e envio de materiais didáticos impressos/livros.</p>
+                    <div className="addresses-grid">
+                      <div className="card">
+                        <h4 style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>Endereço de Faturamento</h4>
+                        {user?.address_street ? (
+                          <div style={{ fontSize: '0.95rem' }}>
+                            <p>{user.name}</p>
+                            <p>{user.address_street}, {user.address_number} {user.address_complement ? ` - ${user.address_complement}` : ''}</p>
+                            <p>{user.address_neighborhood}</p>
+                            <p>{user.address_zip}</p>
+                            <p>{user.address_city} - {user.address_state}</p>
+                          </div>
+                        ) : (
+                          <p className="helper-text">Nenhum endereço cadastrado ainda. Vá na aba "Detalhes da Conta" para atualizar.</p>
                         )}
                       </div>
 
-                      <div className="course-card-actions">
-                        {course.enrollment.enrolled ? (
-                          course.enrollment.status === 'ACTIVE' ? (
-                            <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
-                          ) : course.enrollment.status === 'SUSPENDED' ? (
-                            <div className="error-text-bold">
-                              ⚠️ Acesso Bloqueado por Inadimplência
-                            </div>
-                          ) : (
-                            <div className="muted-text-bold">
-                              ❌ Acesso Expirado (6 Meses)
-                            </div>
-                          )
+                      <div className="card">
+                        <h4 style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>Endereço de Entrega</h4>
+                        {user?.address_street ? (
+                          <div style={{ fontSize: '0.95rem' }}>
+                            <p>{user.name}</p>
+                            <p>{user.address_street}, {user.address_number} {user.address_complement ? ` - ${user.address_complement}` : ''}</p>
+                            <p>{user.address_neighborhood}</p>
+                            <p>{user.address_zip}</p>
+                            <p>{user.address_city} - {user.address_state}</p>
+                          </div>
                         ) : (
-                          course.type === 'FREE' ? (
-                            <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
-                          ) : (
-                            <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar / Assinar</button>
-                          )
+                          <p className="helper-text">Nenhum endereço cadastrado ainda. Vá na aba "Detalhes da Conta" para atualizar.</p>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
 
-              {/* Faturamento / Financeiro do Aluno */}
-              <div>
-                <h3 className="section-title-underlined">Financeiro</h3>
-                
-                <div className="invoices-list">
-                  {myInvoices.length === 0 ? (
-                    <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
-                  ) : (
-                    myInvoices.map(inv => (
-                      <div key={inv.id} className="invoice-card">
-                        <div className="invoice-title">{inv.course_title}</div>
-                        <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
-                        
-                        <div className="invoice-footer">
-                          <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
-                            {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
-                          </span>
-
-                          {inv.status === 'PENDING' && (
-                            <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
-                              Simular Pago
-                            </button>
-                          )}
+                {studentActiveTab === 'account' && (
+                  <div className="card">
+                    <h3 className="mb-4">Detalhes da Conta e Informações de Entrega</h3>
+                    <form onSubmit={handleUpdateProfile}>
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Nome Completo</label>
+                          <input className="form-input" type="text" name="name" defaultValue={user?.name || ''} required />
                         </div>
-                        <small className="invoice-ref">Ref: {inv.transaction_code}</small>
-                        <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
+                        <div className="form-group">
+                          <label className="form-label">E-mail</label>
+                          <input className="form-input" type="email" name="email" defaultValue={user?.email || ''} required />
+                        </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
 
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Telefone de Contato</label>
+                          <input className="form-input" type="text" name="phone" placeholder="ex: (41) 99999-9999" defaultValue={user?.phone || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">CPF ou CNPJ</label>
+                          <input className="form-input" type="text" name="cpf_cnpj" placeholder="ex: 000.000.000-00" defaultValue={user?.cpf_cnpj || ''} />
+                        </div>
+                      </div>
+
+                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Correspondência</h4>
+                      
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">CEP</label>
+                          <input className="form-input" type="text" name="address_zip" placeholder="00000-000" defaultValue={user?.address_zip || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Logradouro / Rua</label>
+                          <input className="form-input" type="text" name="address_street" placeholder="Rua, Avenida, etc." defaultValue={user?.address_street || ''} />
+                        </div>
+                      </div>
+
+                      <div className="grid-container" style={{ gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem' }}>
+                        <div className="form-group">
+                          <label className="form-label">Número</label>
+                          <input className="form-input" type="text" name="address_number" defaultValue={user?.address_number || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Complemento</label>
+                          <input className="form-input" type="text" name="address_complement" placeholder="Apto, Bloco, etc." defaultValue={user?.address_complement || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Bairro</label>
+                          <input className="form-input" type="text" name="address_neighborhood" defaultValue={user?.address_neighborhood || ''} />
+                        </div>
+                      </div>
+
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Cidade</label>
+                          <input className="form-input" type="text" name="address_city" defaultValue={user?.address_city || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Estado</label>
+                          <input className="form-input" type="text" name="address_state" placeholder="ex: PR" defaultValue={user?.address_state || ''} />
+                        </div>
+                      </div>
+
+                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Identificação de Saúde</h4>
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Conselho</label>
+                          <select className="form-input" name="professional_registration_type" defaultValue={user?.professional_registration_type || 'OUTROS'}>
+                            <option value="CRM">CRM (Medicina)</option>
+                            <option value="CRO">CRO (Odontologia)</option>
+                            <option value="CRF">CRF (Farmácia)</option>
+                            <option value="CRV">CRV (Veterinária)</option>
+                            <option value="OUTROS">Outros Conselhos Integrados</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Registro Profissional</label>
+                          <input className="form-input" type="text" name="professional_registration_number" defaultValue={user?.professional_registration_number || ''} />
+                        </div>
+                      </div>
+
+                      <button className="btn btn-primary w-full mt-4" type="submit">Salvar Alterações de Cadastro</button>
+                    </form>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

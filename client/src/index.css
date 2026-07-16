@@ -1,17 +1,20 @@
 :root {
-  /* Cores principais - Paleta premium inspirada em Saúde e na TOSB */
-  --color-primary: #064e3b;       /* Verde Floresta TOSB */
-  --color-primary-light: #e6f0eb; /* Verde muito claro para fundos e realces */
-  --color-secondary: #0f172a;     /* Slate escuro para textos e cabeçalhos sérios */
-  --color-accent: #0d9488;        /* Azul-Verde/Teal para destaque secundário */
-  --color-bg-base: #fbfaf7;       /* Off-white quente e confortável para leitura */
-  --color-bg-card: #ffffff;       /* Branco para cartões e áreas internas */
-  --color-text-main: #334155;     /* Slate médio para texto corrido */
-  --color-text-muted: #64748b;    /* Cinza/Slate suave para metadados */
-  --color-border: #e2e8f0;        /* Borda sutil */
-  --color-success: #15803d;       /* Verde sucesso */
-  --color-error: #be123c;         /* Vermelho elegante para erros/bloqueios */
-  --color-warning: #b45309;       /* Laranja quente */
+  /* Cores principais - Paleta premium refinada e moderna (TOSB) */
+  --color-primary: #0b3c2e;       /* Verde Floresta Escuro */
+  --color-primary-light: #eef5f2; /* Verde suave muito claro */
+  --color-secondary: #0f172a;     /* Slate escuro para alta legibilidade */
+  --color-accent: #c5a880;        /* Ouro fosco/champagne premium */
+  --color-bg-base: #faf9f6;       /* Creme/Off-white quente e confortável */
+  --color-bg-card: #ffffff;       /* Branco para cartões */
+  --color-text-main: #1e293b;     /* Slate escuro para excelente legibilidade (idosos) */
+  --color-text-muted: #475569;    /* Cinza escuro legível para metadados */
+  --color-border: #cbd5e1;        /* Borda com contraste adequado */
+  --color-success: #166534;       /* Verde sucesso */
+  --color-error: #9f1239;         /* Vermelho elegante para erros/bloqueios */
+  --color-warning: #9a3412;       /* Laranja escuro quente */
+
+  /* Acessibilidade */
+  --font-multiplier: 1;
 
   /* Tipografia */
   --font-serif: 'Playfair Display', Georgia, serif;
@@ -38,7 +41,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-bg-base);
   color: var(--color-text-main);
-  line-height: 1.6;
+  font-size: calc(1.05rem * var(--font-multiplier, 1));
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1006,3 +1010,638 @@ h1, h2, h3, h4 {
   border-top: 2px solid var(--color-border);
   padding-top: 1.5rem;
 }
+
+/* ==========================================================================
+   ACESSIBILIDADE E ALTO CONTRASTE (PÚBLICO IDOSO)
+   ========================================================================== */
+
+/* Seletor de Acessibilidade no Cabeçalho */
+.accessibility-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-primary-light);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.btn-acc {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+  color: var(--color-primary);
+}
+
+.btn-acc:hover {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-contrast {
+  border-radius: 12px;
+  padding: 0 0.75rem;
+  width: auto;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Sobrescritas de Alto Contraste */
+body.high-contrast {
+  --color-primary: #ffffff;
+  --color-primary-light: #2d3748;
+  --color-secondary: #ffff00; /* Amarelo sobre preto */
+  --color-accent: #ffff00;
+  --color-bg-base: #000000;
+  --color-bg-card: #121212;
+  --color-text-main: #ffffff;
+  --color-text-muted: #e2e8f0;
+  --color-border: #ffffff;
+  --color-success: #00ff00;
+  --color-error: #ff3333;
+  --color-warning: #ffff00;
+}
+
+body.high-contrast * {
+  border-color: #ffffff !important;
+}
+
+body.high-contrast .btn-primary {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .btn-secondary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .lesson-item-sidebar.active {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast .nav-link:hover, 
+body.high-contrast .nav-link.active {
+  background-color: #2d3748 !important;
+  color: #ffff00 !important;
+}
+
+/* ==========================================================================
+   PAINEL DO ALUNO: MENU LATERAL (SIDEBAR LAYOUT)
+   ========================================================================== */
+.student-panel-container {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+}
+
+.student-sidebar {
+  width: 260px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.student-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+.student-sidebar-item button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-sidebar-item button:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.student-sidebar-item.active button {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.student-panel-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.addresses-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .student-panel-container {
+    flex-direction: column;
+  }
+  .student-sidebar {
+    width: 100%;
+  }
+  .student-sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .student-sidebar-item button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .addresses-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   PÁGINAS INSTITUCIONAIS E LAYOUTS
+   ========================================================================== */
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #06231b 100%);
+  color: white;
+  border-radius: var(--border-radius-lg);
+  padding: 4rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 3rem;
+  border-bottom: 5px solid var(--color-accent);
+}
+
+.hero-section h1 {
+  font-family: var(--font-serif);
+  color: white;
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #d1fae5;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  font-weight: 300;
+}
+
+/* Dropdown Menu para Cursos/Quem Somos */
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--color-bg-card);
+  min-width: 200px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  z-index: 200;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+}
+
+.nav-dropdown:hover .nav-dropdown-content {
+  display: block;
+}
+
+.dropdown-item {
+  color: var(--color-text-main);
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Cursos Grid (Página Inicial e Loja) */
+.home-section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.home-section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background-color: var(--color-accent);
+  margin: 0.5rem auto 0;
+}
+
+.premium-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.premium-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
+}
+
+.premium-card-img-placeholder {
+  height: 180px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 3rem;
+}
+
+.premium-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-card-tag {
+  align-self: flex-start;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.premium-card-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-secondary);
+}
+
+.premium-card-text {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+  flex: 1;
+}
+
+.premium-card-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.premium-card-price {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+/* Vídeo Institucional */
+.video-section-home {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 3rem;
+  margin-bottom: 4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.video-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 800px) {
+  .video-section-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.video-section-content h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.video-section-content p {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.video-wrapper-embed {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.video-wrapper-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Homeopatas Directory */
+.directory-search-box {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.homeopath-card {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.homeopath-avatar {
+  width: 60px;
+  height: 60px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.homeopath-info h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.homeopath-reg {
+  font-size: 0.75rem;
+  background-color: #f1f5f9;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #475569;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.homeopath-contact-item {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+/* Galeria de Fotos */
+.gallery-grid-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  height: 200px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.gallery-placeholder-img {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #eef2f6 0%, #cbd5e1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #94a3b8;
+  transition: var(--transition-smooth);
+}
+
+.gallery-item:hover .gallery-placeholder-img {
+  transform: scale(1.05);
+}
+
+.gallery-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(11, 60, 46, 0.9);
+  color: white;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Carrinho de Compras */
+.cart-badge-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--color-error);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 800px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cart-items-list {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+}
+
+.cart-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cart-item-row:last-child {
+  border-bottom: none;
+}
+
+.cart-item-title-section {
+  flex: 1;
+}
+
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cart-quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.btn-qty {
+  background-color: #f1f5f9;
+  border: none;
+  width: 28px;
+  height: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cart-qty-value {
+  padding: 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-remove-cart {
+  background: transparent;
+  border: none;
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  padding: 0.25rem;
+}
+
+.cart-summary-box {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  height: fit-content;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.summary-total {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin-top: 1rem;
+}
+

@@ -26,7 +26,16 @@ CREATE TABLE IF NOT EXISTS student_profiles (
     terms_accepted BOOLEAN NOT NULL DEFAULT TRUE,
     terms_accepted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     professional_registration_type VARCHAR(50) NOT NULL CHECK (professional_registration_type IN ('CRM', 'CRO', 'CRF', 'CRV', 'OUTROS')),
-    professional_registration_number VARCHAR(50) NOT NULL
+    professional_registration_number VARCHAR(50) NOT NULL,
+    phone VARCHAR(50),
+    cpf_cnpj VARCHAR(50),
+    address_zip VARCHAR(20),
+    address_street VARCHAR(255),
+    address_number VARCHAR(50),
+    address_complement VARCHAR(255),
+    address_neighborhood VARCHAR(100),
+    address_city VARCHAR(100),
+    address_state VARCHAR(50)
 );
 
 -- Tabela de Cursos

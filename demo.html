@@ -5,32 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulação LMS Homeopatia - The Other Song Brasil</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>" />
+  
   <!-- Fontes Premium -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
-  <!-- React, ReactDOM, Babel Standalone da CDN para rodar no navegador direto -->
+  <!-- React, ReactDOM, Babel Standalone da CDN -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
     :root {
-      --color-primary: #064e3b;
-      --color-primary-light: #e6f0eb;
-      --color-secondary: #0f172a;
-      --color-accent: #0d9488;
-      --color-bg-base: #fbfaf7;
-      --color-bg-card: #ffffff;
-      --color-text-main: #334155;
-      --color-text-muted: #64748b;
-      --color-border: #e2e8f0;
-      --color-success: #15803d;
-      --color-error: #be123c;
-      --color-warning: #b45309;
+      /* Cores principais - Paleta premium refinada e moderna (TOSB) */
+      --color-primary: #0b3c2e;       /* Verde Floresta Escuro */
+      --color-primary-light: #eef5f2; /* Verde suave muito claro */
+      --color-secondary: #0f172a;     /* Slate escuro */
+      --color-accent: #c5a880;        /* Ouro fosco/champagne premium */
+      --color-bg-base: #faf9f6;       /* Creme/Off-white quente e confortável */
+      --color-bg-card: #ffffff;       /* Branco para cartões */
+      --color-text-main: #1e293b;     /* Slate escuro para excelente legibilidade (idosos) */
+      --color-text-muted: #475569;    /* Cinza escuro legível para metadados */
+      --color-border: #cbd5e1;        /* Borda com contraste adequado */
+      --color-success: #166534;       /* Verde sucesso */
+      --color-error: #9f1239;         /* Vermelho elegante para erros/bloqueios */
+      --color-warning: #9a3412;       /* Laranja escuro quente */
+
+      /* Acessibilidade */
+      --font-multiplier: 1;
+
+      /* Tipografia */
       --font-serif: 'Playfair Display', Georgia, serif;
       --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+
+      /* Efeitos */
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
       --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
@@ -39,65 +48,1608 @@
       --border-radius-md: 10px;
       --border-radius-lg: 16px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: var(--font-sans); background-color: var(--color-bg-base); color: var(--color-text-main); line-height: 1.6; }
-    h1, h2, h3, h4 { font-family: var(--font-serif); color: var(--color-secondary); font-weight: 600; }
-    .app-container { display: flex; flex-direction: column; min-height: 100vh; }
-    .tosb-header { background-color: var(--color-bg-card); border-bottom: 1px solid var(--color-border); padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
-    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-    .logo-symbol { font-size: 1.75rem; }
-    .logo-text { display: flex; flex-direction: column; }
-    .logo-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: bold; color: var(--color-primary); letter-spacing: 0.05em; text-transform: uppercase; }
-    .logo-subtitle { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--color-text-muted); text-transform: uppercase; }
-    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-    .nav-link { text-decoration: none; color: var(--color-text-main); font-weight: 500; font-size: 0.95rem; transition: var(--transition-smooth); padding: 0.5rem 0.75rem; border-radius: var(--border-radius-sm); }
-    .nav-link:hover { color: var(--color-primary); background-color: var(--color-primary-light); }
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.6rem 1.25rem; font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; border-radius: var(--border-radius-md); border: none; cursor: pointer; transition: var(--transition-smooth); text-decoration: none; gap: 0.5rem; }
-    .btn-primary { background-color: var(--color-primary); color: white; }
-    .btn-primary:hover { background-color: #043a2c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2); }
-    .btn-secondary { background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main); }
-    .btn-secondary:hover { background-color: var(--color-primary-light); color: var(--color-primary); border-color: var(--color-primary); }
-    .btn-danger { background-color: var(--color-error); color: white; }
-    .btn-danger:hover { background-color: #9d0c32; }
-    .card { background-color: var(--color-bg-card); border-radius: var(--border-radius-lg); border: 1px solid var(--color-border); padding: 1.75rem; box-shadow: var(--shadow-md); transition: var(--transition-smooth); }
-    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-    .main-content { flex: 1; padding: 2.5rem 2rem; max-width: 1200px; width: 100%; margin: 0 auto; }
-    .tosb-footer { background-color: var(--color-secondary); color: #94a3b8; padding: 3rem 2rem 1.5rem; margin-top: auto; border-top: 4px solid var(--color-primary); }
-    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto; padding-bottom: 2rem; border-bottom: 1px solid #334155; }
-    .footer-section h4 { color: white; margin-bottom: 1.25rem; font-size: 1.1rem; }
-    .footer-links { list-style: none; }
-    .footer-link { color: #94a3b8; text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 0.6rem; transition: var(--transition-smooth); }
-    .footer-link:hover { color: var(--color-accent); padding-left: 4px; }
-    .footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 1rem; }
-    .alert { padding: 1rem 1.25rem; border-radius: var(--border-radius-md); margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start; font-size: 0.92rem; }
-    .alert-danger { background-color: #fff1f2; border: 1px solid #fecdd3; color: var(--color-error); }
-    .alert-success { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: var(--color-success); }
-    .alert-warning { background-color: #fffbeb; border: 1px solid #fde68a; color: var(--color-warning); }
-    .auth-box { max-width: 480px; width: 100%; margin: 3rem auto; }
-    .form-group { margin-bottom: 1.25rem; }
-    .form-label { display: block; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-main); margin-bottom: 0.4rem; }
-    .form-input { width: 100%; padding: 0.7rem 0.9rem; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); font-family: var(--font-sans); font-size: 0.95rem; transition: var(--transition-smooth); background-color: #fafafa; }
-    .form-input:focus { outline: none; border-color: var(--color-primary); background-color: white; box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1); }
-    .terms-container { max-height: 150px; overflow-y: scroll; border: 1px solid var(--color-border); padding: 0.75rem; border-radius: var(--border-radius-sm); background-color: #f8fafc; font-size: 0.8rem; margin-bottom: 0.75rem; }
-    .player-container { position: relative; width: 100%; padding-top: 56.25%; background-color: #000; border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; }
-    .player-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    .quiz-container { background-color: var(--color-bg-card); padding: 2rem; border-radius: var(--border-radius-lg); border: 1px solid var(--color-border); margin-top: 2rem; }
-    .quiz-question-card { margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px dashed var(--color-border); }
-    .quiz-question-text { font-size: 1.05rem; margin-bottom: 1rem; color: var(--color-secondary); }
-    .quiz-option-label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); margin-bottom: 0.5rem; cursor: pointer; transition: var(--transition-smooth); }
-    .quiz-option-label:hover { background-color: var(--color-primary-light); border-color: var(--color-primary); }
-    .quiz-option-label.selected { background-color: var(--color-primary-light); border-color: var(--color-primary); font-weight: 600; }
-    @media (max-width: 768px) {
-      .tosb-header { flex-direction: column; gap: 1rem; padding: 1rem; }
-      .nav-links { width: 100%; justify-content: center; flex-wrap: wrap; gap: 0.75rem; }
-      .main-content { padding: 1.5rem 1rem; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg-base);
+      color: var(--color-text-main);
+      font-size: calc(1.05rem * var(--font-multiplier, 1));
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--font-serif);
+      color: var(--color-secondary);
+      font-weight: 600;
+    }
+
+    /* Layout Geral */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Cabeçalho TOSB Premium */
+    .tosb-header {
+      background-color: var(--color-bg-card);
+      border-bottom: 1px solid var(--color-border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .logo-symbol {
+      font-size: 1.75rem;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--color-primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .logo-subtitle {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Navegação */
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      background: transparent;
+      border: none;
+      text-decoration: none;
+      color: var(--color-text-main);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--color-primary);
+      background-color: var(--color-primary-light);
+    }
+
+    /* Botões */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--border-radius-md);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      text-decoration: none;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #043a2c;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .btn-danger {
+      background-color: var(--color-error);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #9d0c32;
+    }
+
+    /* Cards Premium */
+    .card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--border-radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-smooth);
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--color-primary-light);
+    }
+
+    /* Grid layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Containers e Áreas principais */
+    .main-content {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Rodapé Sophisticated */
+    .tosb-footer {
+      background-color: var(--color-secondary);
+      color: #94a3b8;
+      padding: 3rem 2rem 1.5rem;
+      margin-top: auto;
+      border-top: 4px solid var(--color-primary);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #334155;
+    }
+
+    .footer-section h4 {
+      color: white;
+      margin-bottom: 1.25rem;
+      font-size: 1.1rem;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 0.6rem;
+      transition: var(--transition-smooth);
+    }
+
+    .footer-link:hover {
+      color: var(--color-accent);
+      padding-left: 4px;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* Alertas estilo GitHub */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: var(--border-radius-md);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.92rem;
+    }
+
+    .alert-danger {
+      background-color: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: var(--color-error);
+    }
+
+    .alert-success {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--color-success);
+    }
+
+    .alert-warning {
+      background-color: #fffbeb;
+      border: 1px solid #fde68a;
+      color: var(--color-warning);
+    }
+
+    /* Modais / Telas de Login */
+    .auth-box {
+      max-width: 480px;
+      width: 100%;
+      margin: 3rem auto;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-border);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+      background-color: #fafafa;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
+    }
+
+    .terms-container {
+      max-height: 150px;
+      overflow-y: scroll;
+      border: 1px solid var(--color-border);
+      padding: 0.75rem;
+      border-radius: var(--border-radius-sm);
+      background-color: #f8fafc;
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Estilos de Player e Quiz */
+    .player-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background-color: #000;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 1.5rem;
+    }
+
+    .player-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .quiz-container {
+      background-color: var(--color-bg-card);
+      padding: 2rem;
+      border-radius: var(--border-radius-lg);
+      border: 1px solid var(--color-border);
+      margin-top: 2rem;
+    }
+
+    .quiz-question-card {
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed var(--color-border);
+    }
+
+    .quiz-question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      color: var(--color-secondary);
+    }
+
+    .quiz-option-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .quiz-option-label:hover {
+      background-color: var(--color-primary-light);
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option-label.selected {
+      background-color: var(--color-primary-light);
+      border-color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    /* Badge de Modo de Simulação */
+    .offline-mode-badge {
+      background-color: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #b45309;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    /* Identificadores e Textos Auxiliares */
+    .user-greeting {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+
+    .main-content-top {
+      padding-bottom: 0;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+
+    .flex-1 { flex: 1; }
+    .flex-2 { flex: 2; }
+
+    .cursor-pointer {
+      cursor: pointer;
+    }
+
+    .pointer-events-none {
+      pointer-events: none;
+    }
+
+    /* Margens utilitárias */
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-5 { margin-bottom: 1.5rem; }
+    .mb-6 { margin-bottom: 2rem; }
+    .mb-7 { margin-bottom: 2.5rem; }
+
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-5 { margin-top: 1.5rem; }
+    .mt-6 { margin-top: 2rem; }
+
+    /* Grid e Flex Layouts Gerais */
+    .flex-center-gap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .grid-2col-wide {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 2rem;
+    }
+
+    .section-title-underlined {
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--color-primary-light);
+      padding-bottom: 0.5rem;
+    }
+
+    .section-title-underlined-thin {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.5rem;
+    }
+
+    /* Assistente de Login Rápido */
+    .quick-login-container {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .quick-login-title {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--color-primary);
+      text-transform: uppercase;
+    }
+
+    .quick-login-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .btn-quick-login {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .helper-text {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    /* Trava de IP no Login */
+    .ip-warning-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: #fff1f2;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #fecdd3;
+    }
+
+    .ip-warning-label {
+      font-size: 0.8rem;
+      color: var(--color-error);
+      cursor: pointer;
+    }
+
+    /* Card de Largura Larga (Cadastro) */
+    .auth-box-wide {
+      max-width: 600px;
+    }
+
+    /* Grade de Cursos */
+    .courses-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .course-card-grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .course-type-badge {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--color-accent);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .course-card-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .course-card-description {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .course-card-expires {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .course-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: right;
+    }
+
+    .error-text-bold {
+      color: var(--color-error);
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .muted-text-bold {
+      color: var(--color-text-muted);
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    /* Financeiro / Invoices */
+    .invoices-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .invoice-card {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      background-color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .invoice-title {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .invoice-details {
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .invoice-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-paid {
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-pending {
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .invoice-ref {
+      display: block;
+      margin-top: 0.5rem;
+      color: #64748b;
+    }
+
+    .invoice-due {
+      display: block;
+      color: #64748b;
+    }
+
+    /* Checkout */
+    .checkout-item-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--color-primary);
+      margin-top: 0.5rem;
+    }
+
+    .checkout-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* LMS Layout & Player */
+    .lms-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
+    }
+
+    .lesson-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .lesson-progress-meta {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .lesson-progress-badge-completed {
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .lesson-progress-badge-pending {
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-attempts-list {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      padding-left: 1.25rem;
+    }
+
+    .quiz-attempt-passed {
+      color: var(--color-success);
+    }
+
+    .quiz-attempt-failed {
+      color: var(--color-error);
+    }
+
+    .placeholder-box {
+      border: 2px dashed var(--color-border);
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+
+    .course-conclusion-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 2rem;
+      border-left: 8px solid var(--color-success);
+    }
+
+    .lms-sidebar {
+      border-left: 1px solid var(--color-border);
+      padding-left: 1.5rem;
+    }
+
+    .sidebar-title {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .modules-list-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .module-header-title {
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .lessons-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lesson-item-sidebar {
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      border: 1px solid transparent;
+      background-color: #fff;
+      color: var(--color-text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      transition: var(--transition-smooth);
+    }
+
+    .lesson-item-sidebar:hover {
+      background-color: var(--color-primary-light);
+      border-color: var(--color-primary-light);
+    }
+
+    .lesson-item-sidebar.active {
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    /* Professor Dashboard */
+    .teacher-dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .lms-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .lms-table th {
+      padding: 0.75rem;
+      border-bottom: 2px solid var(--color-border);
+      color: var(--color-secondary);
+    }
+
+    .lms-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .badge-status-active {
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-status-suspended {
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Admin Dashboard */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .admin-stat-card {
+      background-color: var(--color-bg-card);
+      border-radius: var(--border-radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-smooth);
+    }
+
+    .admin-stat-card.primary {
+      border-left: 6px solid var(--color-primary);
+    }
+
+    .admin-stat-card.warning {
+      border-left: 6px solid var(--color-warning);
+    }
+
+    .admin-stat-card.error {
+      border-left: 6px solid var(--color-error);
+    }
+
+    .admin-stat-card.accent {
+      border-left: 6px solid var(--color-accent);
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .ofx-textarea {
+      min-height: 180px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .conciliation-results {
+      margin-top: 1.5rem;
+      background-color: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      font-size: 0.85rem;
+    }
+
+    .logs-container {
+      flex: 1;
+      max-height: 350px;
+      overflow-y: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background-color: #f8fafc;
+      padding: 0.5rem;
+    }
+
+    .log-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0.5rem 0;
+      font-size: 0.8rem;
+    }
+
+    .badge-log-type {
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      background-color: #e2e8f0;
+      color: #475569;
+    }
+
+    .badge-log-type.lockout {
+      background-color: #fee2e2;
+      color: var(--color-error);
+    }
+
+    .footer-about-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .footer-contact-text {
+      font-size: 0.85rem;
+    }
+
+    .font-serif-title {
+      font-family: var(--font-serif);
+    }
+
+    .text-muted {
+      color: var(--color-text-muted);
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quiz-section-wrapper {
+      margin-top: 2rem;
+      border-top: 2px solid var(--color-border);
+      padding-top: 1.5rem;
+    }
+
+    /* ==========================================================================
+       ACESSIBILIDADE E ALTO CONTRASTE (PÚBLICO IDOSO)
+       ========================================================================== */
+
+    .accessibility-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--color-primary-light);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-acc {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: var(--transition-smooth);
+      color: var(--color-primary);
+    }
+
+    .btn-acc:hover {
+      background-color: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .btn-contrast {
+      border-radius: 12px;
+      padding: 0 0.75rem;
+      width: auto;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    body.high-contrast {
+      --color-primary: #ffffff;
+      --color-primary-light: #2d3748;
+      --color-secondary: #ffff00;
+      --color-accent: #ffff00;
+      --color-bg-base: #000000;
+      --color-bg-card: #121212;
+      --color-text-main: #ffffff;
+      --color-text-muted: #e2e8f0;
+      --color-border: #ffffff;
+      --color-success: #00ff00;
+      --color-error: #ff3333;
+      --color-warning: #ffff00;
+    }
+
+    body.high-contrast * {
+      border-color: #ffffff !important;
+    }
+
+    body.high-contrast .btn-primary {
+      background-color: #ffff00 !important;
+      color: #000000 !important;
+      font-weight: 900 !important;
+      border: 2px solid #ffffff !important;
+    }
+
+    body.high-contrast .btn-secondary {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      border: 2px solid #ffffff !important;
+    }
+
+    body.high-contrast .lesson-item-sidebar.active {
+      background-color: #ffff00 !important;
+      color: #000000 !important;
+    }
+
+    body.high-contrast .nav-link:hover, 
+    body.high-contrast .nav-link.active {
+      background-color: #2d3748 !important;
+      color: #ffff00 !important;
+    }
+
+    /* ==========================================================================
+       PAINEL DO ALUNO: MENU LATERAL (SIDEBAR LAYOUT)
+       ========================================================================== */
+    .student-panel-container {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      margin-top: 1rem;
+    }
+
+    .student-sidebar {
+      width: 260px;
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .student-sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    .student-sidebar-item button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text-main);
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .student-sidebar-item button:hover {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .student-sidebar-item.active button {
+      background-color: var(--color-primary);
+      color: white;
+    }
+
+    .student-panel-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .addresses-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .student-panel-container {
+        flex-direction: column;
+      }
+      .student-sidebar {
+        width: 100%;
+      }
+      .student-sidebar-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .student-sidebar-item button {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+      }
+      .addresses-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       PÁGINAS INSTITUCIONAIS E LAYOUTS
+       ========================================================================== */
+
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #06231b 100%);
+      color: white;
+      border-radius: var(--border-radius-lg);
+      padding: 4rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 3rem;
+      border-bottom: 5px solid var(--color-accent);
+    }
+
+    .hero-section h1 {
+      font-family: var(--font-serif);
+      color: white;
+      font-size: 2.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #d1fae5;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      font-weight: 300;
+    }
+
+    /* Dropdown Menu para Cursos/Quem Somos */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: var(--color-bg-card);
+      min-width: 200px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      z-index: 200;
+      top: 100%;
+      left: 0;
+      margin-top: 0.5rem;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-content {
+      display: block;
+    }
+
+    .dropdown-item {
+      color: var(--color-text-main);
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      border-bottom: 1px solid #f1f5f9;
+      text-align: left;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    /* Cursos Grid (Página Inicial e Loja) */
+    .home-section-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .home-section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background-color: var(--color-accent);
+      margin: 0.5rem auto 0;
+    }
+
+    .premium-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .premium-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--color-accent);
+    }
+
+    .premium-card-img-placeholder {
+      height: 180px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    .premium-card-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .premium-card-tag {
+      align-self: flex-start;
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .premium-card-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: var(--color-secondary);
+    }
+
+    .premium-card-text {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+
+    .premium-card-footer {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .premium-card-price {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--color-primary);
+    }
+
+    /* Vídeo Institucional */
+    .video-section-home {
+      background-color: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 3rem;
+      margin-bottom: 4rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .video-section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (max-width: 800px) {
+      .video-section-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .video-section-content h3 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .video-section-content p {
+      color: var(--color-text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .video-wrapper-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .video-wrapper-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Homeopatas Directory */
+    .directory-search-box {
+      background-color: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .directory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .homeopath-card {
+      background-color: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .homeopath-avatar {
+      width: 60px;
+      height: 60px;
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .homeopath-info h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .homeopath-reg {
+      font-size: 0.75rem;
+      background-color: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #475569;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    .homeopath-contact-item {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.2rem;
+    }
+
+    /* Galeria de Fotos */
+    .gallery-grid-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      height: 200px;
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gallery-placeholder-img {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #eef2f6 0%, #cbd5e1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: #94a3b8;
+      transition: var(--transition-smooth);
+    }
+
+    .gallery-item:hover .gallery-placeholder-img {
+      transform: scale(1.05);
+    }
+
+    .gallery-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(11, 60, 46, 0.9);
+      color: white;
+      padding: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Carrinho de Compras */
+    .cart-badge-nav {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: var(--color-error);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: bold;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 800px) {
+      .cart-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cart-items-list {
+      background-color: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.5rem;
+    }
+
+    .cart-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .cart-item-row:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item-title-section {
+      flex: 1;
+    }
+
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .cart-quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+    }
+
+    .btn-qty {
+      background-color: #f1f5f9;
+      border: none;
+      width: 28px;
+      height: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cart-qty-value {
+      padding: 0 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .btn-remove-cart {
+      background: transparent;
+      border: none;
+      color: var(--color-error);
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      padding: 0.25rem;
+    }
+
+    .cart-summary-box {
+      background-color: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.5rem;
+      height: fit-content;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .summary-total {
+      border-top: 1px solid var(--color-border);
+      padding-top: 1rem;
+      font-weight: bold;
+      font-size: 1.25rem;
+      color: var(--color-primary);
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- Lógica React Completa compilada dinamicamente pelo navegador -->
+  <!-- Lógica React Completa -->
   <script type="text/babel">
     const TERMS_TEXT = `TERMOS DE USO E ACEITE PARA HOMEOPATAS E PROFISSIONAIS DA SAÚDE
 Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e concorda que:
@@ -106,8 +1658,29 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
 3. A prescrição de medicamentos homeopáticos e a aplicação clínica do Método Sensação são de inteira responsabilidade técnica do profissional matriculado.
 4. A plataforma proíbe o compartilhamento de senhas. A identificação de acessos simultâneos em localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.`;
 
+    const BOOKS_DATA = [
+      { id: 'book-esquema', title: 'Esquema de Reinos e Subreinos 2.0', author: 'Dr. Rajan Sankaran', price: 220.00, desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.' },
+      { id: 'book-superclasses', title: 'Superclasses em Homeopatia', author: 'Dr. Rajan Sankaran', price: 180.00, desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.' },
+      { id: 'book-oito-caixas', title: 'O Método das Oito Caixas', author: 'Dr. Rajan Sankaran', price: 240.00, desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.' },
+      { id: 'book-followup', title: 'A Arte do Follow-up na Clínica', author: 'Dr. Gaurang Gaikwad', price: 190.00, desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.' }
+    ];
+
+    const HOMEOPATHS_DATA = [
+      { name: 'Dr. Carlos Eduardo Leitão', reg: 'CRM-PR 12345', specialty: 'Método Sensação Vital', city: 'Curitiba - PR', phone: '(41) 3322-1100', email: 'carlos@tosb.com' },
+      { name: 'Dra. Ana Paula Santos', reg: 'CRM-SP 98765', specialty: 'Homeopatia Clássica e Infantil', city: 'São Paulo - SP', phone: '(11) 98888-7766', email: 'ana.paula@lms.com' },
+      { name: 'Dr. Roberto de Almeida', reg: 'CRM-RJ 44552', specialty: 'Homeopatia e Clínica Geral', city: 'Rio de Janeiro - RJ', phone: '(21) 2544-3322', email: 'roberto.almeida@gmail.com' },
+      { name: 'Dra. Teresa de Jesus', reg: 'CRO-PR 8877', specialty: 'Odontologia Homeopática', city: 'Curitiba - PR', phone: '(41) 99111-2233', email: 'teresa.dentista@hotmail.com' }
+    ];
+
+    const GALLERY_DATA = [
+      { title: 'Turma de Especialização 2025', desc: 'Membros da Pós-Graduação reunidos em Curitiba.' },
+      { title: 'Seminário Internacional com Rajan Sankaran', desc: 'Evento científico transmitido ao vivo.' },
+      { title: 'Sede da The Other Song Brasil', desc: 'Espaço acadêmico e administrativo em Curitiba.' },
+      { title: 'Encontro Científico de Homeopatas', desc: 'Discussão de casos e evolução clínica.' }
+    ];
+
     function App() {
-      const [currentPage, setCurrentPage] = React.useState('login');
+      const [currentPage, setCurrentPage] = React.useState('home');
       const [user, setUser] = React.useState(null);
       const [error, setError] = React.useState('');
       const [success, setSuccess] = React.useState('');
@@ -135,6 +1708,30 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
       const videoRef = React.useRef(null);
       const progressIntervalRef = React.useRef(null);
 
+      // Acessibilidade
+      const [fontMultiplier, setFontMultiplier] = React.useState(1.0);
+      const [highContrast, setHighContrast] = React.useState(false);
+
+      // Carrinho de Compras
+      const [cartItems, setCartItems] = React.useState([]);
+      
+      // Estado da aba ativa no Painel do Aluno
+      const [studentActiveTab, setStudentActiveTab] = React.useState('panel');
+      const [homeopathsSearch, setHomeopathsSearch] = React.useState('');
+
+      // Sincronizar Acessibilidade
+      React.useEffect(() => {
+        document.documentElement.style.setProperty('--font-multiplier', fontMultiplier);
+      }, [fontMultiplier]);
+
+      React.useEffect(() => {
+        if (highContrast) {
+          document.body.classList.add('high-contrast');
+        } else {
+          document.body.classList.remove('high-contrast');
+        }
+      }, [highContrast]);
+
       // Banco de Dados Local Simulado (localStorage)
       const [mockDb, setMockDb] = React.useState(() => {
         const saved = localStorage.getItem('demo_db');
@@ -144,7 +1741,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
           users: [
             { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123' },
             { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.' },
-            { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765' }
+            { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765', phone: '(11) 98888-7766', cpf_cnpj: '123.456.789-00', address_zip: '80420-000', address_street: 'Rua Brigadeiro Franco', address_number: '1234', address_complement: 'Sala 12', address_neighborhood: 'Batel', address_city: 'Curitiba', address_state: 'PR' }
           ],
           courses: [
             { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
@@ -202,6 +1799,73 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         else if (role === 'ADMIN') { setCurrentPage('admin-dash'); loadAdminReport(); }
       };
 
+      // CARRINHO DE COMPRAS
+      const addToCart = (product, type = 'book') => {
+        clearAlerts();
+        setCartItems(prev => {
+          const exists = prev.find(item => item.product.id === product.id);
+          if (exists) {
+            return prev.map(item =>
+              item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+            );
+          }
+          return [...prev, { product, quantity: 1, type }];
+        });
+        setSuccess(`"${product.title}" adicionado ao carrinho!`);
+      };
+
+      const updateCartQty = (productId, delta) => {
+        setCartItems(prev => prev.map(item => {
+          if (item.product.id === productId) {
+            const newQty = item.quantity + delta;
+            return newQty > 0 ? { ...item, quantity: newQty } : item;
+          }
+          return item;
+        }).filter(item => item.quantity > 0));
+      };
+
+      const removeFromCart = (productId) => {
+        setCartItems(prev => prev.filter(item => item.product.id !== productId));
+      };
+
+      const clearCart = () => {
+        setCartItems([]);
+      };
+
+      // EDITAR PERFIL
+      const handleUpdateProfile = (e) => {
+        e.preventDefault();
+        clearAlerts();
+        
+        const formData = {
+          name: e.target.name.value,
+          email: e.target.email.value,
+          phone: e.target.phone.value,
+          cpf_cnpj: e.target.cpf_cnpj.value,
+          address_zip: e.target.address_zip.value,
+          address_street: e.target.address_street.value,
+          address_number: e.target.address_number.value,
+          address_complement: e.target.address_complement.value,
+          address_neighborhood: e.target.address_neighborhood.value,
+          address_city: e.target.address_city.value,
+          address_state: e.target.address_state.value,
+          professional_registration_type: e.target.professional_registration_type?.value || user.professional_registration_type || 'OUTROS',
+          professional_registration_number: e.target.professional_registration_number?.value || user.professional_registration_number || '',
+        };
+
+        setMockDb(prev => {
+          const updatedUsers = prev.users.map(u => {
+            if (u.id === user.id) {
+              return { ...u, ...formData };
+            }
+            return u;
+          });
+          return { ...prev, users: updatedUsers };
+        });
+        setUser(prev => ({ ...prev, ...formData }));
+        setSuccess('Cadastro atualizado com sucesso (Simulação local)!');
+      };
+
       const handleLogin = (e) => {
         e.preventDefault();
         clearAlerts();
@@ -234,7 +1898,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
             };
             return { ...prev, users: updatedUsers, logs: [newLog, ...prev.logs] };
           });
-          setError('⚠️ BLOQUEIO DE SEGURANÇA: Detectada sessão ativa de outro endereço IP. Sua conta foi suspensa temporariamente (Regra de Compartilhamento).');
+          setError('⚠️ BLOQUEIO DE SEGURANÇA: Detectada sessão ativa de outro endereço IP. Sua conta foi suspensa temporariamente.');
           return;
         }
 
@@ -246,7 +1910,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
       const handleLogout = () => {
         clearAlerts();
         setUser(null);
-        setCurrentPage('login');
+        setCurrentPage('home');
       };
 
       const handleRegister = (e) => {
@@ -260,7 +1924,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         const acceptTerms = e.target.acceptTerms.checked;
 
         if (!acceptTerms) {
-          setError('Você precisa aceitar os Termos de Uso e Sigilo de dados.');
+          setError('Você precisa aceitar os Termos de Uso.');
           return;
         }
 
@@ -337,13 +2001,6 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         }));
         setCourses(coursesWithEnrollment);
       };
-
-      React.useEffect(() => {
-        if (user && user.role === 'STUDENT' && currentPage === 'student-dash') {
-          loadCourses();
-          loadInvoices();
-        }
-      }, [user, currentPage]);
 
       const enrollFreeCourse = (courseId) => {
         const newEnroll = {
@@ -472,7 +2129,6 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         });
 
         setQuizResult(newAttempt);
-        // Atualiza a visualização com a nova tentativa
         setQuizData(prev => ({ ...prev, attempts: [...prev.attempts, newAttempt] }));
       };
 
@@ -481,7 +2137,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
           .filter(p => p.student_id === user.id)
           .map(p => {
             const c = mockDb.courses.find(course => course.id === p.course_id);
-            return { ...p, course_title: c ? c.title : 'Curso' };
+            return { ...p, course_title: c ? c.title : 'Compra / Assinatura' };
           });
         setMyInvoices(userInvoices);
       };
@@ -494,21 +2150,37 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
       const handleProcessCheckout = (e) => {
         e.preventDefault();
         clearAlerts();
+
+        const itemsToBuy = checkoutCourse ? [{ product: checkoutCourse, quantity: 1, type: 'course' }] : cartItems;
+        if (itemsToBuy.length === 0) {
+          setError('Seu carrinho está vazio.');
+          return;
+        }
+
         const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
         const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
-        let price = checkoutCourse.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
+        
+        let totalAmt = 0;
+        itemsToBuy.forEach(item => {
+          if (item.type === 'course') {
+            totalAmt += item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
+          } else {
+            totalAmt += item.product.price * item.quantity;
+          }
+        });
 
         const newPayments = [];
-        if (paymentMethod === 'CARNE' && checkoutCourse.type === 'POSTGRAD') {
+        const hasPostgrad = itemsToBuy.some(item => item.type === 'course' && item.product.type === 'POSTGRAD');
+        if (paymentMethod === 'CARNE' && hasPostgrad) {
           const count = installments;
-          const partAmt = (price / count).toFixed(2);
+          const partAmt = (totalAmt / count).toFixed(2);
           for (let i = 1; i <= count; i++) {
             const dueDate = new Date();
             dueDate.setMonth(dueDate.getMonth() + (i - 1));
             newPayments.push({
               id: `pay-${Date.now()}-${i}`,
               student_id: user.id,
-              course_id: checkoutCourse.id,
+              course_id: itemsToBuy.find(item => item.type === 'course').product.id,
               amount: parseFloat(partAmt),
               payment_method: 'CARNE',
               status: 'PENDING',
@@ -520,11 +2192,14 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         } else {
           const dueDate = new Date();
           dueDate.setDate(dueDate.getDate() + 3);
+          const firstCourse = itemsToBuy.find(item => item.type === 'course');
+          const courseId = firstCourse ? firstCourse.product.id : null;
+
           newPayments.push({
             id: `pay-${Date.now()}`,
             student_id: user.id,
-            course_id: checkoutCourse.id,
-            amount: price,
+            course_id: courseId,
+            amount: totalAmt,
             payment_method: paymentMethod,
             status: 'PENDING',
             transaction_code: transactionCode,
@@ -534,7 +2209,10 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         }
 
         setMockDb(prev => ({ ...prev, payments: [...prev.payments, ...newPayments] }));
-        setSuccess('Faturas geradas! Efetue o pagamento na listagem ao lado.');
+        setSuccess('Faturas geradas! Efetue o simulador de pagamento no painel financeiro.');
+        clearCart();
+        setCheckoutCourse(null);
+        setStudentActiveTab('payments');
         setCurrentPage('student-dash');
       };
 
@@ -552,6 +2230,9 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
           });
 
           const targetCourseId = matchPayments[0].course_id;
+          if (!targetCourseId) {
+            return { ...prev, payments: updatedPayments };
+          }
           const course = prev.courses.find(c => c.id === targetCourseId);
           const duration = course ? course.duration_days : 180;
 
@@ -579,7 +2260,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
         });
 
         setSuccess('Sucesso: Pagamento recebido e matrícula ativada por 6 meses.');
-        loadInvoices();
+        setTimeout(() => loadInvoices(), 100);
       };
 
       const loadTeacherReport = () => {
@@ -606,7 +2287,7 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
                 if (prog && prog.completed) completedLessons++;
 
                 if (l.quiz) {
-                  const quizKey = `${student.id}_${l.quiz.id}`;
+                   const quizKey = `${student.id}_${l.quiz.id}`;
                   const attempts = mockDb.quiz_attempts[quizKey] || [];
                   const passed = attempts.some(a => a.passed);
                   if (passed) quizPassed++;
@@ -704,21 +2385,23 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
             if (p.status === 'PENDING') {
               currentPayments[payIdx] = { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
               
-              const c = prev.courses.find(course => course.id === p.course_id);
-              const duration = c ? c.duration_days : 180;
-              const enIdx = currentEnrollments.findIndex(e => e.student_id === p.student_id && e.course_id === p.course_id);
-              
-              if (enIdx !== -1) {
-                currentEnrollments[enIdx] = { ...currentEnrollments[enIdx], status: 'ACTIVE', expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() };
-              } else {
-                currentEnrollments.push({
-                  id: 'enroll_' + Date.now(),
-                  student_id: p.student_id,
-                  course_id: p.course_id,
-                  enrolled_at: new Date().toISOString(),
-                  expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString(),
-                  status: 'ACTIVE'
-                });
+              if (p.course_id) {
+                const c = prev.courses.find(course => course.id === p.course_id);
+                const duration = c ? c.duration_days : 180;
+                const enIdx = currentEnrollments.findIndex(e => e.student_id === p.student_id && e.course_id === p.course_id);
+                
+                if (enIdx !== -1) {
+                  currentEnrollments[enIdx] = { ...currentEnrollments[enIdx], status: 'ACTIVE', expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() };
+                } else {
+                  currentEnrollments.push({
+                    id: 'enroll_' + Date.now(),
+                    student_id: p.student_id,
+                    course_id: p.course_id,
+                    enrolled_at: new Date().toISOString(),
+                    expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString(),
+                    status: 'ACTIVE'
+                  });
+                }
               }
               results.reconciled.push({ transactionCode: code, amount: bankAmt, statusChanged: true });
             } else {
@@ -794,7 +2477,7 @@ COMPRESSION:NONE
           return { ...prev, payments: updatedPayments, enrollments: updatedEnroll };
         });
         setSuccess('Simulação: Boleto vencido há 12 dias detectado. Matrícula da Dra. Ana Paula SUSPENSA por inadimplência.');
-        loadCourses();
+        setTimeout(() => loadCourses(), 100);
       };
 
       const quickLogin = (role) => {
@@ -813,101 +2496,560 @@ COMPRESSION:NONE
 
       return (
         <div className="app-container">
+          {/* Cabeçalho */}
           <header className="tosb-header">
-            <div className="logo-container" style={{ cursor: 'pointer' }} onClick={() => user ? redirectToDashboard(user.role) : setCurrentPage('login')}>
-              <span className="logo-symbol">🌿</span>
-              <div className="logo-text">
-                <span className="logo-title">The Other Song</span>
-                <span className="logo-subtitle">Brasil | EAD</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button className="logo-container" onClick={() => { clearAlerts(); setCurrentPage('home'); }} style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
+                <div className="logo-text">
+                  <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
+                  <span className="logo-subtitle">Brasil | Homeopatia</span>
+                </div>
+              </button>
+
+              <div className="offline-mode-badge" style={{ fontSize: '0.75rem' }}>
+                🔌 Simulação
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#e2e8f0', color: '#475569', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-              🔬 Demonstração Interativa
-            </div>
+            {/* Menu Principal */}
+            <nav className="nav-links" style={{ gap: '0.75rem' }}>
+              <button className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('home'); }}>Início</button>
+              
+              <div className="nav-dropdown">
+                <button className={`nav-link ${['about', 'homeopaths', 'gallery'].includes(currentPage) ? 'active' : ''}`}>
+                  Quem Somos ▾
+                </button>
+                <div className="nav-dropdown-content">
+                  <a href="#about" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('about'); }}>Sobre Nós</a>
+                  <a href="#homeopaths" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('homeopaths'); }}>Lista de Homeopatas</a>
+                  <a href="#gallery" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('gallery'); }}>Galeria</a>
+                </div>
+              </div>
 
-            <nav className="nav-links">
-              {user ? (
-                <>
-                  <span style={{ fontSize: '0.9rem' }}>Olá, <strong>{user.name}</strong></span>
-                  <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem' }} onClick={handleLogout}>Sair</button>
-                </>
-              ) : (
-                <>
-                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
-                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
-                  <button className="nav-link" onClick={() => { clearAlerts(); setCurrentPage('unlock'); }}>Portal de Segurança</button>
-                </>
-              )}
+              <div className="nav-dropdown">
+                <button className="nav-link">Cursos ▾</button>
+                <div className="nav-dropdown-content">
+                  <a href="#online-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
+                  <a href="#inperson-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
+                </div>
+              </div>
+
+              <button className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Livros</button>
+              <button className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Synergy Software</button>
+              <button className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Contato</button>
             </nav>
+
+            {/* Acessibilidade, Carrinho, Usuário */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              
+              {/* Controles de Acessibilidade */}
+              <div className="accessibility-bar">
+                <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.max(0.8, prev - 0.1))} title="Diminuir Fonte">A-</button>
+                <button className="btn-acc" onClick={() => setFontMultiplier(1.0)} title="Restaurar Fonte">A</button>
+                <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.min(1.6, prev + 0.1))} title="Aumentar Fonte">A+</button>
+                <button className="btn-acc btn-contrast" onClick={() => setHighContrast(prev => !prev)} title="Alternar Contraste">◐ Contraste</button>
+              </div>
+
+              {/* Carrinho de Compras */}
+              <button className="btn btn-secondary cart-badge-nav" onClick={() => { clearAlerts(); setCurrentPage('cart'); }} style={{ padding: '0.5rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>🛒</span>
+                {cartItems.length > 0 && (
+                  <span className="cart-count">
+                    {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+                  </span>
+                )}
+              </button>
+
+              {/* Ações do Usuário */}
+              <div className="nav-links" style={{ gap: '0.5rem' }}>
+                {user ? (
+                  <div className="nav-dropdown">
+                    <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}>
+                      👤 Painel ▾
+                    </button>
+                    <div className="nav-dropdown-content" style={{ right: 0, left: 'auto' }}>
+                      <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                      <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
+                    <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+                  </>
+                )}
+              </div>
+            </div>
           </header>
 
-          <div className="main-content" style={{ paddingBottom: 0 }}>
+          {/* Alertas */}
+          <div className="main-content main-content-top">
             {error && <div className="alert alert-danger"><strong>Aviso:</strong> {error}</div>}
             {success && <div className="alert alert-success"><strong>Sucesso:</strong> {success}</div>}
           </div>
 
+          {/* Conteúdo das Páginas */}
           <main className="main-content">
             
-            {/* TELA: LOGIN */}
+            {/* PÁGINA: HOME (LANDING PAGE) */}
+            {currentPage === 'home' && (
+              <div>
+                <section className="hero-section">
+                  <h1>Conheça nossos cursos online</h1>
+                  <p className="hero-subtitle">🌿 A escola oficial do Método Sensação da The Other Song no Brasil. Ensino homeopático de elevado rigor científico e clínico.</p>
+                  <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('register'); }} style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
+                </section>
+
+                <section id="online-courses" className="mb-7">
+                  <h2 className="home-section-title">Cursos de Homeopatia Online</h2>
+                  <div className="premium-card-grid">
+                    <div className="premium-card">
+                      <div className="premium-card-img-placeholder">🌿</div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag">Gratuito</span>
+                        <h3 className="premium-card-title">Introdução à Homeopatia e Sensação Vital</h3>
+                        <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
+                        <div className="premium-card-footer">
+                          <span className="premium-card-price">Grátis</span>
+                          {user ? (
+                            <button className="btn btn-primary" onClick={() => enrollFreeCourse('course-free')}>Matricular-se</button>
+                          ) : (
+                            <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar para Matricular</button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="premium-card">
+                      <div className="premium-card-img-placeholder">📖</div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag">Assinatura</span>
+                        <h3 className="premium-card-title">Clube TOSB: Estudos de Matéria Médica</h3>
+                        <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
+                        <div className="premium-card-footer">
+                          <span className="premium-card-price">R$ 99,00 / mês</span>
+                          <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Adicionar ao Carrinho</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="premium-card">
+                      <div className="premium-card-img-placeholder">🎓</div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag">Especialização</span>
+                        <h3 className="premium-card-title">Pós-Graduação em Homeopatia Avançada</h3>
+                        <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
+                        <div className="premium-card-footer">
+                          <span className="premium-card-price">R$ 3.600,00</span>
+                          <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Adicionar ao Carrinho</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="video-section-home">
+                  <div className="video-section-grid">
+                    <div className="video-section-content">
+                      <span className="premium-card-tag">Apresentação</span>
+                      <h3 className="font-serif-title mt-2">O Método de Sankaran e Níveis de Experiência</h3>
+                      <p>Assista a esta aula explicativa do Dr. Carlos Eduardo Leitão sobre como funciona o Método Sensação, aprofundando o diagnóstico homeopático além da abordagem convencional.</p>
+                      <button className="btn btn-primary" onClick={() => setCurrentPage('about')}>Ver Sobre Nós</button>
+                    </div>
+                    <div>
+                      <div className="video-wrapper-embed">
+                        <iframe 
+                          src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                          title="Introdução ao Método de Sankaran"
+                          frameBorder="0"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section id="inperson-courses" className="mb-7">
+                  <h2 className="home-section-title">Seminários e Cursos Presenciais</h2>
+                  <div className="premium-card-grid">
+                    <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
+                        <h3 className="premium-card-title mt-2">Seminário Avançado de Homeopatia 2026</h3>
+                        <p className="premium-card-text">Encontro presencial na sede de Curitiba focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
+                        <div className="premium-card-footer">
+                          <div>
+                            <div style={{ fontSize: '0.85rem' }}>Data: <strong>23 a 25/Out/2026</strong></div>
+                            <div style={{ fontSize: '0.85rem' }}>Local: <strong>Curitiba - PR</strong></div>
+                          </div>
+                          <button className="btn btn-secondary" onClick={() => setCurrentPage('contact')}>Mais Detalhes</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Encontro Prático</span>
+                        <h3 className="premium-card-title mt-2">Encontro de Matéria Médica Prática</h3>
+                        <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios homeopatas.</p>
+                        <div className="premium-card-footer">
+                          <div>
+                            <div style={{ fontSize: '0.85rem' }}>Data: <strong>05/Dez/2026</strong></div>
+                            <div style={{ fontSize: '0.85rem' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
+                          </div>
+                          <button className="btn btn-secondary" onClick={() => setCurrentPage('contact')}>Mais Detalhes</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="mb-7">
+                  <h2 className="home-section-title">Livros Científicos Recomendados</h2>
+                  <div className="premium-card-grid">
+                    {BOOKS_DATA.slice(0, 3).map(book => (
+                      <div key={book.id} className="premium-card">
+                        <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '140px' }}>📚</div>
+                        <div className="premium-card-content">
+                          <span className="premium-card-tag">{book.author}</span>
+                          <h3 className="premium-card-title">{book.title}</h3>
+                          <p className="premium-card-text">{book.desc}</p>
+                          <div className="premium-card-footer">
+                            <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                            <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <button className="btn btn-secondary" onClick={() => setCurrentPage('books')}>Ver Todos os Livros</button>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* PÁGINA: SOBRE NÓS */}
+            {currentPage === 'about' && (
+              <div className="card">
+                <h2 className="mb-4 font-serif-title text-center" style={{ fontSize: '2rem' }}>Sobre a The Other Song Brasil</h2>
+                <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8' }}>
+                  <p className="mb-4">
+                    A <strong>The Other Song Brasil (TOSB)</strong> é a filial brasileira autorizada da prestigiosa academia internacional *The Other Song - International Academy of Advanced Homeopathy*, sediada em Mumbai, Índia.
+                  </p>
+                  <p className="mb-4">
+                    Nossa filial, sediada em <strong>Curitiba - PR</strong>, é liderada pelo renomado médico homeopata <strong>Dr. Carlos Eduardo Leitão</strong>. Temos como missão central de disseminar o **Método Sensação Vital**, desenvolvido pelo pioneiro **Dr. Rajan Sankaran**, e capacitar profissionais da saúde no Brasil para aplicarem essa metodologia clínica avançada.
+                  </p>
+                  <blockquote style={{ borderLeft: '4px solid var(--color-accent)', paddingLeft: '1.25rem', color: 'var(--color-primary)', fontStyle: 'italic', margin: '2rem 0', fontWeight: '600' }}>
+                    "O Método Sensação nos permite ir além do diagnóstico físico e mental superficial, mergulhando no reino da natureza que expressa o desequilíbrio dinâmico mais profundo de cada indivíduo."
+                  </blockquote>
+                  <div className="text-center mt-6">
+                    <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Voltar para Cursos</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: LISTA DE HOMEOPATAS */}
+            {currentPage === 'homeopaths' && (
+              <div className="card">
+                <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Diretório de Profissionais Homeopatas</h2>
+                <p className="text-muted text-center mb-5">Encontre profissionais qualificados e credenciados no Método Sensação.</p>
+
+                <div className="directory-search-box">
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Buscar homeopata por nome, conselho ou cidade..." 
+                    value={homeopathsSearch} 
+                    onChange={(e) => setHomeopathsSearch(e.target.value)} 
+                  />
+                  {homeopathsSearch && (
+                    <button className="btn btn-secondary" onClick={() => setHomeopathsSearch('')}>Limpar</button>
+                  )}
+                </div>
+
+                <div className="directory-grid">
+                  {HOMEOPATHS_DATA.filter(h => {
+                    const searchLower = homeopathsSearch.toLowerCase();
+                    return h.name.toLowerCase().includes(searchLower) ||
+                           h.reg.toLowerCase().includes(searchLower) ||
+                           h.specialty.toLowerCase().includes(searchLower) ||
+                           h.city.toLowerCase().includes(searchLower);
+                  }).map((h, idx) => (
+                    <div key={idx} className="homeopath-card">
+                      <div className="homeopath-avatar">
+                        {h.name.split(' ').slice(1).map(n => n[0]).join('').substring(0,2).toUpperCase()}
+                      </div>
+                      <div className="homeopath-info">
+                        <h4>{h.name}</h4>
+                        <span className="homeopath-reg">{h.reg}</span>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>{h.specialty}</div>
+                        <div className="homeopath-contact-item">📍 {h.city}</div>
+                        <div className="homeopath-contact-item">📞 {h.phone}</div>
+                        <div className="homeopath-contact-item">✉️ {h.email}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: GALERIA */}
+            {currentPage === 'gallery' && (
+              <div className="card">
+                <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Galeria de Fotos Institucional</h2>
+                <p className="text-muted text-center mb-5">Veja registros de nossos seminários científicos, encontros de alunos e nossa sede em Curitiba.</p>
+
+                <div className="gallery-grid-photos">
+                  {GALLERY_DATA.map((item, idx) => (
+                    <div key={idx} className="gallery-item">
+                      <div className="gallery-placeholder-img">🌿</div>
+                      <div className="gallery-caption">
+                        <div style={{ fontWeight: 'bold' }}>{item.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#e2e8f0' }}>{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: LIVROS */}
+            {currentPage === 'books' && (
+              <div className="card">
+                <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
+                <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
+
+                <div className="premium-card-grid">
+                  {BOOKS_DATA.map(book => (
+                    <div key={book.id} className="premium-card">
+                      <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag">{book.author}</span>
+                        <h3 className="premium-card-title">{book.title}</h3>
+                        <p className="premium-card-text">{book.desc}</p>
+                        <div className="premium-card-footer">
+                          <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                          <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: SYNERGY */}
+            {currentPage === 'synergy' && (
+              <div className="card">
+                <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Synergy Homeopathic Software (SHS)</h2>
+                <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
+
+                <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.05rem', lineHeight: '1.8' }}>
+                  <p className="mb-4">
+                    O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
+                  </p>
+                  
+                  <h3 className="font-serif-title mb-3 mt-5">Tutoriais Exclusivos da Filial Brasil:</h3>
+                  <div className="invoices-list" style={{ gap: '1rem' }}>
+                    <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <strong>Tutorial 1: Como realizar a busca rápida de famílias botânicas</strong>
+                        <div className="helper-text">Assista ao vídeo explicativo passo-a-passo no SHS (15 min)</div>
+                      </div>
+                      <button className="btn btn-primary btn-quick-login" onClick={() => alert('Vídeo de tutorial abrindo...')}>Assistir</button>
+                    </div>
+
+                    <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <strong>Tutorial 2: Repertorização combinada com níveis de experiência</strong>
+                        <div className="helper-text">Estratégia para cruzar sintomas locais com o reino do paciente (22 min)</div>
+                      </div>
+                      <button className="btn btn-primary btn-quick-login" onClick={() => alert('Vídeo de tutorial abrindo...')}>Assistir</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: CONTATO */}
+            {currentPage === 'contact' && (
+              <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Contato e Suporte Acadêmico</h2>
+                <p className="text-muted text-center mb-5">Tem dúvidas sobre matrículas, certificados ou sobre o Synergy Software? Entre em contato.</p>
+
+                <div className="grid-2col-wide">
+                  <div>
+                    <h4 className="section-title-underlined-thin mb-3">Informações de Contato</h4>
+                    <p className="mb-4" style={{ fontSize: '1.05rem' }}>
+                      <strong>The Other Song Brasil</strong><br />
+                      📍 Rua Brigadeiro Franco, 1234 - Batel<br />
+                      Curitiba - PR / CEP: 80420-000
+                    </p>
+                    <p className="mb-4">
+                      📞 Telefone: <strong>(41) 3322-1100</strong><br />
+                      🟢 WhatsApp: <strong>(41) 99111-2233</strong>
+                    </p>
+                    <p className="mb-4">
+                      ✉️ E-mail de Suporte:<br />
+                      <strong>suporte@tosb.com.br</strong>
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="section-title-underlined-thin mb-3">Envie uma Mensagem</h4>
+                    <form onSubmit={(e) => { e.preventDefault(); alert('Mensagem enviada! Em breve retornaremos o contato.'); e.target.reset(); }}>
+                      <div className="form-group">
+                        <label className="form-label">Seu Nome</label>
+                        <input className="form-input" type="text" required placeholder="Dra. Roberta Silva" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Seu E-mail</label>
+                        <input className="form-input" type="email" required placeholder="exemplo@gmail.com" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Mensagem / Dúvida</label>
+                        <textarea className="form-input" required rows="4" placeholder="Descreva sua dúvida..." style={{ minHeight: '100px' }}></textarea>
+                      </div>
+                      <button className="btn btn-primary w-full mt-2" type="submit">Enviar Mensagem</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PÁGINA: CARRINHO */}
+            {currentPage === 'cart' && (
+              <div>
+                <h2 className="mb-5 font-serif-title">Seu Carrinho de Compras</h2>
+                
+                {cartItems.length === 0 ? (
+                  <div className="placeholder-box text-center">
+                    <span style={{ fontSize: '3rem' }}>🛒</span>
+                    <h3 className="mt-3 mb-3">Seu carrinho está vazio!</h3>
+                    <p className="text-muted mb-4">Adicione livros de matéria médica ou cursos acadêmicos à sua sacola para prosseguir.</p>
+                    <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Ver Cursos e Livros</button>
+                  </div>
+                ) : (
+                  <div className="cart-layout">
+                    <div className="cart-items-list">
+                      {cartItems.map((item, idx) => (
+                        <div key={idx} className="cart-item-row">
+                          <div className="cart-item-title-section">
+                            <span className="course-type-badge">{item.type === 'course' ? 'Curso / Assinatura' : 'Livro impresso'}</span>
+                            <h4 className="mt-1">{item.product.title}</h4>
+                          </div>
+                          
+                          <div className="cart-item-actions">
+                            <span style={{ fontWeight: 'bold' }}>
+                              R$ {(item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00) : item.product.price * item.quantity).toFixed(2)}
+                            </span>
+                            
+                            {item.type === 'book' && (
+                              <div className="cart-quantity-selector">
+                                <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
+                                <span className="cart-qty-value">{item.quantity}</span>
+                                <button className="btn-qty" onClick={() => updateCartQty(item.product.id, 1)}>+</button>
+                              </div>
+                            )}
+
+                            <button className="btn-remove-cart" onClick={() => removeFromCart(item.product.id)}>Remover</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="cart-summary-box">
+                      <h3 className="section-title-underlined-thin mb-4">Resumo do Pedido</h3>
+                      <div className="summary-row">
+                        <span>Total dos Itens:</span>
+                        <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>Frete:</span>
+                        <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>Grátis</span>
+                      </div>
+                      <div className="summary-total">
+                        <span>Total:</span>
+                        <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                      </div>
+
+                      <button 
+                        className="btn btn-primary w-full mt-5" 
+                        onClick={() => {
+                          if (!user) {
+                            setError('Por favor, entre na sua conta para finalizar a compra do seu carrinho.');
+                            setCurrentPage('login');
+                          } else {
+                            setCheckoutCourse(null);
+                            setCurrentPage('checkout');
+                          }
+                        }}
+                      >
+                        Finalizar Pedido
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PÁGINA: LOGIN */}
             {currentPage === 'login' && (
               <div className="card auth-box">
-                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Acesso Acadêmico</h2>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  Plataforma Científica de Homeopatia
-                </p>
+                <h2 className="mb-2 text-center">Acesso Acadêmico</h2>
+                <p className="text-muted text-center mb-5">Plataforma Científica de Homeopatia</p>
 
-                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>VALIDAÇÃO RÁPIDA:</span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('student')}>Dra. Ana (Aluna)</button>
-                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('teacher')}>Dr. Carlos (Prof)</button>
-                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => quickLogin('admin')}>Admin</button>
+                <div className="quick-login-container">
+                  <span className="quick-login-title">Assistente de Validação Rápida:</span>
+                  <div className="quick-login-buttons">
+                    <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('student')}>Ana (Aluno)</button>
+                    <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('teacher')}>Carlos (Prof)</button>
+                    <button className="btn btn-secondary btn-quick-login" onClick={() => quickLogin('admin')}>Admin</button>
                   </div>
-                  <small style={{ fontSize: '0.7rem', color: '#64748b' }}>Autopreenche os campos com a senha "senha123".</small>
                 </div>
 
                 <form id="login-form" onSubmit={handleLogin}>
                   <div className="form-group">
                     <label className="form-label">E-mail</label>
-                    <input className="form-input" type="email" name="email" required placeholder="ex: medico@exemplo.com" />
+                    <input className="form-input" type="email" name="email" required placeholder="medico@exemplo.com" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Senha</label>
                     <input className="form-input" type="password" name="password" required />
                   </div>
-                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fff1f2', padding: '0.5rem', borderRadius: '6px', border: '1px solid #fecdd3' }}>
+                  <div className="form-group ip-warning-container">
                     <input type="checkbox" id="simulateIp" name="simulateIp" />
-                    <label htmlFor="simulateIp" style={{ fontSize: '0.8rem', color: 'var(--color-error)', cursor: 'pointer', fontWeight: 'bold' }}>
-                      Simular login em IP distante (Trava Compartilhamento)
-                    </label>
+                    <label htmlFor="simulateIp" className="ip-warning-label">Simular login em IP distante</label>
                   </div>
-                  <button className="btn btn-primary" type="submit" style={{ width: '100%' }}>Entrar na Plataforma</button>
+                  <button className="btn btn-primary w-full mt-2" type="submit">Entrar na Plataforma</button>
                 </form>
               </div>
             )}
 
-            {/* TELA: CADASTRO */}
+            {/* PÁGINA: CADASTRO */}
             {currentPage === 'register' && (
-              <div className="card auth-box" style={{ maxWidth: '550px' }}>
-                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Inscrição Profissional</h2>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  Preencha seus dados de saúde para validação acadêmica
-                </p>
+              <div className="card auth-box auth-box-wide">
+                <h2 className="mb-2 text-center">Inscrição Profissional</h2>
+                <p className="text-muted text-center mb-5">Dados de saúde para validação acadêmica</p>
+
                 <form onSubmit={handleRegister}>
                   <div className="form-group">
                     <label className="form-label">Nome Completo</label>
-                    <input className="form-input" type="text" name="name" required />
+                    <input className="form-input" type="text" name="name" required placeholder="Dra. Roberta Silva" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">E-mail de Trabalho</label>
-                    <input className="form-input" type="email" name="email" required />
+                    <input className="form-input" type="email" name="email" required placeholder="contato@robertasilva.med.br" />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Senha de Acesso</label>
-                    <input className="form-input" type="password" name="password" required />
+                    <label className="form-label">Senha</label>
+                    <input className="form-input" type="password" name="password" required placeholder="Mínimo 6 caracteres" />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+                  <div className="grid-2col">
                     <div className="form-group">
                       <label className="form-label">Conselho</label>
                       <select className="form-input" name="registrationType">
@@ -919,30 +3061,31 @@ COMPRESSION:NONE
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Número Registro</label>
-                      <input className="form-input" type="text" name="registrationNumber" required placeholder="ex: 12345-PR" />
+                      <label className="form-label">Número de Registro</label>
+                      <input className="form-input" type="text" name="registrationNumber" required placeholder="123456-SP" />
                     </div>
                   </div>
+
                   <div className="form-group">
                     <label className="form-label">Termos de Uso e Sigilo Científico</label>
                     <div className="terms-container">{TERMS_TEXT}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="flex-center-gap">
                       <input type="checkbox" id="acceptTerms" name="acceptTerms" required />
-                      <label htmlFor="acceptTerms" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Li e aceito os termos específicos para Homeopatas.</label>
+                      <label htmlFor="acceptTerms">Li e aceito os termos para Homeopatas.</label>
                     </div>
                   </div>
-                  <button className="btn btn-primary" type="submit" style={{ width: '100%' }}>Confirmar Cadastro</button>
+
+                  <button className="btn btn-primary w-full mt-4" type="submit">Criar Conta</button>
                 </form>
               </div>
             )}
 
-            {/* TELA: PORTAL DE SEGURANÇA */}
+            {/* PÁGINA: DESBLOQUEIO */}
             {currentPage === 'unlock' && (
               <div className="card auth-box">
-                <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>Portal de Desbloqueio</h2>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  Ativação de conta suspensa por compartilhamento suspeito
-                </p>
+                <h2 className="mb-2 text-center">Portal de Desbloqueio</h2>
+                <p className="text-muted text-center mb-5">Ativação de conta suspensa por detecção de login simultâneo</p>
+
                 <form onSubmit={handleUnlock}>
                   <div className="form-group">
                     <label className="form-label">E-mail</label>
@@ -953,105 +3096,241 @@ COMPRESSION:NONE
                     <input className="form-input" type="password" name="password" required />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Código de Segurança do E-mail</label>
+                    <label className="form-label">Código de Segurança</label>
                     <input className="form-input" type="text" name="verificationCode" required placeholder="Código de teste: 123456" />
                   </div>
-                  <button className="btn btn-danger" type="submit" style={{ width: '100%' }}>Reativar Conta</button>
+                  <button className="btn btn-danger w-full mt-4" type="submit">Reativar Conta</button>
                 </form>
               </div>
             )}
 
-            {/* TELA: DASHBOARD ALUNO */}
+            {/* PÁGINA: DASHBOARD DO ALUNO */}
             {currentPage === 'student-dash' && (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div className="dashboard-header">
                   <div>
-                    <h1 style={{ fontFamily: 'var(--font-serif)' }}>Meus Estudos Homeopáticos</h1>
-                    <p style={{ color: 'var(--color-text-muted)' }}>Acompanhe suas disciplinas e faturas.</p>
+                    <h1 className="font-serif-title">Painel de Estudos Homeopáticos</h1>
+                    <p className="text-muted">Olá, <strong>{user?.name}</strong>! Gerencie seu aprendizado, dados cadastrais e financeiro.</p>
                   </div>
-                  <button className="btn btn-danger" onClick={handleSimulateDelinquency}>
-                    Simular Inadimplência (+10 dias de atraso)
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="btn btn-danger btn-quick-login" onClick={handleSimulateDelinquency}>Simular Inadimplência</button>
+                    <button className="btn btn-secondary" onClick={handleLogout}>Sair da Conta</button>
+                  </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '2rem' }}>
-                  <div>
-                    <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Meus Cursos</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      {courses.map(course => (
-                        <div key={course.id} className="card" style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-accent)', textTransform: 'uppercase' }}>
-                              {course.type === 'FREE' ? 'Curso Livre' : course.type === 'SUBSCRIPTION' ? 'Mensalidade' : 'Especialização Pós'}
-                            </span>
-                            <h3 style={{ fontSize: '1.25rem', margin: '0.25rem 0' }}>{course.title}</h3>
-                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{course.description}</p>
-                            {course.enrollment.enrolled && (
-                              <small style={{ color: '#64748b' }}>Expira em: {new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</small>
-                            )}
+                <div className="student-panel-container">
+                  <aside className="student-sidebar">
+                    <ul className="student-sidebar-menu">
+                      <li className={`student-sidebar-item ${studentActiveTab === 'panel' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('panel')}>📊 Painel Geral</button>
+                      </li>
+                      <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('courses')}>🌿 Meus Cursos</button>
+                      </li>
+                      <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('payments')}>💳 Pedidos / Financeiro</button>
+                      </li>
+                      <li className={`student-sidebar-item ${studentActiveTab === 'downloads' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('downloads')}>📥 Downloads</button>
+                      </li>
+                      <li className={`student-sidebar-item ${studentActiveTab === 'addresses' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('addresses')}>📍 Endereços</button>
+                      </li>
+                      <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
+                        <button onClick={() => setStudentActiveTab('account')}>⚙️ Detalhes da Conta</button>
+                      </li>
+                    </ul>
+                  </aside>
+
+                  <div className="student-panel-content">
+                    {studentActiveTab === 'panel' && (
+                      <div className="card">
+                        <h3 className="mb-4">Painel Geral</h3>
+                        <p className="mb-4">A partir do seu painel de controle, você pode gerenciar seus estudos, pagamentos, downloads e endereços cadastrados.</p>
+                        <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                          <div className="card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
+                            <span className="course-type-badge">Aulas</span>
+                            <h4>Cursos Ativos</h4>
+                            <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('courses')}>Acessar Aulas</button>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            {course.enrollment.enrolled ? (
-                              course.enrollment.status === 'ACTIVE' ? (
-                                <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
-                              ) : course.enrollment.status === 'SUSPENDED' ? (
-                                <span style={{ color: 'var(--color-error)', fontWeight: 'bold', fontSize: '0.85rem' }}>⚠️ Bloqueado por Atraso</span>
-                              ) : (
-                                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Acesso Expirado</span>
-                              )
+                          <div className="card" style={{ borderLeft: '4px solid var(--color-accent)' }}>
+                            <span className="course-type-badge">Financeiro</span>
+                            <h4>Faturas</h4>
+                            <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('payments')}>Ver Contas</button>
+                          </div>
+                          <div className="card" style={{ borderLeft: '4px solid var(--color-success)' }}>
+                            <span className="course-type-badge">Perfil</span>
+                            <h4>Cadastro</h4>
+                            <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('account')}>Editar Perfil</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {studentActiveTab === 'courses' && (
+                      <div className="card">
+                        <h3 className="mb-4">Meus Cursos</h3>
+                        <div className="courses-list">
+                          {courses.map(course => (
+                            <div key={course.id} className="card course-card-grid">
+                              <div>
+                                <span className="course-type-badge">{course.type}</span>
+                                <h3 className="course-card-title">{course.title}</h3>
+                                <p className="course-card-description">{course.description}</p>
+                              </div>
+                              <div className="course-card-actions">
+                                {course.enrollment.enrolled ? (
+                                  course.enrollment.status === 'ACTIVE' ? (
+                                    <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
+                                  ) : (
+                                    <div className="error-text-bold">⚠️ Suspenso ou Inativo</div>
+                                  )
+                                ) : (
+                                  <button className="btn btn-primary" onClick={() => enrollFreeCourse(course.id)}>Matricular-se</button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {studentActiveTab === 'payments' && (
+                      <div className="card">
+                        <h3 className="mb-4">Histórico Financeiro</h3>
+                        <div className="invoices-list">
+                          {myInvoices.length === 0 ? (
+                            <p className="text-muted text-center">Nenhuma fatura pendente.</p>
+                          ) : (
+                            myInvoices.map(inv => (
+                              <div key={inv.id} className="invoice-card">
+                                <div className="invoice-title">{inv.course_title}</div>
+                                <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
+                                <div className="invoice-footer">
+                                  <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>{inv.status}</span>
+                                  {inv.status === 'PENDING' && (
+                                    <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>Simular Pago</button>
+                                  )}
+                                </div>
+                                <small className="invoice-ref">Ref: {inv.transaction_code}</small>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {studentActiveTab === 'downloads' && (
+                      <div className="card">
+                        <h3 className="mb-4">Downloads Didáticos</h3>
+                        <ul className="invoices-list">
+                          <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <strong>Esquema de Reinos e Subreinos PDF</strong>
+                              <div className="helper-text">Material oficial do Método Sensação Vital</div>
+                            </div>
+                            <button className="btn btn-secondary btn-quick-login" onClick={() => alert('Download iniciado!')}>Baixar</button>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+
+                    {studentActiveTab === 'addresses' && (
+                      <div className="card">
+                        <h3 className="mb-4">Seus Endereços</h3>
+                        <div className="addresses-grid">
+                          <div className="card">
+                            <h4>Endereço de Correspondência</h4>
+                            {user?.address_street ? (
+                              <p>{user.address_street}, {user.address_number} - {user.address_city}/{user.address_state}</p>
                             ) : (
-                              course.type === 'FREE' ? (
-                                <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
-                              ) : (
-                                <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar Curso</button>
-                              )
+                              <p className="helper-text">Nenhum cadastrado. Vá na aba "Detalhes da Conta".</p>
                             )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    )}
 
-                  <div>
-                    <h3 style={{ marginBottom: '1rem', borderBottom: '2px solid var(--color-primary-light)', paddingBottom: '0.5rem' }}>Faturas Asaas</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {myInvoices.length === 0 ? (
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Sem boletos em aberto.</p>
-                      ) : (
-                        myInvoices.map(inv => (
-                          <div key={inv.id} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '0.75rem', backgroundColor: '#fff', fontSize: '0.85rem' }}>
-                            <div style={{ fontWeight: 'bold' }}>{inv.course_title}</div>
-                            <div>R$ {parseFloat(inv.amount).toFixed(2)}</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                              <span style={{
-                                padding: '0.1rem 0.3rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold',
-                                backgroundColor: inv.status === 'RECEIVED' ? '#dcfce7' : '#fee2e2',
-                                color: inv.status === 'RECEIVED' ? '#166534' : '#991b1b'
-                              }}>{inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}</span>
-                              {inv.status === 'PENDING' && (
-                                <button className="btn btn-primary" style={{ padding: '0.15rem 0.4rem', fontSize: '0.7rem' }} onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>Pagar</button>
-                              )}
+                    {studentActiveTab === 'account' && (
+                      <div className="card">
+                        <h3 className="mb-4">Detalhes da Conta</h3>
+                        <form onSubmit={handleUpdateProfile}>
+                          <div className="grid-2col">
+                            <div className="form-group">
+                              <label className="form-label">Nome Completo</label>
+                              <input className="form-input" type="text" name="name" defaultValue={user?.name || ''} required />
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.5rem' }}>Cód: {inv.transaction_code}</div>
+                            <div className="form-group">
+                              <label className="form-label">E-mail</label>
+                              <input className="form-input" type="email" name="email" defaultValue={user?.email || ''} required />
+                            </div>
                           </div>
-                        ))
-                      )}
-                    </div>
+                          <div className="grid-2col">
+                            <div className="form-group">
+                              <label className="form-label">Telefone</label>
+                              <input className="form-input" type="text" name="phone" defaultValue={user?.phone || ''} />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">CPF / CNPJ</label>
+                              <input className="form-input" type="text" name="cpf_cnpj" defaultValue={user?.cpf_cnpj || ''} />
+                            </div>
+                          </div>
+                          <h4 className="mt-4 mb-3">Endereço de Entrega</h4>
+                          <div className="grid-2col">
+                            <div className="form-group">
+                              <label className="form-label">Rua</label>
+                              <input className="form-input" type="text" name="address_street" defaultValue={user?.address_street || ''} />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">Número</label>
+                              <input className="form-input" type="text" name="address_number" defaultValue={user?.address_number || ''} />
+                            </div>
+                          </div>
+                          <div className="grid-container" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                            <div className="form-group">
+                              <label className="form-label">Bairro</label>
+                              <input className="form-input" type="text" name="address_neighborhood" defaultValue={user?.address_neighborhood || ''} />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">Cidade</label>
+                              <input className="form-input" type="text" name="address_city" defaultValue={user?.address_city || ''} />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">Estado</label>
+                              <input className="form-input" type="text" name="address_state" defaultValue={user?.address_state || ''} />
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">CEP</label>
+                            <input className="form-input" type="text" name="address_zip" defaultValue={user?.address_zip || ''} />
+                          </div>
+                          <button className="btn btn-primary w-full mt-4" type="submit">Salvar Alterações</button>
+                        </form>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TELA: CHECKOUT */}
-            {currentPage === 'checkout' && checkoutCourse && (
+            {/* PÁGINA: CHECKOUT */}
+            {currentPage === 'checkout' && (
               <div className="card auth-box">
-                <h2>Finalizar Inscrição</h2>
-                <div style={{ margin: '1rem 0' }}>
-                  <h3>{checkoutCourse.title}</h3>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>
-                    {checkoutCourse.type === 'SUBSCRIPTION' ? 'R$ 99,00 / mês' : 'R$ 3.600,00 total'}
-                  </div>
+                <h2 className="section-title-underlined-thin mb-4">Finalizar Compra - Checkout</h2>
+                <div className="mb-4">
+                  <strong>Resumo da Compra:</strong>
+                  {checkoutCourse ? (
+                    <p>{checkoutCourse.title} - R$ {checkoutCourse.type === 'SUBSCRIPTION' ? '99,00/mês' : '3.600,00'}</p>
+                  ) : (
+                    <div>
+                      {cartItems.map((item, idx) => (
+                        <div key={idx}>{item.product.title} (x{item.quantity})</div>
+                      ))}
+                      <div className="mt-2 font-weight-bold">Total: R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</div>
+                    </div>
+                  )}
                 </div>
+
                 <form onSubmit={handleProcessCheckout}>
                   <div className="form-group">
                     <label className="form-label">Forma de Pagamento</label>
@@ -1059,118 +3338,114 @@ COMPRESSION:NONE
                       <option value="PIX">Pix Imediato</option>
                       <option value="CREDIT_CARD">Cartão de Crédito</option>
                       <option value="BOLETO">Boleto Bancário</option>
-                      {checkoutCourse.type === 'POSTGRAD' && <option value="CARNE">Boleto Parcelado (Carnê)</option>}
+                      <option value="CARNE">Boleto Parcelado (Carnê)</option>
                     </select>
                   </div>
-                  {paymentMethod === 'CARNE' && (
-                    <div className="form-group">
-                      <label className="form-label">Parcelamento</label>
-                      <select className="form-input" value={installments} onChange={(e) => setInstallments(parseInt(e.target.value))}>
-                        <option value={6}>6x de R$ 600,00</option>
-                        <option value={12}>12x de R$ 300,00</option>
-                      </select>
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <button className="btn btn-secondary" style={{ flex: 1 }} type="button" onClick={() => setCurrentPage('student-dash')}>Voltar</button>
-                    <button className="btn btn-primary" style={{ flex: 2 }} type="submit">Confirmar Cobrança</button>
+                  <div className="checkout-actions">
+                    <button className="btn btn-secondary flex-1" type="button" onClick={() => setCurrentPage('cart')}>Voltar</button>
+                    <button className="btn btn-primary flex-2" type="submit">Gerar Cobrança</button>
                   </div>
                 </form>
               </div>
             )}
 
-            {/* TELA: PLAYER DO CURSO */}
+            {/* PÁGINA: LMS / CURSO E PLAYER */}
             {currentPage === 'course-view' && selectedCourse && (
               <div>
-                <button className="btn btn-secondary" style={{ marginBottom: '1.5rem' }} onClick={() => setCurrentPage('student-dash')}>← Painel Principal</button>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+                <button className="btn btn-secondary mb-5" onClick={() => setCurrentPage('student-dash')}>← Voltar ao Dashboard</button>
+
+                <div className="lms-layout">
                   <div>
                     <h2>{selectedCourse.course.title}</h2>
-                    <p style={{ color: 'var(--color-text-muted)' }}>{selectedCourse.course.description}</p>
+                    <p className="course-card-description mb-5">{selectedCourse.course.description}</p>
                     
                     {selectedLesson ? (
-                      <div style={{ marginTop: '1rem' }}>
+                      <div>
                         <div className="player-container">
-                          <video ref={videoRef} key={selectedLesson.id} className="player-video" controls src={selectedLesson.video_url} onPlay={handleVideoPlay} onPause={handleVideoPause} />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h3>{selectedLesson.title}</h3>
-                          <span>Assistido: <strong>{lessonProgress ? lessonProgress.seconds_watched : 0}s</strong> / {selectedLesson.duration_seconds}s</span>
+                          <video
+                            ref={videoRef}
+                            key={selectedLesson.id}
+                            className="player-video"
+                            controls
+                            src={selectedLesson.video_url}
+                            onPlay={handleVideoPlay}
+                            onPause={handleVideoPause}
+                          />
                         </div>
 
-                        {selectedLesson.quiz && (
-                          <div style={{ marginTop: '2.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="lesson-info">
+                          <h3>{selectedLesson.title}</h3>
+                          <div className="lesson-progress-meta">
+                            <span>Progresso: <strong>{lessonProgress ? lessonProgress.seconds_watched : 0}s</strong></span>
+                            <span className={lessonProgress && lessonProgress.completed ? 'lesson-progress-badge-completed' : 'lesson-progress-badge-pending'}>
+                              {lessonProgress && lessonProgress.completed ? '✓ Concluído' : 'Pendente'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {selectedLesson.quiz ? (
+                          <div className="quiz-section-wrapper">
+                            <div className="quiz-header">
                               <h3>{selectedLesson.quiz.title}</h3>
-                              {!quizData ? <button className="btn btn-primary" onClick={loadQuiz}>Responder Quiz</button> : <button className="btn btn-secondary" onClick={() => setQuizData(null)}>Recolher</button>}
+                              {!quizData ? (
+                                <button className="btn btn-primary" onClick={loadQuiz}>Iniciar Quiz da Aula</button>
+                              ) : (
+                                <button className="btn btn-secondary" onClick={() => setQuizData(null)}>Recolher Quiz</button>
+                              )}
                             </div>
+
                             {quizData && (
                               <div className="quiz-container">
-                                {quizData.attempts.length > 0 && (
-                                  <div style={{ marginBottom: '1rem' }}>
-                                    <strong>Tentativas Anteriores:</strong>
-                                    <ul>
-                                      {quizData.attempts.map((a, idx) => (
-                                        <li key={idx} style={{ color: a.passed ? 'var(--color-success)' : 'var(--color-error)' }}>
-                                          Tentativa {a.attempt_number}: Nota {a.score}% ({a.passed ? 'Aprovado' : 'Reprovado'})
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
                                 {quizData.attempts.length < quizData.max_attempts && !quizData.attempts.some(a => a.passed) ? (
                                   <div>
                                     {quizData.questions.map((q, idx) => (
                                       <div key={q.id} className="quiz-question-card">
-                                        <div className="quiz-question-text">Questão {idx+1}: {q.question_text}</div>
+                                        <div className="quiz-question-text"><strong>Questão {idx + 1}:</strong> {q.question_text}</div>
                                         {q.options.map((opt, oIdx) => (
-                                          <div key={oIdx} className={`quiz-option-label ${quizAnswers[q.id] === oIdx ? 'selected' : ''}`} onClick={() => handleSelectQuizOption(q.id, oIdx)}>
+                                          <div
+                                            key={oIdx}
+                                            className={`quiz-option-label ${quizAnswers[q.id] === oIdx ? 'selected' : ''}`}
+                                            onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: oIdx }))}
+                                          >
                                             <span>{opt}</span>
                                           </div>
                                         ))}
                                       </div>
                                     ))}
-                                    <button className="btn btn-primary" style={{ width: '100%' }} onClick={submitQuiz}>Enviar Respostas</button>
+                                    <button className="btn btn-primary w-full" onClick={submitQuiz}>Enviar Respostas</button>
                                   </div>
                                 ) : (
-                                  <div className="alert alert-warning">Você atingiu o limite de tentativas ou já foi aprovado.</div>
+                                  <div className="alert alert-warning">Você concluiu esta avaliação.</div>
                                 )}
                               </div>
                             )}
                           </div>
+                        ) : (
+                          <p>Sem Quiz obrigatório.</p>
                         )}
                       </div>
                     ) : (
-                      <div style={{ border: '2px dashed #ccc', padding: '3rem', textAlign: 'center', marginTop: '1rem', borderRadius: '8px' }}>🌿 Selecione uma aula da lista.</div>
-                    )}
-
-                    {selectedCourse.modules.every(m => m.lessons.every(l => {
-                      const pk = `${user.id}_${l.id}`;
-                      const prog = mockDb.lesson_progress[pk];
-                      return prog && prog.completed;
-                    })) && (
-                      <div className="card alert-success" style={{ marginTop: '2rem' }}>
-                        <h3>Curso Concluído!</h3>
-                        <p>"{selectedCourse.course.finishing_message}"</p>
-                      </div>
+                      <div className="placeholder-box">🌿 Selecione uma aula ao lado para assistir à gravação.</div>
                     )}
                   </div>
 
-                  <div>
-                    <h3>Grade Horária</h3>
-                    {selectedCourse.modules.map(m => (
-                      <div key={m.id} style={{ marginTop: '1rem' }}>
-                        <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{m.title}</div>
-                        {m.lessons.map(l => {
-                          const pk = `${user.id}_${l.id}`;
-                          const isComp = mockDb.lesson_progress[pk]?.completed;
-                          return (
-                            <div key={l.id} onClick={() => selectLesson(l)} style={{ padding: '0.5rem', cursor: 'pointer', border: '1px solid #eee', marginTop: '0.25rem', backgroundColor: selectedLesson?.id === l.id ? 'var(--color-primary-light)' : '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                              <span>{l.title}</span>
-                              <span>{isComp ? '✓' : ''}</span>
+                  <div className="lms-sidebar">
+                    <h3 className="sidebar-title">Módulos</h3>
+                    {selectedCourse.modules.map(mod => (
+                      <div key={mod.id} className="modules-list-container">
+                        <div className="module-header-title">{mod.title}</div>
+                        <div className="lessons-list-container">
+                          {mod.lessons.map(lesson => (
+                            <div
+                              key={lesson.id}
+                              onClick={() => selectLesson(lesson)}
+                              className={`lesson-item-sidebar ${selectedLesson && selectedLesson.id === lesson.id ? 'active' : ''}`}
+                            >
+                              <span>{lesson.title}</span>
+                              <span>{lesson.completed ? '✓' : ''}</span>
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1178,100 +3453,72 @@ COMPRESSION:NONE
               </div>
             )}
 
-            {/* TELA: PROFESSOR */}
+            {/* PÁGINA: DASHBOARD DO PROFESSOR */}
             {currentPage === 'teacher-dash' && (
               <div>
-                <h2>Relatório de Presença e Alunos</h2>
-                <div className="card" style={{ marginTop: '1rem' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '2px solid #ccc' }}>
-                        <th style={{ padding: '0.5rem' }}>Aluno</th>
-                        <th style={{ padding: '0.5rem' }}>Curso</th>
-                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Assistido</th>
-                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Aulas Concluídas</th>
-                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Quizzes Aprovados</th>
-                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Presença Oficial</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {teacherReportData.map((rep, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                          <td style={{ padding: '0.5rem' }}><strong>{rep.studentName}</strong><br/><small>{rep.studentEmail}</small></td>
-                          <td style={{ padding: '0.5rem' }}>{rep.courseTitle}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.progressPercent}%</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.completedLessons}/{rep.totalLessons}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{rep.quizzesPassed}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--color-success)' }}>{rep.presenceCount} presenças</td>
+                <div className="teacher-dash-header">
+                  <h2>Portal do Professor</h2>
+                  <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar</button>
+                </div>
+                <div className="card">
+                  <h3 className="mb-4">Alunos e Presenças</h3>
+                  <div className="table-responsive">
+                    <table className="lms-table">
+                      <thead>
+                        <tr>
+                          <th>Aluno</th>
+                          <th>Curso</th>
+                          <th>Presenças</th>
+                          <th>Quizzes Feitos</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {teacherReportData.map((rep, idx) => (
+                          <tr key={idx}>
+                            <td>{rep.studentName}</td>
+                            <td>{rep.courseTitle}</td>
+                            <td>{rep.presenceCount}</td>
+                            <td>{rep.quizzesPassed}</td>
+                            <td>{rep.enrollmentStatus}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* TELA: ADMIN */}
+            {/* PÁGINA: DASHBOARD DO ADMINISTRADOR */}
             {currentPage === 'admin-dash' && (
               <div>
-                <h2>Painel Financeiro & Conciliação OFX</h2>
-                
+                <h2>Painel do Administrador</h2>
                 {adminReportData && (
-                  <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0', flexWrap: 'wrap' }}>
-                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-primary)' }}>
-                      <div>Recebido Líquido</div>
+                  <div className="admin-stats-grid">
+                    <div className="admin-stat-card primary">
+                      <span>Receita Paga</span>
                       <h2>R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
                     </div>
-                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-warning)' }}>
-                      <div>Boletos em Aberto</div>
+                    <div className="admin-stat-card warning">
+                      <span>Receita Pendente</span>
                       <h2>R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
-                    </div>
-                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-error)' }}>
-                      <div>Inadimplência Vencida</div>
-                      <h2>R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
-                    </div>
-                    <div className="card" style={{ flex: 1, borderLeft: '6px solid var(--color-accent)' }}>
-                      <div>MRR Clubes</div>
-                      <h2>R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
                     </div>
                   </div>
                 )}
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div className="admin-layout">
                   <div className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3>Conciliação Bancária</h3>
-                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={handleGenerateMockOfx}>Gerar OFX para Teste</button>
-                    </div>
-                    <form onSubmit={handleConciliation} style={{ marginTop: '1rem' }}>
-                      <textarea className="form-input" style={{ minHeight: '150px', fontFamily: 'monospace', fontSize: '0.75rem' }} value={ofxInput} onChange={(e) => setOfxInput(e.target.value)} required />
-                      <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} type="submit">Processar OFX</button>
+                    <h3>Conciliação Bancária (.OFX)</h3>
+                    <button className="btn btn-secondary mt-2 mb-4" onClick={handleGenerateMockOfx}>Gerar OFX para Teste</button>
+                    <form onSubmit={handleConciliation}>
+                      <textarea
+                        className="form-input ofx-textarea"
+                        value={ofxInput}
+                        onChange={(e) => setOfxInput(e.target.value)}
+                        required
+                      />
+                      <button className="btn btn-primary w-full" type="submit">Processar Conciliação</button>
                     </form>
-
-                    {conciliationResults && (
-                      <div style={{ marginTop: '1rem', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}>
-                        <div>Processados no OFX: <strong>{conciliationResults.processedCount}</strong></div>
-                        <div style={{ color: 'var(--color-success)' }}>✓ Conciliados com Matrícula Liberada: <strong>{conciliationResults.reconciled.length}</strong></div>
-                        <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes de valor: <strong>{conciliationResults.divergent.length}</strong></div>
-                        <div style={{ color: '#64748b' }}>✗ Não identificados no LMS: <strong>{conciliationResults.unmatched.length}</strong></div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="card">
-                    <h3>Logs de Acesso e Trava de Segurança</h3>
-                    <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #eee', padding: '0.5rem', marginTop: '1rem', backgroundColor: '#fafafa' }}>
-                      {securityLogs.map((log, idx) => (
-                        <div key={idx} style={{ borderBottom: '1px solid #eee', padding: '0.25rem', fontSize: '0.75rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <strong>{log.user_name}</strong>
-                            <span>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
-                          </div>
-                          <div>Ação: <span style={{ color: log.content_accessed.includes('LOCKOUT') ? 'red' : 'green' }}>{log.content_accessed}</span></div>
-                          <div>IP: {log.ip_address} | {log.user_agent}</div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1279,17 +3526,29 @@ COMPRESSION:NONE
 
           </main>
 
+          {/* Rodapé TOSB */}
           <footer className="tosb-footer">
+            <div className="footer-grid">
+              <div className="footer-section">
+                <h4>Sobre Nós</h4>
+                <p className="footer-about-text">A filial brasileira autorizada da The Other Song. Compromisso científico no ensino da Homeopatia.</p>
+              </div>
+              <div className="footer-section">
+                <h4>Contato e Suporte</h4>
+                <p className="footer-contact-text">Curitiba - PR / suporte@tosb.com.br</p>
+              </div>
+            </div>
             <div className="footer-bottom">
-              <span>&copy; The Other Song Brasil - Plataforma Integrada de Homeopatia EAD</span>
-              <span>Desenvolvido com sofisticação acadêmica e segurança.</span>
+              <span>&copy; {new Date().getFullYear()} The Other Song Brasil. Todos os direitos reservados.</span>
+              <span>Desenvolvido para Máxima Acessibilidade.</span>
             </div>
           </footer>
         </div>
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
     root.render(<App />);
   </script>
 </body>

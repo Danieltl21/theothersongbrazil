@@ -226,4 +226,116 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
+// Atualizar Perfil do Aluno ou Professor
+router.put('/profile', authenticateToken, async (req, res) => {
+  const {
+    name,
+    email,
+    phone,
+    cpf_cnpj,
+    address_zip,
+    address_street,
+    address_number,
+    address_complement,
+    address_neighborhood,
+    address_city,
+    address_state,
+    professional_registration_type,
+    professional_registration_number,
+    crm,
+    rqe,
+    bio
+  } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Atualizar tabela users
+    await client.query(
+      'UPDATE users SET name = $1, email = $2 WHERE id = $3',
+      [name, email, req.user.id]
+    );
+
+    if (req.user.role === 'STUDENT') {
+      // Upsert student_profile
+      const checkProfile = await client.query('SELECT user_id FROM student_profiles WHERE user_id = $1', [req.user.id]);
+      if (checkProfile.rows.length > 0) {
+        await client.query(
+          `UPDATE student_profiles SET 
+            professional_registration_type = $1, 
+            professional_registration_number = $2, 
+            phone = $3, 
+            cpf_cnpj = $4, 
+            address_zip = $5, 
+            address_street = $6, 
+            address_number = $7, 
+            address_complement = $8, 
+            address_neighborhood = $9, 
+            address_city = $10, 
+            address_state = $11 
+           WHERE user_id = $12`,
+          [
+            professional_registration_type,
+            professional_registration_number,
+            phone,
+            cpf_cnpj,
+            address_zip,
+            address_street,
+            address_number,
+            address_complement,
+            address_neighborhood,
+            address_city,
+            address_state,
+            req.user.id
+          ]
+        );
+      } else {
+        await client.query(
+          `INSERT INTO student_profiles 
+            (user_id, professional_registration_type, professional_registration_number, phone, cpf_cnpj, address_zip, address_street, address_number, address_complement, address_neighborhood, address_city, address_state) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          [
+            req.user.id,
+            professional_registration_type,
+            professional_registration_number,
+            phone,
+            cpf_cnpj,
+            address_zip,
+            address_street,
+            address_number,
+            address_complement,
+            address_neighborhood,
+            address_city,
+            address_state
+          ]
+        );
+      }
+    } else if (req.user.role === 'TEACHER') {
+      // Upsert teacher_profile
+      const checkProfile = await client.query('SELECT user_id FROM teacher_profiles WHERE user_id = $1', [req.user.id]);
+      if (checkProfile.rows.length > 0) {
+        await client.query(
+          'UPDATE teacher_profiles SET crm = $1, rqe = $2, bio = $3 WHERE user_id = $4',
+          [crm, rqe, bio, req.user.id]
+        );
+      } else {
+        await client.query(
+          'INSERT INTO teacher_profiles (user_id, crm, rqe, bio) VALUES ($1, $2, $3, $4)',
+          [req.user.id, crm, rqe, bio]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ message: 'Perfil atualizado com sucesso!' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar perfil.' });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;
