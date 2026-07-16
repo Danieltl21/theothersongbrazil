@@ -29,6 +29,81 @@ const GALLERY_DATA = [
   { title: 'Encontro Científico de Homeopatas', desc: 'Discussão de casos e evolução clínica.' }
 ];
 
+const COURSES_DETAILS_DATA = {
+  'course-free': {
+    target: 'Médicos, Médicas, Farmacêuticos, Veterinários, Dentistas e terapeutas integrativos interessados em conhecer a homeopatia clássica.',
+    duration: '180 dias de acesso',
+    workload: '30 horas',
+    certificate: 'Disponível após assistir todas as aulas.',
+    modules: [
+      {
+        title: 'Módulo 1: Fundamentos da Homeopatia',
+        lessons: [
+          'Introdução à Lei dos Semelhantes e Hahnemann',
+          'Conceito de Força Vital e Saúde Dinâmica',
+          'Diferença entre Alopatia, Homeopatia e Fitoterapia'
+        ]
+      },
+      {
+        title: 'Módulo 2: O Método Sensação Vital',
+        lessons: [
+          'Rajan Sankaran e a evolução do diagnóstico homeopático',
+          'Os Sete Níveis de Experiência Humana',
+          'Introdução aos três reinos da natureza'
+        ]
+      }
+    ]
+  },
+  'course-sub': {
+    target: 'Homeopatas formados, estudantes avançados de homeopatia e clínicos que desejam estudar Matéria Médica de forma continuada.',
+    duration: 'Recorrente mensal (cancelamento a qualquer momento)',
+    workload: 'Estudo continuado (2h de novos conteúdos por semana)',
+    certificate: 'Certificado de participação anual emitido sob demanda.',
+    modules: [
+      {
+        title: 'Ciclo 1: O Reino Vegetal na Clínica',
+        lessons: [
+          'Diferenciando Família das Solanáceas',
+          'Família das Compostas e reações de choque/trauma',
+          'Estudo de Casos Clínicos de Plantas Raras'
+        ]
+      },
+      {
+        title: 'Ciclo 2: O Reino Mineral e Tabela Periódica',
+        lessons: [
+          'Linha do Carbono e Linha do Silício na infância',
+          'Metais Pesados e reações de sobrevivência/defesa',
+          'Diferenciação de Sais Homeopáticos'
+        ]
+      }
+    ]
+  },
+  'course-post': {
+    target: 'Médicos, Dentistas e Profissionais da saúde graduados que desejam obter a especialização no Método Sensação e prática de consultório.',
+    duration: '18 meses (acesso estendido por mais 6 meses)',
+    workload: '360 horas',
+    certificate: 'Certificado de Pós-Graduação Lato Sensu reconhecido.',
+    modules: [
+      {
+        title: 'Módulo de Especialização 1: Método Sensação na Prática',
+        lessons: [
+          'O Conceito de Sensação Vital no Reino Vegetal',
+          'Mapeamento dos reinos e subreinos da natureza',
+          'Anamnese Clínica Avançada (Tomada de caso)'
+        ]
+      },
+      {
+        title: 'Módulo de Especialização 2: Casos Clínicos Complexos',
+        lessons: [
+          'Diagnóstico diferencial no Reino Animal',
+          'Reações de Luta ou Fuga vs. Competição',
+          'Superclasses em Homeopatia'
+        ]
+      }
+    ]
+  }
+};
+
 export default function App() {
   // Controle de Estado Geral
   const [currentPage, setCurrentPage] = useState('home'); // home, about, homeopaths, gallery, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
@@ -37,6 +112,11 @@ export default function App() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  // Estados de Responsividade e Dropdowns
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'about' | 'courses' | 'panel' | null
+  const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
 
   // Estados de Acessibilidade (público idoso)
   const [fontMultiplier, setFontMultiplier] = useState(() => {
@@ -54,6 +134,27 @@ export default function App() {
 
   // Estado da aba ativa no Dashboard do Aluno
   const [studentActiveTab, setStudentActiveTab] = useState('panel'); // panel, courses, payments, downloads, addresses, account
+
+  // Estados de Negócio
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  // Fechar dropdowns e menu mobile ao clicar fora
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest('.nav-dropdown') && !e.target.closest('.hamburger-btn')) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
+
+  // Fechar menus automaticamente ao navegar
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+  }, [currentPage]);
 
   // Sincronizar Acessibilidade com Documento e LocalStorage
   useEffect(() => {
@@ -75,9 +176,6 @@ export default function App() {
     localStorage.setItem('cart_items', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Estados de Negócio
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
   
@@ -1403,15 +1501,30 @@ NEWFILEENCODING:NONE
           )}
         </div>
 
+        {/* Botão Hamburger Mobile */}
+        <button 
+          className="hamburger-btn" 
+          onClick={() => setMobileMenuOpen(prev => !prev)}
+          aria-label="Alternar Menu"
+        >
+          ☰
+        </button>
+
         {/* Menu Principal */}
-        <nav className="nav-links" style={{ gap: '0.75rem' }}>
+        <nav className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ gap: '0.75rem' }}>
           <button className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('home'); }}>Início</button>
           
           <div className="nav-dropdown">
-            <button className={`nav-link ${['about', 'homeopaths', 'gallery'].includes(currentPage) ? 'active' : ''}`}>
+            <button 
+              className={`nav-link ${['about', 'homeopaths', 'gallery'].includes(currentPage) ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveDropdown(activeDropdown === 'about' ? null : 'about');
+              }}
+            >
               Quem Somos ▾
             </button>
-            <div className="nav-dropdown-content">
+            <div className={`nav-dropdown-content ${activeDropdown === 'about' ? 'open' : ''}`}>
               <a href="#about" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('about'); }}>Sobre Nós</a>
               <a href="#homeopaths" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('homeopaths'); }}>Lista de Homeopatas</a>
               <a href="#gallery" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('gallery'); }}>Galeria</a>
@@ -1419,8 +1532,16 @@ NEWFILEENCODING:NONE
           </div>
 
           <div className="nav-dropdown">
-            <button className="nav-link">Cursos ▾</button>
-            <div className="nav-dropdown-content">
+            <button 
+              className="nav-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveDropdown(activeDropdown === 'courses' ? null : 'courses');
+              }}
+            >
+              Cursos ▾
+            </button>
+            <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
               <a href="#online-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
               <a href="#inperson-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
             </div>
@@ -1429,6 +1550,34 @@ NEWFILEENCODING:NONE
           <button className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Livros</button>
           <button className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Synergy Software</button>
           <button className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Contato</button>
+
+          {/* Bloco de Usuário exclusivo para mobile */}
+          <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
+            {user ? (
+              <div className="nav-dropdown">
+                <button 
+                  className="nav-link w-full text-left" 
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveDropdown(activeDropdown === 'panel' ? null : 'panel');
+                  }}
+                >
+                  <span>👤 {user.name}</span>
+                  <span>▾</span>
+                </button>
+                <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`}>
+                  <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                  <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <button className="btn btn-secondary w-full" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
+                <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Painel do Usuário, Carrinho e Acessibilidade */}
@@ -1452,14 +1601,21 @@ NEWFILEENCODING:NONE
             )}
           </button>
 
-          {/* Ações do Usuário */}
-          <div className="nav-links" style={{ gap: '0.5rem' }}>
+          {/* Ações do Usuário (Desktop Apenas) */}
+          <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
             {user ? (
               <div className="nav-dropdown">
-                <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveDropdown(activeDropdown === 'panel' ? null : 'panel');
+                  }}
+                >
                   👤 Painel ▾
                 </button>
-                <div className="nav-dropdown-content" style={{ right: 0, left: 'auto' }}>
+                <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`} style={{ right: 0, left: 'auto' }}>
                   <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
                   <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
                 </div>
@@ -1628,47 +1784,47 @@ NEWFILEENCODING:NONE
               <div className="premium-card-grid">
                 
                 {/* Curso Livre */}
-                <div className="premium-card">
-                  <div className="premium-card-img-placeholder">🌿</div>
+                <div className="premium-card animate-fade-in">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>🌿</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Gratuito</span>
-                    <h3 className="premium-card-title">Introdução à Homeopatia e Sensação Vital</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>Introdução à Homeopatia e Sensação Vital</h3>
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
-                    <div className="premium-card-footer">
-                      <span className="premium-card-price">Grátis</span>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>Ementa</button>
                       {user ? (
-                        <button className="btn btn-primary" onClick={() => enrollFreeCourse('course-free')}>Matricular-se</button>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
-                        <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar para Matricular</button>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Assinatura Clube */}
-                <div className="premium-card">
-                  <div className="premium-card-img-placeholder">📖</div>
+                <div className="premium-card animate-fade-in">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>📖</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Assinatura</span>
-                    <h3 className="premium-card-title">Clube TOSB: Estudos de Matéria Médica</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>Clube TOSB: Estudos de Matéria Médica</h3>
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
-                    <div className="premium-card-footer">
-                      <span className="premium-card-price">R$ 99,00 / mês</span>
-                      <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Adicionar ao Carrinho</button>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>Ementa</button>
+                      <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
                 </div>
 
                 {/* Pós-Graduação */}
-                <div className="premium-card">
-                  <div className="premium-card-img-placeholder">🎓</div>
+                <div className="premium-card animate-fade-in">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>🎓</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Especialização</span>
-                    <h3 className="premium-card-title">Pós-Graduação em Homeopatia Avançada</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>Pós-Graduação em Homeopatia Avançada</h3>
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
-                    <div className="premium-card-footer">
-                      <span className="premium-card-price">R$ 3.600,00</span>
-                      <button className="btn btn-primary" onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Adicionar ao Carrinho</button>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>Ementa</button>
+                      <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
                 </div>
@@ -1777,6 +1933,102 @@ NEWFILEENCODING:NONE
           </div>
         )}
 
+        {/* PÁGINA: DETALHES DO CURSO */}
+        {currentPage === 'course-detail' && selectedDetailCourse && (
+          <div>
+            <button className="btn btn-secondary mb-5" onClick={() => setCurrentPage('home')}>
+              ← Voltar para Cursos
+            </button>
+
+            <div className="course-detail-hero">
+              <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
+                {selectedDetailCourse.type === 'FREE' ? 'Curso Livre (Gratuito)' : selectedDetailCourse.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
+              </span>
+              <h1 className="mt-2">{selectedDetailCourse.title}</h1>
+              <p className="hero-subtitle mb-0" style={{ fontSize: '1.1rem', margin: '0.5rem 0 0' }}>
+                {selectedDetailCourse.description}
+              </p>
+            </div>
+
+            <div className="course-detail-grid">
+              <div>
+                <h3 className="section-title-underlined mb-4">Ementa e Módulos do Curso</h3>
+                
+                {COURSES_DETAILS_DATA[selectedDetailCourse.id]?.modules.map((mod, idx) => (
+                  <div key={idx} className="syllabus-module-card">
+                    <div className="syllabus-module-header">{mod.title}</div>
+                    <ul className="syllabus-lessons-list">
+                      {mod.lessons.map((les, lIdx) => (
+                        <li key={lIdx} className="syllabus-lesson-item">
+                          <span>📖</span> {les}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )) || (
+                  <p className="text-muted">A ementa detalhada estará disponível em breve.</p>
+                )}
+
+                <h3 className="section-title-underlined mt-6 mb-4">Corpo Docente</h3>
+                <div className="teacher-bio-card">
+                  <div className="teacher-bio-avatar">C</div>
+                  <div>
+                    <h4>Dr. Carlos Eduardo Leitão (TOSB)</h4>
+                    <p className="helper-text" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>CRM-PR 12345 | RQE 6789</p>
+                    <p className="mt-2 text-muted" style={{ fontSize: '0.92rem' }}>
+                      Médico Homeopata com mais de 20 anos de experiência clínica. Diretor científico e principal responsável pela difusão do Método Sensação Vital no Brasil.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="card" style={{ position: 'sticky', top: '100px' }}>
+                  <h3 className="section-title-underlined-thin mb-4">Ficha Técnica</h3>
+                  <table className="course-specs-table">
+                    <tbody>
+                      <tr>
+                        <td>Carga Horária:</td>
+                        <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.workload || '30 horas'}</td>
+                      </tr>
+                      <tr>
+                        <td>Acesso:</td>
+                        <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.duration || '180 dias'}</td>
+                      </tr>
+                      <tr>
+                        <td>Certificado:</td>
+                        <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.certificate || 'Disponível'}</td>
+                      </tr>
+                      <tr>
+                        <td>Público-Alvo:</td>
+                        <td style={{ fontSize: '0.85rem' }}>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.target || 'Profissionais de saúde'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="mt-5">
+                    {selectedDetailCourse.type === 'FREE' ? (
+                      user ? (
+                        <button className="btn btn-primary w-full" onClick={() => { enrollFreeCourse(selectedDetailCourse.id); setCurrentPage('student-dash'); }}>
+                          Matricular-se Grátis
+                        </button>
+                      ) : (
+                        <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>
+                          Entrar para Matricular
+                        </button>
+                      )
+                    ) : (
+                      <button className="btn btn-primary w-full" onClick={() => { addToCart({ id: selectedDetailCourse.id, title: selectedDetailCourse.title, type: selectedDetailCourse.type, price: selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : 3600 }, 'course'); }}>
+                        Adicionar ao Carrinho
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* PÁGINA: SOBRE NÓS */}
         {currentPage === 'about' && (
           <div className="card">
@@ -1873,25 +2125,97 @@ NEWFILEENCODING:NONE
 
         {/* PÁGINA: LOJA DE LIVROS */}
         {currentPage === 'books' && (
-          <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
-            <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
+          <div>
+            <div className="card">
+              <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
+              <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
 
-            <div className="premium-card-grid">
-              {BOOKS_DATA.map(book => (
-                <div key={book.id} className="premium-card">
-                  <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
-                  <div className="premium-card-content">
-                    <span className="premium-card-tag">{book.author}</span>
-                    <h3 className="premium-card-title">{book.title}</h3>
-                    <p className="premium-card-text">{book.desc}</p>
-                    <div className="premium-card-footer">
-                      <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
-                      <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
+              <div className="premium-card-grid">
+                {BOOKS_DATA.map(book => (
+                  <div key={book.id} className="premium-card">
+                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
+                    <div className="premium-card-content">
+                      <span className="premium-card-tag">{book.author}</span>
+                      <h3 className="premium-card-title">{book.title}</h3>
+                      <p className="premium-card-text">{book.desc}</p>
+                      <div className="premium-card-footer">
+                        <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                        <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RELATOS DOS CLIENTES (TESTIMONIALS) */}
+            <div className="testimonials-section">
+              <h2 className="home-section-title">Relatos de Nossos Leitores</h2>
+              <p className="text-muted text-center mb-5">Veja o impacto das obras de Rajan Sankaran na prática clínica de médicos e homeopatas no Brasil.</p>
+              
+              <div className="testimonial-grid">
+                <div className="testimonial-card">
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p>"O livro \'Esquema de Reinos e Subreinos\' tornou-se um guia de consulta diária no meu consultório. A rapidez para diferenciar o reino mineral do vegetal aumentou significativamente meus acertos prescritivos."</p>
+                  <div className="testimonial-author">Dr. Marcos Souza — CRM-SP</div>
                 </div>
-              ))}
+
+                <div className="testimonial-card">
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p>"\'O Método das Oito Caixas\' clareou de forma definitiva como organizar os sintomas clínicos. A tradução está excelente e muito fiel aos ensinamentos originais de Mumbai."</p>
+                  <div className="testimonial-author">Dra. Letícia Ramos — CRM-PR</div>
+                </div>
+
+                <div className="testimonial-card">
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p>"Estudar as \'Superclasses em Homeopatia\' me deu a segurança que faltava para tratar casos crônicos de hipersensibilidade. Indispensável para quem atua com o Método Sensação."</p>
+                  <div className="testimonial-author">Dr. Roberto de Almeida — CRM-RJ</div>
+                </div>
+              </div>
+            </div>
+
+            {/* AGENDA E LANÇAMENTOS */}
+            <div className="agenda-section">
+              <h2 className="home-section-title">Agenda & Lançamentos</h2>
+              <p className="text-muted text-center mb-5">Acompanhe nossos lançamentos literários, grupos de estudos e seminários integrados.</p>
+
+              <div className="agenda-list">
+                <div className="agenda-card">
+                  <div className="agenda-date-box">
+                    <span className="agenda-date-day">15</span>
+                    <span className="agenda-date-month">Set</span>
+                  </div>
+                  <div className="agenda-details">
+                    <span className="agenda-type">Lançamento de Livro</span>
+                    <h3 className="agenda-title">Lançamento Oficial: Superclasses em Homeopatia</h3>
+                    <p className="agenda-location">📍 Sede da TOSB Curitiba / Transmissão ao vivo via Zoom</p>
+                  </div>
+                </div>
+
+                <div className="agenda-card">
+                  <div className="agenda-date-box">
+                    <span className="agenda-date-day">10</span>
+                    <span className="agenda-date-month">Out</span>
+                  </div>
+                  <div className="agenda-details">
+                    <span className="agenda-type">Grupo de Estudos</span>
+                    <h3 className="agenda-title">Discussão Científica do Livro \'Esquema de Reinos\'</h3>
+                    <p className="agenda-location">📍 Online Zoom exclusivo para alunos e portadores da obra</p>
+                  </div>
+                </div>
+
+                <div className="agenda-card">
+                  <div className="agenda-date-box">
+                    <span className="agenda-date-day">24</span>
+                    <span className="agenda-date-month">Out</span>
+                  </div>
+                  <div className="agenda-details">
+                    <span className="agenda-type">Seminário Literário</span>
+                    <h3 className="agenda-title">Seminário Avançado com base nas \'Oito Caixas\'</h3>
+                    <p className="agenda-location">📍 Auditório TOSB Curitiba / Evento Presencial</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
