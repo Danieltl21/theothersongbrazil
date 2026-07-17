@@ -37,11 +37,15 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: calc(16px * var(--font-multiplier, 1)) !important;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg-base);
   color: var(--color-text-main);
-  font-size: calc(1.05rem * var(--font-multiplier, 1));
+  font-size: 1.05rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -1989,6 +1993,52 @@ body.high-contrast .nav-link.active {
     width: 100%;
     min-width: unset;
     padding: 0.75rem;
+  }
+}
+
+/* Botão Flutuante do WhatsApp */
+.whatsapp-float-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #25D366;
+  color: white !important;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  z-index: 9999;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.whatsapp-float-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  background-color: #20ba5a;
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-icon-svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Classes de Visibilidade Responsiva */
+@media (min-width: 769px) {
+  .mobile-only-block {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-only-block {
+    display: none !important;
   }
 }
 

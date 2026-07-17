@@ -104,109 +104,36 @@ const COURSES_DETAILS_DATA = {
   }
 };
 
+// Helper para gerar slugs legíveis de cursos
+const getSlug = (title) => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+};
+
 export default function App() {
   // Controle de Estado Geral
-  const [currentPage, setCurrentPage] = useState('home'); // home, about, homeopaths, gallery, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
+  const [currentPage, setCurrentPage] = useState('home'); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
-  // Estados de Responsividade e Dropdowns
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null); // 'about' | 'courses' | 'panel' | null
-  const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
-
-  // Estados de Acessibilidade (público idoso)
-  const [fontMultiplier, setFontMultiplier] = useState(() => {
-    return parseFloat(localStorage.getItem('fontMultiplier')) || 1.0;
-  });
-  const [highContrast, setHighContrast] = useState(() => {
-    return localStorage.getItem('highContrast') === 'true';
-  });
-
-  // Estado do Carrinho de Compras
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('cart_items');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Estado da aba ativa no Dashboard do Aluno
-  const [studentActiveTab, setStudentActiveTab] = useState('panel'); // panel, courses, payments, downloads, addresses, account
-
-  // Estados de Negócio
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-
-  // Fechar dropdowns e menu mobile ao clicar fora
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (!e.target.closest('.nav-dropdown') && !e.target.closest('.hamburger-btn')) {
-        setActiveDropdown(null);
-      }
-    };
-    document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
-  }, []);
-
-  // Fechar menus automaticamente ao navegar
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setActiveDropdown(null);
-  }, [currentPage]);
-
-  // Sincronizar Acessibilidade com Documento e LocalStorage
-  useEffect(() => {
-    document.documentElement.style.setProperty('--font-multiplier', fontMultiplier);
-    localStorage.setItem('fontMultiplier', fontMultiplier);
-  }, [fontMultiplier]);
-
-  useEffect(() => {
-    if (highContrast) {
-      document.body.classList.add('high-contrast');
-    } else {
-      document.body.classList.remove('high-contrast');
-    }
-    localStorage.setItem('highContrast', highContrast);
-  }, [highContrast]);
-
-  // Sincronizar Carrinho
-  useEffect(() => {
-    localStorage.setItem('cart_items', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  const [selectedLesson, setSelectedLesson] = useState(null);
-  const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
-  
-  // Estado do Quiz
-  const [quizData, setQuizData] = useState(null);
-  const [quizAnswers, setQuizAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState(null);
-
-  // Estado de Faturas e Checkout
-  const [myInvoices, setMyInvoices] = useState([]);
-  const [checkoutCourse, setCheckoutCourse] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('PIX');
-  const [installments, setInstallments] = useState(12);
-
-  // Estado de Relatórios
-  const [teacherReportData, setTeacherReportData] = useState([]);
-  const [adminReportData, setAdminReportData] = useState(null);
-  const [securityLogs, setSecurityLogs] = useState([]);
-
-  // Estado do upload OFX
-  const [ofxInput, setOfxInput] = useState('');
-  const [conciliationResults, setConciliationResults] = useState(null);
-
-  // Refs de mídia
-  const videoRef = useRef(null);
-  const progressIntervalRef = useRef(null);
-
   // Backup Local (Mock Database) para funcionamento Offline
   const [mockDb, setMockDb] = useState(() => {
     const saved = localStorage.getItem('mock_db');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (!parsed.books) {
+        parsed.books = BOOKS_DATA;
+        localStorage.setItem('mock_db', JSON.stringify(parsed));
+      }
+      return parsed;
+    }
 
     const initialDb = {
       users: [
@@ -219,6 +146,7 @@ export default function App() {
         { id: 'course-sub', title: 'Clube TOSB: Estudo Continuado de Matéria Médica', description: 'Curso recorrente mensal focado no estudo aprofundado dos reinos animal, vegetal e mineral na clínica homeopática.', type: 'SUBSCRIPTION', duration_days: 30, finishing_message: 'Parabéns por concluir mais um ciclo de estudos continuados em nossa Matéria Médica!', teacher_id: 'teacher-id', active: true },
         { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true }
       ],
+      books: BOOKS_DATA,
       modules: {
         'course-free': [
           { id: 'mod-f1', title: 'Módulo 1: Fundamentos da Homeopatia', lessons: [
@@ -263,10 +191,143 @@ export default function App() {
     localStorage.setItem('mock_db', JSON.stringify(mockDb));
   }, [mockDb]);
 
+  // Estados de Responsividade e Dropdowns
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'about' | 'courses' | 'panel' | null
+  const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
+
+  // Estados de Acessibilidade (público idoso)
+  const [fontMultiplier, setFontMultiplier] = useState(() => {
+    return parseFloat(localStorage.getItem('fontMultiplier')) || 1.0;
+  });
+
+  // Estado do Carrinho de Compras
+  const [cartItems, setCartItems] = useState(() => {
+    const saved = localStorage.getItem('cart_items');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Estado da aba ativa no Dashboard do Aluno
+  const [studentActiveTab, setStudentActiveTab] = useState('panel'); // panel, courses, payments, account, agenda
+
+  // Estados de Negócio
+  const [courses, setCourses] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  // Estados de Edição CRUD Administrador
+  const [adminCrudTab, setAdminCrudTab] = useState('courses'); // courses, books
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [editingBook, setEditingBook] = useState(null);
+
+  // Fechar dropdowns e menu mobile ao clicar fora
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest('.nav-dropdown') && !e.target.closest('.hamburger-btn')) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
+
+  // Fechar menus automaticamente ao navegar
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+  }, [currentPage]);
+
+  // Sincronizar Acessibilidade com Documento e LocalStorage
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-multiplier', fontMultiplier);
+    localStorage.setItem('fontMultiplier', fontMultiplier);
+  }, [fontMultiplier]);
+
+  // Sincronizar Carrinho
+  useEffect(() => {
+    localStorage.setItem('cart_items', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Sincronizar Livros do mockDb
+  useEffect(() => {
+    if (mockDb && mockDb.books) {
+      setBooks(mockDb.books);
+    } else {
+      setBooks(BOOKS_DATA);
+    }
+  }, [mockDb, isOfflineMode]);
+
+  // Sistema de Roteamento por Hash URL
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash || '#home';
+      
+      if (hash.startsWith('#course/')) {
+        const slug = hash.replace('#course/', '');
+        const courseList = mockDb?.courses || [];
+        const course = courseList.find(c => getSlug(c.title) === slug || c.id === slug);
+        if (course) {
+          setSelectedDetailCourse(course);
+          setCurrentPage('course-detail');
+        } else {
+          setCurrentPage('home');
+        }
+      } else {
+        const page = hash.replace('#', '');
+        const validPages = [
+          'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
+          'cart', 'login', 'register', 'unlock', 'student-dash', 
+          'course-view', 'teacher-dash', 'admin-dash', 'checkout'
+        ];
+        if (validPages.includes(page)) {
+          setCurrentPage(page);
+        } else {
+          setCurrentPage('home');
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [mockDb.courses]);
+
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
+  
+  // Estado do Quiz
+  const [quizData, setQuizData] = useState(null);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizResult, setQuizResult] = useState(null);
+
+  // Estado de Faturas e Checkout
+  const [myInvoices, setMyInvoices] = useState([]);
+  const [checkoutCourse, setCheckoutCourse] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('PIX');
+  const [installments, setInstallments] = useState(12);
+
+  // Estado de Relatórios
+  const [teacherReportData, setTeacherReportData] = useState([]);
+  const [adminReportData, setAdminReportData] = useState(null);
+  const [securityLogs, setSecurityLogs] = useState([]);
+
+  // Estado do upload OFX
+  const [ofxInput, setOfxInput] = useState('');
+  const [conciliationResults, setConciliationResults] = useState(null);
+
+  // Refs de mídia
+  const videoRef = useRef(null);
+  const progressIntervalRef = useRef(null);
+
   // Testar conexão ao carregar e carregar usuário se houver token
   useEffect(() => {
     const testConnection = async () => {
       try {
+        const healthRes = await fetch('/api/health');
+        if (!healthRes.ok) {
+          throw new Error('Database is offline');
+        }
+
         const res = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -281,9 +342,10 @@ export default function App() {
           setUser(null);
           setToken('');
           localStorage.removeItem('token');
+          setIsOfflineMode(false);
         }
       } catch (err) {
-        console.warn("Backend não conectado. Iniciando em Modo de Simulação (Frontend-Only).");
+        console.warn("Backend ou Banco de Dados não conectado. Iniciando em Modo de Simulação (Frontend-Only).");
         setIsOfflineMode(true);
         // Tenta restaurar login mock se houver token mockado
         if (token) {
@@ -621,6 +683,85 @@ export default function App() {
       } catch (err) {
         setError('Erro ao desbloquear.');
       }
+    }
+  };
+
+  // Handlers do CRUD do Administrador
+  const handleSaveCourse = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const id = e.target.id.value || 'course_' + Date.now();
+    const title = e.target.title.value;
+    const description = e.target.description.value;
+    const type = e.target.type.value;
+    const duration_days = parseInt(e.target.duration_days.value) || 180;
+    const finishing_message = e.target.finishing_message.value;
+    const teacher_id = e.target.teacher_id.value || 'teacher-id';
+
+    setMockDb(prev => {
+      let updatedCourses;
+      const exists = prev.courses.some(c => c.id === id);
+      if (exists) {
+        updatedCourses = prev.courses.map(c => c.id === id ? { ...c, title, description, type, duration_days, finishing_message, teacher_id } : c);
+        setSuccess('Curso atualizado com sucesso!');
+      } else {
+        const newCourse = { id, title, description, type, duration_days, finishing_message, teacher_id, active: true };
+        updatedCourses = [...prev.courses, newCourse];
+        setSuccess('Curso criado com sucesso!');
+      }
+      return { ...prev, courses: updatedCourses };
+    });
+
+    setEditingCourse(null);
+    e.target.reset();
+  };
+
+  const handleDeleteCourse = (id) => {
+    clearAlerts();
+    if (confirm('Tem certeza que deseja remover este curso do catálogo?')) {
+      setMockDb(prev => {
+        const updatedCourses = prev.courses.filter(c => c.id !== id);
+        return { ...prev, courses: updatedCourses };
+      });
+      setSuccess('Curso removido com sucesso!');
+    }
+  };
+
+  const handleSaveBook = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const id = e.target.id.value || 'book_' + Date.now();
+    const title = e.target.title.value;
+    const author = e.target.author.value;
+    const price = parseFloat(e.target.price.value);
+    const desc = e.target.desc.value;
+
+    setMockDb(prev => {
+      let updatedBooks;
+      const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
+      if (exists) {
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc } : b);
+        setSuccess('Livro atualizado com sucesso!');
+      } else {
+        const newBook = { id, title, author, price, desc };
+        updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
+        setSuccess('Livro adicionado com sucesso!');
+      }
+      return { ...prev, books: updatedBooks };
+    });
+
+    setEditingBook(null);
+    e.target.reset();
+  };
+
+  const handleDeleteBook = (id) => {
+    clearAlerts();
+    if (confirm('Tem certeza que deseja remover este livro da livraria?')) {
+      setMockDb(prev => {
+        const updatedBooks = (prev.books || BOOKS_DATA).filter(b => b.id !== id);
+        return { ...prev, books: updatedBooks };
+      });
+      setSuccess('Livro removido com sucesso!');
     }
   };
 
@@ -1512,11 +1653,11 @@ NEWFILEENCODING:NONE
 
         {/* Menu Principal */}
         <nav className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ gap: '0.75rem' }}>
-          <button className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('home'); }}>Início</button>
+          <a href="#home" className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => clearAlerts()}>Início</a>
           
           <div className="nav-dropdown">
             <button 
-              className={`nav-link ${['about', 'homeopaths', 'gallery'].includes(currentPage) ? 'active' : ''}`}
+              className={`nav-link ${['about', 'homeopaths'].includes(currentPage) ? 'active' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveDropdown(activeDropdown === 'about' ? null : 'about');
@@ -1525,9 +1666,8 @@ NEWFILEENCODING:NONE
               Quem Somos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'about' ? 'open' : ''}`}>
-              <a href="#about" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('about'); }}>Sobre Nós</a>
-              <a href="#homeopaths" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('homeopaths'); }}>Lista de Homeopatas</a>
-              <a href="#gallery" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('gallery'); }}>Galeria</a>
+              <a href="#about" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); }}>Sobre Nós & Galeria</a>
+              <a href="#homeopaths" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); }}>Lista de Homeopatas</a>
             </div>
           </div>
 
@@ -1542,14 +1682,14 @@ NEWFILEENCODING:NONE
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
-              <a href="#online-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
-              <a href="#inperson-courses" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); setCurrentPage('home'); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
+              <a href="#online-courses" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
+              <a href="#inperson-courses" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
             </div>
           </div>
 
-          <button className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Livros</button>
-          <button className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Synergy Software</button>
-          <button className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Contato</button>
+          <a href="#books" className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => clearAlerts()}>Livros</a>
+          <a href="#synergy" className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => clearAlerts()}>Synergy Software</a>
+          <a href="#contact" className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => clearAlerts()}>Contato</a>
 
           {/* Bloco de Usuário exclusivo para mobile */}
           <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
@@ -1567,14 +1707,14 @@ NEWFILEENCODING:NONE
                   <span>▾</span>
                 </button>
                 <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`}>
-                  <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                  <a href="#student-dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
                   <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <button className="btn btn-secondary w-full" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
-                <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+                <a href="#login" className="btn btn-secondary w-full" onClick={() => { clearAlerts(); setMobileMenuOpen(false); }}>Entrar</a>
+                <a href="#register" className="btn btn-primary w-full" onClick={() => { clearAlerts(); setMobileMenuOpen(false); }}>Cadastrar</a>
               </div>
             )}
           </div>
@@ -1588,18 +1728,17 @@ NEWFILEENCODING:NONE
             <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.max(0.8, prev - 0.1))} title="Diminuir Fonte (A-)" aria-label="Diminuir Fonte">A-</button>
             <button className="btn-acc" onClick={() => setFontMultiplier(1.0)} title="Tamanho Padrão (A)" aria-label="Restaurar Fonte">A</button>
             <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.min(1.6, prev + 0.1))} title="Aumentar Fonte (A+)" aria-label="Aumentar Fonte">A+</button>
-            <button className="btn-acc btn-contrast" onClick={() => setHighContrast(prev => !prev)} title="Alternar Contraste" aria-label="Alternar Contraste">◐ Contraste</button>
           </div>
 
           {/* Carrinho de Compras */}
-          <button className="btn btn-secondary cart-badge-nav" onClick={() => { clearAlerts(); setCurrentPage('cart'); }} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
+          <a href="#cart" className="btn btn-secondary cart-badge-nav" onClick={() => clearAlerts()} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
             <span style={{ fontSize: '1.2rem' }}>🛒</span>
             {cartItems.length > 0 && (
               <span className="cart-count">
                 {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
               </span>
             )}
-          </button>
+          </a>
 
           {/* Ações do Usuário (Desktop Apenas) */}
           <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
@@ -1622,8 +1761,8 @@ NEWFILEENCODING:NONE
               </div>
             ) : (
               <>
-                <button className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
-                <button className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => { clearAlerts(); setCurrentPage('register'); }}>Cadastrar</button>
+                <a href="#login" className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => clearAlerts()}>Entrar</a>
+                <a href="#register" className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => clearAlerts()}>Cadastrar</a>
               </>
             )}
           </div>
@@ -1785,17 +1924,17 @@ NEWFILEENCODING:NONE
                 
                 {/* Curso Livre */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>🌿</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>🌿</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Gratuito</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>Introdução à Homeopatia e Sensação Vital</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>Introdução à Homeopatia e Sensação Vital</h3>
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); setCurrentPage('course-detail'); }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>Ementa</button>
                       {user ? (
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
-                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); setCurrentPage('login'); }}>Entrar</button>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); window.location.hash = '#login'; }}>Entrar</button>
                       )}
                     </div>
                   </div>
@@ -1803,13 +1942,13 @@ NEWFILEENCODING:NONE
 
                 {/* Assinatura Clube */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>📖</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>📖</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Assinatura</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>Clube TOSB: Estudos de Matéria Médica</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>Clube TOSB: Estudos de Matéria Médica</h3>
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); setCurrentPage('course-detail'); }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>Ementa</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -1817,13 +1956,13 @@ NEWFILEENCODING:NONE
 
                 {/* Pós-Graduação */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>🎓</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>🎓</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Especialização</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>Pós-Graduação em Homeopatia Avançada</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>Pós-Graduação em Homeopatia Avançada</h3>
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); setCurrentPage('course-detail'); }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>Ementa</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -1840,7 +1979,7 @@ NEWFILEENCODING:NONE
                   <h3 className="font-serif-title mt-2">O Método de Sankaran e Níveis de Experiência</h3>
                   <p>Assista a esta aula explicativa do Dr. Carlos Eduardo Leitão sobre como funciona o Método Sensação, aprofundando o diagnóstico homeopático além da abordagem convencional.</p>
                   <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('about'); }}>Ver Sobre Nós</button>
+                    <button className="btn btn-primary" onClick={() => { clearAlerts(); window.location.hash = '#about'; }}>Ver Sobre Nós</button>
                   </div>
                 </div>
                 <div>
@@ -1867,12 +2006,15 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
                     <h3 className="premium-card-title mt-2">Seminário Avançado de Homeopatia 2026</h3>
                     <p className="premium-card-text">Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
-                    <div className="premium-card-footer">
+                    <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
                       </div>
-                      <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Mais Detalhes</button>
+                      <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
+                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); window.location.hash = '#contact'; }}>Mais Detalhes</button>
+                        <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', price: 1200.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1882,12 +2024,15 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Encontro Prático</span>
                     <h3 className="premium-card-title mt-2">Encontro de Matéria Médica Prática</h3>
                     <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.</p>
-                    <div className="premium-card-footer">
+                    <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
                       </div>
-                      <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('contact'); }}>Mais Detalhes</button>
+                      <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
+                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); window.location.hash = '#contact'; }}>Mais Detalhes</button>
+                        <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', price: 600.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1899,7 +2044,7 @@ NEWFILEENCODING:NONE
             <section className="mb-7">
               <h2 className="home-section-title">Livros Científicos Recomendados</h2>
               <div className="premium-card-grid">
-                {BOOKS_DATA.slice(0, 3).map(book => (
+                {books.slice(0, 3).map(book => (
                   <div key={book.id} className="premium-card">
                     <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '140px' }}>📚</div>
                     <div className="premium-card-content">
@@ -2049,8 +2194,23 @@ NEWFILEENCODING:NONE
                 <li className="mb-2"><strong>Casos Clínicos Reais:</strong> Ensino baseado em gravações reais de consultas, respeitando o sigilo de dados.</li>
                 <li className="mb-2"><strong>Integração de Tecnologias:</strong> Uso do Synergy Software como base para repertorização rápida.</li>
               </ul>
-              <div className="text-center mt-6">
-                <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Voltar para Cursos</button>
+              <div className="text-center mt-6 mb-7">
+                <button className="btn btn-primary" onClick={() => { clearAlerts(); window.location.hash = '#home'; }}>Voltar para Cursos</button>
+              </div>
+
+              <h3 className="font-serif-title mb-4 mt-6 text-center" style={{ fontSize: '1.75rem' }}>Galeria de Fotos Institucional</h3>
+              <div className="gallery-grid-photos">
+                {GALLERY_DATA.map((item, idx) => (
+                  <div key={idx} className="gallery-item">
+                    <div className="gallery-placeholder-img">
+                      🌿
+                    </div>
+                    <div className="gallery-caption">
+                      <div style={{ fontWeight: 'bold' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -2131,7 +2291,7 @@ NEWFILEENCODING:NONE
               <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
 
               <div className="premium-card-grid">
-                {BOOKS_DATA.map(book => (
+                {books.map(book => (
                   <div key={book.id} className="premium-card">
                     <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
                     <div className="premium-card-content">
@@ -2156,64 +2316,20 @@ NEWFILEENCODING:NONE
               <div className="testimonial-grid">
                 <div className="testimonial-card">
                   <div className="testimonial-stars">★★★★★</div>
-                  <p>"O livro \'Esquema de Reinos e Subreinos\' tornou-se um guia de consulta diária no meu consultório. A rapidez para diferenciar o reino mineral do vegetal aumentou significativamente meus acertos prescritivos."</p>
+                  <p>"O livro 'Esquema de Reinos e Subreinos' tornou-se um guia de consulta diária no meu consultório. A rapidez para diferenciar o reino mineral do vegetal aumentou significativamente meus acertos prescritivos."</p>
                   <div className="testimonial-author">Dr. Marcos Souza — CRM-SP</div>
                 </div>
 
                 <div className="testimonial-card">
                   <div className="testimonial-stars">★★★★★</div>
-                  <p>"\'O Método das Oito Caixas\' clareou de forma definitiva como organizar os sintomas clínicos. A tradução está excelente e muito fiel aos ensinamentos originais de Mumbai."</p>
+                  <p>"'O Método das Oito Caixas' clareou de forma definitiva como organizar os sintomas clínicos. A tradução está excelente e muito fiel aos ensinamentos originais de Mumbai."</p>
                   <div className="testimonial-author">Dra. Letícia Ramos — CRM-PR</div>
                 </div>
 
                 <div className="testimonial-card">
                   <div className="testimonial-stars">★★★★★</div>
-                  <p>"Estudar as \'Superclasses em Homeopatia\' me deu a segurança que faltava para tratar casos crônicos de hipersensibilidade. Indispensável para quem atua com o Método Sensação."</p>
+                  <p>"Estudar as 'Superclasses em Homeopatia' me deu a segurança que faltava para tratar casos crônicos de hipersensibilidade. Indispensável para quem atua com o Método Sensação."</p>
                   <div className="testimonial-author">Dr. Roberto de Almeida — CRM-RJ</div>
-                </div>
-              </div>
-            </div>
-
-            {/* AGENDA E LANÇAMENTOS */}
-            <div className="agenda-section">
-              <h2 className="home-section-title">Agenda & Lançamentos</h2>
-              <p className="text-muted text-center mb-5">Acompanhe nossos lançamentos literários, grupos de estudos e seminários integrados.</p>
-
-              <div className="agenda-list">
-                <div className="agenda-card">
-                  <div className="agenda-date-box">
-                    <span className="agenda-date-day">15</span>
-                    <span className="agenda-date-month">Set</span>
-                  </div>
-                  <div className="agenda-details">
-                    <span className="agenda-type">Lançamento de Livro</span>
-                    <h3 className="agenda-title">Lançamento Oficial: Superclasses em Homeopatia</h3>
-                    <p className="agenda-location">📍 Sede da TOSB Curitiba / Transmissão ao vivo via Zoom</p>
-                  </div>
-                </div>
-
-                <div className="agenda-card">
-                  <div className="agenda-date-box">
-                    <span className="agenda-date-day">10</span>
-                    <span className="agenda-date-month">Out</span>
-                  </div>
-                  <div className="agenda-details">
-                    <span className="agenda-type">Grupo de Estudos</span>
-                    <h3 className="agenda-title">Discussão Científica do Livro \'Esquema de Reinos\'</h3>
-                    <p className="agenda-location">📍 Online Zoom exclusivo para alunos e portadores da obra</p>
-                  </div>
-                </div>
-
-                <div className="agenda-card">
-                  <div className="agenda-date-box">
-                    <span className="agenda-date-day">24</span>
-                    <span className="agenda-date-month">Out</span>
-                  </div>
-                  <div className="agenda-details">
-                    <span className="agenda-type">Seminário Literário</span>
-                    <h3 className="agenda-title">Seminário Avançado com base nas \'Oito Caixas\'</h3>
-                    <p className="agenda-location">📍 Auditório TOSB Curitiba / Evento Presencial</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -2427,28 +2543,25 @@ NEWFILEENCODING:NONE
                   <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('courses')}>🌿 Meus Cursos</button>
                   </li>
+                  <li className={`student-sidebar-item ${studentActiveTab === 'agenda' ? 'active' : ''}`}>
+                    <button onClick={() => setStudentActiveTab('agenda')}>📅 Agenda & Eventos</button>
+                  </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('payments')}>💳 Pedidos / Financeiro</button>
-                  </li>
-                  <li className={`student-sidebar-item ${studentActiveTab === 'downloads' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('downloads')}>📥 Downloads</button>
-                  </li>
-                  <li className={`student-sidebar-item ${studentActiveTab === 'addresses' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('addresses')}>📍 Endereços</button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('account')}>⚙️ Detalhes da Conta</button>
                   </li>
                 </ul>
               </aside>
-
+ 
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
                 {studentActiveTab === 'panel' && (
                   <div className="card">
                     <h3 className="mb-4">Painel Geral</h3>
                     <p style={{ marginBottom: '1.5rem' }}>
-                      A partir do seu painel de controle, você pode visualizar suas faturas pendentes, gerenciar seus endereços de entrega e faturamento, e editar sua senha e detalhes da conta.
+                      A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
                     <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
                       <div className="card" style={{ borderLeft: '4px solid var(--color-primary)', padding: '1.25rem' }}>
@@ -2469,7 +2582,7 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
-
+ 
                 {studentActiveTab === 'courses' && (
                   <div className="card">
                     <h3 className="mb-4">Meus Cursos e Disciplinas</h3>
@@ -2514,7 +2627,52 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
-
+ 
+                {studentActiveTab === 'agenda' && (
+                  <div className="card">
+                    <h3 className="mb-4">Agenda & Eventos Científicos</h3>
+                    <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
+                    
+                    <div className="agenda-list">
+                      <div className="agenda-card">
+                        <div className="agenda-date-box">
+                          <span className="agenda-date-day">15</span>
+                          <span className="agenda-date-month">Set</span>
+                        </div>
+                        <div className="agenda-details">
+                          <span className="agenda-type">Lançamento de Livro</span>
+                          <h3 className="agenda-title">Lançamento Oficial: Superclasses em Homeopatia</h3>
+                          <p className="agenda-location">📍 Sede da TOSB Curitiba / Transmissão ao vivo via Zoom</p>
+                        </div>
+                      </div>
+ 
+                      <div className="agenda-card">
+                        <div className="agenda-date-box">
+                          <span className="agenda-date-day">10</span>
+                          <span className="agenda-date-month">Out</span>
+                        </div>
+                        <div className="agenda-details">
+                          <span className="agenda-type">Grupo de Estudos</span>
+                          <h3 className="agenda-title">Discussão Científica do Livro 'Esquema de Reinos'</h3>
+                          <p className="agenda-location">📍 Online Zoom exclusivo para alunos e portadores da obra</p>
+                        </div>
+                      </div>
+ 
+                      <div className="agenda-card">
+                        <div className="agenda-date-box">
+                          <span className="agenda-date-day">24</span>
+                          <span className="agenda-date-month">Out</span>
+                        </div>
+                        <div className="agenda-details">
+                          <span className="agenda-type">Seminário Literário</span>
+                          <h3 className="agenda-title">Seminário Avançado com base nas 'Oito Caixas'</h3>
+                          <p className="agenda-location">📍 Auditório TOSB Curitiba / Evento Presencial</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+ 
                 {studentActiveTab === 'payments' && (
                   <div className="card">
                     <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
@@ -2545,73 +2703,7 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
-                {studentActiveTab === 'downloads' && (
-                  <div className="card">
-                    <h3 className="mb-4">Materiais para Download</h3>
-                    <p className="text-muted mb-4">Arquivos científicos e guias acadêmicos de suporte às aulas:</p>
-                    <ul className="invoices-list" style={{ gap: '0.75rem' }}>
-                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <strong>Esquema de Reinos e Subreinos PDF</strong>
-                          <div className="helper-text">Material oficial do Método Sensação Vital (1.2 MB)</div>
-                        </div>
-                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
-                      </li>
-                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <strong>Formulário de Anamnese Método Sensação</strong>
-                          <div className="helper-text">Roteiro prático para tomada de caso clínico (450 KB)</div>
-                        </div>
-                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
-                      </li>
-                      <li className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <strong>Tabela de Potências e Frequência</strong>
-                          <div className="helper-text">Guia rápido de escala LM e Cinquentamilesimal (600 KB)</div>
-                        </div>
-                        <a href="#dl" className="btn btn-secondary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Download iniciado!'); }}>Baixar Arquivo</a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
 
-                {studentActiveTab === 'addresses' && (
-                  <div className="card">
-                    <h3 className="mb-4">Endereços de Cadastro</h3>
-                    <p className="text-muted mb-4">Os seguintes endereços serão utilizados na finalização de compras e envio de materiais didáticos impressos/livros.</p>
-                    <div className="addresses-grid">
-                      <div className="card">
-                        <h4 style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>Endereço de Faturamento</h4>
-                        {user?.address_street ? (
-                          <div style={{ fontSize: '0.95rem' }}>
-                            <p>{user.name}</p>
-                            <p>{user.address_street}, {user.address_number} {user.address_complement ? ` - ${user.address_complement}` : ''}</p>
-                            <p>{user.address_neighborhood}</p>
-                            <p>{user.address_zip}</p>
-                            <p>{user.address_city} - {user.address_state}</p>
-                          </div>
-                        ) : (
-                          <p className="helper-text">Nenhum endereço cadastrado ainda. Vá na aba "Detalhes da Conta" para atualizar.</p>
-                        )}
-                      </div>
-
-                      <div className="card">
-                        <h4 style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>Endereço de Entrega</h4>
-                        {user?.address_street ? (
-                          <div style={{ fontSize: '0.95rem' }}>
-                            <p>{user.name}</p>
-                            <p>{user.address_street}, {user.address_number} {user.address_complement ? ` - ${user.address_complement}` : ''}</p>
-                            <p>{user.address_neighborhood}</p>
-                            <p>{user.address_zip}</p>
-                            <p>{user.address_city} - {user.address_state}</p>
-                          </div>
-                        ) : (
-                          <p className="helper-text">Nenhum endereço cadastrado ainda. Vá na aba "Detalhes da Conta" para atualizar.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {studentActiveTab === 'account' && (
                   <div className="card">
@@ -2911,16 +3003,61 @@ NEWFILEENCODING:NONE
         )}
 
         {/* PÁGINA: DASHBOARD DO PROFESSOR */}
-        {currentPage === 'teacher-dash' && (
+        {currentPage === 'teacher-dash' && user && (
           <div>
             <div className="teacher-dash-header">
               <div>
-                <h1 className="font-serif-title">Portal do Professor</h1>
-                <p className="text-muted">Gerencie o progresso e a presença dos seus alunos nas aulas gravadas.</p>
+                <h1 className="font-serif-title">Portal do Docente</h1>
+                <p className="text-muted">Seja bem-vindo, <strong>{user.name}</strong>! Gerencie suas turmas e acompanhe a receita de seus cursos.</p>
               </div>
-              <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar Relatório</button>
+              <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar Painel</button>
             </div>
 
+            {/* Metadados do Professor */}
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card primary">
+                <span className="course-type-badge">Receita de Vendas Gerada</span>
+                <h2 className="stat-value">R$ {mockDb.payments
+                  .filter(p => p.status === 'RECEIVED' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id))
+                  .reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</h2>
+              </div>
+              
+              <div className="admin-stat-card accent">
+                <span className="course-type-badge">Cursos Vinculados</span>
+                <h2 className="stat-value">{mockDb.courses.filter(c => c.teacher_id === user.id).length} Cursos</h2>
+              </div>
+
+              <div className="admin-stat-card warning">
+                <span className="course-type-badge">Total de Matrículas Ativas</span>
+                <h2 className="stat-value">
+                  {mockDb.enrollments.filter(e => e.status === 'ACTIVE' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(e.course_id)).length} Alunos
+                </h2>
+              </div>
+            </div>
+
+            {/* Lista de Cursos Vinculados */}
+            <div className="card mb-6">
+              <h3 className="section-title-underlined mb-4">Meus Cursos Vinculados</h3>
+              <div className="courses-list">
+                {mockDb.courses.filter(c => c.teacher_id === user.id).map(c => {
+                  const enrollCount = mockDb.enrollments.filter(e => e.course_id === c.id && e.status === 'ACTIVE').length;
+                  return (
+                    <div key={c.id} className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <strong>{c.title}</strong>
+                        <div className="helper-text">{c.description}</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span className="badge-paid">{c.type}</span>
+                        <div className="helper-text mt-1">{enrollCount} aluno(s) ativo(s)</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Relatório de Presenças */}
             <div className="card">
               <h3 className="mb-4">Relatório Consolidado de Alunos</h3>
               
@@ -2982,77 +3119,237 @@ NEWFILEENCODING:NONE
           <div>
             <h1 className="font-serif-title mb-5">Painel Administrativo da Homeopatia EAD</h1>
 
-            {/* Widgets Financeiros */}
-            {adminReportData && (
-              <div className="admin-stats-grid">
-                
-                <div className="admin-stat-card primary">
-                  <span className="course-type-badge">Receita Total (Paga)</span>
-                  <h2 className="stat-value">R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
-                </div>
+            {/* Abas Sub-menu do Administrador */}
+            <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <button className={`btn ${adminCrudTab === 'stats' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('stats')}>📊 Estatísticas & OFX</button>
+              <button className={`btn ${adminCrudTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('courses')}>🌿 Gerenciar Cursos</button>
+              <button className={`btn ${adminCrudTab === 'books' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('books')}>📚 Gerenciar Livros</button>
+              <button className={`btn ${adminCrudTab === 'logs' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('logs')}>🔒 Logs de Segurança</button>
+            </div>
 
-                <div className="admin-stat-card warning">
-                  <span className="course-type-badge">Receita em Aberto</span>
-                  <h2 className="stat-value">R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
-                </div>
+            {adminCrudTab === 'stats' && (
+              <div>
+                {/* Widgets Financeiros */}
+                {adminReportData && (
+                  <div className="admin-stats-grid">
+                    <div className="admin-stat-card primary">
+                      <span className="course-type-badge">Receita Total (Paga)</span>
+                      <h2 className="stat-value">R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
+                    </div>
+                    <div className="admin-stat-card warning">
+                      <span className="course-type-badge">Receita em Aberto</span>
+                      <h2 className="stat-value">R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
+                    </div>
+                    <div className="admin-stat-card error">
+                      <span className="course-type-badge">Valores Vencidos</span>
+                      <h2 className="stat-value">R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
+                    </div>
+                    <div className="admin-stat-card accent">
+                      <span className="course-type-badge">Recorrência Mensal (MRR)</span>
+                      <h2 className="stat-value">R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
+                    </div>
+                  </div>
+                )}
 
-                <div className="admin-stat-card error">
-                  <span className="course-type-badge">Valores Vencidos</span>
-                  <h2 className="stat-value">R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
+                <div className="admin-layout">
+                  {/* Conciliação OFX */}
+                  <div className="card">
+                    <div className="quiz-header">
+                      <h3>Conciliação Bancária (.OFX)</h3>
+                      <button className="btn btn-secondary btn-quick-login" onClick={handleGenerateMockOfx}>
+                        Gerar OFX de Teste
+                      </button>
+                    </div>
+                    <p className="course-card-description mb-4">
+                      Cole aqui o conteúdo textual do arquivo de extrato bancário (.OFX) para cruzar com as vendas no banco do LMS.
+                    </p>
+                    <form onSubmit={handleConciliation}>
+                      <textarea
+                        className="form-input ofx-textarea"
+                        placeholder="Cole as tags XML do arquivo OFX ou use o botão 'Gerar OFX de Teste' acima..."
+                        value={ofxInput}
+                        onChange={(e) => setOfxInput(e.target.value)}
+                        required
+                      />
+                      <button className="btn btn-primary w-full" type="submit">Processar Conciliação Financeira</button>
+                    </form>
+                    {conciliationResults && (
+                      <div className="conciliation-results">
+                        <h4 className="mb-2">Resultado do Extrato:</h4>
+                        <div>Total Lançamentos: <strong>{conciliationResults.processedCount}</strong></div>
+                        <div style={{ color: 'var(--color-success)' }}>✓ Conciliados: <strong>{conciliationResults.reconciled.length}</strong></div>
+                        <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes: <strong>{conciliationResults.divergent.length}</strong></div>
+                        <div className="text-muted">✗ Não localizados: <strong>{conciliationResults.unmatched.length}</strong></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="admin-stat-card accent">
-                  <span className="course-type-badge">Recorrência Mensal (MRR)</span>
-                  <h2 className="stat-value">R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
-                </div>
-
               </div>
             )}
 
-            <div className="admin-layout">
-              
-              {/* Conciliação OFX */}
+            {adminCrudTab === 'courses' && (
               <div className="card">
-                <div className="quiz-header">
-                  <h3>Conciliação Bancária (.OFX)</h3>
-                  <button className="btn btn-secondary btn-quick-login" onClick={handleGenerateMockOfx}>
-                    Gerar OFX de Teste
-                  </button>
+                <div className="quiz-header mb-4">
+                  <h3>Gerenciamento de Cursos Acadêmicos</h3>
+                  <button className="btn btn-primary" onClick={() => setEditingCourse({})}>＋ Criar Novo Curso</button>
                 </div>
-                <p className="course-card-description mb-4">
-                  Cole aqui o conteúdo textual do arquivo de extrato bancário (.OFX) para cruzar com as vendas no banco do LMS.
-                </p>
 
-                <form onSubmit={handleConciliation}>
-                  <textarea
-                    className="form-input ofx-textarea"
-                    placeholder="Cole as tags XML do arquivo OFX ou use o botão 'Gerar OFX de Teste' acima..."
-                    value={ofxInput}
-                    onChange={(e) => setOfxInput(e.target.value)}
-                    required
-                  />
+                {editingCourse && (
+                  <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                    <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
+                    <input type="hidden" name="id" defaultValue={editingCourse.id || ''} />
+                    
+                    <div className="form-group">
+                      <label className="form-label">Título do Curso</label>
+                      <input className="form-input" name="title" defaultValue={editingCourse.title || ''} required placeholder="ex: Introdução à Sensação Vital" />
+                    </div>
 
-                  <button className="btn btn-primary w-full" type="submit">Processar Conciliação Financeira</button>
-                </form>
+                    <div className="form-group">
+                      <label className="form-label">Descrição</label>
+                      <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Descreva os objetivos do curso..." />
+                    </div>
 
-                {conciliationResults && (
-                  <div className="conciliation-results">
-                    <h4 className="mb-2">Resultado do Processamento:</h4>
-                    <div>Total de Lançamentos no Arquivo: <strong>{conciliationResults.processedCount}</strong></div>
-                    <div style={{ color: 'var(--color-success)' }}>✓ Conciliados: <strong>{conciliationResults.reconciled.length}</strong></div>
-                    <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes de valor: <strong>{conciliationResults.divergent.length}</strong></div>
-                    <div className="text-muted">✗ Não localizados no LMS: <strong>{conciliationResults.unmatched.length}</strong></div>
-                  </div>
+                    <div className="grid-2col">
+                      <div className="form-group">
+                        <label className="form-label">Tipo de Curso</label>
+                        <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
+                          <option value="FREE">FREE (Gratuito)</option>
+                          <option value="SUBSCRIPTION">SUBSCRIPTION (Assinatura)</option>
+                          <option value="POSTGRAD">POSTGRAD (Pós-Graduação)</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Duração de Acesso (Dias)</label>
+                        <input className="form-input" type="number" name="duration_days" defaultValue={editingCourse.duration_days || 180} required />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Mensagem de Conclusão</label>
+                      <input className="form-input" name="finishing_message" defaultValue={editingCourse.finishing_message || ''} placeholder="Parabéns pela conclusão..." />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">ID do Professor Responsável</label>
+                      <input className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingCourse(null)}>Cancelar</button>
+                      <button className="btn btn-primary flex-1" type="submit">Gravar Curso no LMS</button>
+                    </div>
+                  </form>
                 )}
-              </div>
 
-              {/* Logs de Acesso e Auditoria de Segurança */}
+                <div className="table-responsive">
+                  <table className="lms-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Tipo</th>
+                        <th>Duração (Dias)</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockDb.courses.map(c => (
+                        <tr key={c.id}>
+                          <td><code>{c.id}</code></td>
+                          <td><strong>{c.title}</strong></td>
+                          <td><span className="course-type-badge">{c.type}</span></td>
+                          <td>{c.duration_days} dias</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                              <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>Editar</button>
+                              <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>Excluir</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {adminCrudTab === 'books' && (
+              <div className="card">
+                <div className="quiz-header mb-4">
+                  <h3>Gerenciamento da Livraria (Livros)</h3>
+                  <button className="btn btn-primary" onClick={() => setEditingBook({})}>＋ Adicionar Novo Livro</button>
+                </div>
+
+                {editingBook && (
+                  <form onSubmit={handleSaveBook} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                    <h4 className="mb-4">{editingBook.id ? 'Editar Detalhes do Livro' : 'Adicionar Novo Livro'}</h4>
+                    <input type="hidden" name="id" defaultValue={editingBook.id || ''} />
+                    
+                    <div className="form-group">
+                      <label className="form-label">Título do Livro</label>
+                      <input className="form-input" name="title" defaultValue={editingBook.title || ''} required placeholder="ex: O Método das Oito Caixas" />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Autor</label>
+                      <input className="form-input" name="author" defaultValue={editingBook.author || ''} required placeholder="ex: Dr. Rajan Sankaran" />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Preço (R$)</label>
+                      <input className="form-input" type="number" step="0.01" name="price" defaultValue={editingBook.price || 0.00} required />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Descrição Curta</label>
+                      <textarea className="form-input" name="desc" defaultValue={editingBook.desc || ''} required placeholder="Escreva um resumo da obra didática..." />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingBook(null)}>Cancelar</button>
+                      <button className="btn btn-primary flex-1" type="submit">Gravar Livro</button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="table-responsive">
+                  <table className="lms-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {books.map(b => (
+                        <tr key={b.id}>
+                          <td><code>{b.id}</code></td>
+                          <td><strong>{b.title}</strong></td>
+                          <td>{b.author}</td>
+                          <td><strong>R$ {b.price.toFixed(2)}</strong></td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                              <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingBook(b)}>Editar</button>
+                              <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteBook(b.id)}>Excluir</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {adminCrudTab === 'logs' && (
               <div className="card flex-col">
                 <h3>Registros de Acesso e Segurança</h3>
                 <p className="course-card-description mb-4">
                   Auditoria em tempo real de IPs, agentes de usuário e travas de segurança acionadas.
                 </p>
-
                 <div className="logs-container">
                   {securityLogs.length === 0 ? (
                     <p className="course-card-description text-center mt-3">Nenhum log registrado.</p>
@@ -3075,8 +3372,7 @@ NEWFILEENCODING:NONE
                   )}
                 </div>
               </div>
-
-            </div>
+            )}
           </div>
         )}
 
@@ -3120,6 +3416,19 @@ NEWFILEENCODING:NONE
           <span>Plataforma Desenvolvida com Elevado Rigor Acadêmico.</span>
         </div>
       </footer>
+      {/* Botão Flutuante do WhatsApp */}
+      <a 
+        href="https://wa.me/5541991112233" 
+        className="whatsapp-float-btn animate-fade-in" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        title="Fale Conosco no WhatsApp"
+      >
+        <svg className="whatsapp-icon-svg" viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.578 1.98 14.116.953 11.49.951 6.058.951 1.632 5.321 1.628 10.75c-.001 1.71.463 3.384 1.34 4.877l-.994 3.633 3.737-.981zM17.11 13.99c-.27-.135-1.597-.788-1.846-.878-.25-.09-.432-.135-.612.135-.18.27-.697.878-.855 1.058-.158.18-.315.202-.585.067-.27-.135-1.14-.42-2.172-1.34-.803-.717-1.346-1.603-1.503-1.872-.158-.27-.017-.417.118-.552.122-.122.27-.315.405-.472.135-.158.18-.27.27-.45.09-.18.045-.337-.022-.472-.068-.135-.612-1.474-.838-2.016-.22-.53-.442-.459-.612-.468-.158-.008-.338-.008-.517-.008-.18 0-.473.067-.72.337-.247.27-.945.923-.945 2.25 0 1.328.968 2.61 1.103 2.79.135.18 1.902 2.905 4.608 4.07 1.1.474 1.88.66 2.532.766.702.112 1.34.08 1.843.005.56-.083 1.598-.653 1.822-1.282.225-.63.225-1.17.158-1.282-.068-.113-.248-.18-.518-.315z"/>
+        </svg>
+        <span>Fale Conosco</span>
+      </a>
     </div>
   );
 }

@@ -24,6 +24,17 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Servidor LMS Homeopatia ativo e rodando.' });
 });
 
+// API Health Check com verificação do Banco de Dados
+import pool from './db/index.js';
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT NOW()');
+    res.json({ status: 'OK', database: 'CONNECTED', message: 'Servidor e Banco de dados ativos.' });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', database: 'DISCONNECTED', message: 'Erro ao conectar ao banco de dados.' });
+  }
+});
+
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
