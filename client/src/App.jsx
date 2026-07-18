@@ -2993,41 +2993,22 @@ NEWFILEENCODING:NONE
                     <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
                     
                     <div className="agenda-list">
-                      <div className="agenda-card">
-                        <div className="agenda-date-box">
-                          <span className="agenda-date-day">15</span>
-                          <span className="agenda-date-month">Set</span>
+                      {(mockDb.events || []).map(event => (
+                        <div key={event.id} className="agenda-card">
+                          <div className="agenda-date-box">
+                            <span className="agenda-date-day">{event.day}</span>
+                            <span className="agenda-date-month">{event.month}</span>
+                          </div>
+                          <div className="agenda-details">
+                            <span className="agenda-type">{event.type}</span>
+                            <h3 className="agenda-title">{event.title}</h3>
+                            <p className="agenda-location">📍 {event.location}</p>
+                          </div>
                         </div>
-                        <div className="agenda-details">
-                          <span className="agenda-type">Lançamento de Livro</span>
-                          <h3 className="agenda-title">Lançamento Oficial: Superclasses em Homeopatia</h3>
-                          <p className="agenda-location">📍 Sede da TOSB Curitiba / Transmissão ao vivo via Zoom</p>
-                        </div>
-                      </div>
- 
-                      <div className="agenda-card">
-                        <div className="agenda-date-box">
-                          <span className="agenda-date-day">10</span>
-                          <span className="agenda-date-month">Out</span>
-                        </div>
-                        <div className="agenda-details">
-                          <span className="agenda-type">Grupo de Estudos</span>
-                          <h3 className="agenda-title">Discussão Científica do Livro 'Esquema de Reinos'</h3>
-                          <p className="agenda-location">📍 Online Zoom exclusivo para alunos e portadores da obra</p>
-                        </div>
-                      </div>
- 
-                      <div className="agenda-card">
-                        <div className="agenda-date-box">
-                          <span className="agenda-date-day">24</span>
-                          <span className="agenda-date-month">Out</span>
-                        </div>
-                        <div className="agenda-details">
-                          <span className="agenda-type">Seminário Literário</span>
-                          <h3 className="agenda-title">Seminário Avançado com base nas 'Oito Caixas'</h3>
-                          <p className="agenda-location">📍 Auditório TOSB Curitiba / Evento Presencial</p>
-                        </div>
-                      </div>
+                      ))}
+                      {(mockDb.events || []).length === 0 && (
+                        <p className="text-muted text-center w-full py-4">Nenhum evento agendado no momento.</p>
+                      )}
                     </div>
                   </div>
                 )}
