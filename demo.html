@@ -2186,9 +2186,43 @@ const getSlug = (title) => {
     .replace(/(^-|-$)/g, '');
 };
 
+const getPageFromPathname = () => {
+  const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+  if (isDemo) {
+    const hash = window.location.hash || '#home';
+    if (hash.startsWith('#course/')) return 'course-detail';
+    if (hash.startsWith('#course-view/')) return 'course-view';
+    const page = hash.replace('#', '');
+    const validPages = [
+      'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
+      'cart', 'login', 'register', 'unlock', 'student-dash', 
+      'course-view', 'teacher-dash', 'admin-dash', 'checkout'
+    ];
+    return validPages.includes(page) ? page : 'home';
+  }
+  
+  const pathname = window.location.pathname;
+  if (pathname.endsWith('/about.html') || pathname.endsWith('/about')) return 'about';
+  if (pathname.endsWith('/homeopaths.html') || pathname.endsWith('/homeopaths')) return 'homeopaths';
+  if (pathname.endsWith('/books.html') || pathname.endsWith('/books')) return 'books';
+  if (pathname.endsWith('/synergy.html') || pathname.endsWith('/synergy')) return 'synergy';
+  if (pathname.endsWith('/contact.html') || pathname.endsWith('/contact')) return 'contact';
+  if (pathname.endsWith('/cart.html') || pathname.endsWith('/cart')) return 'cart';
+  if (pathname.endsWith('/login.html') || pathname.endsWith('/login')) return 'login';
+  if (pathname.endsWith('/register.html') || pathname.endsWith('/register')) return 'register';
+  if (pathname.endsWith('/unlock.html') || pathname.endsWith('/unlock')) return 'unlock';
+  if (pathname.endsWith('/student-dash.html') || pathname.endsWith('/student-dash')) return 'student-dash';
+  if (pathname.endsWith('/course-view.html') || pathname.endsWith('/course-view')) return 'course-view';
+  if (pathname.endsWith('/teacher-dash.html') || pathname.endsWith('/teacher-dash')) return 'teacher-dash';
+  if (pathname.endsWith('/admin-dash.html') || pathname.endsWith('/admin-dash')) return 'admin-dash';
+  if (pathname.endsWith('/course-detail.html') || pathname.endsWith('/course-detail')) return 'course-detail';
+  if (pathname.endsWith('/checkout.html') || pathname.endsWith('/checkout')) return 'checkout';
+  return 'home';
+};
+
 function App() {
   // Controle de Estado Geral
-  const [currentPage, setCurrentPage] = useState('home'); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
+  const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [error, setError] = useState('');
@@ -2528,8 +2562,12 @@ function App() {
           const data = await res.json();
           setUser(data.user);
           setIsOfflineMode(false);
-          // Redirecionar para o dashboard correspondente
-          redirectToDashboard(data.user.role);
+          
+          // Só redireciona se estiver na página de login/cadastro/desbloqueio
+          const pathname = window.location.pathname;
+          if (pathname.includes('login') || pathname.includes('register') || pathname.includes('unlock')) {
+            redirectToDashboard(data.user.role);
+          }
         } else {
           // Token inválido/expirado
           setUser(null);
@@ -2545,7 +2583,10 @@ function App() {
           const found = mockDb.users.find(u => u.id === token);
           if (found) {
             setUser(found);
-            redirectToDashboard(found.role);
+            const pathname = window.location.pathname;
+            if (pathname.includes('login') || pathname.includes('register') || pathname.includes('unlock')) {
+              redirectToDashboard(found.role);
+            }
           } else {
             setToken('');
           }
@@ -2554,6 +2595,46 @@ function App() {
     };
     testConnection();
   }, [token]);
+
+  // Sistema de Guards e Proteção de Rotas (Evita que o login bloqueie navegação pública)
+  useEffect(() => {
+    const pathname = window.location.pathname;
+    const isDemo = pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    
+    if (!isDemo) {
+      const isDashboard = pathname.includes('student-dash') || pathname.includes('teacher-dash') || pathname.includes('admin-dash') || pathname.includes('course-view') || pathname.includes('checkout');
+      const isAuthPage = pathname.includes('login') || pathname.includes('register') || pathname.includes('unlock');
+      
+      const storedToken = localStorage.getItem('token');
+      
+      if (isDashboard) {
+        if (!storedToken) {
+          navigateTo('login');
+        }
+        else if (storedToken && !token && !user) {
+          navigateTo('login');
+        }
+      }
+      
+      if (isAuthPage && user) {
+        redirectToDashboard(user.role);
+      }
+    }
+  }, [user, token, currentPage]);
+
+  // Sincronizar mockDb entre páginas/abas via evento storage
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'mock_db') {
+        const saved = localStorage.getItem('mock_db');
+        if (saved) {
+          setMockDb(JSON.parse(saved));
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const redirectToDashboard = (role) => {
     const pathname = window.location.pathname;
@@ -3934,6 +4015,19 @@ NEWFILEENCODING:NONE
     }));
     setSuccess('Evento acadêmico removido.');
   };
+
+  // Evitar flicker de renderização enquanto recupera sessão
+  if (token && !user) {
+    return (
+      <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--color-bg)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <span style={{ fontSize: '3rem', animation: 'spin 2s linear infinite', display: 'inline-block' }}>🌿</span>
+          <h2 className="font-serif-title mt-4" style={{ color: 'var(--color-primary)' }}>Carregando Portal...</h2>
+          <p className="text-muted">Verificando credenciais acadêmicas de segurança.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
