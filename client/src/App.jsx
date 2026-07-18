@@ -484,9 +484,22 @@ export default function App() {
   }, [token]);
 
   const redirectToDashboard = (role) => {
-    if (role === 'STUDENT') navigateTo('student-dash');
-    else if (role === 'TEACHER') navigateTo('teacher-dash');
-    else if (role === 'ADMIN') navigateTo('admin-dash');
+    const pathname = window.location.pathname;
+    const isDemo = pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    
+    if (role === 'STUDENT') {
+      if (isDemo || (!pathname.endsWith('/student-dash.html') && !pathname.endsWith('/student-dash'))) {
+        navigateTo('student-dash');
+      }
+    } else if (role === 'TEACHER') {
+      if (isDemo || (!pathname.endsWith('/teacher-dash.html') && !pathname.endsWith('/teacher-dash'))) {
+        navigateTo('teacher-dash');
+      }
+    } else if (role === 'ADMIN') {
+      if (isDemo || (!pathname.endsWith('/admin-dash.html') && !pathname.endsWith('/admin-dash'))) {
+        navigateTo('admin-dash');
+      }
+    }
   };
 
   // Funções de API / Ações do Usuário
