@@ -128,8 +128,20 @@ export default function App() {
     const saved = localStorage.getItem('mock_db');
     if (saved) {
       const parsed = JSON.parse(saved);
+      let changed = false;
       if (!parsed.books) {
         parsed.books = BOOKS_DATA;
+        changed = true;
+      }
+      if (!parsed.events) {
+        parsed.events = [
+          { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
+          { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
+          { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
+        ];
+        changed = true;
+      }
+      if (changed) {
         localStorage.setItem('mock_db', JSON.stringify(parsed));
       }
       return parsed;
@@ -180,6 +192,11 @@ export default function App() {
       quiz_attempts: {},
       logs: [
         { id: 'log-1', user_name: 'Dra. Ana Paula', user_email: 'ana@lms.com', ip_address: '189.12.34.56', user_agent: 'Chrome/Windows', content_accessed: 'LOGIN_SUCCESS', created_at: new Date().toISOString() }
+      ],
+      events: [
+        { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
+        { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
+        { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
       ]
     };
     localStorage.setItem('mock_db', JSON.stringify(initialDb));
@@ -220,6 +237,50 @@ export default function App() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
 
+  // Novos estados para busca de homeopatas e abas dos dashboards
+  const [homeopathsSearch, setHomeopathsSearch] = useState('');
+  const [teacherActiveTab, setTeacherActiveTab] = useState('panel');
+  const [adminActiveTab, setAdminActiveTab] = useState('stats');
+  
+  // Estados adicionais para administração de eventos e cadastros
+  const [editingEvent, setEditingEvent] = useState(null);
+
+  // ROTEADOR HÍBRIDO E FUNÇÕES AUXILIARES
+  const getLinkHref = (page, queryParams = '') => {
+    const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    if (isDemo) {
+      if (page === 'home') return '#home';
+      if (page === 'course-detail') return `#course/${queryParams.replace('id=', '')}`;
+      if (page === 'course-view') return `#course-view/${queryParams.replace('id=', '')}`;
+      return `#${page}`;
+    }
+    if (page === 'home') return 'index.html';
+    if (queryParams) return `${page}.html?${queryParams}`;
+    return `${page}.html`;
+  };
+
+  const navigateTo = (page, queryParams = '') => {
+    const href = getLinkHref(page, queryParams);
+    if (href.startsWith('#')) {
+      window.location.hash = href;
+    } else {
+      window.location.href = href;
+    }
+  };
+
+  const handleLinkClick = (e, page, queryParams = '') => {
+    const href = getLinkHref(page, queryParams);
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      clearAlerts();
+      setMobileMenuOpen(false);
+      setActiveDropdown(null);
+      navigateTo(page, queryParams);
+    } else {
+      clearAlerts();
+    }
+  };
+
   // Fechar dropdowns e menu mobile ao clicar fora
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -257,40 +318,100 @@ export default function App() {
     }
   }, [mockDb, isOfflineMode]);
 
-  // Sistema de Roteamento por Hash URL
+  // Sistema de Roteamento (Roteador Híbrido MPA / Hash SPA)
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleNavigation = async () => {
+      const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
       const hash = window.location.hash || '#home';
-      
-      if (hash.startsWith('#course/')) {
-        const slug = hash.replace('#course/', '');
-        const courseList = mockDb?.courses || [];
-        const course = courseList.find(c => getSlug(c.title) === slug || c.id === slug);
-        if (course) {
-          setSelectedDetailCourse(course);
-          setCurrentPage('course-detail');
+
+      let page = 'home';
+      let courseIdFromQuery = null;
+
+      if (isDemo) {
+        // Modo Demo (SPA por Hash)
+        if (hash.startsWith('#course/')) {
+          const slug = hash.replace('#course/', '');
+          const courseList = mockDb?.courses || [];
+          const course = courseList.find(c => 
+            getSlug(c.title) === slug || 
+            c.id === slug ||
+            (c.id === 'course-free' && slug === 'introducao-homeopatia') ||
+            (c.id === 'course-sub' && slug === 'clube-tosb-estudos') ||
+            (c.id === 'course-post' && slug === 'pos-graduacao-homeopatia')
+          );
+          if (course) {
+            setSelectedDetailCourse(course);
+            page = 'course-detail';
+          }
+        } else if (hash.startsWith('#course-view/')) {
+          const courseId = hash.replace('#course-view/', '');
+          courseIdFromQuery = courseId;
+          page = 'course-view';
         } else {
-          setCurrentPage('home');
+          const rawPage = hash.replace('#', '');
+          const validPages = [
+            'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
+            'cart', 'login', 'register', 'unlock', 'student-dash', 
+            'course-view', 'teacher-dash', 'admin-dash', 'checkout'
+          ];
+          if (validPages.includes(rawPage)) {
+            page = rawPage;
+          }
         }
       } else {
-        const page = hash.replace('#', '');
-        const validPages = [
-          'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
-          'cart', 'login', 'register', 'unlock', 'student-dash', 
-          'course-view', 'teacher-dash', 'admin-dash', 'checkout'
-        ];
-        if (validPages.includes(page)) {
-          setCurrentPage(page);
-        } else {
-          setCurrentPage('home');
+        // Modo MPA Real (HTML por arquivo)
+        const pathname = window.location.pathname;
+        const searchParams = new URLSearchParams(window.location.search);
+        courseIdFromQuery = searchParams.get('id');
+
+        if (pathname.endsWith('/about.html') || pathname.endsWith('/about')) page = 'about';
+        else if (pathname.endsWith('/homeopaths.html') || pathname.endsWith('/homeopaths')) page = 'homeopaths';
+        else if (pathname.endsWith('/books.html') || pathname.endsWith('/books')) page = 'books';
+        else if (pathname.endsWith('/synergy.html') || pathname.endsWith('/synergy')) page = 'synergy';
+        else if (pathname.endsWith('/contact.html') || pathname.endsWith('/contact')) page = 'contact';
+        else if (pathname.endsWith('/cart.html') || pathname.endsWith('/cart')) page = 'cart';
+        else if (pathname.endsWith('/login.html') || pathname.endsWith('/login')) page = 'login';
+        else if (pathname.endsWith('/register.html') || pathname.endsWith('/register')) page = 'register';
+        else if (pathname.endsWith('/unlock.html') || pathname.endsWith('/unlock')) page = 'unlock';
+        else if (pathname.endsWith('/student-dash.html') || pathname.endsWith('/student-dash')) page = 'student-dash';
+        else if (pathname.endsWith('/course-view.html') || pathname.endsWith('/course-view')) page = 'course-view';
+        else if (pathname.endsWith('/teacher-dash.html') || pathname.endsWith('/teacher-dash')) page = 'teacher-dash';
+        else if (pathname.endsWith('/admin-dash.html') || pathname.endsWith('/admin-dash')) page = 'admin-dash';
+        else if (pathname.endsWith('/course-detail.html') || pathname.endsWith('/course-detail')) page = 'course-detail';
+        else if (pathname.endsWith('/checkout.html') || pathname.endsWith('/checkout')) page = 'checkout';
+        else page = 'home';
+      }
+
+      setCurrentPage(page);
+
+      // Carregamentos de dados baseados na página
+      if (page === 'course-detail' && courseIdFromQuery) {
+        const courseList = mockDb?.courses || [];
+        const course = courseList.find(c => c.id === courseIdFromQuery);
+        if (course) {
+          setSelectedDetailCourse(course);
         }
+      }
+
+      if (page === 'course-view' && courseIdFromQuery && user) {
+        await viewCourseDetails(courseIdFromQuery);
+      }
+
+      if (page === 'student-dash' && user) {
+        loadInvoices();
+        loadCourses();
+      } else if (page === 'teacher-dash' && user) {
+        loadTeacherReport();
+      } else if (page === 'admin-dash' && user) {
+        loadAdminReport();
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [mockDb.courses]);
+    window.addEventListener('hashchange', handleNavigation);
+    handleNavigation();
+    return () => window.removeEventListener('hashchange', handleNavigation);
+  }, [user, mockDb.courses, token]);
+
 
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
@@ -363,15 +484,9 @@ export default function App() {
   }, [token]);
 
   const redirectToDashboard = (role) => {
-    if (role === 'STUDENT') setCurrentPage('student-dash');
-    else if (role === 'TEACHER') {
-      setCurrentPage('teacher-dash');
-      loadTeacherReport();
-    }
-    else if (role === 'ADMIN') {
-      setCurrentPage('admin-dash');
-      loadAdminReport();
-    }
+    if (role === 'STUDENT') navigateTo('student-dash');
+    else if (role === 'TEACHER') navigateTo('teacher-dash');
+    else if (role === 'ADMIN') navigateTo('admin-dash');
   };
 
   // Funções de API / Ações do Usuário
@@ -570,7 +685,7 @@ export default function App() {
     setUser(null);
     setToken('');
     localStorage.removeItem('token');
-    setCurrentPage('login');
+    navigateTo('login');
   };
 
   // CADASTRO DO ALUNO
@@ -620,7 +735,7 @@ export default function App() {
       }));
 
       setSuccess('Cadastro realizado! Matrícula no curso introdutório liberada por 6 meses (Modo Simulação).');
-      setCurrentPage('login');
+      navigateTo('login');
     } else {
       // Registro Real
       try {
@@ -632,7 +747,7 @@ export default function App() {
         const data = await res.json();
         if (res.ok) {
           setSuccess(data.message);
-          setCurrentPage('login');
+          navigateTo('login');
         } else {
           setError(data.message);
         }
@@ -665,7 +780,7 @@ export default function App() {
         return { ...prev, users: updated };
       });
       setSuccess('Conta desbloqueada com sucesso! Você já pode efetuar o login.');
-      setCurrentPage('login');
+      navigateTo('login');
     } else {
       try {
         const res = await fetch('/api/auth/unlock', {
@@ -676,7 +791,7 @@ export default function App() {
         const data = await res.json();
         if (res.ok) {
           setSuccess(data.message);
-          setCurrentPage('login');
+          navigateTo('login');
         } else {
           setError(data.message);
         }
@@ -868,7 +983,9 @@ export default function App() {
         enrollment: enroll,
         modules: populatedModules
       });
-      setCurrentPage('course-view');
+      if (currentPage !== 'course-view') {
+        navigateTo('course-view', 'id=' + courseId);
+      }
     } else {
       try {
         const res = await fetch(`/api/courses/${courseId}`, {
@@ -877,7 +994,9 @@ export default function App() {
         const data = await res.json();
         if (res.ok) {
           setSelectedCourse(data);
-          setCurrentPage('course-view');
+          if (currentPage !== 'course-view') {
+            navigateTo('course-view', 'id=' + courseId);
+          }
         } else {
           setError(data.message);
         }
@@ -1099,7 +1218,7 @@ export default function App() {
 
   const startCheckout = (course) => {
     setCheckoutCourse(course);
-    setCurrentPage('checkout');
+    navigateTo('checkout');
   };
 
   const handleProcessCheckout = async (e) => {
@@ -1176,7 +1295,7 @@ export default function App() {
       clearCart();
       setCheckoutCourse(null);
       setStudentActiveTab('payments'); // Ir direto para financeiro
-      setCurrentPage('student-dash');
+      navigateTo('student-dash');
     } else {
       try {
         const firstCourse = itemsToBuy.find(item => item.type === 'course');
@@ -1201,7 +1320,7 @@ export default function App() {
           clearCart();
           setCheckoutCourse(null);
           setStudentActiveTab('payments');
-          setCurrentPage('student-dash');
+          navigateTo('student-dash');
         } else {
           setError(data.message);
         }
@@ -1622,12 +1741,121 @@ NEWFILEENCODING:NONE
     loadCourses();
   };
 
+  // Funções de Gerenciamento do Administrador
+  const toggleStudentStatus = (studentId) => {
+    setMockDb(prev => {
+      const updatedUsers = prev.users.map(u => {
+        if (u.id === studentId) {
+          const newStatus = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+          return { ...u, status: newStatus };
+        }
+        return u;
+      });
+      const updatedEnrollments = prev.enrollments.map(e => {
+        if (e.student_id === studentId) {
+          const userObj = updatedUsers.find(u => u.id === studentId);
+          return { ...e, status: userObj.status };
+        }
+        return e;
+      });
+      return {
+        ...prev,
+        users: updatedUsers,
+        enrollments: updatedEnrollments
+      };
+    });
+    setSuccess('Status do aluno atualizado com sucesso.');
+  };
+
+  const resetQuizAttempts = (studentId, quizId) => {
+    setMockDb(prev => {
+      const updatedAttempts = { ...prev.quiz_attempts };
+      delete updatedAttempts[`${studentId}_${quizId}`];
+      return {
+        ...prev,
+        quiz_attempts: updatedAttempts
+      };
+    });
+    setSuccess('Tentativas de avaliação do aluno reiniciadas com sucesso.');
+  };
+
+  const simulatePaymentConfirm = (paymentId) => {
+    setMockDb(prev => {
+      const updatedPayments = prev.payments.map(p => {
+        if (p.id === paymentId) {
+          return { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
+        }
+        return p;
+      });
+      
+      const paymentObj = updatedPayments.find(p => p.id === paymentId);
+      let updatedEnroll = [...prev.enrollments];
+      
+      if (paymentObj && paymentObj.course_id) {
+        const enrollIndex = updatedEnroll.findIndex(e => e.student_id === paymentObj.student_id && e.course_id === paymentObj.course_id);
+        if (enrollIndex > -1) {
+          updatedEnroll[enrollIndex] = {
+            ...updatedEnroll[enrollIndex],
+            status: 'ACTIVE',
+            expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString()
+          };
+        } else {
+          updatedEnroll.push({
+            id: 'enroll_' + Date.now(),
+            student_id: paymentObj.student_id,
+            course_id: paymentObj.course_id,
+            enrolled_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'ACTIVE'
+          });
+        }
+      }
+      
+      return {
+        ...prev,
+        payments: updatedPayments,
+        enrollments: updatedEnroll
+      };
+    });
+    setSuccess('Pagamento confirmado e matrícula liberada / ativada com sucesso.');
+  };
+
+  const handleCreateEvent = (e) => {
+    e.preventDefault();
+    const title = e.target.title.value;
+    const type = e.target.type.value;
+    const day = e.target.day.value;
+    const month = e.target.month.value;
+    const location = e.target.location.value;
+
+    const newEvent = {
+      id: 'event-' + Date.now(),
+      title, type, day, month, location
+    };
+
+    setMockDb(prev => ({
+      ...prev,
+      events: [...(prev.events || []), newEvent]
+    }));
+
+    setSuccess('Evento acadêmico criado com sucesso!');
+    e.target.reset();
+  };
+
+  const handleDeleteEvent = (eventId) => {
+    setMockDb(prev => ({
+      ...prev,
+      events: (prev.events || []).filter(ev => ev.id !== eventId)
+    }));
+    setSuccess('Evento acadêmico removido.');
+  };
+
   return (
     <div className="app-container">
       {/* Cabeçalho */}
       <header className="tosb-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <a href="#home" className="logo-container" onClick={() => { clearAlerts(); setCurrentPage('home'); }}>
+          <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
             <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
             <div className="logo-text">
               <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
@@ -1653,7 +1881,7 @@ NEWFILEENCODING:NONE
 
         {/* Menu Principal */}
         <nav className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ gap: '0.75rem' }}>
-          <a href="#home" className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => clearAlerts()}>Início</a>
+          <a href={getLinkHref('home')} className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'home')}>Início</a>
           
           <div className="nav-dropdown">
             <button 
@@ -1666,8 +1894,8 @@ NEWFILEENCODING:NONE
               Quem Somos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'about' ? 'open' : ''}`}>
-              <a href="#about" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); }}>Sobre Nós & Galeria</a>
-              <a href="#homeopaths" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); }}>Lista de Homeopatas</a>
+              <a href={getLinkHref('about')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'about')}>Sobre Nós & Galeria</a>
+              <a href={getLinkHref('homeopaths')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'homeopaths')}>Lista de Homeopatas</a>
             </div>
           </div>
 
@@ -1682,14 +1910,38 @@ NEWFILEENCODING:NONE
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
-              <a href="#online-courses" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Online</a>
-              <a href="#inperson-courses" className="dropdown-item" onClick={() => { clearAlerts(); setMobileMenuOpen(false); setActiveDropdown(null); setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos Presenciais</a>
+              <a href={getLinkHref('home') + '#online-courses'} className="dropdown-item" onClick={(e) => {
+                const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+                if (isDemo) {
+                  e.preventDefault();
+                  clearAlerts();
+                  setMobileMenuOpen(false);
+                  setActiveDropdown(null);
+                  navigateTo('home');
+                  setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                } else {
+                  clearAlerts();
+                }
+              }}>Cursos Online</a>
+              <a href={getLinkHref('home') + '#inperson-courses'} className="dropdown-item" onClick={(e) => {
+                const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+                if (isDemo) {
+                  e.preventDefault();
+                  clearAlerts();
+                  setMobileMenuOpen(false);
+                  setActiveDropdown(null);
+                  navigateTo('home');
+                  setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                } else {
+                  clearAlerts();
+                }
+              }}>Cursos Presenciais</a>
             </div>
           </div>
 
-          <a href="#books" className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={() => clearAlerts()}>Livros</a>
-          <a href="#synergy" className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={() => clearAlerts()}>Synergy Software</a>
-          <a href="#contact" className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={() => clearAlerts()}>Contato</a>
+          <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'books')}>Livros</a>
+          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'synergy')}>Synergy Software</a>
+          <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'contact')}>Contato</a>
 
           {/* Bloco de Usuário exclusivo para mobile */}
           <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
@@ -1707,14 +1959,14 @@ NEWFILEENCODING:NONE
                   <span>▾</span>
                 </button>
                 <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`}>
-                  <a href="#student-dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
-                  <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
+                  <a href={getLinkHref(user.role === 'STUDENT' ? 'student-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'admin-dash')} className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                  <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <a href="#login" className="btn btn-secondary w-full" onClick={() => { clearAlerts(); setMobileMenuOpen(false); }}>Entrar</a>
-                <a href="#register" className="btn btn-primary w-full" onClick={() => { clearAlerts(); setMobileMenuOpen(false); }}>Cadastrar</a>
+                <a href={getLinkHref('login')} className="btn btn-secondary w-full" onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
+                <a href={getLinkHref('register')} className="btn btn-primary w-full" onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
               </div>
             )}
           </div>
@@ -1731,7 +1983,7 @@ NEWFILEENCODING:NONE
           </div>
 
           {/* Carrinho de Compras */}
-          <a href="#cart" className="btn btn-secondary cart-badge-nav" onClick={() => clearAlerts()} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
+          <a href={getLinkHref('cart')} className="btn btn-secondary cart-badge-nav" onClick={(e) => handleLinkClick(e, 'cart')} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
             <span style={{ fontSize: '1.2rem' }}>🛒</span>
             {cartItems.length > 0 && (
               <span className="cart-count">
@@ -1755,14 +2007,14 @@ NEWFILEENCODING:NONE
                   👤 Painel ▾
                 </button>
                 <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`} style={{ right: 0, left: 'auto' }}>
-                  <a href="#dash" className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
-                  <a href="#logout" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
+                  <a href={getLinkHref(user.role === 'STUDENT' ? 'student-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'admin-dash')} className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
+                  <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
                 </div>
               </div>
             ) : (
               <>
-                <a href="#login" className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => clearAlerts()}>Entrar</a>
-                <a href="#register" className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={() => clearAlerts()}>Cadastrar</a>
+                <a href={getLinkHref('login')} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
+                <a href={getLinkHref('register')} className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
               </>
             )}
           </div>
@@ -1914,7 +2166,7 @@ NEWFILEENCODING:NONE
             <section className="hero-section">
               <h1>Conheça nossos cursos online</h1>
               <p className="hero-subtitle">🌿 A escola oficial do Método Sensação da The Other Song no Brasil. Ensino homeopático de elevado rigor científico e clínico.</p>
-              <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('register'); }} style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
+              <button className="btn btn-primary" onClick={() => { clearAlerts(); navigateTo('register'); }} style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
             </section>
 
             {/* Cursos Online Catalog */}
@@ -1924,17 +2176,17 @@ NEWFILEENCODING:NONE
                 
                 {/* Curso Livre */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>🌿</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>🌿</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Gratuito</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>Introdução à Homeopatia e Sensação Vital</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>Introdução à Homeopatia e Sensação Vital</h3>
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.' }); window.location.hash = '#course/introducao-homeopatia'; }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-free')}>Ementa</button>
                       {user ? (
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
-                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); window.location.hash = '#login'; }}>Entrar</button>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); navigateTo('login'); }}>Entrar</button>
                       )}
                     </div>
                   </div>
@@ -1942,13 +2194,13 @@ NEWFILEENCODING:NONE
 
                 {/* Assinatura Clube */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>📖</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>📖</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Assinatura</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>Clube TOSB: Estudos de Matéria Médica</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>Clube TOSB: Estudos de Matéria Médica</h3>
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', description: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.' }); window.location.hash = '#course/clube-tosb-estudos'; }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-sub')}>Ementa</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -1956,13 +2208,13 @@ NEWFILEENCODING:NONE
 
                 {/* Pós-Graduação */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>🎓</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>🎓</div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Especialização</span>
-                    <h3 className="premium-card-title cursor-pointer" onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>Pós-Graduação em Homeopatia Avançada</h3>
+                    <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>Pós-Graduação em Homeopatia Avançada</h3>
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setSelectedDetailCourse({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', description: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.' }); window.location.hash = '#course/pos-graduacao-homeopatia'; }}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-post')}>Ementa</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -1979,7 +2231,7 @@ NEWFILEENCODING:NONE
                   <h3 className="font-serif-title mt-2">O Método de Sankaran e Níveis de Experiência</h3>
                   <p>Assista a esta aula explicativa do Dr. Carlos Eduardo Leitão sobre como funciona o Método Sensação, aprofundando o diagnóstico homeopático além da abordagem convencional.</p>
                   <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="btn btn-primary" onClick={() => { clearAlerts(); window.location.hash = '#about'; }}>Ver Sobre Nós</button>
+                    <button className="btn btn-primary" onClick={() => { clearAlerts(); navigateTo('about'); }}>Ver Sobre Nós</button>
                   </div>
                 </div>
                 <div>
@@ -2012,7 +2264,7 @@ NEWFILEENCODING:NONE
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
-                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); window.location.hash = '#contact'; }}>Mais Detalhes</button>
+                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
                         <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', price: 1200.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
                       </div>
                     </div>
@@ -2030,7 +2282,7 @@ NEWFILEENCODING:NONE
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
-                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); window.location.hash = '#contact'; }}>Mais Detalhes</button>
+                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
                         <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', price: 600.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
                       </div>
                     </div>
@@ -2060,7 +2312,7 @@ NEWFILEENCODING:NONE
                 ))}
               </div>
               <div className="text-center">
-                <button className="btn btn-secondary" onClick={() => { clearAlerts(); setCurrentPage('books'); }}>Ver Todos os Livros</button>
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('books'); }}>Ver Todos os Livros</button>
               </div>
             </section>
 
@@ -2072,7 +2324,7 @@ NEWFILEENCODING:NONE
                 O software definitivo para repertorização de medicamentos homeopáticos e busca rápida do Método Sensação. Aprenda a usar através de nossos tutoriais exclusivos e facilite sua prática de consultório.
               </p>
               <div style={{ marginTop: '1rem' }}>
-                <button className="btn btn-primary" onClick={() => { clearAlerts(); setCurrentPage('synergy'); }}>Conhecer Software e Tutoriais</button>
+                <button className="btn btn-primary" onClick={() => { clearAlerts(); navigateTo('synergy'); }}>Conhecer Software e Tutoriais</button>
               </div>
             </section>
           </div>
@@ -2081,7 +2333,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DETALHES DO CURSO */}
         {currentPage === 'course-detail' && selectedDetailCourse && (
           <div>
-            <button className="btn btn-secondary mb-5" onClick={() => setCurrentPage('home')}>
+            <button className="btn btn-secondary mb-5" onClick={() => navigateTo('home')}>
               ← Voltar para Cursos
             </button>
 
@@ -2154,11 +2406,11 @@ NEWFILEENCODING:NONE
                   <div className="mt-5">
                     {selectedDetailCourse.type === 'FREE' ? (
                       user ? (
-                        <button className="btn btn-primary w-full" onClick={() => { enrollFreeCourse(selectedDetailCourse.id); setCurrentPage('student-dash'); }}>
+                        <button className="btn btn-primary w-full" onClick={() => { enrollFreeCourse(selectedDetailCourse.id); navigateTo('student-dash'); }}>
                           Matricular-se Grátis
                         </button>
                       ) : (
-                        <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); setCurrentPage('login'); }}>
+                        <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); navigateTo('login'); }}>
                           Entrar para Matricular
                         </button>
                       )
@@ -2436,7 +2688,7 @@ NEWFILEENCODING:NONE
                 <span style={{ fontSize: '3rem' }}>🛒</span>
                 <h3 className="mt-3 mb-3">Seu carrinho está vazio!</h3>
                 <p className="text-muted mb-4">Adicione livros de matéria médica ou cursos acadêmicos à sua sacola para prosseguir.</p>
-                <button className="btn btn-primary" onClick={() => setCurrentPage('home')}>Ver Cursos e Livros</button>
+                <button className="btn btn-primary" onClick={() => navigateTo('home')}>Ver Cursos e Livros</button>
               </div>
             ) : (
               <div className="cart-layout">
@@ -2499,16 +2751,16 @@ NEWFILEENCODING:NONE
                     onClick={() => {
                       if (!user) {
                         setError('Por favor, faça login ou crie uma conta para poder finalizar a compra do seu carrinho.');
-                        setCurrentPage('login');
+                        navigateTo('login');
                       } else {
                         setCheckoutCourse(null);
-                        setCurrentPage('checkout');
+                        navigateTo('checkout');
                       }
                     }}
                   >
                     Prosseguir para o Checkout
                   </button>
-                  <button className="btn btn-secondary w-full mt-2" onClick={() => setCurrentPage('home')}>Continuar Comprando</button>
+                  <button className="btn btn-secondary w-full mt-2" onClick={() => navigateTo('home')}>Continuar Comprando</button>
                 </div>
               </div>
             )}
@@ -2836,7 +3088,7 @@ NEWFILEENCODING:NONE
               )}
 
               <div className="checkout-actions">
-                <button className="btn btn-secondary flex-1" type="button" onClick={() => setCurrentPage('student-dash')}>Cancelar</button>
+                <button className="btn btn-secondary flex-1" type="button" onClick={() => navigateTo('student-dash')}>Cancelar</button>
                 <button className="btn btn-primary flex-2" type="submit">Gerar Fatura no Asaas</button>
               </div>
             </form>
@@ -2846,7 +3098,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: LMS / CURSO E PLAYER */}
         {currentPage === 'course-view' && selectedCourse && (
           <div>
-            <button className="btn btn-secondary mb-5" onClick={() => setCurrentPage('student-dash')}>
+            <button className="btn btn-secondary mb-5" onClick={() => navigateTo('student-dash')}>
               ← Voltar ao Dashboard
             </button>
 
@@ -3013,102 +3265,124 @@ NEWFILEENCODING:NONE
               <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar Painel</button>
             </div>
 
-            {/* Metadados do Professor */}
-            <div className="admin-stats-grid">
-              <div className="admin-stat-card primary">
-                <span className="course-type-badge">Receita de Vendas Gerada</span>
-                <h2 className="stat-value">R$ {mockDb.payments
-                  .filter(p => p.status === 'RECEIVED' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id))
-                  .reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</h2>
-              </div>
-              
-              <div className="admin-stat-card accent">
-                <span className="course-type-badge">Cursos Vinculados</span>
-                <h2 className="stat-value">{mockDb.courses.filter(c => c.teacher_id === user.id).length} Cursos</h2>
-              </div>
+            <div className="student-panel-container">
+              {/* Menu Lateral do Professor */}
+              <aside className="student-sidebar">
+                <ul className="student-sidebar-menu">
+                  <li className={`student-sidebar-item ${teacherActiveTab === 'panel' ? 'active' : ''}`}>
+                    <button onClick={() => setTeacherActiveTab('panel')}>📊 Painel Geral</button>
+                  </li>
+                  <li className={`student-sidebar-item ${teacherActiveTab === 'students' ? 'active' : ''}`}>
+                    <button onClick={() => setTeacherActiveTab('students')}>👥 Relatório de Alunos</button>
+                  </li>
+                </ul>
+              </aside>
 
-              <div className="admin-stat-card warning">
-                <span className="course-type-badge">Total de Matrículas Ativas</span>
-                <h2 className="stat-value">
-                  {mockDb.enrollments.filter(e => e.status === 'ACTIVE' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(e.course_id)).length} Alunos
-                </h2>
-              </div>
-            </div>
-
-            {/* Lista de Cursos Vinculados */}
-            <div className="card mb-6">
-              <h3 className="section-title-underlined mb-4">Meus Cursos Vinculados</h3>
-              <div className="courses-list">
-                {mockDb.courses.filter(c => c.teacher_id === user.id).map(c => {
-                  const enrollCount = mockDb.enrollments.filter(e => e.course_id === c.id && e.status === 'ACTIVE').length;
-                  return (
-                    <div key={c.id} className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <strong>{c.title}</strong>
-                        <div className="helper-text">{c.description}</div>
+              {/* Conteúdo da Aba Ativa */}
+              <div className="student-panel-content">
+                {teacherActiveTab === 'panel' && (
+                  <div>
+                    {/* Metadados do Professor */}
+                    <div className="admin-stats-grid" style={{ marginBottom: '2rem' }}>
+                      <div className="admin-stat-card primary">
+                        <span className="course-type-badge">Receita de Vendas Gerada</span>
+                        <h2 className="stat-value">R$ {mockDb.payments
+                          .filter(p => p.status === 'RECEIVED' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id))
+                          .reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</h2>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span className="badge-paid">{c.type}</span>
-                        <div className="helper-text mt-1">{enrollCount} aluno(s) ativo(s)</div>
+                      
+                      <div className="admin-stat-card accent">
+                        <span className="course-type-badge">Cursos Vinculados</span>
+                        <h2 className="stat-value">{mockDb.courses.filter(c => c.teacher_id === user.id).length} Cursos</h2>
+                      </div>
+
+                      <div className="admin-stat-card warning">
+                        <span className="course-type-badge">Total de Matrículas Ativas</span>
+                        <h2 className="stat-value">
+                          {mockDb.enrollments.filter(e => e.status === 'ACTIVE' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(e.course_id)).length} Alunos
+                        </h2>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* Relatório de Presenças */}
-            <div className="card">
-              <h3 className="mb-4">Relatório Consolidado de Alunos</h3>
-              
-              <div className="table-responsive">
-                <table className="lms-table">
-                  <thead>
-                    <tr>
-                      <th>Aluno</th>
-                      <th>Curso</th>
-                      <th>Data Matrícula</th>
-                      <th className="text-center">Progresso Aulas</th>
-                      <th className="text-center">Presenças</th>
-                      <th className="text-center">Quizzes Feitos</th>
-                      <th className="text-center">Status Acesso</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teacherReportData.length === 0 ? (
-                      <tr>
-                        <td colSpan="7" className="text-center text-muted" style={{ padding: '2rem' }}>
-                          Nenhum aluno matriculado em seus cursos ainda.
-                        </td>
-                      </tr>
-                    ) : (
-                      teacherReportData.map((rep, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <strong>{rep.studentName}</strong>
-                            <div className="helper-text">{rep.studentEmail}</div>
-                          </td>
-                          <td>{rep.courseTitle}</td>
-                          <td>{new Date(rep.enrolledAt).toLocaleDateString('pt-BR')}</td>
-                          <td className="text-center">
-                            {rep.completedLessons}/{rep.totalLessons} ({rep.progressPercent}%)
-                          </td>
-                          <td className="text-center">
-                            <span style={{ fontWeight: 'bold', color: rep.presenceCount > 0 ? 'var(--color-success)' : 'inherit' }}>
-                              {rep.presenceCount}
-                            </span>
-                          </td>
-                          <td className="text-center">{rep.quizzesPassed}</td>
-                          <td className="text-center">
-                            <span className={rep.enrollmentStatus === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
-                              {rep.enrollmentStatus}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                    {/* Lista de Cursos Vinculados */}
+                    <div className="card">
+                      <h3 className="section-title-underlined mb-4">Meus Cursos Vinculados</h3>
+                      <div className="courses-list">
+                        {mockDb.courses.filter(c => c.teacher_id === user.id).map(c => {
+                          const enrollCount = mockDb.enrollments.filter(e => e.course_id === c.id && e.status === 'ACTIVE').length;
+                          return (
+                            <div key={c.id} className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <strong>{c.title}</strong>
+                                <div className="helper-text">{c.description}</div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <span className="badge-paid">{c.type}</span>
+                                <div className="helper-text mt-1">{enrollCount} aluno(s) ativo(s)</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {teacherActiveTab === 'students' && (
+                  <div className="card">
+                    <h3 className="mb-4">Relatório Consolidado de Alunos</h3>
+                    
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Aluno</th>
+                            <th>Curso</th>
+                            <th>Data Matrícula</th>
+                            <th className="text-center">Progresso Aulas</th>
+                            <th className="text-center">Presenças</th>
+                            <th className="text-center">Quizzes Feitos</th>
+                            <th className="text-center">Status Acesso</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {teacherReportData.length === 0 ? (
+                            <tr>
+                              <td colSpan="7" className="text-center text-muted" style={{ padding: '2rem' }}>
+                                Nenhum aluno matriculado em seus cursos ainda.
+                              </td>
+                            </tr>
+                          ) : (
+                            teacherReportData.map((rep, idx) => (
+                              <tr key={idx}>
+                                <td>
+                                  <strong>{rep.studentName}</strong>
+                                  <div className="helper-text">{rep.studentEmail}</div>
+                                </td>
+                                <td>{rep.courseTitle}</td>
+                                <td>{new Date(rep.enrolledAt).toLocaleDateString('pt-BR')}</td>
+                                <td className="text-center">
+                                  {rep.completedLessons}/{rep.totalLessons} ({rep.progressPercent}%)
+                                </td>
+                                <td className="text-center">
+                                  <span style={{ fontWeight: 'bold', color: rep.presenceCount > 0 ? 'var(--color-success)' : 'inherit' }}>
+                                    {rep.presenceCount}
+                                  </span>
+                                </td>
+                                <td className="text-center">{rep.quizzesPassed}</td>
+                                <td className="text-center">
+                                  <span className={rep.enrollmentStatus === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
+                                    {rep.enrollmentStatus}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -3119,260 +3393,492 @@ NEWFILEENCODING:NONE
           <div>
             <h1 className="font-serif-title mb-5">Painel Administrativo da Homeopatia EAD</h1>
 
-            {/* Abas Sub-menu do Administrador */}
-            <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <button className={`btn ${adminCrudTab === 'stats' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('stats')}>📊 Estatísticas & OFX</button>
-              <button className={`btn ${adminCrudTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('courses')}>🌿 Gerenciar Cursos</button>
-              <button className={`btn ${adminCrudTab === 'books' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('books')}>📚 Gerenciar Livros</button>
-              <button className={`btn ${adminCrudTab === 'logs' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminCrudTab('logs')}>🔒 Logs de Segurança</button>
-            </div>
+            <div className="student-panel-container">
+              {/* Menu Lateral do Administrador */}
+              <aside className="student-sidebar">
+                <ul className="student-sidebar-menu">
+                  <li className={`student-sidebar-item ${adminActiveTab === 'stats' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('stats')}>📊 Estatísticas & OFX</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'courses' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('courses')}>🌿 Gerenciar Cursos</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'books' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('books')}>📚 Gerenciar Livros</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Alunos</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'payments' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('payments')}>💳 Gerenciar Faturas</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'events' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('events')}>📅 Agenda / Eventos</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'logs' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('logs')}>🔒 Logs de Segurança</button>
+                  </li>
+                </ul>
+              </aside>
 
-            {adminCrudTab === 'stats' && (
-              <div>
-                {/* Widgets Financeiros */}
-                {adminReportData && (
-                  <div className="admin-stats-grid">
-                    <div className="admin-stat-card primary">
-                      <span className="course-type-badge">Receita Total (Paga)</span>
-                      <h2 className="stat-value">R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
-                    </div>
-                    <div className="admin-stat-card warning">
-                      <span className="course-type-badge">Receita em Aberto</span>
-                      <h2 className="stat-value">R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
-                    </div>
-                    <div className="admin-stat-card error">
-                      <span className="course-type-badge">Valores Vencidos</span>
-                      <h2 className="stat-value">R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
-                    </div>
-                    <div className="admin-stat-card accent">
-                      <span className="course-type-badge">Recorrência Mensal (MRR)</span>
-                      <h2 className="stat-value">R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
-                    </div>
-                  </div>
-                )}
-
-                <div className="admin-layout">
-                  {/* Conciliação OFX */}
-                  <div className="card">
-                    <div className="quiz-header">
-                      <h3>Conciliação Bancária (.OFX)</h3>
-                      <button className="btn btn-secondary btn-quick-login" onClick={handleGenerateMockOfx}>
-                        Gerar OFX de Teste
-                      </button>
-                    </div>
-                    <p className="course-card-description mb-4">
-                      Cole aqui o conteúdo textual do arquivo de extrato bancário (.OFX) para cruzar com as vendas no banco do LMS.
-                    </p>
-                    <form onSubmit={handleConciliation}>
-                      <textarea
-                        className="form-input ofx-textarea"
-                        placeholder="Cole as tags XML do arquivo OFX ou use o botão 'Gerar OFX de Teste' acima..."
-                        value={ofxInput}
-                        onChange={(e) => setOfxInput(e.target.value)}
-                        required
-                      />
-                      <button className="btn btn-primary w-full" type="submit">Processar Conciliação Financeira</button>
-                    </form>
-                    {conciliationResults && (
-                      <div className="conciliation-results">
-                        <h4 className="mb-2">Resultado do Extrato:</h4>
-                        <div>Total Lançamentos: <strong>{conciliationResults.processedCount}</strong></div>
-                        <div style={{ color: 'var(--color-success)' }}>✓ Conciliados: <strong>{conciliationResults.reconciled.length}</strong></div>
-                        <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes: <strong>{conciliationResults.divergent.length}</strong></div>
-                        <div className="text-muted">✗ Não localizados: <strong>{conciliationResults.unmatched.length}</strong></div>
+              {/* Conteúdo da Aba Ativa */}
+              <div className="student-panel-content">
+                {adminActiveTab === 'stats' && (
+                  <div>
+                    {/* Widgets Financeiros */}
+                    {adminReportData && (
+                      <div className="admin-stats-grid" style={{ marginBottom: '2rem' }}>
+                        <div className="admin-stat-card primary">
+                          <span className="course-type-badge">Receita Total (Paga)</span>
+                          <h2 className="stat-value">R$ {adminReportData.summary.totalReceived.toFixed(2)}</h2>
+                        </div>
+                        <div className="admin-stat-card warning">
+                          <span className="course-type-badge">Receita em Aberto</span>
+                          <h2 className="stat-value">R$ {adminReportData.summary.totalPending.toFixed(2)}</h2>
+                        </div>
+                        <div className="admin-stat-card error">
+                          <span className="course-type-badge">Valores Vencidos</span>
+                          <h2 className="stat-value">R$ {adminReportData.summary.totalOverdue.toFixed(2)}</h2>
+                        </div>
+                        <div className="admin-stat-card accent">
+                          <span className="course-type-badge">Recorrência Mensal (MRR)</span>
+                          <h2 className="stat-value">R$ {adminReportData.summary.mrr.toFixed(2)}</h2>
+                        </div>
                       </div>
                     )}
+
+                    <div className="admin-layout">
+                      {/* Conciliação OFX */}
+                      <div className="card">
+                        <div className="quiz-header">
+                          <h3>Conciliação Bancária (.OFX)</h3>
+                          <button className="btn btn-secondary btn-quick-login" onClick={handleGenerateMockOfx}>
+                            Gerar OFX de Teste
+                          </button>
+                        </div>
+                        <p className="course-card-description mb-4">
+                          Cole aqui o conteúdo textual do arquivo de extrato bancário (.OFX) para cruzar com as vendas no banco do LMS.
+                        </p>
+                        <form onSubmit={handleConciliation}>
+                          <textarea
+                            className="form-input ofx-textarea"
+                            placeholder="Cole as tags XML do arquivo OFX ou use o botão 'Gerar OFX de Teste' acima..."
+                            value={ofxInput}
+                            onChange={(e) => setOfxInput(e.target.value)}
+                            required
+                          />
+                          <button className="btn btn-primary w-full" type="submit">Processar Conciliação Financeira</button>
+                        </form>
+                        {conciliationResults && (
+                          <div className="conciliation-results">
+                            <h4 className="mb-2">Resultado do Extrato:</h4>
+                            <div>Total Lançamentos: <strong>{conciliationResults.processedCount}</strong></div>
+                            <div style={{ color: 'var(--color-success)' }}>✓ Conciliados: <strong>{conciliationResults.reconciled.length}</strong></div>
+                            <div style={{ color: 'var(--color-warning)' }}>⚠️ Divergentes: <strong>{conciliationResults.divergent.length}</strong></div>
+                            <div className="text-muted">✗ Não localizados: <strong>{conciliationResults.unmatched.length}</strong></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {adminCrudTab === 'courses' && (
-              <div className="card">
-                <div className="quiz-header mb-4">
-                  <h3>Gerenciamento de Cursos Acadêmicos</h3>
-                  <button className="btn btn-primary" onClick={() => setEditingCourse({})}>＋ Criar Novo Curso</button>
-                </div>
-
-                {editingCourse && (
-                  <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
-                    <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
-                    <input type="hidden" name="id" defaultValue={editingCourse.id || ''} />
-                    
-                    <div className="form-group">
-                      <label className="form-label">Título do Curso</label>
-                      <input className="form-input" name="title" defaultValue={editingCourse.title || ''} required placeholder="ex: Introdução à Sensação Vital" />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Descrição</label>
-                      <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Descreva os objetivos do curso..." />
-                    </div>
-
-                    <div className="grid-2col">
-                      <div className="form-group">
-                        <label className="form-label">Tipo de Curso</label>
-                        <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
-                          <option value="FREE">FREE (Gratuito)</option>
-                          <option value="SUBSCRIPTION">SUBSCRIPTION (Assinatura)</option>
-                          <option value="POSTGRAD">POSTGRAD (Pós-Graduação)</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Duração de Acesso (Dias)</label>
-                        <input className="form-input" type="number" name="duration_days" defaultValue={editingCourse.duration_days || 180} required />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Mensagem de Conclusão</label>
-                      <input className="form-input" name="finishing_message" defaultValue={editingCourse.finishing_message || ''} placeholder="Parabéns pela conclusão..." />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">ID do Professor Responsável</label>
-                      <input className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingCourse(null)}>Cancelar</button>
-                      <button className="btn btn-primary flex-1" type="submit">Gravar Curso no LMS</button>
-                    </div>
-                  </form>
                 )}
 
-                <div className="table-responsive">
-                  <table className="lms-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Tipo</th>
-                        <th>Duração (Dias)</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockDb.courses.map(c => (
-                        <tr key={c.id}>
-                          <td><code>{c.id}</code></td>
-                          <td><strong>{c.title}</strong></td>
-                          <td><span className="course-type-badge">{c.type}</span></td>
-                          <td>{c.duration_days} dias</td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '0.25rem' }}>
-                              <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>Editar</button>
-                              <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>Excluir</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {adminCrudTab === 'books' && (
-              <div className="card">
-                <div className="quiz-header mb-4">
-                  <h3>Gerenciamento da Livraria (Livros)</h3>
-                  <button className="btn btn-primary" onClick={() => setEditingBook({})}>＋ Adicionar Novo Livro</button>
-                </div>
-
-                {editingBook && (
-                  <form onSubmit={handleSaveBook} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
-                    <h4 className="mb-4">{editingBook.id ? 'Editar Detalhes do Livro' : 'Adicionar Novo Livro'}</h4>
-                    <input type="hidden" name="id" defaultValue={editingBook.id || ''} />
-                    
-                    <div className="form-group">
-                      <label className="form-label">Título do Livro</label>
-                      <input className="form-input" name="title" defaultValue={editingBook.title || ''} required placeholder="ex: O Método das Oito Caixas" />
+                {adminActiveTab === 'courses' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>Gerenciamento de Cursos Acadêmicos</h3>
+                      <button className="btn btn-primary" onClick={() => setEditingCourse({})}>＋ Criar Novo Curso</button>
                     </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Autor</label>
-                      <input className="form-input" name="author" defaultValue={editingBook.author || ''} required placeholder="ex: Dr. Rajan Sankaran" />
-                    </div>
+                    {editingCourse && (
+                      <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingCourse.id || ''} />
+                        
+                        <div className="form-group">
+                          <label className="form-label">Título do Curso</label>
+                          <input className="form-input" name="title" defaultValue={editingCourse.title || ''} required placeholder="ex: Introdução à Sensação Vital" />
+                        </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Preço (R$)</label>
-                      <input className="form-input" type="number" step="0.01" name="price" defaultValue={editingBook.price || 0.00} required />
-                    </div>
+                        <div className="form-group">
+                          <label className="form-label">Descrição</label>
+                          <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Descreva os objetivos do curso..." />
+                        </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Descrição Curta</label>
-                      <textarea className="form-input" name="desc" defaultValue={editingBook.desc || ''} required placeholder="Escreva um resumo da obra didática..." />
-                    </div>
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Tipo de Curso</label>
+                            <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
+                              <option value="FREE">FREE (Gratuito)</option>
+                              <option value="SUBSCRIPTION">SUBSCRIPTION (Assinatura)</option>
+                              <option value="POSTGRAD">POSTGRAD (Pós-Graduação)</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Duração de Acesso (Dias)</label>
+                            <input className="form-input" type="number" name="duration_days" defaultValue={editingCourse.duration_days || 180} required />
+                          </div>
+                        </div>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingBook(null)}>Cancelar</button>
-                      <button className="btn btn-primary flex-1" type="submit">Gravar Livro</button>
+                        <div className="form-group">
+                          <label className="form-label">Mensagem de Conclusão</label>
+                          <input className="form-input" name="finishing_message" defaultValue={editingCourse.finishing_message || ''} placeholder="Parabéns pela conclusão..." />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">ID do Professor Responsável</label>
+                          <input className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingCourse(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Gravar Curso no LMS</button>
+                        </div>
+                      </form>
+                    )}
+
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Tipo</th>
+                            <th>Duração (Dias)</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {mockDb.courses.map(c => (
+                            <tr key={c.id}>
+                              <td><code>{c.id}</code></td>
+                              <td><strong>{c.title}</strong></td>
+                              <td><span className="course-type-badge">{c.type}</span></td>
+                              <td>{c.duration_days} dias</td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>Editar</button>
+                                  <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>Excluir</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  </form>
+                  </div>
                 )}
 
-                <div className="table-responsive">
-                  <table className="lms-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Autor</th>
-                        <th>Preço</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {books.map(b => (
-                        <tr key={b.id}>
-                          <td><code>{b.id}</code></td>
-                          <td><strong>{b.title}</strong></td>
-                          <td>{b.author}</td>
-                          <td><strong>R$ {b.price.toFixed(2)}</strong></td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '0.25rem' }}>
-                              <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingBook(b)}>Editar</button>
-                              <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteBook(b.id)}>Excluir</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+                {adminActiveTab === 'books' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>Gerenciamento da Livraria (Livros)</h3>
+                      <button className="btn btn-primary" onClick={() => setEditingBook({})}>＋ Adicionar Novo Livro</button>
+                    </div>
 
-            {adminCrudTab === 'logs' && (
-              <div className="card flex-col">
-                <h3>Registros de Acesso e Segurança</h3>
-                <p className="course-card-description mb-4">
-                  Auditoria em tempo real de IPs, agentes de usuário e travas de segurança acionadas.
-                </p>
-                <div className="logs-container">
-                  {securityLogs.length === 0 ? (
-                    <p className="course-card-description text-center mt-3">Nenhum log registrado.</p>
-                  ) : (
-                    securityLogs.map((log, idx) => (
-                      <div key={idx} className="log-item">
-                        <div className="invoice-footer mb-1">
-                          <span className="invoice-title mb-0">{log.user_name || 'Sistema'}</span>
-                          <span className="text-muted">{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
+                    {editingBook && (
+                      <form onSubmit={handleSaveBook} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-4">{editingBook.id ? 'Editar Detalhes do Livro' : 'Adicionar Novo Livro'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingBook.id || ''} />
+                        
+                        <div className="form-group">
+                          <label className="form-label">Título do Livro</label>
+                          <input className="form-input" name="title" defaultValue={editingBook.title || ''} required placeholder="ex: O Método das Oito Caixas" />
                         </div>
-                        <div className="invoice-footer">
-                          <span className={`badge-log-type ${log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? 'lockout' : ''}`}>
-                            {log.content_accessed}
-                          </span>
-                          <span className="helper-text">IP: {log.ip_address}</span>
+
+                        <div className="form-group">
+                          <label className="form-label">Autor</label>
+                          <input className="form-input" name="author" defaultValue={editingBook.author || ''} required placeholder="ex: Dr. Rajan Sankaran" />
                         </div>
-                        <small className="invoice-ref mt-1">{log.user_agent}</small>
+
+                        <div className="form-group">
+                          <label className="form-label">Preço (R$)</label>
+                          <input className="form-input" type="number" step="0.01" name="price" defaultValue={editingBook.price || 0.00} required />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Descrição Curta</label>
+                          <textarea className="form-input" name="desc" defaultValue={editingBook.desc || ''} required placeholder="Escreva um resumo da obra didática..." />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingBook(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Gravar Livro</button>
+                        </div>
+                      </form>
+                    )}
+
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {books.map(b => (
+                            <tr key={b.id}>
+                              <td><code>{b.id}</code></td>
+                              <td><strong>{b.title}</strong></td>
+                              <td>{b.author}</td>
+                              <td><strong>R$ {b.price.toFixed(2)}</strong></td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingBook(b)}>Editar</button>
+                                  <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteBook(b.id)}>Excluir</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {adminActiveTab === 'students' && (
+                  <div className="card">
+                    <h3 className="mb-4">Gerenciamento de Alunos</h3>
+                    <p className="course-card-description mb-4">
+                      Ative ou suspenda contas de estudantes e reinicie tentativas de testes avaliativos expirados.
+                    </p>
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Nome</th>
+                            <th>Cadastro / E-mail</th>
+                            <th>Status</th>
+                            <th>Histórico de Testes</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {mockDb.users.filter(u => u.role === 'STUDENT').map(s => {
+                            const hasAttempts = mockDb.quiz_attempts[`${s.id}_quiz-p1`] || null;
+                            return (
+                              <tr key={s.id}>
+                                <td><strong>{s.name}</strong></td>
+                                <td>
+                                  <div>{s.email}</div>
+                                  <small className="text-muted">{s.registrationType}: {s.registrationNumber}</small>
+                                </td>
+                                <td>
+                                  <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
+                                    {s.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'}
+                                  </span>
+                                </td>
+                                <td>
+                                  {hasAttempts ? (
+                                    <div>
+                                      <span style={{ fontSize: '0.85rem' }}>Quiz Pós: <strong>{hasAttempts.attempts_count}</strong> tentativa(s)</span>
+                                      <button 
+                                        className="btn btn-secondary mt-1 w-full" 
+                                        style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem' }} 
+                                        onClick={() => resetQuizAttempts(s.id, 'quiz-p1')}
+                                      >
+                                        Reiniciar
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>Nenhuma tentativa</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <button 
+                                    className={`btn ${s.status === 'ACTIVE' ? 'btn-danger' : 'btn-primary'}`} 
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                    onClick={() => toggleStudentStatus(s.id)}
+                                  >
+                                    {s.status === 'ACTIVE' ? 'Suspender' : 'Ativar'}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {adminActiveTab === 'payments' && (
+                  <div className="card">
+                    <h3 className="mb-4">Gerenciamento de Faturas e Cobranças</h3>
+                    <p className="course-card-description mb-4">
+                      Visualize o status das cobranças geradas pelo sistema EAD e simule/confirme o recebimento manualmente.
+                    </p>
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Ref / Transação</th>
+                            <th>Aluno</th>
+                            <th>Valor</th>
+                            <th>Método</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {mockDb.payments.map(p => {
+                            const student = mockDb.users.find(u => u.id === p.student_id);
+                            return (
+                              <tr key={p.id}>
+                                <td>
+                                  <small><code>{p.transaction_code || p.id}</code></small>
+                                </td>
+                                <td>
+                                  <strong>{student ? student.name : 'Aluno Removido'}</strong>
+                                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
+                                </td>
+                                <td><strong>R$ {p.amount.toFixed(2)}</strong></td>
+                                <td><span className="course-type-badge">{p.payment_method}</span></td>
+                                <td>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</td>
+                                <td>
+                                  <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'}>
+                                    {p.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  {p.status !== 'RECEIVED' ? (
+                                    <button 
+                                      className="btn btn-primary" 
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                      onClick={() => simulatePaymentConfirm(p.id)}
+                                    >
+                                      Confirmar Pix/Boleto
+                                    </button>
+                                  ) : (
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>Pago em {p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {adminActiveTab === 'events' && (
+                  <div>
+                    {/* Criar Evento */}
+                    <div className="card mb-6">
+                      <h3 className="mb-4">Adicionar Evento Científico</h3>
+                      <form onSubmit={handleCreateEvent} className="grid-2col" style={{ gap: '1rem' }}>
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                          <label className="form-label">Título do Evento</label>
+                          <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Tipo de Evento</label>
+                          <select className="form-input" name="type">
+                            <option value="Lançamento de Livro">Lançamento de Livro</option>
+                            <option value="Grupo de Estudos">Grupo de Estudos</option>
+                            <option value="Seminário Literário">Seminário Literário</option>
+                            <option value="Aula Magna">Aula Magna</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Localização / Link</label>
+                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Dia (ex: 15)</label>
+                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Mês (ex: Set)</label>
+                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" />
+                        </div>
+                        <div style={{ gridColumn: 'span 2', marginTop: '0.5rem' }}>
+                          <button className="btn btn-primary w-full" type="submit">Cadastrar Evento na Agenda</button>
+                        </div>
+                      </form>
+                    </div>
+
+                    {/* Listagem de Eventos */}
+                    <div className="card">
+                      <h3 className="mb-4">Eventos Programados</h3>
+                      <div className="table-responsive">
+                        <table className="lms-table">
+                          <thead>
+                            <tr>
+                              <th>Data</th>
+                              <th>Tipo</th>
+                              <th>Título</th>
+                              <th>Local</th>
+                              <th>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(mockDb.events || []).map(event => (
+                              <tr key={event.id}>
+                                <td><strong>{event.day} {event.month}</strong></td>
+                                <td><span className="course-type-badge">{event.type}</span></td>
+                                <td><strong>{event.title}</strong></td>
+                                <td>{event.location}</td>
+                                <td>
+                                  <button 
+                                    className="btn btn-danger" 
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                    onClick={() => handleDeleteEvent(event.id)}
+                                  >
+                                    Excluir
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {(mockDb.events || []).length === 0 && (
+                              <tr>
+                                <td colSpan="5" className="text-center text-muted" style={{ padding: '2rem' }}>Nenhum evento agendado.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
                       </div>
-                    ))
-                  )}
-                </div>
+                    </div>
+                  </div>
+                )}
+
+                {adminActiveTab === 'logs' && (
+                  <div className="card flex-col">
+                    <h3>Registros de Acesso e Segurança</h3>
+                    <p className="course-card-description mb-4">
+                      Auditoria em tempo real de IPs, agentes de usuário e travas de segurança acionadas.
+                    </p>
+                    <div className="logs-container">
+                      {securityLogs.length === 0 ? (
+                        <p className="course-card-description text-center mt-3">Nenhum log registrado.</p>
+                      ) : (
+                        securityLogs.map((log, idx) => (
+                          <div key={idx} className="log-item">
+                            <div className="invoice-footer mb-1">
+                              <span className="invoice-title mb-0">{log.user_name || 'Sistema'}</span>
+                              <span className="text-muted">{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
+                            </div>
+                            <div className="invoice-footer">
+                              <span className={`badge-log-type ${log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? 'lockout' : ''}`}>
+                                {log.content_accessed}
+                              </span>
+                              <span className="helper-text">IP: {log.ip_address}</span>
+                            </div>
+                            <small className="invoice-ref mt-1">{log.user_agent}</small>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 
