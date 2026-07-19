@@ -1907,6 +1907,8 @@ body.high-contrast .nav-link.active {
     z-index: 150;
     gap: 0.5rem;
     align-items: stretch;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
   }
 
   .nav-links.mobile-open {
@@ -2034,12 +2036,171 @@ body.high-contrast .nav-link.active {
   .mobile-only-block {
     display: none !important;
   }
+  .mobile-only-flex {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
   .desktop-only-block {
     display: none !important;
   }
+  .mobile-only-flex {
+    display: flex !important;
+  }
+  
+  /* Ajustes do Cabeçalho Mobile para ser Sticky e Menor */
+  .tosb-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem 1rem !important;
+    background-color: var(--color-bg-card) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  
+  .accessibility-bar {
+    display: none !important;
+  }
+
+  .logo-title {
+    display: none !important;
+  }
+
+  .logo-subtitle {
+    display: none !important;
+  }
+
+  .logo-text::after {
+    content: 'TOSB';
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: 1.35rem;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+
+  .logo-symbol {
+    font-size: 1.5rem !important;
+  }
+
+  .nav-links {
+    top: 55px !important; /* Ajusta para a altura do novo header menor */
+  }
 }
+
+/* Transição do texto do WhatsApp */
+.whatsapp-text {
+  max-width: 150px;
+  overflow: hidden;
+  transition: max-width 0.5s ease, opacity 0.5s ease;
+  white-space: nowrap;
+  opacity: 1;
+  display: inline-block;
+}
+
+.whatsapp-text.hidden {
+  max-width: 0;
+  opacity: 0;
+}
+
+.whatsapp-float-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease, gap 0.5s ease !important;
+}
+
+.whatsapp-float-btn.text-hidden {
+  padding: 0.75rem !important;
+  gap: 0 !important;
+}
+
+/* Sistema de Toasts Flutuantes */
+.tosb-toast-container {
+  position: fixed;
+  top: 75px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  width: calc(100% - 40px);
+}
+
+.tosb-toast {
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.tosb-toast.alert-success {
+  background-color: rgba(240, 253, 244, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-left: 5px solid #22c55e;
+}
+
+.tosb-toast.alert-danger {
+  background-color: rgba(254, 242, 242, 0.95);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-left: 5px solid #ef4444;
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.toast-close-btn:hover {
+  color: #0f172a;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Correção do deslocamento do menu painel no mobile */
+.header-mobile-actions .nav-dropdown-content {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: auto !important;
+  display: none;
+  min-width: 220px !important;
+  background-color: var(--color-bg-card) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--color-border) !important;
+  z-index: 10000 !important;
+}
+
+.header-mobile-actions .nav-dropdown-content.open {
+  display: block !important;
+}
+
 
 

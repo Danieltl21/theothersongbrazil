@@ -104,6 +104,25 @@ const COURSES_DETAILS_DATA = {
   }
 };
 
+const PAGE_URLS = {
+  home: 'index',
+  about: 'sobre-nos',
+  homeopaths: 'homeopatas',
+  books: 'livros',
+  synergy: 'software-synergy',
+  contact: 'contato',
+  cart: 'carrinho',
+  login: 'entrar',
+  register: 'cadastro',
+  unlock: 'desbloquear',
+  'student-dash': 'painel-aluno',
+  'teacher-dash': 'painel-professor',
+  'admin-dash': 'painel-administrador',
+  'course-detail': 'detalhes-curso',
+  'course-view': 'assistir-aula',
+  checkout: 'finalizar-compra'
+};
+
 // Helper para gerar slugs legíveis de cursos
 const getSlug = (title) => {
   return title
@@ -117,34 +136,26 @@ const getSlug = (title) => {
 const getPageFromPathname = () => {
   const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
   if (isDemo) {
-    const hash = window.location.hash || '#home';
-    if (hash.startsWith('#course/')) return 'course-detail';
-    if (hash.startsWith('#course-view/')) return 'course-view';
-    const page = hash.replace('#', '');
-    const validPages = [
-      'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
-      'cart', 'login', 'register', 'unlock', 'student-dash', 
-      'course-view', 'teacher-dash', 'admin-dash', 'checkout'
-    ];
-    return validPages.includes(page) ? page : 'home';
+    const hash = window.location.hash || '#inicio';
+    if (hash.startsWith('#curso/')) return 'course-detail';
+    if (hash.startsWith('#aula/')) return 'course-view';
+    const pageHash = hash.replace('#', '');
+    
+    // Reverse lookup for hash
+    const entries = Object.entries(PAGE_URLS);
+    for (const [key, value] of entries) {
+      if (value === pageHash) return key;
+    }
+    if (pageHash === 'inicio') return 'home';
+    return 'home';
   }
   
   const pathname = window.location.pathname;
-  if (pathname.endsWith('/about.html') || pathname.endsWith('/about')) return 'about';
-  if (pathname.endsWith('/homeopaths.html') || pathname.endsWith('/homeopaths')) return 'homeopaths';
-  if (pathname.endsWith('/books.html') || pathname.endsWith('/books')) return 'books';
-  if (pathname.endsWith('/synergy.html') || pathname.endsWith('/synergy')) return 'synergy';
-  if (pathname.endsWith('/contact.html') || pathname.endsWith('/contact')) return 'contact';
-  if (pathname.endsWith('/cart.html') || pathname.endsWith('/cart')) return 'cart';
-  if (pathname.endsWith('/login.html') || pathname.endsWith('/login')) return 'login';
-  if (pathname.endsWith('/register.html') || pathname.endsWith('/register')) return 'register';
-  if (pathname.endsWith('/unlock.html') || pathname.endsWith('/unlock')) return 'unlock';
-  if (pathname.endsWith('/student-dash.html') || pathname.endsWith('/student-dash')) return 'student-dash';
-  if (pathname.endsWith('/course-view.html') || pathname.endsWith('/course-view')) return 'course-view';
-  if (pathname.endsWith('/teacher-dash.html') || pathname.endsWith('/teacher-dash')) return 'teacher-dash';
-  if (pathname.endsWith('/admin-dash.html') || pathname.endsWith('/admin-dash')) return 'admin-dash';
-  if (pathname.endsWith('/course-detail.html') || pathname.endsWith('/course-detail')) return 'course-detail';
-  if (pathname.endsWith('/checkout.html') || pathname.endsWith('/checkout')) return 'checkout';
+  for (const [key, value] of Object.entries(PAGE_URLS)) {
+    if (pathname.endsWith(`/${value}.html`) || pathname.endsWith(`/${value}`)) {
+      return key;
+    }
+  }
   return 'home';
 };
 
@@ -244,6 +255,25 @@ export default function App() {
 
   // Estados de Responsividade e Dropdowns
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showWhatsappText, setShowWhatsappText] = useState(true);
+
+  // Ocultar texto do WhatsApp após 3 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWhatsappText(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Limpar alertas automaticamente após 5 segundos (Toast auto-hide)
+  useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        clearAlerts();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, error]);
   const [activeDropdown, setActiveDropdown] = useState(null); // 'about' | 'courses' | 'panel' | null
   const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
 
@@ -270,6 +300,19 @@ export default function App() {
   const [adminCrudTab, setAdminCrudTab] = useState('courses'); // courses, books
   const [editingCourse, setEditingCourse] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [formUserRole, setFormUserRole] = useState('STUDENT');
+
+  const startAddUser = () => {
+    setEditingUser({});
+    setFormUserRole('STUDENT');
+  };
+
+  const startEditUser = (userObj) => {
+    setEditingUser(userObj);
+    setFormUserRole(userObj.role || 'STUDENT');
+  };
 
   // Novos estados para busca de homeopatas e abas dos dashboards
   const [homeopathsSearch, setHomeopathsSearch] = useState('');
@@ -283,14 +326,28 @@ export default function App() {
   const getLinkHref = (page, queryParams = '') => {
     const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
     if (isDemo) {
-      if (page === 'home') return '#home';
-      if (page === 'course-detail') return `#course/${queryParams.replace('id=', '')}`;
-      if (page === 'course-view') return `#course-view/${queryParams.replace('id=', '')}`;
+      if (page === 'home') return '#inicio';
+      if (page === 'about') return '#sobre-nos';
+      if (page === 'homeopaths') return '#homeopatas';
+      if (page === 'books') return '#livros';
+      if (page === 'synergy') return '#software-synergy';
+      if (page === 'contact') return '#contato';
+      if (page === 'cart') return '#carrinho';
+      if (page === 'login') return '#entrar';
+      if (page === 'register') return '#cadastro';
+      if (page === 'unlock') return '#desbloquear';
+      if (page === 'student-dash') return '#painel-aluno';
+      if (page === 'teacher-dash') return '#painel-professor';
+      if (page === 'admin-dash') return '#painel-administrador';
+      if (page === 'course-detail') return `#curso/${queryParams.replace('id=', '')}`;
+      if (page === 'course-view') return `#aula/${queryParams.replace('id=', '')}`;
+      if (page === 'checkout') return '#finalizar-compra';
       return `#${page}`;
     }
+    const urlSegment = PAGE_URLS[page] || page;
     if (page === 'home') return 'index.html';
-    if (queryParams) return `${page}.html?${queryParams}`;
-    return `${page}.html`;
+    if (queryParams) return `${urlSegment}.html?${queryParams}`;
+    return `${urlSegment}.html`;
   };
 
   const navigateTo = (page, queryParams = '') => {
@@ -312,6 +369,25 @@ export default function App() {
       navigateTo(page, queryParams);
     } else {
       clearAlerts();
+    }
+  };
+
+  const handleDashboardTabClick = (e, targetPage, tabName) => {
+    e.preventDefault();
+    clearAlerts();
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+    
+    if (targetPage === 'student-dash') {
+      setStudentActiveTab(tabName);
+    } else if (targetPage === 'teacher-dash') {
+      setTeacherActiveTab(tabName);
+    } else if (targetPage === 'admin-dash') {
+      setAdminActiveTab(tabName);
+    }
+    
+    if (currentPage !== targetPage) {
+      navigateTo(targetPage);
     }
   };
 
@@ -352,19 +428,18 @@ export default function App() {
     }
   }, [mockDb, isOfflineMode]);
 
-  // Sistema de Roteamento (Roteador Híbrido MPA / Hash SPA)
   useEffect(() => {
     const handleNavigation = async () => {
       const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
-      const hash = window.location.hash || '#home';
+      const hash = window.location.hash || '#inicio';
 
       let page = 'home';
       let courseIdFromQuery = null;
 
       if (isDemo) {
         // Modo Demo (SPA por Hash)
-        if (hash.startsWith('#course/')) {
-          const slug = hash.replace('#course/', '');
+        if (hash.startsWith('#curso/')) {
+          const slug = hash.replace('#curso/', '');
           const courseList = mockDb?.courses || [];
           const course = courseList.find(c => 
             getSlug(c.title) === slug || 
@@ -377,19 +452,23 @@ export default function App() {
             setSelectedDetailCourse(course);
             page = 'course-detail';
           }
-        } else if (hash.startsWith('#course-view/')) {
-          const courseId = hash.replace('#course-view/', '');
+        } else if (hash.startsWith('#aula/')) {
+          const courseId = hash.replace('#aula/', '');
           courseIdFromQuery = courseId;
           page = 'course-view';
         } else {
-          const rawPage = hash.replace('#', '');
-          const validPages = [
-            'home', 'about', 'homeopaths', 'books', 'synergy', 'contact', 
-            'cart', 'login', 'register', 'unlock', 'student-dash', 
-            'course-view', 'teacher-dash', 'admin-dash', 'checkout'
-          ];
-          if (validPages.includes(rawPage)) {
-            page = rawPage;
+          const pageHash = hash.replace('#', '');
+          const entries = Object.entries(PAGE_URLS);
+          let found = false;
+          for (const [key, value] of entries) {
+            if (value === pageHash) {
+              page = key;
+              found = true;
+              break;
+            }
+          }
+          if (!found && pageHash === 'inicio') {
+            page = 'home';
           }
         }
       } else {
@@ -398,22 +477,15 @@ export default function App() {
         const searchParams = new URLSearchParams(window.location.search);
         courseIdFromQuery = searchParams.get('id');
 
-        if (pathname.endsWith('/about.html') || pathname.endsWith('/about')) page = 'about';
-        else if (pathname.endsWith('/homeopaths.html') || pathname.endsWith('/homeopaths')) page = 'homeopaths';
-        else if (pathname.endsWith('/books.html') || pathname.endsWith('/books')) page = 'books';
-        else if (pathname.endsWith('/synergy.html') || pathname.endsWith('/synergy')) page = 'synergy';
-        else if (pathname.endsWith('/contact.html') || pathname.endsWith('/contact')) page = 'contact';
-        else if (pathname.endsWith('/cart.html') || pathname.endsWith('/cart')) page = 'cart';
-        else if (pathname.endsWith('/login.html') || pathname.endsWith('/login')) page = 'login';
-        else if (pathname.endsWith('/register.html') || pathname.endsWith('/register')) page = 'register';
-        else if (pathname.endsWith('/unlock.html') || pathname.endsWith('/unlock')) page = 'unlock';
-        else if (pathname.endsWith('/student-dash.html') || pathname.endsWith('/student-dash')) page = 'student-dash';
-        else if (pathname.endsWith('/course-view.html') || pathname.endsWith('/course-view')) page = 'course-view';
-        else if (pathname.endsWith('/teacher-dash.html') || pathname.endsWith('/teacher-dash')) page = 'teacher-dash';
-        else if (pathname.endsWith('/admin-dash.html') || pathname.endsWith('/admin-dash')) page = 'admin-dash';
-        else if (pathname.endsWith('/course-detail.html') || pathname.endsWith('/course-detail')) page = 'course-detail';
-        else if (pathname.endsWith('/checkout.html') || pathname.endsWith('/checkout')) page = 'checkout';
-        else page = 'home';
+        let found = false;
+        for (const [key, value] of Object.entries(PAGE_URLS)) {
+          if (pathname.endsWith(`/${value}.html`) || pathname.endsWith(`/${value}`)) {
+            page = key;
+            found = true;
+            break;
+          }
+        }
+        if (!found) page = 'home';
       }
 
       setCurrentPage(page);
@@ -1836,18 +1908,18 @@ NEWFILEENCODING:NONE
   };
 
   // Funções de Gerenciamento do Administrador
-  const toggleStudentStatus = (studentId) => {
+  const toggleUserStatus = (userId) => {
     setMockDb(prev => {
       const updatedUsers = prev.users.map(u => {
-        if (u.id === studentId) {
+        if (u.id === userId) {
           const newStatus = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
           return { ...u, status: newStatus };
         }
         return u;
       });
       const updatedEnrollments = prev.enrollments.map(e => {
-        if (e.student_id === studentId) {
-          const userObj = updatedUsers.find(u => u.id === studentId);
+        if (e.student_id === userId) {
+          const userObj = updatedUsers.find(u => u.id === userId);
           return { ...e, status: userObj.status };
         }
         return e;
@@ -1858,7 +1930,147 @@ NEWFILEENCODING:NONE
         enrollments: updatedEnrollments
       };
     });
-    setSuccess('Status do aluno atualizado com sucesso.');
+    setSuccess('Status do usuário atualizado com sucesso.');
+  };
+
+  const handleSaveUser = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const name = e.target.name.value;
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    const role = e.target.role.value;
+    const status = e.target.status.value;
+    
+    let registrationType = '';
+    let registrationNumber = '';
+    let crm = '';
+    let rqe = '';
+    let bio = '';
+    
+    if (role === 'STUDENT') {
+      registrationType = e.target.registrationType?.value || '';
+      registrationNumber = e.target.registrationNumber?.value || '';
+    } else if (role === 'TEACHER') {
+      crm = e.target.crm?.value || '';
+      rqe = e.target.rqe?.value || '';
+      bio = e.target.bio?.value || '';
+    }
+
+    let errorOccurred = false;
+
+    setMockDb(prev => {
+      const existingUser = prev.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.id !== editingUser.id);
+      if (existingUser) {
+        errorOccurred = true;
+        return prev;
+      }
+
+      let updatedUsers;
+      if (editingUser.id) {
+        updatedUsers = prev.users.map(u => {
+          if (u.id === editingUser.id) {
+            return {
+              ...u,
+              name,
+              email,
+              password,
+              role,
+              status,
+              registrationType,
+              registrationNumber,
+              crm,
+              rqe,
+              bio
+            };
+          }
+          return u;
+        });
+      } else {
+        const newUser = {
+          id: 'user-' + Date.now(),
+          name,
+          email,
+          password,
+          role,
+          status,
+          registrationType,
+          registrationNumber,
+          crm,
+          rqe,
+          bio
+        };
+        updatedUsers = [...prev.users, newUser];
+      }
+
+      return {
+        ...prev,
+        users: updatedUsers
+      };
+    });
+
+    if (errorOccurred) {
+      setError('E-mail já cadastrado por outro usuário.');
+    } else {
+      setSuccess(editingUser.id ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!');
+      setEditingUser(null);
+    }
+  };
+
+  const handleSavePayment = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const student_id = e.target.student_id.value;
+    const course_id = e.target.course_id.value || null;
+    const amount = parseFloat(e.target.amount.value) || 0;
+    const payment_method = e.target.payment_method.value;
+    const status = e.target.status.value;
+    const due_date = e.target.due_date.value;
+    const transaction_code = e.target.transaction_code.value || ('ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase());
+    const paid_at = status === 'RECEIVED' ? (editingPayment.paid_at || new Date().toISOString().split('T')[0]) : null;
+
+    setMockDb(prev => {
+      let updatedPayments;
+      if (editingPayment.id) {
+        updatedPayments = prev.payments.map(p => {
+          if (p.id === editingPayment.id) {
+            return {
+              ...p,
+              student_id,
+              course_id,
+              amount,
+              payment_method,
+              status,
+              due_date,
+              transaction_code,
+              paid_at
+            };
+          }
+          return p;
+        });
+      } else {
+        const newPayment = {
+          id: 'pay-' + Date.now(),
+          student_id,
+          course_id,
+          amount,
+          payment_method,
+          status,
+          due_date,
+          transaction_code,
+          paid_at
+        };
+        updatedPayments = [...prev.payments, newPayment];
+      }
+
+      return {
+        ...prev,
+        payments: updatedPayments
+      };
+    });
+
+    setSuccess(editingPayment.id ? 'Fatura atualizada com sucesso!' : 'Fatura criada com sucesso!');
+    setEditingPayment(null);
   };
 
   const resetQuizAttempts = (studentId, quizId) => {
@@ -1921,10 +2133,11 @@ NEWFILEENCODING:NONE
     const day = e.target.day.value;
     const month = e.target.month.value;
     const location = e.target.location.value;
+    const time = e.target.time?.value || '';
 
     const newEvent = {
       id: 'event-' + Date.now(),
-      title, type, day, month, location
+      title, type, day, month, location, time
     };
 
     setMockDb(prev => ({
@@ -2051,23 +2264,51 @@ NEWFILEENCODING:NONE
           <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'contact')}>Contato</a>
 
           {/* Bloco de Usuário exclusivo para mobile */}
-          <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem' }}>
+          <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
             {user ? (
               <div className="nav-dropdown">
                 <button 
                   className="nav-link w-full text-left" 
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setActiveDropdown(activeDropdown === 'panel' ? null : 'panel');
+                    setActiveDropdown(activeDropdown === 'panel-hamburger' ? null : 'panel-hamburger');
                   }}
                 >
-                  <span>👤 {user.name}</span>
+                  <span>👤 Painel de {user.name}</span>
                   <span>▾</span>
                 </button>
-                <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`}>
-                  <a href={getLinkHref(user.role === 'STUDENT' ? 'student-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'admin-dash')} className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
-                  <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
+                <div className={`nav-dropdown-content ${activeDropdown === 'panel-hamburger' ? 'open' : ''}`} style={{ display: activeDropdown === 'panel-hamburger' ? 'block' : 'none', position: 'static', boxShadow: 'none', paddingLeft: '1rem' }}>
+                  {user.role === 'STUDENT' && (
+                    <>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'panel')}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'courses')}>📚 Meus Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'payments')}>💳 Financeiro / Faturas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'account')}>👤 Meus Dados</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'agenda')}>📅 Calendário Acadêmico</a>
+                    </>
+                  )}
+                  {user.role === 'TEACHER' && (
+                    <>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'panel')}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'students')}>👥 Gerenciar Turmas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'payments')}>💳 Financeiro</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'account')}>⚙️ Detalhes da Conta</a>
+                    </>
+                  )}
+                  {user.role === 'ADMIN' && (
+                    <>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'stats')}>📊 Estatísticas / OFX</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🌿 Gerenciar Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
+                    </>
+                  )}
+                  <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }}></div>
+                  <a href="#" className="dropdown-item text-danger" style={{ padding: '0.5rem 0' }} onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
                 </div>
               </div>
             ) : (
@@ -2080,7 +2321,7 @@ NEWFILEENCODING:NONE
         </nav>
 
         {/* Painel do Usuário, Carrinho e Acessibilidade */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           
           {/* Controles de Acessibilidade */}
           <div className="accessibility-bar">
@@ -2098,6 +2339,75 @@ NEWFILEENCODING:NONE
               </span>
             )}
           </a>
+
+          {/* Ações Rápidas Mobile (Sempre Visíveis no Mobile Sticky Header) */}
+          <div className="mobile-only-flex header-mobile-actions" style={{ alignItems: 'center', gap: '0.35rem' }}>
+            {user ? (
+              <div className="nav-dropdown">
+                <button 
+                  className="btn btn-primary" 
+                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveDropdown(activeDropdown === 'panel-mobile' ? null : 'panel-mobile');
+                  }}
+                >
+                  Painel ▾
+                </button>
+                <div className={`nav-dropdown-content ${activeDropdown === 'panel-mobile' ? 'open' : ''}`} style={{ right: 0, left: 'auto', minWidth: '220px' }}>
+                  {user.role === 'STUDENT' && (
+                    <>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'panel')}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'courses')}>📚 Meus Cursos</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'payments')}>💳 Financeiro / Faturas</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'account')}>👤 Meus Dados</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'agenda')}>📅 Calendário Acadêmico</a>
+                    </>
+                  )}
+                  {user.role === 'TEACHER' && (
+                    <>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'panel')}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'students')}>👥 Gerenciar Turmas</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'payments')}>💳 Financeiro</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'account')}>⚙️ Detalhes da Conta</a>
+                    </>
+                  )}
+                  {user.role === 'ADMIN' && (
+                    <>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'stats')}>📊 Estatísticas / OFX</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🌿 Gerenciar Cursos</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
+                    </>
+                  )}
+                  <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.25rem 0' }}></div>
+                  <a href="#" className="dropdown-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
+                </div>
+              </div>
+            ) : (
+              <>
+                <a 
+                  href={getLinkHref('login')} 
+                  className="btn btn-secondary" 
+                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
+                  onClick={(e) => handleLinkClick(e, 'login')}
+                >
+                  Entrar
+                </a>
+                <a 
+                  href={getLinkHref('register')} 
+                  className="btn btn-primary" 
+                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
+                  onClick={(e) => handleLinkClick(e, 'register')}
+                >
+                  Inscrever
+                </a>
+              </>
+            )}
+          </div>
 
           {/* Ações do Usuário (Desktop Apenas) */}
           <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
@@ -2121,17 +2431,27 @@ NEWFILEENCODING:NONE
             ) : (
               <>
                 <a href={getLinkHref('login')} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
-                <a href={getLinkHref('register')} className="btn btn-primary" style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
+                <a href={getLinkHref('register')} className="btn btn-primary" style={{ padding: '0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
               </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Alertas */}
-      <div className="main-content main-content-top">
-        {error && <div className="alert alert-danger"><strong>Aviso:</strong> {error}</div>}
-        {success && <div className="alert alert-success"><strong>Sucesso:</strong> {success}</div>}
+      {/* Container de Toasts Flutuantes */}
+      <div className="tosb-toast-container">
+        {error && (
+          <div className="tosb-toast alert-danger">
+            <span><strong>Aviso:</strong> {error}</span>
+            <button className="toast-close-btn" onClick={() => setError('')}>&times;</button>
+          </div>
+        )}
+        {success && (
+          <div className="tosb-toast alert-success">
+            <span><strong>Sucesso:</strong> {success}</span>
+            <button className="toast-close-btn" onClick={() => setSuccess('')}>&times;</button>
+          </div>
+        )}
       </div>
 
       {/* Conteúdo das Páginas */}
@@ -2946,43 +3266,58 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <h3 className="mb-4">Meus Cursos e Disciplinas</h3>
                     <div className="courses-list">
-                      {courses.map(course => (
-                        <div key={course.id} className="card course-card-grid">
-                          <div>
-                            <span className="course-type-badge">
-                              {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
-                            </span>
-                            <h3 className="course-card-title">{course.title}</h3>
-                            <p className="course-card-description">{course.description}</p>
-                            {course.enrollment.enrolled && (
-                              <div className="course-card-expires">
-                                Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
-                              </div>
-                            )}
-                          </div>
-                          <div className="course-card-actions">
-                            {course.enrollment.enrolled ? (
-                              course.enrollment.status === 'ACTIVE' ? (
-                                <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
-                              ) : course.enrollment.status === 'SUSPENDED' ? (
-                                <div className="error-text-bold">
-                                  ⚠️ Acesso Bloqueado por Inadimplência
+                      {courses.filter(course => course.enrollment.enrolled).length > 0 ? (
+                        courses.filter(course => course.enrollment.enrolled).map(course => (
+                          <div key={course.id} className="card course-card-grid">
+                            <div>
+                              <span className="course-type-badge">
+                                {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
+                              </span>
+                              <h3 className="course-card-title">{course.title}</h3>
+                              <p className="course-card-description">{course.description}</p>
+                              {course.enrollment.enrolled && (
+                                <div className="course-card-expires">
+                                  Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
                                 </div>
+                              )}
+                            </div>
+                            <div className="course-card-actions">
+                              {course.enrollment.enrolled ? (
+                                course.enrollment.status === 'ACTIVE' ? (
+                                  <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
+                                ) : course.enrollment.status === 'SUSPENDED' ? (
+                                  <div className="error-text-bold">
+                                    ⚠️ Acesso Bloqueado por Inadimplência
+                                  </div>
+                                ) : (
+                                  <div className="muted-text-bold">
+                                    ❌ Acesso Expirado (6 Meses)
+                                  </div>
+                                )
                               ) : (
-                                <div className="muted-text-bold">
-                                  ❌ Acesso Expirado (6 Meses)
-                                </div>
-                              )
-                            ) : (
-                              course.type === 'FREE' ? (
-                                <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
-                              ) : (
-                                <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar / Assinar</button>
-                              )
-                            )}
+                                course.type === 'FREE' ? (
+                                  <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
+                                ) : (
+                                  <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar / Assinar</button>
+                                )
+                              )}
+                            </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center p-6 text-muted">
+                          <p>Você não possui nenhuma matrícula ativa no momento.</p>
+                          <a href={getLinkHref('home') + '#online-courses'} className="btn btn-primary mt-4" onClick={(e) => {
+                            const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+                            if (isDemo) {
+                              e.preventDefault();
+                              clearAlerts();
+                              navigateTo('home');
+                              setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                            }
+                          }}>Explorar Cursos</a>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
@@ -3002,7 +3337,10 @@ NEWFILEENCODING:NONE
                           <div className="agenda-details">
                             <span className="agenda-type">{event.type}</span>
                             <h3 className="agenda-title">{event.title}</h3>
-                            <p className="agenda-location">📍 {event.location}</p>
+                            <p className="agenda-location">
+                              📍 {event.location}
+                              {event.time && <span style={{ marginLeft: '1rem', color: 'var(--color-primary)', fontWeight: '500' }}>🕒 {event.time}</span>}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -3361,7 +3699,13 @@ NEWFILEENCODING:NONE
                     <button onClick={() => setTeacherActiveTab('panel')}>📊 Painel Geral</button>
                   </li>
                   <li className={`student-sidebar-item ${teacherActiveTab === 'students' ? 'active' : ''}`}>
-                    <button onClick={() => setTeacherActiveTab('students')}>👥 Relatório de Alunos</button>
+                    <button onClick={() => setTeacherActiveTab('students')}>👥 Gerenciar Turmas</button>
+                  </li>
+                  <li className={`student-sidebar-item ${teacherActiveTab === 'payments' ? 'active' : ''}`}>
+                    <button onClick={() => setTeacherActiveTab('payments')}>💳 Financeiro</button>
+                  </li>
+                  <li className={`student-sidebar-item ${teacherActiveTab === 'account' ? 'active' : ''}`}>
+                    <button onClick={() => setTeacherActiveTab('account')}>⚙️ Detalhes da Conta</button>
                   </li>
                 </ul>
               </aside>
@@ -3418,7 +3762,7 @@ NEWFILEENCODING:NONE
 
                 {teacherActiveTab === 'students' && (
                   <div className="card">
-                    <h3 className="mb-4">Relatório Consolidado de Alunos</h3>
+                    <h3 className="mb-4">Gerenciamento de Turmas</h3>
                     
                     <div className="table-responsive">
                       <table className="lms-table">
@@ -3471,6 +3815,111 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
+
+                {teacherActiveTab === 'payments' && (
+                  <div className="card">
+                    <h3 className="mb-4">Relatório Financeiro do Docente</h3>
+                    <p className="course-card-description mb-4">
+                      Acompanhe as vendas e faturas recebidas referentes aos cursos sob sua docência.
+                    </p>
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Data</th>
+                            <th>Código/Ref</th>
+                            <th>Aluno</th>
+                            <th>Curso</th>
+                            <th>Valor Repassado</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {mockDb.payments
+                            .filter(p => mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id))
+                            .map(p => {
+                              const student = mockDb.users.find(u => u.id === p.student_id);
+                              const course = mockDb.courses.find(c => c.id === p.course_id);
+                              return (
+                                <tr key={p.id}>
+                                  <td>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</td>
+                                  <td><small><code>{p.transaction_code || p.id}</code></small></td>
+                                  <td>
+                                    <strong>{student ? student.name : 'Aluno Removido'}</strong>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
+                                  </td>
+                                  <td>{course ? course.title : 'Curso Removido'}</td>
+                                  <td><strong>R$ {p.amount.toFixed(2)}</strong></td>
+                                  <td>
+                                    <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'}>
+                                      {p.status === 'RECEIVED' ? 'PAID' : p.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          {mockDb.payments.filter(p => mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id)).length === 0 && (
+                            <tr>
+                              <td colSpan="6" className="text-center text-muted" style={{ padding: '2rem' }}>
+                                Nenhuma fatura vinculada aos seus cursos localizada.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {teacherActiveTab === 'account' && (
+                  <div className="card">
+                    <h3 className="mb-4">Detalhes da Conta Docente</h3>
+                    <form onSubmit={handleUpdateProfile}>
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Nome Completo</label>
+                          <input className="form-input" type="text" name="name" defaultValue={user?.name || ''} required />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">E-mail</label>
+                          <input className="form-input" type="email" name="email" defaultValue={user?.email || ''} required />
+                        </div>
+                      </div>
+
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Telefone de Contato</label>
+                          <input className="form-input" type="text" name="phone" placeholder="ex: (41) 99999-9999" defaultValue={user?.phone || ''} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">CPF ou CNPJ</label>
+                          <input className="form-input" type="text" name="cpf_cnpj" placeholder="ex: 000.000.000-00" defaultValue={user?.cpf_cnpj || ''} />
+                        </div>
+                      </div>
+
+                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Identificação Profissional</h4>
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">CRM / Conselho</label>
+                          <input className="form-input" type="text" name="crm" defaultValue={user?.crm || ''} required placeholder="ex: CRM-PR 12345" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">RQE</label>
+                          <input className="form-input" type="text" name="rqe" defaultValue={user?.rqe || ''} placeholder="ex: RQE 6789" />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Biografia Curta</label>
+                        <textarea className="form-input" name="bio" defaultValue={user?.bio || ''} placeholder="Descreva sua formação e experiência profissional..." style={{ minHeight: '100px' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                        <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
+                      </div>
+                    </form>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -3495,7 +3944,7 @@ NEWFILEENCODING:NONE
                     <button onClick={() => setAdminActiveTab('books')}>📚 Gerenciar Livros</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
-                    <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Alunos</button>
+                    <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Usuários</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'payments' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('payments')}>💳 Gerenciar Faturas</button>
@@ -3730,15 +4179,109 @@ NEWFILEENCODING:NONE
 
                 {adminActiveTab === 'students' && (
                   <div className="card">
-                    <h3 className="mb-4">Gerenciamento de Alunos</h3>
+                    <div className="quiz-header mb-4">
+                      <h3>Gerenciamento de Usuários</h3>
+                      <button className="btn btn-primary" onClick={startAddUser}>＋ Adicionar Novo Usuário</button>
+                    </div>
                     <p className="course-card-description mb-4">
-                      Ative ou suspenda contas de estudantes e reinicie tentativas de testes avaliativos expirados.
+                      Adicione, edite, ative ou suspenda contas de usuários (alunos, professores e administradores) da plataforma.
                     </p>
+
+                    {editingUser && (
+                      <form onSubmit={handleSaveUser} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-4">{editingUser.id ? 'Editar Detalhes do Usuário' : 'Cadastrar Novo Usuário'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingUser.id || ''} />
+                        
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Nome Completo</label>
+                            <input className="form-input" name="name" defaultValue={editingUser.name || ''} required placeholder="ex: Dr. Rajan Sankaran" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">E-mail (Login)</label>
+                            <input className="form-input" type="email" name="email" defaultValue={editingUser.email || ''} required placeholder="ex: rajan@tosb.com" />
+                          </div>
+                        </div>
+
+                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                          <div className="form-group">
+                            <label className="form-label">Senha de Acesso</label>
+                            <input className="form-input" type="password" name="password" defaultValue={editingUser.password || 'senha123'} required placeholder="Mínimo 6 caracteres" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Função / Perfil</label>
+                            <select 
+                              className="form-input" 
+                              name="role" 
+                              value={formUserRole} 
+                              onChange={(e) => setFormUserRole(e.target.value)}
+                            >
+                              <option value="STUDENT">Aluno (Profissional de Saúde)</option>
+                              <option value="TEACHER">Professor Colaborador</option>
+                              <option value="ADMIN">Administrador</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Status da Conta</label>
+                            <select className="form-input" name="status" defaultValue={editingUser.status || 'ACTIVE'}>
+                              <option value="ACTIVE">Ativo / Liberado</option>
+                              <option value="SUSPENDED">Suspenso / Inativo</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Campos Dinâmicos baseados na Função */}
+                        {formUserRole === 'STUDENT' && (
+                          <div className="grid-2col" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
+                            <div className="form-group">
+                              <label className="form-label">Tipo de Registro Acadêmico/Conselho</label>
+                              <select className="form-input" name="registrationType" defaultValue={editingUser.registrationType || 'CRM'}>
+                                <option value="CRM">CRM (Medicina)</option>
+                                <option value="CRO">CRO (Odontologia)</option>
+                                <option value="CRF">CRF (Farmácia)</option>
+                                <option value="CRMV">CRMV (Veterinária)</option>
+                                <option value="Outros">Outros Conselhos</option>
+                              </select>
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">Número do Conselho</label>
+                              <input className="form-input" name="registrationNumber" defaultValue={editingUser.registrationNumber || ''} required placeholder="ex: 12345-PR" />
+                            </div>
+                          </div>
+                        )}
+
+                        {formUserRole === 'TEACHER' && (
+                          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
+                            <div className="grid-2col">
+                              <div className="form-group">
+                                <label className="form-label">CRM / Conselho</label>
+                                <input className="form-input" name="crm" defaultValue={editingUser.crm || ''} required placeholder="ex: CRM-PR 12345" />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">RQE (Registro de Especialidade)</label>
+                                <input className="form-input" name="rqe" defaultValue={editingUser.rqe || ''} placeholder="ex: RQE 6789 (Homeopatia)" />
+                              </div>
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label">Biografia Curta</label>
+                              <textarea className="form-input" name="bio" defaultValue={editingUser.bio || ''} placeholder="Mini-currículo ou especialidades do docente..." />
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingUser(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Gravar Usuário</button>
+                        </div>
+                      </form>
+                    )}
+
                     <div className="table-responsive">
                       <table className="lms-table">
                         <thead>
                           <tr>
                             <th>Nome</th>
+                            <th>Função</th>
                             <th>Cadastro / E-mail</th>
                             <th>Status</th>
                             <th>Histórico de Testes</th>
@@ -3746,14 +4289,22 @@ NEWFILEENCODING:NONE
                           </tr>
                         </thead>
                         <tbody>
-                          {mockDb.users.filter(u => u.role === 'STUDENT').map(s => {
+                          {mockDb.users.map(s => {
                             const hasAttempts = mockDb.quiz_attempts[`${s.id}_quiz-p1`] || null;
                             return (
                               <tr key={s.id}>
                                 <td><strong>{s.name}</strong></td>
                                 <td>
+                                  <span className="course-type-badge">{s.role === 'STUDENT' ? 'Aluno' : s.role === 'TEACHER' ? 'Professor' : 'Administrador'}</span>
+                                </td>
+                                <td>
                                   <div>{s.email}</div>
-                                  <small className="text-muted">{s.registrationType}: {s.registrationNumber}</small>
+                                  {s.role === 'STUDENT' && s.registrationType && (
+                                    <small className="text-muted">{s.registrationType}: {s.registrationNumber}</small>
+                                  )}
+                                  {s.role === 'TEACHER' && s.crm && (
+                                    <small className="text-muted">{s.crm} / {s.rqe || 'Sem RQE'}</small>
+                                  )}
                                 </td>
                                 <td>
                                   <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
@@ -3761,29 +4312,40 @@ NEWFILEENCODING:NONE
                                   </span>
                                 </td>
                                 <td>
-                                  {hasAttempts ? (
-                                    <div>
-                                      <span style={{ fontSize: '0.85rem' }}>Quiz Pós: <strong>{hasAttempts.attempts_count}</strong> tentativa(s)</span>
-                                      <button 
-                                        className="btn btn-secondary mt-1 w-full" 
-                                        style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem' }} 
-                                        onClick={() => resetQuizAttempts(s.id, 'quiz-p1')}
-                                      >
-                                        Reiniciar
-                                      </button>
-                                    </div>
+                                  {s.role === 'STUDENT' ? (
+                                    hasAttempts ? (
+                                      <div>
+                                        <span style={{ fontSize: '0.85rem' }}>Quiz Pós: <strong>{hasAttempts.attempts_count}</strong> tentativa(s)</span>
+                                        <button 
+                                          className="btn btn-secondary mt-1 w-full" 
+                                          style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem' }} 
+                                          onClick={() => resetQuizAttempts(s.id, 'quiz-p1')}
+                                        >
+                                          Reiniciar
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Nenhuma tentativa</span>
+                                    )
                                   ) : (
-                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>Nenhuma tentativa</span>
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>N/A</span>
                                   )}
                                 </td>
                                 <td>
-                                  <button 
-                                    className={`btn ${s.status === 'ACTIVE' ? 'btn-danger' : 'btn-primary'}`} 
-                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                    onClick={() => toggleStudentStatus(s.id)}
-                                  >
-                                    {s.status === 'ACTIVE' ? 'Suspender' : 'Ativar'}
-                                  </button>
+                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                    {s.id !== user.id ? (
+                                      <button 
+                                        className={`btn ${s.status === 'ACTIVE' ? 'btn-danger' : 'btn-primary'}`} 
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                        onClick={() => toggleUserStatus(s.id)}
+                                      >
+                                        {s.status === 'ACTIVE' ? 'Suspender' : 'Ativar'}
+                                      </button>
+                                    ) : (
+                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Sua Conta</span>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -3796,10 +4358,82 @@ NEWFILEENCODING:NONE
 
                 {adminActiveTab === 'payments' && (
                   <div className="card">
-                    <h3 className="mb-4">Gerenciamento de Faturas e Cobranças</h3>
+                    <div className="quiz-header mb-4">
+                      <h3>Gerenciamento de Faturas e Cobranças</h3>
+                      <button className="btn btn-primary" onClick={() => setEditingPayment({})}>＋ Criar Nova Fatura</button>
+                    </div>
                     <p className="course-card-description mb-4">
-                      Visualize o status das cobranças geradas pelo sistema EAD e simule/confirme o recebimento manualmente.
+                      Visualize o status das cobranças geradas pelo sistema EAD, edite seus dados ou simule/confirme o recebimento manualmente.
                     </p>
+
+                    {editingPayment && (
+                      <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-4">{editingPayment.id ? 'Editar Fatura' : 'Criar Nova Fatura'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingPayment.id || ''} />
+
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Selecionar Aluno (Responsável)</label>
+                            <select className="form-input" name="student_id" defaultValue={editingPayment.student_id || ''} required>
+                              <option value="" disabled>-- Selecione o Aluno --</option>
+                              {mockDb.users.filter(u => u.role === 'STUDENT').map(u => (
+                                <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Curso Associado (Opcional)</label>
+                            <select className="form-input" name="course_id" defaultValue={editingPayment.course_id || ''}>
+                              <option value="">Nenhum / Avulso / Livro</option>
+                              {mockDb.courses.map(c => (
+                                <option key={c.id} value={c.id}>{c.title}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                          <div className="form-group">
+                            <label className="form-label">Valor (R$)</label>
+                            <input className="form-input" type="number" step="0.01" name="amount" defaultValue={editingPayment.amount || 0.00} required placeholder="0.00" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Forma de Pagamento</label>
+                            <select className="form-input" name="payment_method" defaultValue={editingPayment.payment_method || 'PIX'}>
+                              <option value="PIX">Pix</option>
+                              <option value="BOLETO">Boleto Bancário</option>
+                              <option value="CREDIT_CARD">Cartão de Crédito</option>
+                              <option value="CARNE">Carnê</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Status da Fatura</label>
+                            <select className="form-input" name="status" defaultValue={editingPayment.status || 'PENDING'}>
+                              <option value="PENDING">PENDING (Pendente)</option>
+                              <option value="RECEIVED">RECEIVED (Pago)</option>
+                              <option value="OVERDUE">OVERDUE (Vencido)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Data de Vencimento</label>
+                            <input className="form-input" type="date" name="due_date" defaultValue={editingPayment.due_date || ''} required />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Código de Transação / Referência</label>
+                            <input className="form-input" name="transaction_code" defaultValue={editingPayment.transaction_code || ''} placeholder="Gerado automaticamente se vazio" />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingPayment(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Gravar Fatura</button>
+                        </div>
+                      </form>
+                    )}
+
                     <div className="table-responsive">
                       <table className="lms-table">
                         <thead>
@@ -3834,17 +4468,20 @@ NEWFILEENCODING:NONE
                                   </span>
                                 </td>
                                 <td>
-                                  {p.status !== 'RECEIVED' ? (
-                                    <button 
-                                      className="btn btn-primary" 
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                      onClick={() => simulatePaymentConfirm(p.id)}
-                                    >
-                                      Confirmar Pix/Boleto
-                                    </button>
-                                  ) : (
-                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>Pago em {p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
-                                  )}
+                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingPayment(p)}>Editar</button>
+                                    {p.status !== 'RECEIVED' ? (
+                                      <button 
+                                        className="btn btn-primary" 
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                        onClick={() => simulatePaymentConfirm(p.id)}
+                                      >
+                                        Confirmar
+                                      </button>
+                                    ) : (
+                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Pago {p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -3984,15 +4621,15 @@ NEWFILEENCODING:NONE
           <div className="footer-section">
             <h4>Cursos Livres</h4>
             <ul className="footer-links">
-              <li><a href="#link" className="footer-link">Princípios da Homeopatia</a></li>
-              <li><a href="#link" className="footer-link">Introdução à Sensação Vital</a></li>
+              <li><a href={getLinkHref('course-detail', 'id=course-free')} className="footer-link" onClick={(e) => { e.preventDefault(); clearAlerts(); navigateTo('course-detail', 'id=course-free'); }}>Princípios da Homeopatia</a></li>
+              <li><a href={getLinkHref('course-detail', 'id=course-free')} className="footer-link" onClick={(e) => { e.preventDefault(); clearAlerts(); navigateTo('course-detail', 'id=course-free'); }}>Introdução à Sensação Vital</a></li>
             </ul>
           </div>
           <div className="footer-section">
             <h4>Pós-Graduação</h4>
             <ul className="footer-links">
-              <li><a href="#link" className="footer-link">Especialização Médica</a></li>
-              <li><a href="#link" className="footer-link">Repertorização Digital</a></li>
+              <li><a href={getLinkHref('course-detail', 'id=course-post')} className="footer-link" onClick={(e) => { e.preventDefault(); clearAlerts(); navigateTo('course-detail', 'id=course-post'); }}>Especialização Médica</a></li>
+              <li><a href={getLinkHref('synergy')} className="footer-link" onClick={(e) => handleLinkClick(e, 'synergy')}>Repertorização Digital</a></li>
             </ul>
           </div>
           <div className="footer-section">
@@ -4013,7 +4650,7 @@ NEWFILEENCODING:NONE
       {/* Botão Flutuante do WhatsApp */}
       <a 
         href="https://wa.me/5541991112233" 
-        className="whatsapp-float-btn animate-fade-in" 
+        className={`whatsapp-float-btn animate-fade-in ${!showWhatsappText ? 'text-hidden' : ''}`}
         target="_blank" 
         rel="noopener noreferrer"
         title="Fale Conosco no WhatsApp"
@@ -4021,7 +4658,7 @@ NEWFILEENCODING:NONE
         <svg className="whatsapp-icon-svg" viewBox="0 0 24 24">
           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.578 1.98 14.116.953 11.49.951 6.058.951 1.632 5.321 1.628 10.75c-.001 1.71.463 3.384 1.34 4.877l-.994 3.633 3.737-.981zM17.11 13.99c-.27-.135-1.597-.788-1.846-.878-.25-.09-.432-.135-.612.135-.18.27-.697.878-.855 1.058-.158.18-.315.202-.585.067-.27-.135-1.14-.42-2.172-1.34-.803-.717-1.346-1.603-1.503-1.872-.158-.27-.017-.417.118-.552.122-.122.27-.315.405-.472.135-.158.18-.27.27-.45.09-.18.045-.337-.022-.472-.068-.135-.612-1.474-.838-2.016-.22-.53-.442-.459-.612-.468-.158-.008-.338-.008-.517-.008-.18 0-.473.067-.72.337-.247.27-.945.923-.945 2.25 0 1.328.968 2.61 1.103 2.79.135.18 1.902 2.905 4.608 4.07 1.1.474 1.88.66 2.532.766.702.112 1.34.08 1.843.005.56-.083 1.598-.653 1.822-1.282.225-.63.225-1.17.158-1.282-.068-.113-.248-.18-.518-.315z"/>
         </svg>
-        <span>Fale Conosco</span>
+        <span className={`whatsapp-text ${!showWhatsappText ? 'hidden' : ''}`}>Fale Conosco</span>
       </a>
     </div>
   );
