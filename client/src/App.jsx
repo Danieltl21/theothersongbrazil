@@ -107,6 +107,8 @@ const COURSES_DETAILS_DATA = {
 const PAGE_URLS = {
   home: 'index',
   about: 'sobre-nos',
+  agenda: 'agenda-geral',
+  news: 'noticias',
   homeopaths: 'homeopatas',
   books: 'livros',
   synergy: 'software-synergy',
@@ -133,8 +135,19 @@ const getSlug = (title) => {
     .replace(/(^-|-$)/g, '');
 };
 
+const checkIsDemo = () => {
+  const pathname = window.location.pathname;
+  return (
+    pathname.endsWith('demo.html') ||
+    window.location.protocol === 'file:' ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    !pathname.endsWith('.html')
+  );
+};
+
 const getPageFromPathname = () => {
-  const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+  const isDemo = checkIsDemo();
   if (isDemo) {
     const hash = window.location.hash || '#inicio';
     if (hash.startsWith('#curso/')) return 'course-detail';
@@ -309,6 +322,63 @@ export default function App() {
   const [courses, setCourses] = useState([]);
   const [books, setBooks] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [isOpenPreviewMode, setIsOpenPreviewMode] = useState(false);
+  const [openPreviewLocked, setOpenPreviewLocked] = useState(false);
+
+  // Assistir 1ª Aula Liberada (Aula Aberta / Prévia de 20%)
+  const handleWatchOpenLesson = (course) => {
+    clearAlerts();
+    if (!user) {
+      // Se não estiver logado, vai para a área de login
+      navigateTo('login');
+      return;
+    }
+
+    // Se estiver logado:
+    // Cadastra o curso nos cursos do aluno como "PREVIA" se ele ainda não possuir matrícula ativa paga
+    const existingEnrollment = (mockDb.enrollments || []).find(e => e.student_id === user.id && e.course_id === course.id);
+    if (!existingEnrollment) {
+      const previewEnrollment = {
+        id: 'enroll_previa_' + Date.now(),
+        student_id: user.id,
+        course_id: course.id,
+        enrolled_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'PREVIA'
+      };
+      setMockDb(prev => ({
+        ...prev,
+        enrollments: [...(prev.enrollments || []), previewEnrollment]
+      }));
+    }
+
+    // Identifica e redireciona para a 1ª aula do curso
+    const courseDetails = COURSES_DETAILS_DATA[course.id];
+    const firstLessonTitle = courseDetails?.modules?.[0]?.lessons?.[0] || 'Aula 1: Introdução';
+    
+    const firstLesson = {
+      id: `${course.id}_les_1`,
+      title: typeof firstLessonTitle === 'string' ? firstLessonTitle : (firstLessonTitle.title || 'Aula 1: Introdução à Sensação Vital'),
+      duration_seconds: 600,
+      video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+    };
+
+    setSelectedCourse({
+      course,
+      modules: [
+        {
+          id: 'mod_1',
+          title: 'Módulo 1: Introdução & Conceitos Fundamentais',
+          lessons: [firstLesson]
+        }
+      ]
+    });
+    setSelectedLesson(firstLesson);
+    setIsOpenPreviewMode(true);
+    setOpenPreviewLocked(false);
+    navigateTo('course-view', `id=${course.id}`);
+  };
 
   // Estados de Edição CRUD Administrador
   const [adminCrudTab, setAdminCrudTab] = useState('courses'); // courses, books
@@ -339,10 +409,12 @@ export default function App() {
 
   // ROTEADOR HÍBRIDO E FUNÇÕES AUXILIARES
   const getLinkHref = (page, queryParams = '') => {
-    const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    const isDemo = checkIsDemo();
     if (isDemo) {
       if (page === 'home') return '#inicio';
       if (page === 'about') return '#sobre-nos';
+      if (page === 'agenda') return '#agenda-geral';
+      if (page === 'news') return '#noticias';
       if (page === 'homeopaths') return '#homeopatas';
       if (page === 'books') return '#livros';
       if (page === 'synergy') return '#software-synergy';
@@ -366,25 +438,24 @@ export default function App() {
   };
 
   const navigateTo = (page, queryParams = '') => {
-    const href = getLinkHref(page, queryParams);
-    if (href.startsWith('#')) {
+    clearAlerts();
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+    const isDemo = checkIsDemo();
+    if (isDemo) {
+      const href = getLinkHref(page, queryParams);
       window.location.hash = href;
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      const href = getLinkHref(page, queryParams);
       window.location.href = href;
     }
   };
 
   const handleLinkClick = (e, page, queryParams = '') => {
-    const href = getLinkHref(page, queryParams);
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      clearAlerts();
-      setMobileMenuOpen(false);
-      setActiveDropdown(null);
-      navigateTo(page, queryParams);
-    } else {
-      clearAlerts();
-    }
+    e.preventDefault();
+    navigateTo(page, queryParams);
   };
 
   const handleDashboardTabClick = (e, targetPage, tabName) => {
@@ -445,7 +516,7 @@ export default function App() {
 
   useEffect(() => {
     const handleNavigation = async () => {
-      const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+      const isDemo = checkIsDemo();
       const hash = window.location.hash || '#inicio';
 
       let page = 'home';
@@ -534,7 +605,6 @@ export default function App() {
   }, [user, mockDb.courses, token]);
 
 
-  const [selectedLesson, setSelectedLesson] = useState(null);
   const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
   
   // Estado do Quiz
@@ -614,7 +684,7 @@ export default function App() {
   // Sistema de Guards e Proteção de Rotas (Evita que o login bloqueie navegação pública)
   useEffect(() => {
     const pathname = window.location.pathname;
-    const isDemo = pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    const isDemo = checkIsDemo();
     
     if (!isDemo) {
       const isDashboard = pathname.includes('student-dash') || pathname.includes('teacher-dash') || pathname.includes('admin-dash') || pathname.includes('course-view') || pathname.includes('checkout');
@@ -653,7 +723,7 @@ export default function App() {
 
   const redirectToDashboard = (role) => {
     const pathname = window.location.pathname;
-    const isDemo = pathname.endsWith('demo.html') || window.location.protocol === 'file:';
+    const isDemo = checkIsDemo();
     
     if (role === 'STUDENT') {
       if (isDemo || (!pathname.endsWith('/student-dash.html') && !pathname.endsWith('/student-dash'))) {
@@ -2345,6 +2415,7 @@ NEWFILEENCODING:NONE
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
+              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'agenda')}>📅 Agenda Geral</a>
               <a href={getLinkHref('home') + '#online-courses'} className="dropdown-item" onClick={(e) => {
                 const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
                 if (isDemo) {
@@ -2357,7 +2428,7 @@ NEWFILEENCODING:NONE
                 } else {
                   clearAlerts();
                 }
-              }}>Cursos Online</a>
+              }}>Online</a>
               <a href={getLinkHref('home') + '#inperson-courses'} className="dropdown-item" onClick={(e) => {
                 const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
                 if (isDemo) {
@@ -2370,7 +2441,7 @@ NEWFILEENCODING:NONE
                 } else {
                   clearAlerts();
                 }
-              }}>Cursos Presenciais</a>
+              }}>Presenciais & Híbridos</a>
             </div>
           </div>
 
@@ -2725,8 +2796,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Gratuito</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>Introdução à Homeopatia e Sensação Vital</h3>
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-free')}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Aula Aberta (20%)</button>
                       {user ? (
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
@@ -2743,8 +2815,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Assinatura</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>Clube TOSB: Estudos de Matéria Médica</h3>
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-sub')}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Aula Aberta (20%)</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -2757,8 +2830,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Especialização</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>Pós-Graduação em Homeopatia Avançada</h3>
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem' }}>
+                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-post')}>Ementa</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Aula Aberta (20%)</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -2947,7 +3021,10 @@ NEWFILEENCODING:NONE
                     </tbody>
                   </table>
 
-                  <div className="mt-5">
+                  <div className="mt-5" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button className="btn btn-secondary w-full" style={{ backgroundColor: '#eef5f2', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }} onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
+                      ▶ Assistir 1ª Aula Aberta (Prévia de 20%)
+                    </button>
                     {selectedDetailCourse.type === 'FREE' ? (
                       user ? (
                         <button className="btn btn-primary w-full" onClick={() => { enrollFreeCourse(selectedDetailCourse.id); navigateTo('student-dash'); }}>
@@ -2966,6 +3043,30 @@ NEWFILEENCODING:NONE
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: AGENDA GERAL */}
+        {currentPage === 'agenda' && (
+          <div className="card">
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>📅 Agenda Geral Acadêmica</h2>
+            <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
+
+            <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
+              {(mockDb.events || []).map(event => (
+                <div key={event.id} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', padding: '1.25rem', borderLeft: '4px solid var(--color-primary)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-primary-light)', padding: '0.75rem 1.25rem', borderRadius: 'var(--border-radius-md)', minWidth: '80px' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>{event.day}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{event.month}</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span className="badge-modality badge-modality-online" style={{ marginBottom: '0.35rem' }}>{event.type}</span>
+                    <h3 style={{ fontSize: '1.15rem', marginBottom: '0.25rem' }}>{event.title}</h3>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -3684,16 +3785,46 @@ NEWFILEENCODING:NONE
                 
                 {selectedLesson ? (
                   <div>
-                    <div className="player-container">
+                    <div className="player-container video-player-container">
                       <video
                         ref={videoRef}
                         key={selectedLesson.id}
                         className="player-video"
-                        controls
+                        controls={!openPreviewLocked}
                         src={selectedLesson.video_url}
                         onPlay={handleVideoPlay}
                         onPause={handleVideoPause}
+                        onTimeUpdate={() => {
+                          if (isOpenPreviewMode && videoRef.current) {
+                            const dur = videoRef.current.duration || selectedLesson?.duration_seconds || 600;
+                            const cur = videoRef.current.currentTime;
+                            if (dur > 0 && cur >= dur * 0.20) {
+                              videoRef.current.pause();
+                              setOpenPreviewLocked(true);
+                            }
+                          }
+                        }}
                       />
+
+                      {openPreviewLocked && (
+                        <div className="video-locked-overlay">
+                          <div className="locked-card">
+                            <span style={{ fontSize: '3.5rem' }}>🔒</span>
+                            <h3>Prévia de 20% Concluída</h3>
+                            <p>Você assistiu aos primeiros 20% da 1ª aula aberta deste curso. O restante do vídeo e do conteúdo é liberado mediante pagamento/matrícula.</p>
+                            <button 
+                              className="btn btn-primary w-full mt-3" 
+                              onClick={() => {
+                                setIsOpenPreviewMode(false);
+                                setOpenPreviewLocked(false);
+                                addToCart({ id: selectedCourse.course.id, title: selectedCourse.course.title, type: selectedCourse.course.type, price: selectedCourse.course.type === 'SUBSCRIPTION' ? 99 : 3600 }, 'course');
+                              }}
+                            >
+                              Matricular-se / Efetuar Pagamento
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="lesson-info">

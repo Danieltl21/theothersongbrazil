@@ -2202,5 +2202,80 @@ body.high-contrast .nav-link.active {
   display: block !important;
 }
 
+/* Badges de Modalidade do Curso */
+.badge-modality {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-modality-online {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-modality-presencial {
+  background-color: #ffedd5;
+  color: #c2410c;
+}
+
+.badge-modality-hibrido {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* Trava de Prévia do Vídeo (20%) */
+.video-player-container {
+  position: relative;
+  width: 100%;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.video-locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  padding: 1.5rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.locked-card {
+  max-width: 420px;
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.locked-card h3 {
+  font-family: var(--font-serif);
+  color: var(--color-primary);
+  margin-top: 0.5rem;
+}
+
+.locked-card p {
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+}
+
 
 
