@@ -186,6 +186,16 @@ export default function App() {
         ];
         changed = true;
       }
+      if (!parsed.classes) {
+        parsed.classes = [
+          { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
+        ];
+        changed = true;
+      }
+      if (!parsed.class_attendance) {
+        parsed.class_attendance = {};
+        changed = true;
+      }
       if (changed) {
         localStorage.setItem('mock_db', JSON.stringify(parsed));
       }
@@ -242,7 +252,11 @@ export default function App() {
         { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
         { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
         { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
-      ]
+      ],
+      classes: [
+        { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
+      ],
+      class_attendance: {}
     };
     localStorage.setItem('mock_db', JSON.stringify(initialDb));
     return initialDb;
@@ -302,6 +316,7 @@ export default function App() {
   const [editingBook, setEditingBook] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [editingPayment, setEditingPayment] = useState(null);
+  const [editingClass, setEditingClass] = useState(null);
   const [formUserRole, setFormUserRole] = useState('STUDENT');
 
   const startAddUser = () => {
@@ -2073,6 +2088,106 @@ NEWFILEENCODING:NONE
     setEditingPayment(null);
   };
 
+  const handleSaveClass = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const name = e.target.name.value;
+    const course_id = e.target.course_id.value;
+    const max_students = parseInt(e.target.max_students.value) || 0;
+    const max_teachers = parseInt(e.target.max_teachers.value) || 0;
+
+    const selectedTeachers = Array.from(e.target.elements)
+      .filter(el => el.name === 'teacher_ids' && el.checked)
+      .map(el => el.value);
+
+    const selectedStudents = Array.from(e.target.elements)
+      .filter(el => el.name === 'student_ids' && el.checked)
+      .map(el => el.value);
+
+    if (max_students > 0 && selectedStudents.length > max_students) {
+      setError(`O número de alunos alocados (${selectedStudents.length}) excede o limite máximo permitido (${max_students}).`);
+      return;
+    }
+
+    if (max_teachers > 0 && selectedTeachers.length > max_teachers) {
+      setError(`O número de professores alocados (${selectedTeachers.length}) excede o limite máximo permitido (${max_teachers}).`);
+      return;
+    }
+
+    setMockDb(prev => {
+      let updatedClasses;
+      if (editingClass.id) {
+        updatedClasses = prev.classes.map(c => {
+          if (c.id === editingClass.id) {
+            return {
+              ...c,
+              name,
+              course_id,
+              teacher_ids: selectedTeachers,
+              student_ids: selectedStudents,
+              max_students,
+              max_teachers
+            };
+          }
+          return c;
+        });
+      } else {
+        const newClass = {
+          id: 'class-' + Date.now(),
+          name,
+          course_id,
+          teacher_ids: selectedTeachers,
+          student_ids: selectedStudents,
+          max_students,
+          max_teachers
+        };
+        updatedClasses = [...(prev.classes || []), newClass];
+      }
+
+      return {
+        ...prev,
+        classes: updatedClasses
+      };
+    });
+
+    setSuccess(editingClass.id ? 'Turma atualizada com sucesso!' : 'Turma criada com sucesso!');
+    setEditingClass(null);
+  };
+
+  const registerAttendance = (classId, studentId) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    let alreadyExists = false;
+
+    setMockDb(prev => {
+      const attendanceKey = `${classId}_${studentId}`;
+      const currentRecords = prev.class_attendance[attendanceKey] || [];
+      
+      const exists = currentRecords.find(r => r.date === todayStr);
+      if (exists) {
+        alreadyExists = true;
+        return prev;
+      }
+
+      const newRecords = [...currentRecords, { date: todayStr, present: true }];
+      
+      const updatedAttendance = {
+        ...prev.class_attendance,
+        [attendanceKey]: newRecords
+      };
+
+      return {
+        ...prev,
+        class_attendance: updatedAttendance
+      };
+    });
+
+    if (alreadyExists) {
+      setError('Presença para este aluno já foi registrada hoje.');
+    } else {
+      setSuccess('Presença registrada com sucesso!');
+    }
+  };
+
   const resetQuizAttempts = (studentId, quizId) => {
     setMockDb(prev => {
       const updatedAttempts = { ...prev.quiz_attempts };
@@ -2303,6 +2418,7 @@ NEWFILEENCODING:NONE
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'classes')}>🎓 Gerenciar Turmas</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
                     </>
@@ -2379,6 +2495,7 @@ NEWFILEENCODING:NONE
                       <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
                       <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
                       <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
+                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'classes')}>🎓 Gerenciar Turmas</a>
                       <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
                       <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
                     </>
@@ -3280,6 +3397,36 @@ NEWFILEENCODING:NONE
                                   Acesso até: <strong>{new Date(course.enrollment.expiresAt).toLocaleDateString('pt-BR')}</strong>
                                 </div>
                               )}
+
+                              {/* Informações de Turma, Professor e Presença do Aluno */}
+                              {(() => {
+                                const associatedClass = (mockDb.classes || []).find(cl => cl.course_id === course.id && (cl.student_ids || []).includes(user.id));
+                                const classTeachers = associatedClass ? mockDb.users.filter(u => (associatedClass.teacher_ids || []).includes(u.id)) : [];
+                                const attendanceKey = associatedClass ? `${associatedClass.id}_${user.id}` : null;
+                                const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
+                                return associatedClass ? (
+                                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
+                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                      🏫 <strong>Turma:</strong> {associatedClass.name}
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                      👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem' }}>
+                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
+                                      {attendanceRecords.length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                          Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                    Nenhuma turma alocada para este curso ainda.
+                                  </div>
+                                );
+                              })()}
                             </div>
                             <div className="course-card-actions">
                               {course.enrollment.enrolled ? (
@@ -3762,57 +3909,97 @@ NEWFILEENCODING:NONE
 
                 {teacherActiveTab === 'students' && (
                   <div className="card">
-                    <h3 className="mb-4">Gerenciamento de Turmas</h3>
-                    
-                    <div className="table-responsive">
-                      <table className="lms-table">
-                        <thead>
-                          <tr>
-                            <th>Aluno</th>
-                            <th>Curso</th>
-                            <th>Data Matrícula</th>
-                            <th className="text-center">Progresso Aulas</th>
-                            <th className="text-center">Presenças</th>
-                            <th className="text-center">Quizzes Feitos</th>
-                            <th className="text-center">Status Acesso</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {teacherReportData.length === 0 ? (
-                            <tr>
-                              <td colSpan="7" className="text-center text-muted" style={{ padding: '2rem' }}>
-                                Nenhum aluno matriculado em seus cursos ainda.
-                              </td>
-                            </tr>
-                          ) : (
-                            teacherReportData.map((rep, idx) => (
-                              <tr key={idx}>
-                                <td>
-                                  <strong>{rep.studentName}</strong>
-                                  <div className="helper-text">{rep.studentEmail}</div>
-                                </td>
-                                <td>{rep.courseTitle}</td>
-                                <td>{new Date(rep.enrolledAt).toLocaleDateString('pt-BR')}</td>
-                                <td className="text-center">
-                                  {rep.completedLessons}/{rep.totalLessons} ({rep.progressPercent}%)
-                                </td>
-                                <td className="text-center">
-                                  <span style={{ fontWeight: 'bold', color: rep.presenceCount > 0 ? 'var(--color-success)' : 'inherit' }}>
-                                    {rep.presenceCount}
-                                  </span>
-                                </td>
-                                <td className="text-center">{rep.quizzesPassed}</td>
-                                <td className="text-center">
-                                  <span className={rep.enrollmentStatus === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
-                                    {rep.enrollmentStatus}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                    <h3 className="mb-4">Gerenciamento de Turmas e Presenças</h3>
+                    <p className="course-card-description mb-4">
+                      Abaixo estão listadas as turmas sob sua coordenação. Você pode registrar a presença dos alunos diariamente.
+                    </p>
+
+                    {(mockDb.classes || [])
+                      .filter(c => (c.teacher_ids || []).includes(user.id))
+                      .map(c => {
+                        const course = mockDb.courses.find(course => course.id === c.course_id);
+                        const studentsInClass = mockDb.users.filter(u => (c.student_ids || []).includes(u.id));
+
+                        return (
+                          <div key={c.id} className="card p-4 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+                              <div>
+                                <h4 style={{ margin: 0, color: 'var(--color-primary)' }}>🏫 {c.name}</h4>
+                                <small className="text-muted">Curso: {course ? course.title : 'Curso Removido'}</small>
+                              </div>
+                              <span className="course-type-badge">{studentsInClass.length} aluno(s) alocado(s)</span>
+                            </div>
+
+                            <div className="table-responsive">
+                              <table className="lms-table" style={{ fontSize: '0.9rem' }}>
+                                <thead>
+                                  <tr>
+                                    <th>Aluno</th>
+                                    <th>E-mail</th>
+                                    <th className="text-center">Presenças Registradas</th>
+                                    <th className="text-center">Datas das Presenças</th>
+                                    <th className="text-center">Ação</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {studentsInClass.map(s => {
+                                    const attendanceKey = `${c.id}_${s.id}`;
+                                    const attendanceList = mockDb.class_attendance[attendanceKey] || [];
+                                    
+                                    // Match student progress in this course
+                                    const studentProgress = teacherReportData.find(rep => rep.studentEmail === s.email && rep.courseTitle === course?.title);
+                                    const progressStr = studentProgress ? `${studentProgress.completedLessons}/${studentProgress.totalLessons} (${studentProgress.progressPercent}%)` : '-';
+
+                                    return (
+                                      <tr key={s.id}>
+                                        <td>
+                                          <strong>{s.name}</strong>
+                                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Progresso Aulas: {progressStr}</div>
+                                        </td>
+                                        <td>{s.email}</td>
+                                        <td className="text-center">
+                                          <span className="badge-paid" style={{ padding: '0.2rem 0.5rem' }}>{attendanceList.length}</span>
+                                        </td>
+                                        <td>
+                                          {attendanceList.length > 0 ? (
+                                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                              {attendanceList.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                            </span>
+                                          ) : (
+                                            <span className="text-muted" style={{ fontSize: '0.8rem', fontStyle: 'italic' }}>Nenhuma registrada</span>
+                                          )}
+                                        </td>
+                                        <td className="text-center">
+                                          <button 
+                                            className="btn btn-primary" 
+                                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                            onClick={() => registerAttendance(c.id, s.id)}
+                                          >
+                                            ➕ Registrar Presença Hoje
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                  {studentsInClass.length === 0 && (
+                                    <tr>
+                                      <td colSpan="5" className="text-center text-muted" style={{ padding: '1rem' }}>
+                                        Nenhum aluno alocado nesta turma ainda.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                    {(mockDb.classes || []).filter(c => (c.teacher_ids || []).includes(user.id)).length === 0 && (
+                      <div className="text-center p-6 text-muted">
+                        Você não está alocado como professor em nenhuma turma ativa no momento.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -4486,6 +4673,139 @@ NEWFILEENCODING:NONE
                               </tr>
                             );
                           })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {adminActiveTab === 'classes' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>Gerenciamento de Turmas</h3>
+                      <button className="btn btn-primary" onClick={() => setEditingClass({})}>＋ Criar Nova Turma</button>
+                    </div>
+                    <p className="course-card-description mb-4">
+                      Crie turmas baseadas em cursos, defina os limites máximos de alunos e professores, e aloque-os para a turma.
+                    </p>
+
+                    {editingClass && (
+                      <form onSubmit={handleSaveClass} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-4">{editingClass.id ? 'Editar Detalhes da Turma' : 'Criar Nova Turma'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingClass.id || ''} />
+
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Nome da Turma</label>
+                            <input className="form-input" name="name" defaultValue={editingClass.name || ''} required placeholder="ex: Turma Alfa - Sensação Vital 2026" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Curso Associado</label>
+                            <select className="form-input" name="course_id" defaultValue={editingClass.course_id || ''} required>
+                              <option value="" disabled>-- Selecione o Curso --</option>
+                              {mockDb.courses.map(c => (
+                                <option key={c.id} value={c.id}>{c.title} ({c.type})</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Abas/Campos de Limites */}
+                        <div className="grid-2col" style={{ margin: '1rem 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: '1rem 0' }}>
+                          <div className="form-group">
+                            <label className="form-label">📊 Limite Máximo de Alunos (0 para ilimitado)</label>
+                            <input className="form-input" type="number" name="max_students" defaultValue={editingClass.max_students || 0} required />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">👥 Limite Máximo de Professores (0 para ilimitado)</label>
+                            <input className="form-input" type="number" name="max_teachers" defaultValue={editingClass.max_teachers || 0} required />
+                          </div>
+                        </div>
+
+                        {/* Alocação de Professores e Alunos */}
+                        <div className="grid-2col" style={{ gap: '2rem' }}>
+                          <div>
+                            <h5 className="mb-2" style={{ fontWeight: 'bold' }}>Alocar Professores</h5>
+                            <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px' }}>
+                              {mockDb.users.filter(u => u.role === 'TEACHER').map(u => {
+                                const isChecked = (editingClass.teacher_ids || []).includes(u.id);
+                                return (
+                                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                                    <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
+                                    <span>{u.name}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="mb-2" style={{ fontWeight: 'bold' }}>Alocar Alunos</h5>
+                            <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px' }}>
+                              {mockDb.users.filter(u => u.role === 'STUDENT').map(u => {
+                                const isChecked = (editingClass.student_ids || []).includes(u.id);
+                                return (
+                                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                                    <input type="checkbox" name="student_ids" value={u.id} defaultChecked={isChecked} />
+                                    <span>{u.name} ({u.email})</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingClass(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Gravar Turma</button>
+                        </div>
+                      </form>
+                    )}
+
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Nome da Turma</th>
+                            <th>Curso Associado</th>
+                            <th>Professores</th>
+                            <th>Alunos Alocados</th>
+                            <th>Limites (Alunos/Profs)</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(mockDb.classes || []).map(c => {
+                            const course = mockDb.courses.find(course => course.id === c.course_id);
+                            const teachers = mockDb.users.filter(u => (c.teacher_ids || []).includes(u.id));
+                            const studentsCount = (c.student_ids || []).length;
+                            return (
+                              <tr key={c.id}>
+                                <td><strong>{c.name}</strong></td>
+                                <td>{course ? course.title : 'Curso Removido'}</td>
+                                <td>
+                                  {teachers.map(t => <div key={t.id} style={{ fontSize: '0.85rem' }}>👨‍🏫 {t.name}</div>)}
+                                  {teachers.length === 0 && <span className="text-muted">Nenhum</span>}
+                                </td>
+                                <td>
+                                  <strong>{studentsCount}</strong> aluno(s)
+                                </td>
+                                <td>
+                                  <div>Máx Alunos: {c.max_students > 0 ? c.max_students : 'Ilimitado'}</div>
+                                  <div>Máx Profs: {c.max_teachers > 0 ? c.max_teachers : 'Ilimitado'}</div>
+                                </td>
+                                <td>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingClass(c)}>Editar</button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {(mockDb.classes || []).length === 0 && (
+                            <tr>
+                              <td colSpan="6" className="text-center text-muted" style={{ padding: '2rem' }}>
+                                Nenhuma turma criada ainda.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
