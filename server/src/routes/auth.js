@@ -142,7 +142,8 @@ router.post('/login', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        is_homeopath: user.is_homeopath
       }
     });
   } catch (error) {
@@ -218,6 +219,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         role: req.user.role,
+        is_homeopath: req.user.is_homeopath,
         ...profileData
       }
     });
@@ -244,7 +246,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
     professional_registration_number,
     crm,
     rqe,
-    bio
+    bio,
+    is_homeopath
   } = req.body;
 
   const client = await pool.connect();
@@ -253,8 +256,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     // Atualizar tabela users
     await client.query(
-      'UPDATE users SET name = $1, email = $2 WHERE id = $3',
-      [name, email, req.user.id]
+      'UPDATE users SET name = $1, email = $2, is_homeopath = $3 WHERE id = $4',
+      [name, email, is_homeopath === undefined ? req.user.is_homeopath : !!is_homeopath, req.user.id]
     );
 
     if (req.user.role === 'STUDENT') {
@@ -335,6 +338,53 @@ router.put('/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Erro ao atualizar perfil.' });
   } finally {
     client.release();
+  }
+});
+
+// Obter lista de homeopatas cadastrados (Público)
+router.get('/homeopaths', async (req, res) => {
+  try {
+    const queryStr = `
+      SELECT u.id, u.name, u.email, u.role,
+             sp.professional_registration_type, sp.professional_registration_number, sp.phone, sp.address_city, sp.address_state,
+             tp.crm, tp.rqe, tp.bio
+      FROM users u
+      LEFT JOIN student_profiles sp ON sp.user_id = u.id
+      LEFT JOIN teacher_profiles tp ON tp.user_id = u.id
+      WHERE u.is_homeopath = TRUE AND u.status = 'ACTIVE'
+      ORDER BY u.name ASC
+    `;
+    const result = await pool.query(queryStr);
+    
+    const homeopaths = result.rows.map(row => {
+      let reg = '';
+      let specialty = '';
+      let city = '';
+      
+      if (row.role === 'TEACHER') {
+        reg = row.crm || 'CRM';
+        specialty = 'Professor / Método Sensação Vital';
+        city = 'Curitiba - PR';
+      } else {
+        reg = `${row.professional_registration_type || 'CRM'} ${row.professional_registration_number || ''}`;
+        specialty = 'Homeopatia Clássica';
+        city = (row.address_city && row.address_state) ? `${row.address_city} - ${row.address_state}` : 'Não informado';
+      }
+      
+      return {
+        name: row.name,
+        reg: reg.trim(),
+        specialty: specialty,
+        city: city,
+        phone: row.phone || '',
+        email: row.email
+      };
+    });
+    
+    res.json(homeopaths);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar lista de homeopatas.' });
   }
 });
 

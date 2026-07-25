@@ -15,12 +15,7 @@ const BOOKS_DATA = [
   { id: 'book-followup', title: 'A Arte do Follow-up na Clínica', author: 'Dr. Gaurang Gaikwad', price: 190.00, desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.' }
 ];
 
-const HOMEOPATHS_DATA = [
-  { name: 'Dr. Carlos Eduardo Leitão', reg: 'CRM-PR 12345', specialty: 'Método Sensação Vital', city: 'Curitiba - PR', phone: '(41) 3322-1100', email: 'carlos@tosb.com' },
-  { name: 'Dra. Ana Paula Santos', reg: 'CRM-SP 98765', specialty: 'Homeopatia Clássica e Infantil', city: 'São Paulo - SP', phone: '(11) 98888-7766', email: 'ana.paula@lms.com' },
-  { name: 'Dr. Roberto de Almeida', reg: 'CRM-RJ 44552', specialty: 'Homeopatia e Clínica Geral', city: 'Rio de Janeiro - RJ', phone: '(21) 2544-3322', email: 'roberto.almeida@gmail.com' },
-  { name: 'Dra. Teresa de Jesus', reg: 'CRO-PR 8877', specialty: 'Odontologia Homeopática', city: 'Curitiba - PR', phone: '(41) 99111-2233', email: 'teresa.dentista@hotmail.com' }
-];
+const HOMEOPATHS_DATA = [];
 
 const GALLERY_DATA = [
   { title: 'Turma de Especialização 2025', desc: 'Membros da Pós-Graduação reunidos em Curitiba.' },
@@ -204,9 +199,9 @@ export default function App() {
 
     const initialDb = {
       users: [
-        { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123' },
-        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.' },
-        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765' }
+        { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123', is_homeopath: false },
+        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.', is_homeopath: false },
+        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765', is_homeopath: false }
       ],
       courses: [
         { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
@@ -318,21 +313,116 @@ export default function App() {
   const [editingPayment, setEditingPayment] = useState(null);
   const [editingClass, setEditingClass] = useState(null);
   const [formUserRole, setFormUserRole] = useState('STUDENT');
+  const [adminRegType, setAdminRegType] = useState('CRM');
+  const [adminRegNumber, setAdminRegNumber] = useState('');
+  const [adminTeacherCrm, setAdminTeacherCrm] = useState('');
+  const [profileRegType, setProfileRegType] = useState('OUTROS');
+  const [profileRegNumber, setProfileRegNumber] = useState('');
+  const [profileTeacherCrm, setProfileTeacherCrm] = useState('');
 
   const startAddUser = () => {
     setEditingUser({});
     setFormUserRole('STUDENT');
+    setAdminRegType('CRM');
+    setAdminRegNumber('');
+    setAdminTeacherCrm('');
   };
 
   const startEditUser = (userObj) => {
     setEditingUser(userObj);
     setFormUserRole(userObj.role || 'STUDENT');
+    setAdminRegType(userObj.registrationType || 'CRM');
+    setAdminRegNumber(userObj.registrationNumber || '');
+    setAdminTeacherCrm(userObj.crm || '');
   };
 
   // Novos estados para busca de homeopatas e abas dos dashboards
   const [homeopathsSearch, setHomeopathsSearch] = useState('');
   const [teacherActiveTab, setTeacherActiveTab] = useState('panel');
   const [adminActiveTab, setAdminActiveTab] = useState('stats');
+
+  useEffect(() => {
+    if (user) {
+      setProfileRegType(user.professional_registration_type || 'OUTROS');
+      setProfileRegNumber(user.professional_registration_number || '');
+      setProfileTeacherCrm(user.crm || '');
+    }
+  }, [user]);
+  const [serverHomeopaths, setServerHomeopaths] = useState([]);
+
+  useEffect(() => {
+    if (currentPage === 'homeopaths' && !isOfflineMode) {
+      fetch('/api/auth/homeopaths')
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch');
+        })
+        .then(data => {
+          setServerHomeopaths(data);
+        })
+        .catch(err => {
+          console.warn("Erro ao carregar homeopatas do servidor:", err);
+        });
+    }
+  }, [currentPage, isOfflineMode]);
+
+  const getHomeopathsList = () => {
+    let dynamicList = [];
+    if (isOfflineMode) {
+      dynamicList = mockDb.users
+        .filter(u => u.is_homeopath && (u.role === 'STUDENT' || u.role === 'TEACHER'))
+        .map(u => {
+          let reg = '';
+          let specialty = '';
+          let city = '';
+          
+          if (u.role === 'TEACHER') {
+            reg = u.crm || 'CRM';
+            specialty = 'Professor / Método Sensação Vital';
+            city = 'Curitiba - PR';
+          } else {
+            reg = `${u.registrationType || 'CRM'} ${u.registrationNumber || ''}`;
+            specialty = 'Homeopatia Clássica';
+            city = (u.address_city && u.address_state) ? `${u.address_city} - ${u.address_state}` : 'Não informado';
+          }
+          
+          return {
+            name: u.name,
+            reg: reg.trim(),
+            specialty: specialty,
+            city: city,
+            phone: u.phone || '',
+            email: u.email
+          };
+        });
+    } else {
+      dynamicList = serverHomeopaths || [];
+    }
+
+    const combined = [...dynamicList];
+    HOMEOPATHS_DATA.forEach(staticH => {
+      if (isOfflineMode) {
+        const dbUser = mockDb.users.find(u => u.email.toLowerCase() === staticH.email.toLowerCase());
+        if (dbUser) {
+          // Skip static listing, as the database user preference decides.
+          // If the user opted-in, they are already in dynamicList (and thus combined).
+          // If they opted-out, they are excluded.
+          return;
+        }
+      } else {
+        // Online mode: Skip if already in the fetched dynamic list (opted-in)
+        // or if it matches the current logged-in user who opted-out.
+        const isOptedIn = combined.some(h => h.email.toLowerCase() === staticH.email.toLowerCase());
+        const isCurrentUserOptedOut = user && user.email.toLowerCase() === staticH.email.toLowerCase() && !user.is_homeopath;
+        if (isOptedIn || isCurrentUserOptedOut) {
+          return;
+        }
+      }
+      combined.push(staticH);
+    });
+
+    return combined;
+  };
   
   // Estados adicionais para administração de eventos e cadastros
   const [editingEvent, setEditingEvent] = useState(null);
@@ -721,18 +811,19 @@ export default function App() {
       email: e.target.email.value,
       phone: e.target.phone.value,
       cpf_cnpj: e.target.cpf_cnpj.value,
-      address_zip: e.target.address_zip.value,
-      address_street: e.target.address_street.value,
-      address_number: e.target.address_number.value,
-      address_complement: e.target.address_complement.value,
-      address_neighborhood: e.target.address_neighborhood.value,
-      address_city: e.target.address_city.value,
-      address_state: e.target.address_state.value,
+      address_zip: e.target.address_zip?.value || '',
+      address_street: e.target.address_street?.value || '',
+      address_number: e.target.address_number?.value || '',
+      address_complement: e.target.address_complement?.value || '',
+      address_neighborhood: e.target.address_neighborhood?.value || '',
+      address_city: e.target.address_city?.value || '',
+      address_state: e.target.address_state?.value || '',
       professional_registration_type: e.target.professional_registration_type?.value || user.professional_registration_type || 'OUTROS',
       professional_registration_number: e.target.professional_registration_number?.value || user.professional_registration_number || '',
       crm: e.target.crm?.value || '',
       rqe: e.target.rqe?.value || '',
-      bio: e.target.bio?.value || ''
+      bio: e.target.bio?.value || '',
+      is_homeopath: e.target.is_homeopath?.checked || false
     };
 
     if (isOfflineMode) {
@@ -1956,6 +2047,7 @@ NEWFILEENCODING:NONE
     const password = e.target.password.value;
     const role = e.target.role.value;
     const status = e.target.status.value;
+    const is_homeopath = e.target.is_homeopath?.checked || false;
     
     let registrationType = '';
     let registrationNumber = '';
@@ -1996,7 +2088,8 @@ NEWFILEENCODING:NONE
               registrationNumber,
               crm,
               rqe,
-              bio
+              bio,
+              is_homeopath
             };
           }
           return u;
@@ -2013,7 +2106,8 @@ NEWFILEENCODING:NONE
           registrationNumber,
           crm,
           rqe,
-          bio
+          bio,
+          is_homeopath
         };
         updatedUsers = [...prev.users, newUser];
       }
@@ -3032,7 +3126,7 @@ NEWFILEENCODING:NONE
             </div>
 
             <div className="directory-grid">
-              {HOMEOPATHS_DATA.filter(h => {
+              {getHomeopathsList().filter(h => {
                 const searchLower = homeopathsSearch.toLowerCase();
                 return h.name.toLowerCase().includes(searchLower) ||
                        h.reg.toLowerCase().includes(searchLower) ||
@@ -3599,7 +3693,12 @@ NEWFILEENCODING:NONE
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Conselho</label>
-                          <select className="form-input" name="professional_registration_type" defaultValue={user?.professional_registration_type || 'OUTROS'}>
+                          <select 
+                            className="form-input" 
+                            name="professional_registration_type" 
+                            value={profileRegType}
+                            onChange={(e) => setProfileRegType(e.target.value)}
+                          >
                             <option value="CRM">CRM (Medicina)</option>
                             <option value="CRO">CRO (Odontologia)</option>
                             <option value="CRF">CRF (Farmácia)</option>
@@ -3609,9 +3708,30 @@ NEWFILEENCODING:NONE
                         </div>
                         <div className="form-group">
                           <label className="form-label">Registro Profissional</label>
-                          <input className="form-input" type="text" name="professional_registration_number" defaultValue={user?.professional_registration_number || ''} />
+                          <input 
+                            className="form-input" 
+                            type="text" 
+                            name="professional_registration_number" 
+                            value={profileRegNumber}
+                            onChange={(e) => setProfileRegNumber(e.target.value)} 
+                          />
                         </div>
                       </div>
+
+                      {profileRegType.toUpperCase() !== 'OUTROS' && profileRegNumber.trim() !== '' && (
+                        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <input 
+                            type="checkbox" 
+                            id="is_homeopath" 
+                            name="is_homeopath" 
+                            defaultChecked={user?.is_homeopath} 
+                            style={{ width: 'auto', margin: 0 }} 
+                          />
+                          <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                            Quero participar da lista de Homeopatas indicados
+                          </label>
+                        </div>
+                      )}
 
                       <button className="btn btn-primary w-full mt-4" type="submit">Salvar Alterações de Cadastro</button>
                     </form>
@@ -4088,7 +4208,15 @@ NEWFILEENCODING:NONE
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">CRM / Conselho</label>
-                          <input className="form-input" type="text" name="crm" defaultValue={user?.crm || ''} required placeholder="ex: CRM-PR 12345" />
+                          <input 
+                            className="form-input" 
+                            type="text" 
+                            name="crm" 
+                            value={profileTeacherCrm} 
+                            onChange={(e) => setProfileTeacherCrm(e.target.value)} 
+                            required 
+                            placeholder="ex: CRM-PR 12345" 
+                          />
                         </div>
                         <div className="form-group">
                           <label className="form-label">RQE</label>
@@ -4100,6 +4228,21 @@ NEWFILEENCODING:NONE
                         <label className="form-label">Biografia Curta</label>
                         <textarea className="form-input" name="bio" defaultValue={user?.bio || ''} placeholder="Descreva sua formação e experiência profissional..." style={{ minHeight: '100px' }} />
                       </div>
+
+                      {profileTeacherCrm.trim() !== '' && (
+                        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <input 
+                            type="checkbox" 
+                            id="teacher_is_homeopath" 
+                            name="is_homeopath" 
+                            defaultChecked={user?.is_homeopath} 
+                            style={{ width: 'auto', margin: 0 }} 
+                          />
+                          <label htmlFor="teacher_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                            Quero participar da lista de Homeopatas indicados
+                          </label>
+                        </div>
+                      )}
 
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                         <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
@@ -4422,7 +4565,12 @@ NEWFILEENCODING:NONE
                           <div className="grid-2col" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
                             <div className="form-group">
                               <label className="form-label">Tipo de Registro Acadêmico/Conselho</label>
-                              <select className="form-input" name="registrationType" defaultValue={editingUser.registrationType || 'CRM'}>
+                              <select 
+                                className="form-input" 
+                                name="registrationType" 
+                                value={adminRegType}
+                                onChange={(e) => setAdminRegType(e.target.value)}
+                              >
                                 <option value="CRM">CRM (Medicina)</option>
                                 <option value="CRO">CRO (Odontologia)</option>
                                 <option value="CRF">CRF (Farmácia)</option>
@@ -4432,7 +4580,14 @@ NEWFILEENCODING:NONE
                             </div>
                             <div className="form-group">
                               <label className="form-label">Número do Conselho</label>
-                              <input className="form-input" name="registrationNumber" defaultValue={editingUser.registrationNumber || ''} required placeholder="ex: 12345-PR" />
+                              <input 
+                                className="form-input" 
+                                name="registrationNumber" 
+                                value={adminRegNumber}
+                                onChange={(e) => setAdminRegNumber(e.target.value)}
+                                required 
+                                placeholder="ex: 12345-PR" 
+                              />
                             </div>
                           </div>
                         )}
@@ -4442,7 +4597,14 @@ NEWFILEENCODING:NONE
                             <div className="grid-2col">
                               <div className="form-group">
                                 <label className="form-label">CRM / Conselho</label>
-                                <input className="form-input" name="crm" defaultValue={editingUser.crm || ''} required placeholder="ex: CRM-PR 12345" />
+                                <input 
+                                  className="form-input" 
+                                  name="crm" 
+                                  value={adminTeacherCrm}
+                                  onChange={(e) => setAdminTeacherCrm(e.target.value)}
+                                  required 
+                                  placeholder="ex: CRM-PR 12345" 
+                                />
                               </div>
                               <div className="form-group">
                                 <label className="form-label">RQE (Registro de Especialidade)</label>
@@ -4453,6 +4615,22 @@ NEWFILEENCODING:NONE
                               <label className="form-label">Biografia Curta</label>
                               <textarea className="form-input" name="bio" defaultValue={editingUser.bio || ''} placeholder="Mini-currículo ou especialidades do docente..." />
                             </div>
+                          </div>
+                        )}
+
+                        {((formUserRole === 'STUDENT' && adminRegType && adminRegType.toUpperCase() !== 'OUTROS' && adminRegNumber && adminRegNumber.trim() !== '') || 
+                          (formUserRole === 'TEACHER' && adminTeacherCrm && adminTeacherCrm.trim() !== '')) && (
+                          <div className="form-group mt-3 mb-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <input 
+                              type="checkbox" 
+                              id="admin_is_homeopath" 
+                              name="is_homeopath" 
+                              defaultChecked={editingUser.is_homeopath || false} 
+                              style={{ width: 'auto', margin: 0 }} 
+                            />
+                            <label htmlFor="admin_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                              Quero participar da lista de Homeopatas indicados
+                            </label>
                           </div>
                         )}
 

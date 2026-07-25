@@ -14,7 +14,7 @@ export const authenticateToken = async (req, res, next) => {
     
     // Verificar se o usuário existe e se está ativo
     const userResult = await pool.query(
-      'SELECT id, name, email, role, status FROM users WHERE id = $1',
+      'SELECT id, name, email, role, status, is_homeopath FROM users WHERE id = $1',
       [decoded.id]
     );
 
