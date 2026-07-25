@@ -9,8 +9,12 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'TEACHER', 'STUDENT')),
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'SUSPENDED')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_homeopath BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+-- Garantir que a coluna is_homeopath exista se a tabela já tiver sido criada antes
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_homeopath BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Tabela de Perfis de Professores
 CREATE TABLE IF NOT EXISTS teacher_profiles (
@@ -157,13 +161,13 @@ CREATE TABLE IF NOT EXISTS active_sessions (
 -- Inserir dados iniciais (Seed)
 -- Senha de teste padrão criptografada com bcryptjs para 'senha123': $2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC
 -- Admin
-INSERT INTO users (id, name, email, password_hash, role, status)
-VALUES ('a1111111-1111-1111-1111-111111111111', 'Admin Principal', 'admin@lms.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'ADMIN', 'ACTIVE')
+INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath)
+VALUES ('a1111111-1111-1111-1111-111111111111', 'Admin Principal', 'admin@lms.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'ADMIN', 'ACTIVE', FALSE)
 ON CONFLICT (email) DO NOTHING;
 
 -- Professor
-INSERT INTO users (id, name, email, password_hash, role, status)
-VALUES ('b2222222-2222-2222-2222-222222222222', 'Dr. Carlos Eduardo (TOSB)', 'carlos@tosb.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'TEACHER', 'ACTIVE')
+INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath)
+VALUES ('b2222222-2222-2222-2222-222222222222', 'Dr. Carlos Eduardo (TOSB)', 'carlos@tosb.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'TEACHER', 'ACTIVE', FALSE)
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO teacher_profiles (user_id, crm, rqe, bio)
@@ -171,8 +175,8 @@ VALUES ('b2222222-2222-2222-2222-222222222222', 'CRM-PR 12345', 'RQE 6789', 'Mé
 ON CONFLICT (user_id) DO NOTHING;
 
 -- Aluno
-INSERT INTO users (id, name, email, password_hash, role, status)
-VALUES ('c3333333-3333-3333-3333-333333333333', 'Dra. Ana Paula (Aluna)', 'ana@lms.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'STUDENT', 'ACTIVE')
+INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath)
+VALUES ('c3333333-3333-3333-3333-333333333333', 'Dra. Ana Paula (Aluna)', 'ana@lms.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'STUDENT', 'ACTIVE', FALSE)
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO student_profiles (user_id, terms_accepted, professional_registration_type, professional_registration_number)
