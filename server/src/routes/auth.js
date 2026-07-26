@@ -49,7 +49,10 @@ router.post('/register', async (req, res) => {
   }
 
   // Validação de saúde vs outro
-  const isHealthProfession = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(profession);
+  const isHealthProfession = [
+    'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
+    'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
+  ].includes(profession);
   if (isHealthProfession) {
     if (
       !council_type || !council_state || !council_number ||
@@ -58,7 +61,7 @@ router.post('/register', async (req, res) => {
     ) {
       return res.status(400).json({ message: 'Para profissionais da área da saúde, os campos de registro profissional, endereço comercial e termo de sigilo são obrigatórios.' });
     }
-  } else if (profession === 'outro') {
+  } else if (profession === 'outro' || profession === 'Outro') {
     if (!custom_profession) {
       return res.status(400).json({ message: 'Por favor, informe o nome da sua profissão.' });
     }

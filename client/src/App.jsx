@@ -25,10 +25,12 @@ const ESTADOS_BRASIL = [
 ];
 
 const getCouncilType = (profession) => {
-  if (profession === 'médico(a)') return 'CRM';
-  if (profession === 'odontologista') return 'CRO';
-  if (profession === 'veterinário(a)') return 'CRMV';
-  if (profession === 'farmaceutico(a)') return 'CRF';
+  if (!profession) return '';
+  const profLower = profession.toLowerCase();
+  if (profLower === 'médico(a)' || profLower === 'medico(a)') return 'CRM';
+  if (profLower === 'odontologista') return 'CRO';
+  if (profLower === 'veterinário(a)' || profLower === 'veterinario(a)') return 'CRMV';
+  if (profLower === 'farmaceutico(a)' || profLower === 'farmacêutico(a)') return 'CRF';
   return '';
 };
 
@@ -192,7 +194,10 @@ const getPageFromPathname = () => {
 };
 
 const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession, setCurrentProfession, formUserRole) => {
-  const isHealth = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(currentProfession);
+  const isHealth = [
+    'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
+    'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
+  ].includes(currentProfession);
   
   const isReq = (field) => {
     if (isAdmin) return false;
@@ -200,7 +205,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
     if (['council_state', 'council_number', 'commercial_zip', 'commercial_street', 'commercial_number', 'commercial_neighborhood', 'commercial_city', 'commercial_state', 'commercial_phone'].includes(field)) {
       return isHealth;
     }
-    if (field === 'custom_profession') return currentProfession === 'outro';
+    if (field === 'custom_profession') return currentProfession === 'outro' || currentProfession === 'Outro';
     return true;
   };
 
@@ -209,19 +214,19 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
       <h4 className="mb-3 section-title-underlined-thin">Informações de Login e Identificação</h4>
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">Nome Completo {isReq('name') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Nome Completo <span style={{ color: 'red' }}>*</span></label>
           <input className="form-input" type="text" name="name" defaultValue={targetUser?.name || ''} required={isAdmin || isReq('name')} placeholder="Dra. Roberta Silva" />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Email (Login) {isReq('email') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Email (Login) <span style={{ color: 'red' }}>*</span></label>
           <input className="form-input" type="email" name="email" defaultValue={targetUser?.email || ''} required={isAdmin || isReq('email')} placeholder="contato@robertasilva.med.br" />
         </div>
       </div>
 
       {(isAdmin || !targetUser?.id) && (
         <div className="form-group">
-          <label className="form-label">Senha de Acesso {isAdmin && !targetUser?.id && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Senha de Acesso <span style={{ color: 'red' }}>*</span></label>
           <input className="form-input" type="password" name="password" defaultValue={targetUser?.password || ''} required={isAdmin && !targetUser?.id} placeholder="Digite a senha" />
         </div>
       )}
@@ -246,7 +251,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           <input className="form-input" type="text" name="billing_zip" defaultValue={targetUser?.billing_zip || targetUser?.address_zip || ''} required={isReq('billing_zip')} placeholder="00000-000" />
         </div>
         <div className="form-group">
-          <label className="form-label">Logradouro / Rua {isReq('billing_street') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Logradouro {isReq('billing_street') && <span style={{ color: 'red' }}>*</span>}</label>
           <input className="form-input" type="text" name="billing_street" defaultValue={targetUser?.billing_street || targetUser?.address_street || ''} required={isReq('billing_street')} placeholder="Rua, Avenida, etc." />
         </div>
       </div>
@@ -291,15 +296,15 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
             onChange={(e) => setCurrentProfession(e.target.value)}
             required={isReq('profession')}
           >
-            <option value="médico(a)">médico(a)</option>
-            <option value="odontologista">odontologista</option>
-            <option value="veterinário(a)">veterinário(a)</option>
-            <option value="farmaceutico(a)">farmacêutico(a)</option>
-            <option value="outro">outro</option>
+            <option value="Médico(a)">Médico(a)</option>
+            <option value="Odontologista">Odontologista</option>
+            <option value="Veterinário(a)">Veterinário(a)</option>
+            <option value="Farmacêutico(a)">Farmacêutico(a)</option>
+            <option value="Outro">Outro</option>
           </select>
         </div>
 
-        {currentProfession === 'outro' && (
+        {(currentProfession === 'outro' || currentProfession === 'Outro') && (
           <div className="form-group">
             <label className="form-label">Nome da Profissão {isReq('custom_profession') && <span style={{ color: 'red' }}>*</span>}</label>
             <input className="form-input" type="text" name="custom_profession" defaultValue={targetUser?.custom_profession || ''} required={isReq('custom_profession')} placeholder="ex: Fisioterapeuta" />
@@ -368,37 +373,37 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           
           <div className="grid-2col">
             <div className="form-group">
-              <label className="form-label">CEP Comercial {isReq('commercial_zip') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">CEP {isReq('commercial_zip') && <span style={{ color: 'red' }}>*</span>}</label>
               <input className="form-input" type="text" name="commercial_zip" defaultValue={targetUser?.commercial_zip || ''} required={isReq('commercial_zip')} placeholder="00000-000" />
             </div>
             <div className="form-group">
-              <label className="form-label">Logradouro / Rua Comercial {isReq('commercial_street') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Logradouro {isReq('commercial_street') && <span style={{ color: 'red' }}>*</span>}</label>
               <input className="form-input" type="text" name="commercial_street" defaultValue={targetUser?.commercial_street || ''} required={isReq('commercial_street')} placeholder="Rua, Avenida, etc." />
             </div>
           </div>
 
           <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             <div className="form-group">
-              <label className="form-label">Número Comercial {isReq('commercial_number') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Número {isReq('commercial_number') && <span style={{ color: 'red' }}>*</span>}</label>
               <input className="form-input" type="text" name="commercial_number" defaultValue={targetUser?.commercial_number || ''} required={isReq('commercial_number')} placeholder="123" />
             </div>
             <div className="form-group">
-              <label className="form-label">Complemento Comercial</label>
+              <label className="form-label">Complemento</label>
               <input className="form-input" type="text" name="commercial_complement" defaultValue={targetUser?.commercial_complement || ''} placeholder="Sala, Andar, etc." />
             </div>
             <div className="form-group">
-              <label className="form-label">Bairro Comercial {isReq('commercial_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Bairro {isReq('commercial_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
               <input className="form-input" type="text" name="commercial_neighborhood" defaultValue={targetUser?.commercial_neighborhood || ''} required={isReq('commercial_neighborhood')} placeholder="Centro" />
             </div>
           </div>
 
           <div className="grid-2col">
             <div className="form-group">
-              <label className="form-label">Cidade Comercial {isReq('commercial_city') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Cidade {isReq('commercial_city') && <span style={{ color: 'red' }}>*</span>}</label>
               <input className="form-input" type="text" name="commercial_city" defaultValue={targetUser?.commercial_city || ''} required={isReq('commercial_city')} placeholder="Curitiba" />
             </div>
             <div className="form-group">
-              <label className="form-label">Estado Comercial (UF) {isReq('commercial_state') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Estado (UF) {isReq('commercial_state') && <span style={{ color: 'red' }}>*</span>}</label>
               <select className="form-input" name="commercial_state" required={isReq('commercial_state')} defaultValue={targetUser?.commercial_state || 'PR'}>
                 {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
               </select>
@@ -406,7 +411,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           </div>
 
           <div className="form-group">
-            <label className="form-label">Telefone Comercial {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
+            <label className="form-label">Telefone {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
             <input className="form-input" type="text" name="commercial_phone" defaultValue={targetUser?.commercial_phone || ''} required={isReq('commercial_phone')} placeholder="ex: (11) 5555-5555" />
           </div>
 
@@ -660,9 +665,9 @@ export default function App() {
   const [profileTeacherCrm, setProfileTeacherCrm] = useState('');
 
   // Novos estados unificados de cadastro, perfil e admin
-  const [regProfession, setRegProfession] = useState('médico(a)');
-  const [profileProfession, setProfileProfession] = useState('médico(a)');
-  const [adminUserProfession, setAdminUserProfession] = useState('médico(a)');
+  const [regProfession, setRegProfession] = useState('Médico(a)');
+  const [profileProfession, setProfileProfession] = useState('Médico(a)');
+  const [adminUserProfession, setAdminUserProfession] = useState('Médico(a)');
   const [adminUserStatus, setAdminUserStatus] = useState('ACTIVE');
 
   const startAddUser = () => {
@@ -671,7 +676,7 @@ export default function App() {
     setAdminRegType('CRM');
     setAdminRegNumber('');
     setAdminTeacherCrm('');
-    setAdminUserProfession('médico(a)');
+    setAdminUserProfession('Médico(a)');
     setAdminUserStatus('ACTIVE');
   };
 
@@ -681,7 +686,7 @@ export default function App() {
     setAdminRegType(userObj.council_type || 'CRM');
     setAdminRegNumber(userObj.council_number || '');
     setAdminTeacherCrm(userObj.rqe || '');
-    setAdminUserProfession(userObj.profession || 'médico(a)');
+    setAdminUserProfession(userObj.profession || 'Médico(a)');
     setAdminUserStatus(userObj.status || 'ACTIVE');
   };
 
@@ -1171,7 +1176,10 @@ export default function App() {
     const profession = e.target.profession?.value || user.profession || '';
     const custom_profession = e.target.custom_profession?.value || '';
     
-    const isHealthProfession = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(profession);
+    const isHealthProfession = [
+      'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
+      'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
+    ].includes(profession);
     const council_type = isHealthProfession ? getCouncilType(profession) : '';
     const council_state = e.target.council_state?.value || '';
     const council_number = e.target.council_number?.value || '';
@@ -1394,7 +1402,10 @@ export default function App() {
       return;
     }
 
-    const isHealthProfession = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(profession);
+    const isHealthProfession = [
+      'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
+      'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
+    ].includes(profession);
     if (isHealthProfession && !acceptSigiloTerms) {
       setError('Você precisa aceitar o Termo de Sigilo Científico.');
       return;
@@ -3228,7 +3239,7 @@ NEWFILEENCODING:NONE
                   <input className="form-input" type="text" name="billing_zip" required placeholder="00000-000" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Logradouro / Rua <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Logradouro <span style={{ color: 'red' }}>*</span></label>
                   <input className="form-input" type="text" name="billing_street" required placeholder="Rua, Avenida, etc." />
                 </div>
               </div>
@@ -3273,15 +3284,15 @@ NEWFILEENCODING:NONE
                     onChange={(e) => setRegProfession(e.target.value)}
                     required
                   >
-                    <option value="médico(a)">médico(a)</option>
-                    <option value="odontologista">odontologista</option>
-                    <option value="veterinário(a)">veterinário(a)</option>
-                    <option value="farmaceutico(a)">farmacêutico(a)</option>
-                    <option value="outro">outro</option>
+                    <option value="Médico(a)">Médico(a)</option>
+                    <option value="Odontologista">Odontologista</option>
+                    <option value="Veterinário(a)">Veterinário(a)</option>
+                    <option value="Farmacêutico(a)">Farmacêutico(a)</option>
+                    <option value="Outro">Outro</option>
                   </select>
                 </div>
 
-                {regProfession === 'outro' && (
+                {(regProfession === 'outro' || regProfession === 'Outro') && (
                   <div className="form-group">
                     <label className="form-label">Nome da Profissão <span style={{ color: 'red' }}>*</span></label>
                     <input className="form-input" type="text" name="custom_profession" required placeholder="ex: Fisioterapeuta" />
@@ -3290,7 +3301,7 @@ NEWFILEENCODING:NONE
               </div>
 
               {/* Campos dinâmicos para Profissão de Saúde */}
-              {['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(regProfession) && (
+              {['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)', 'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'].includes(regProfession) && (
                 <>
                   <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="form-group">
@@ -3327,37 +3338,37 @@ NEWFILEENCODING:NONE
                   
                   <div className="grid-2col">
                     <div className="form-group">
-                      <label className="form-label">CEP Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
                       <input className="form-input" type="text" name="commercial_zip" required placeholder="00000-000" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Logradouro / Rua Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Logradouro <span style={{ color: 'red' }}>*</span></label>
                       <input className="form-input" type="text" name="commercial_street" required placeholder="Rua, Avenida, etc." />
                     </div>
                   </div>
 
                   <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Número Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Número <span style={{ color: 'red' }}>*</span></label>
                       <input className="form-input" type="text" name="commercial_number" required placeholder="123" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Complemento Comercial</label>
+                      <label className="form-label">Complemento</label>
                       <input className="form-input" type="text" name="commercial_complement" placeholder="Sala, Andar, etc." />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Bairro Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Bairro <span style={{ color: 'red' }}>*</span></label>
                       <input className="form-input" type="text" name="commercial_neighborhood" required placeholder="Centro" />
                     </div>
                   </div>
 
                   <div className="grid-2col">
                     <div className="form-group">
-                      <label className="form-label">Cidade Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Cidade <span style={{ color: 'red' }}>*</span></label>
                       <input className="form-input" type="text" name="commercial_city" required placeholder="Curitiba" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Estado Comercial (UF) <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Estado (UF) <span style={{ color: 'red' }}>*</span></label>
                       <select className="form-input" name="commercial_state" required defaultValue="PR">
                         {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
                       </select>
@@ -3365,35 +3376,35 @@ NEWFILEENCODING:NONE
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Telefone Comercial <span style={{ color: 'red' }}>*</span></label>
+                    <label className="form-label">Telefone <span style={{ color: 'red' }}>*</span></label>
                     <input className="form-input" type="text" name="commercial_phone" required placeholder="ex: (11) 5555-5555" />
                   </div>
 
                   <div className="form-group mt-4">
-                    <label className="form-label">Termo de Sigilo Científico <span style={{ color: 'red' }}>*</span></label>
+                    <label className="form-label">Termo de Sigilo Científico</label>
                     <div className="terms-container" style={{ whiteSpace: 'pre-wrap' }}>
                       {SIGILO_TERMS_TEXT}
                     </div>
                     <div className="flex-center-gap">
                       <input type="checkbox" id="acceptSigiloTerms" name="acceptSigiloTerms" required />
-                      <label htmlFor="acceptSigiloTerms" className="cursor-pointer">Declaro que li e aceito as condições de sigilo de dados profissionais e científicos.</label>
+                      <label htmlFor="acceptSigiloTerms" className="cursor-pointer">Declaro que li e aceito as condições de sigilo de dados profissionais e científicos. <span style={{ color: 'red' }}>*</span></label>
                     </div>
                   </div>
                 </>
               )}
 
               <div className="form-group mt-4">
-                <label className="form-label">Termo Geral de Uso <span style={{ color: 'red' }}>*</span></label>
+                <label className="form-label">Termo Geral de Uso</label>
                 <div className="terms-container" style={{ whiteSpace: 'pre-wrap' }}>
                   {GENERAL_TERMS_TEXT}
                 </div>
                 <div className="flex-center-gap">
                   <input type="checkbox" id="acceptGeneralTerms" name="acceptGeneralTerms" required />
-                  <label htmlFor="acceptGeneralTerms" className="cursor-pointer">Li e aceito os Termos Gerais de Uso do site.</label>
+                  <label htmlFor="acceptGeneralTerms" className="cursor-pointer">Li e aceito os Termos Gerais de Uso do site. <span style={{ color: 'red' }}>*</span></label>
                 </div>
               </div>
 
-              <button className="btn btn-primary w-full mt-4" type="submit">Criar Conta e Confirmar Registro</button>
+              <button className="btn btn-primary w-full mt-4" type="submit">Finalizar cadastro</button>
             </form>
           </div>
         )}
@@ -5047,7 +5058,7 @@ NEWFILEENCODING:NONE
 
                         <div className="grid-2col" style={{ marginBottom: '1.5rem' }}>
                           <div className="form-group">
-                            <label className="form-label">Função / Perfil <span style={{ color: 'red' }}>*</span></label>
+                            <label className="form-label">Perfil <span style={{ color: 'red' }}>*</span></label>
                             <select 
                               className="form-input" 
                               name="role" 
@@ -5060,9 +5071,9 @@ NEWFILEENCODING:NONE
                               }}
                               required
                             >
-                              <option value="STUDENT">Aluno (Profissional de Saúde)</option>
-                              <option value="TEACHER">Professor Colaborador</option>
                               <option value="ADMIN">Administrador</option>
+                              <option value="TEACHER">Professor</option>
+                              <option value="STUDENT">Aluno</option>
                             </select>
                           </div>
                           <div className="form-group">
