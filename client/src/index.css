@@ -302,6 +302,10 @@ h1, h2, h3, h4 {
   margin: 3rem auto;
 }
 
+.auth-box-wide {
+  max-width: 800px !important;
+}
+
 .form-group {
   margin-bottom: 1.25rem;
 }

@@ -1,7 +1,7 @@
 -- Habilitar extensão pgcrypto para uuid_generate_v4 se necessário
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Tabela de Usuários
+-- Tabela de Usuários Unificada
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
@@ -10,37 +10,75 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'TEACHER', 'STUDENT')),
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'SUSPENDED')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    is_homeopath BOOLEAN NOT NULL DEFAULT FALSE
-);
-
--- Garantir que a coluna is_homeopath exista se a tabela já tiver sido criada antes
-ALTER TABLE users ADD COLUMN IF NOT EXISTS is_homeopath BOOLEAN NOT NULL DEFAULT FALSE;
-
--- Tabela de Perfis de Professores
-CREATE TABLE IF NOT EXISTS teacher_profiles (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    crm VARCHAR(50) NOT NULL,
-    rqe VARCHAR(50) NOT NULL,
-    bio TEXT
-);
-
--- Tabela de Perfis de Alunos
-CREATE TABLE IF NOT EXISTS student_profiles (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    terms_accepted BOOLEAN NOT NULL DEFAULT TRUE,
-    terms_accepted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    professional_registration_type VARCHAR(50) NOT NULL CHECK (professional_registration_type IN ('CRM', 'CRO', 'CRF', 'CRV', 'OUTROS')),
-    professional_registration_number VARCHAR(50) NOT NULL,
+    is_homeopath BOOLEAN NOT NULL DEFAULT FALSE,
     phone VARCHAR(50),
-    cpf_cnpj VARCHAR(50),
-    address_zip VARCHAR(20),
-    address_street VARCHAR(255),
-    address_number VARCHAR(50),
-    address_complement VARCHAR(255),
-    address_neighborhood VARCHAR(100),
-    address_city VARCHAR(100),
-    address_state VARCHAR(50)
+    cpf VARCHAR(50),
+    profession VARCHAR(100),
+    custom_profession VARCHAR(255),
+    council_type VARCHAR(50),
+    council_number VARCHAR(50),
+    council_state VARCHAR(50),
+    specialty VARCHAR(255),
+    rqe VARCHAR(50),
+    bio TEXT,
+    -- Endereço de Cobrança
+    billing_zip VARCHAR(20),
+    billing_street VARCHAR(255),
+    billing_number VARCHAR(50),
+    billing_complement VARCHAR(255),
+    billing_neighborhood VARCHAR(100),
+    billing_city VARCHAR(100),
+    billing_state VARCHAR(50),
+    -- Endereço Comercial
+    commercial_zip VARCHAR(20),
+    commercial_street VARCHAR(255),
+    commercial_number VARCHAR(50),
+    commercial_complement VARCHAR(255),
+    commercial_neighborhood VARCHAR(100),
+    commercial_city VARCHAR(100),
+    commercial_state VARCHAR(50),
+    commercial_phone VARCHAR(50),
+    -- Termos
+    terms_accepted BOOLEAN NOT NULL DEFAULT FALSE,
+    terms_accepted_at TIMESTAMP WITH TIME ZONE,
+    general_terms_accepted BOOLEAN NOT NULL DEFAULT FALSE,
+    general_terms_accepted_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Garantir que todas as colunas novas existam caso a tabela já tenha sido criada antes
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS cpf VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS profession VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_profession VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS council_type VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS council_number VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS council_state VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS specialty VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rqe VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_zip VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_street VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_number VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_complement VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_neighborhood VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_city VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_state VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_zip VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_street VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_number VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_complement VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_neighborhood VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_city VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_state VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS commercial_phone VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS general_terms_accepted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS general_terms_accepted_at TIMESTAMP WITH TIME ZONE;
+
+-- Remover tabelas antigas se não contiverem funcionalidade relevante
+DROP TABLE IF EXISTS student_profiles CASCADE;
+DROP TABLE IF EXISTS teacher_profiles CASCADE;
 
 -- Tabela de Cursos
 CREATE TABLE IF NOT EXISTS courses (
@@ -166,22 +204,44 @@ VALUES ('a1111111-1111-1111-1111-111111111111', 'Admin Principal', 'admin@lms.co
 ON CONFLICT (email) DO NOTHING;
 
 -- Professor
-INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath)
-VALUES ('b2222222-2222-2222-2222-222222222222', 'Dr. Carlos Eduardo (TOSB)', 'carlos@tosb.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'TEACHER', 'ACTIVE', FALSE)
+INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath, profession, council_type, council_state, council_number, rqe, bio)
+VALUES (
+    'b2222222-2222-2222-2222-222222222222',
+    'Dr. Carlos Eduardo (TOSB)',
+    'carlos@tosb.com',
+    '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC',
+    'TEACHER',
+    'ACTIVE',
+    FALSE,
+    'médico(a)',
+    'CRM',
+    'PR',
+    '12345',
+    '6789',
+    'Médico Homeopata, Diretor e Professor Especialista no Método Sensação.'
+)
 ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO teacher_profiles (user_id, crm, rqe, bio)
-VALUES ('b2222222-2222-2222-2222-222222222222', 'CRM-PR 12345', 'RQE 6789', 'Médico Homeopata, Diretor e Professor Especialista no Método Sensação.')
-ON CONFLICT (user_id) DO NOTHING;
 
 -- Aluno
-INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath)
-VALUES ('c3333333-3333-3333-3333-333333333333', 'Dra. Ana Paula (Aluna)', 'ana@lms.com', '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC', 'STUDENT', 'ACTIVE', FALSE)
+INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath, profession, council_type, council_number, council_state, terms_accepted, terms_accepted_at, general_terms_accepted, general_terms_accepted_at)
+VALUES (
+    'c3333333-3333-3333-3333-333333333333',
+    'Dra. Ana Paula (Aluna)',
+    'ana@lms.com',
+    '$2a$10$tZ2R.211U5H52PuxFpU9/.B3vR.pT9oIq0Jocd4i4oN2rQzW7aFjC',
+    'STUDENT',
+    'ACTIVE',
+    FALSE,
+    'médico(a)',
+    'CRM',
+    '98765',
+    'SP',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    TRUE,
+    CURRENT_TIMESTAMP
+)
 ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO student_profiles (user_id, terms_accepted, professional_registration_type, professional_registration_number)
-VALUES ('c3333333-3333-3333-3333-333333333333', TRUE, 'CRM', 'CRM-SP 98765')
-ON CONFLICT (user_id) DO NOTHING;
 
 -- Cursos Iniciais
 -- 1. Curso Livre

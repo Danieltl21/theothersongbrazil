@@ -1,12 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Termos de Uso específicos para profissionais da saúde / homeopatas
-const TERMS_TEXT = `TERMOS DE USO E ACEITE PARA HOMEOPATAS E PROFISSIONAIS DA SAÚDE
+// Termo de Sigilo Científico formatado com quebras de linha para profissionais da saúde
+const SIGILO_TERMS_TEXT = `TERMO DE SIGILO CIENTÍFICO PARA PROFISSIONAIS DA SAÚDE
+
 Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e concorda que:
-1. Este conteúdo é destinado a profissionais da saúde (Médicos, Dentistas, Farmacêuticos, Veterinários e terapeutas integrativos autorizados).
-2. O material científico, incluindo casos clínicos expostos em vídeo, é estritamente confidencial e protegido por sigilo médico, sendo vedado qualquer tipo de download, gravação de tela ou compartilhamento externo sob pena de suspensão de acesso e medidas legais cabíveis.
-3. A prescrição de medicamentos homeopáticos e a aplicação clínica do Método Sensação são de inteira responsabilidade técnica do profissional matriculado.
-4. A plataforma proíbe o compartilhamento de senhas. A identificação de acessos simultâneos em localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.`;
+
+1. O material científico, incluindo discussões de casos clínicos expostos em vídeo e prontuários virtuais, é estritamente confidencial e protegido por sigilo profissional.
+2. É expressamente vedado qualquer tipo de download, cópia, gravação de tela, fotografia ou compartilhamento externo dos materiais sob pena de suspensão imediata de acesso e responsabilização legal cabível.
+3. A prescrição de medicamentos homeopáticos e a aplicação clínica do Método Sensação são de inteira responsabilidade técnica do profissional matriculado.`;
+
+// Termo Geral de Uso para qualquer usuário
+const GENERAL_TERMS_TEXT = `TERMO GERAL DE USO DO SITE
+
+Ao criar sua conta na plataforma The Other Song Brasil (TOSB), você declara e concorda que:
+
+1. O acesso à plataforma de estudos é pessoal, individual e intransferível, sendo expressamente proibido o compartilhamento de credenciais de acesso.
+2. A identificação de acessos simultâneos a partir de localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.
+3. Você assume total responsabilidade pela veracidade e exatidão de todos os dados cadastrais informados.
+4. Todo o material pedagógico e textual é de propriedade intelectual da TOSB e protegido por leis de direitos autorais.`;
+
+const ESTADOS_BRASIL = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
+
+const getCouncilType = (profession) => {
+  if (profession === 'médico(a)') return 'CRM';
+  if (profession === 'odontologista') return 'CRO';
+  if (profession === 'veterinário(a)') return 'CRMV';
+  if (profession === 'farmaceutico(a)') return 'CRF';
+  return '';
+};
 
 const BOOKS_DATA = [
   { id: 'book-esquema', title: 'Esquema de Reinos e Subreinos 2.0', author: 'Dr. Rajan Sankaran', price: 220.00, desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.' },
@@ -167,6 +191,245 @@ const getPageFromPathname = () => {
   return 'home';
 };
 
+const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession, setCurrentProfession, formUserRole) => {
+  const isHealth = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(currentProfession);
+  
+  const isReq = (field) => {
+    if (isAdmin) return false;
+    if (['billing_complement', 'commercial_complement', 'specialty'].includes(field)) return false;
+    if (['council_state', 'council_number', 'commercial_zip', 'commercial_street', 'commercial_number', 'commercial_neighborhood', 'commercial_city', 'commercial_state', 'commercial_phone'].includes(field)) {
+      return isHealth;
+    }
+    if (field === 'custom_profession') return currentProfession === 'outro';
+    return true;
+  };
+
+  return (
+    <>
+      <h4 className="mb-3 section-title-underlined-thin">Informações de Login e Identificação</h4>
+      <div className="grid-2col">
+        <div className="form-group">
+          <label className="form-label">Nome Completo {isReq('name') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="name" defaultValue={targetUser?.name || ''} required={isAdmin || isReq('name')} placeholder="Dra. Roberta Silva" />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Email (Login) {isReq('email') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="email" name="email" defaultValue={targetUser?.email || ''} required={isAdmin || isReq('email')} placeholder="contato@robertasilva.med.br" />
+        </div>
+      </div>
+
+      {(isAdmin || !targetUser?.id) && (
+        <div className="form-group">
+          <label className="form-label">Senha de Acesso {isAdmin && !targetUser?.id && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="password" name="password" defaultValue={targetUser?.password || ''} required={isAdmin && !targetUser?.id} placeholder="Digite a senha" />
+        </div>
+      )}
+
+      <div className="grid-2col">
+        <div className="form-group">
+          <label className="form-label">Telefone de Contato {isReq('phone') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="phone" defaultValue={targetUser?.phone || ''} required={isReq('phone')} placeholder="ex: (11) 99999-9999" />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">CPF {isReq('cpf') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="cpf" defaultValue={targetUser?.cpf || targetUser?.cpf_cnpj || ''} required={isReq('cpf')} placeholder="ex: 000.000.000-00" />
+        </div>
+      </div>
+
+      <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Cobrança</h4>
+      
+      <div className="grid-2col">
+        <div className="form-group">
+          <label className="form-label">CEP {isReq('billing_zip') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="billing_zip" defaultValue={targetUser?.billing_zip || targetUser?.address_zip || ''} required={isReq('billing_zip')} placeholder="00000-000" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Logradouro / Rua {isReq('billing_street') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="billing_street" defaultValue={targetUser?.billing_street || targetUser?.address_street || ''} required={isReq('billing_street')} placeholder="Rua, Avenida, etc." />
+        </div>
+      </div>
+
+      <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="form-group">
+          <label className="form-label">Número {isReq('billing_number') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="billing_number" defaultValue={targetUser?.billing_number || targetUser?.address_number || ''} required={isReq('billing_number')} placeholder="123" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Complemento</label>
+          <input className="form-input" type="text" name="billing_complement" defaultValue={targetUser?.billing_complement || targetUser?.address_complement || ''} placeholder="Apto, Bloco, etc." />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Bairro {isReq('billing_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="billing_neighborhood" defaultValue={targetUser?.billing_neighborhood || targetUser?.address_neighborhood || ''} required={isReq('billing_neighborhood')} placeholder="Centro" />
+        </div>
+      </div>
+
+      <div className="grid-2col">
+        <div className="form-group">
+          <label className="form-label">Cidade {isReq('billing_city') && <span style={{ color: 'red' }}>*</span>}</label>
+          <input className="form-input" type="text" name="billing_city" defaultValue={targetUser?.billing_city || targetUser?.address_city || ''} required={isReq('billing_city')} placeholder="Curitiba" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Estado (UF) {isReq('billing_state') && <span style={{ color: 'red' }}>*</span>}</label>
+          <select className="form-input" name="billing_state" required={isReq('billing_state')} defaultValue={targetUser?.billing_state || targetUser?.address_state || 'PR'}>
+            {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <h4 className="mt-4 mb-3 section-title-underlined-thin">Informações profissionais</h4>
+      
+      <div className="grid-2col">
+        <div className="form-group">
+          <label className="form-label">Profissão {isReq('profession') && <span style={{ color: 'red' }}>*</span>}</label>
+          <select 
+            className="form-input" 
+            name="profession" 
+            value={currentProfession}
+            onChange={(e) => setCurrentProfession(e.target.value)}
+            required={isReq('profession')}
+          >
+            <option value="médico(a)">médico(a)</option>
+            <option value="odontologista">odontologista</option>
+            <option value="veterinário(a)">veterinário(a)</option>
+            <option value="farmaceutico(a)">farmacêutico(a)</option>
+            <option value="outro">outro</option>
+          </select>
+        </div>
+
+        {currentProfession === 'outro' && (
+          <div className="form-group">
+            <label className="form-label">Nome da Profissão {isReq('custom_profession') && <span style={{ color: 'red' }}>*</span>}</label>
+            <input className="form-input" type="text" name="custom_profession" defaultValue={targetUser?.custom_profession || ''} required={isReq('custom_profession')} placeholder="ex: Fisioterapeuta" />
+          </div>
+        )}
+      </div>
+
+      {isHealth && (
+        <>
+          <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="form-group">
+              <label className="form-label">Conselho Regional</label>
+              <input className="form-input" type="text" name="council_type" value={getCouncilType(currentProfession)} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">UF do Conselho {isReq('council_state') && <span style={{ color: 'red' }}>*</span>}</label>
+              <select className="form-input" name="council_state" required={isReq('council_state')} defaultValue={targetUser?.council_state || 'PR'}>
+                {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Número do Conselho {isReq('council_number') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input 
+                className="form-input" 
+                type="text" 
+                name="council_number" 
+                defaultValue={targetUser?.council_number || ''}
+                required={isReq('council_number')} 
+                placeholder="Apenas números"
+                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Especialidade</label>
+            <input className="form-input" type="text" name="specialty" defaultValue={targetUser?.specialty || ''} placeholder="ex: Homeopatia, Pediatria (Opcional)" />
+          </div>
+
+          {(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && (
+            <div style={{ borderTop: '1px dashed var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
+              <div className="grid-2col">
+                <div className="form-group">
+                  <label className="form-label">RQE (Registro de Especialidade) <span style={{ color: 'red' }}>*</span></label>
+                  <input 
+                    className="form-input" 
+                    type="text" 
+                    name="rqe" 
+                    defaultValue={targetUser?.rqe || ''} 
+                    required={!isAdmin}
+                    placeholder="Apenas números"
+                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Biografia Curta</label>
+                  <textarea className="form-input" name="bio" defaultValue={targetUser?.bio || ''} placeholder="Biografia do docente..." style={{ minHeight: '100px' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço Comercial</h4>
+          
+          <div className="grid-2col">
+            <div className="form-group">
+              <label className="form-label">CEP Comercial {isReq('commercial_zip') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input className="form-input" type="text" name="commercial_zip" defaultValue={targetUser?.commercial_zip || ''} required={isReq('commercial_zip')} placeholder="00000-000" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Logradouro / Rua Comercial {isReq('commercial_street') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input className="form-input" type="text" name="commercial_street" defaultValue={targetUser?.commercial_street || ''} required={isReq('commercial_street')} placeholder="Rua, Avenida, etc." />
+            </div>
+          </div>
+
+          <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="form-group">
+              <label className="form-label">Número Comercial {isReq('commercial_number') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input className="form-input" type="text" name="commercial_number" defaultValue={targetUser?.commercial_number || ''} required={isReq('commercial_number')} placeholder="123" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Complemento Comercial</label>
+              <input className="form-input" type="text" name="commercial_complement" defaultValue={targetUser?.commercial_complement || ''} placeholder="Sala, Andar, etc." />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Bairro Comercial {isReq('commercial_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input className="form-input" type="text" name="commercial_neighborhood" defaultValue={targetUser?.commercial_neighborhood || ''} required={isReq('commercial_neighborhood')} placeholder="Centro" />
+            </div>
+          </div>
+
+          <div className="grid-2col">
+            <div className="form-group">
+              <label className="form-label">Cidade Comercial {isReq('commercial_city') && <span style={{ color: 'red' }}>*</span>}</label>
+              <input className="form-input" type="text" name="commercial_city" defaultValue={targetUser?.commercial_city || ''} required={isReq('commercial_city')} placeholder="Curitiba" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Estado Comercial (UF) {isReq('commercial_state') && <span style={{ color: 'red' }}>*</span>}</label>
+              <select className="form-input" name="commercial_state" required={isReq('commercial_state')} defaultValue={targetUser?.commercial_state || 'PR'}>
+                {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Telefone Comercial {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
+            <input className="form-input" type="text" name="commercial_phone" defaultValue={targetUser?.commercial_phone || ''} required={isReq('commercial_phone')} placeholder="ex: (11) 5555-5555" />
+          </div>
+
+          {targetUser?.id && (
+            <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="is_homeopath" 
+                name="is_homeopath" 
+                defaultChecked={targetUser?.is_homeopath || false} 
+                style={{ width: 'auto', margin: 0 }} 
+              />
+              <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                Quero participar da lista de Homeopatas indicados
+              </label>
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
 export default function App() {
   // Controle de Estado Geral
   const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
@@ -181,40 +444,46 @@ export default function App() {
     const saved = localStorage.getItem('mock_db');
     if (saved) {
       const parsed = JSON.parse(saved);
-      let changed = false;
-      if (!parsed.books) {
-        parsed.books = BOOKS_DATA;
-        changed = true;
+      // Forçar re-criação se for o banco antigo (sem a nova propriedade profession)
+      const testStudent = parsed.users?.find(u => u.id === 'student-id');
+      if (testStudent && !testStudent.profession) {
+        localStorage.removeItem('mock_db');
+      } else {
+        let changed = false;
+        if (!parsed.books) {
+          parsed.books = BOOKS_DATA;
+          changed = true;
+        }
+        if (!parsed.events) {
+          parsed.events = [
+            { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
+            { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
+            { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
+          ];
+          changed = true;
+        }
+        if (!parsed.classes) {
+          parsed.classes = [
+            { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
+          ];
+          changed = true;
+        }
+        if (!parsed.class_attendance) {
+          parsed.class_attendance = {};
+          changed = true;
+        }
+        if (changed) {
+          localStorage.setItem('mock_db', JSON.stringify(parsed));
+        }
+        return parsed;
       }
-      if (!parsed.events) {
-        parsed.events = [
-          { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
-          { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
-          { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
-        ];
-        changed = true;
-      }
-      if (!parsed.classes) {
-        parsed.classes = [
-          { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
-        ];
-        changed = true;
-      }
-      if (!parsed.class_attendance) {
-        parsed.class_attendance = {};
-        changed = true;
-      }
-      if (changed) {
-        localStorage.setItem('mock_db', JSON.stringify(parsed));
-      }
-      return parsed;
     }
 
     const initialDb = {
       users: [
         { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123', is_homeopath: false },
-        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.', is_homeopath: false },
-        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765', is_homeopath: false }
+        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', profession: 'médico(a)', council_type: 'CRM', council_state: 'PR', council_number: '12345', rqe: '6789', bio: 'Médico Homeopata especialista no Método Sensação.', is_homeopath: false },
+        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', profession: 'médico(a)', council_type: 'CRM', council_state: 'SP', council_number: '98765', is_homeopath: false }
       ],
       courses: [
         { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
@@ -390,20 +659,30 @@ export default function App() {
   const [profileRegNumber, setProfileRegNumber] = useState('');
   const [profileTeacherCrm, setProfileTeacherCrm] = useState('');
 
+  // Novos estados unificados de cadastro, perfil e admin
+  const [regProfession, setRegProfession] = useState('médico(a)');
+  const [profileProfession, setProfileProfession] = useState('médico(a)');
+  const [adminUserProfession, setAdminUserProfession] = useState('médico(a)');
+  const [adminUserStatus, setAdminUserStatus] = useState('ACTIVE');
+
   const startAddUser = () => {
     setEditingUser({});
     setFormUserRole('STUDENT');
     setAdminRegType('CRM');
     setAdminRegNumber('');
     setAdminTeacherCrm('');
+    setAdminUserProfession('médico(a)');
+    setAdminUserStatus('ACTIVE');
   };
 
   const startEditUser = (userObj) => {
     setEditingUser(userObj);
     setFormUserRole(userObj.role || 'STUDENT');
-    setAdminRegType(userObj.registrationType || 'CRM');
-    setAdminRegNumber(userObj.registrationNumber || '');
-    setAdminTeacherCrm(userObj.crm || '');
+    setAdminRegType(userObj.council_type || 'CRM');
+    setAdminRegNumber(userObj.council_number || '');
+    setAdminTeacherCrm(userObj.rqe || '');
+    setAdminUserProfession(userObj.profession || 'médico(a)');
+    setAdminUserStatus(userObj.status || 'ACTIVE');
   };
 
   // Novos estados para busca de homeopatas e abas dos dashboards
@@ -413,9 +692,9 @@ export default function App() {
 
   useEffect(() => {
     if (user) {
-      setProfileRegType(user.professional_registration_type || 'OUTROS');
-      setProfileRegNumber(user.professional_registration_number || '');
-      setProfileTeacherCrm(user.crm || '');
+      setProfileRegType(user.council_type || 'CRM');
+      setProfileRegNumber(user.council_number || '');
+      setProfileProfession(user.profession || 'médico(a)');
     }
   }, [user]);
   const [serverHomeopaths, setServerHomeopaths] = useState([]);
@@ -440,28 +719,37 @@ export default function App() {
     let dynamicList = [];
     if (isOfflineMode) {
       dynamicList = mockDb.users
-        .filter(u => u.is_homeopath && (u.role === 'STUDENT' || u.role === 'TEACHER'))
+        .filter(u => u.is_homeopath)
         .map(u => {
           let reg = '';
-          let specialty = '';
-          let city = '';
-          
-          if (u.role === 'TEACHER') {
+          if (u.council_type && u.council_number) {
+            reg = `${u.council_type}-${u.council_state || ''} ${u.council_number}`;
+          } else if (u.role === 'TEACHER') {
             reg = u.crm || 'CRM';
-            specialty = 'Professor / Método Sensação Vital';
-            city = 'Curitiba - PR';
           } else {
             reg = `${u.registrationType || 'CRM'} ${u.registrationNumber || ''}`;
-            specialty = 'Homeopatia Clássica';
-            city = (u.address_city && u.address_state) ? `${u.address_city} - ${u.address_state}` : 'Não informado';
           }
+          
+          let specialty = u.specialty || '';
+          if (!specialty && u.role === 'TEACHER') {
+            specialty = 'Professor / Método Sensação Vital';
+          }
+          
+          let city = (u.commercial_city && u.commercial_state) 
+            ? `${u.commercial_city} - ${u.commercial_state}` 
+            : (u.address_city && u.address_state)
+              ? `${u.address_city} - ${u.address_state}`
+              : 'Não informado';
+          
+          let phone = u.commercial_phone || u.phone || '';
           
           return {
             name: u.name,
             reg: reg.trim(),
+            profession: u.profession === 'outro' ? u.custom_profession : (u.profession || (u.role === 'TEACHER' ? 'médico(a)' : 'Aluno')),
             specialty: specialty,
             city: city,
-            phone: u.phone || '',
+            phone: phone,
             email: u.email
           };
         });
@@ -876,24 +1164,55 @@ export default function App() {
     e.preventDefault();
     clearAlerts();
     
+    const name = e.target.name.value;
+    const email = e.target.email.value;
+    const phone = e.target.phone.value;
+    const cpf = e.target.cpf.value;
+    const profession = e.target.profession?.value || user.profession || '';
+    const custom_profession = e.target.custom_profession?.value || '';
+    
+    const isHealthProfession = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(profession);
+    const council_type = isHealthProfession ? getCouncilType(profession) : '';
+    const council_state = e.target.council_state?.value || '';
+    const council_number = e.target.council_number?.value || '';
+    const specialty = e.target.specialty?.value || '';
+    
+    // RQE para Professor
+    const rqe = e.target.rqe?.value || '';
+    const bio = e.target.bio?.value || '';
+
+    if (user.role === 'TEACHER' && !rqe) {
+      setError('O campo RQE é obrigatório para professores.');
+      return;
+    }
+    
+    // Endereço de Cobrança
+    const billing_zip = e.target.billing_zip.value;
+    const billing_street = e.target.billing_street.value;
+    const billing_number = e.target.billing_number.value;
+    const billing_complement = e.target.billing_complement?.value || '';
+    const billing_neighborhood = e.target.billing_neighborhood.value;
+    const billing_city = e.target.billing_city.value;
+    const billing_state = e.target.billing_state.value;
+    
+    // Endereço Comercial
+    const commercial_zip = e.target.commercial_zip?.value || '';
+    const commercial_street = e.target.commercial_street?.value || '';
+    const commercial_number = e.target.commercial_number?.value || '';
+    const commercial_complement = e.target.commercial_complement?.value || '';
+    const commercial_neighborhood = e.target.commercial_neighborhood?.value || '';
+    const commercial_city = e.target.commercial_city?.value || '';
+    const commercial_state = e.target.commercial_state?.value || '';
+    const commercial_phone = e.target.commercial_phone?.value || '';
+    
+    const is_homeopath = e.target.is_homeopath?.checked || false;
+
     const formData = {
-      name: e.target.name.value,
-      email: e.target.email.value,
-      phone: e.target.phone.value,
-      cpf_cnpj: e.target.cpf_cnpj.value,
-      address_zip: e.target.address_zip?.value || '',
-      address_street: e.target.address_street?.value || '',
-      address_number: e.target.address_number?.value || '',
-      address_complement: e.target.address_complement?.value || '',
-      address_neighborhood: e.target.address_neighborhood?.value || '',
-      address_city: e.target.address_city?.value || '',
-      address_state: e.target.address_state?.value || '',
-      professional_registration_type: e.target.professional_registration_type?.value || user.professional_registration_type || 'OUTROS',
-      professional_registration_number: e.target.professional_registration_number?.value || user.professional_registration_number || '',
-      crm: e.target.crm?.value || '',
-      rqe: e.target.rqe?.value || '',
-      bio: e.target.bio?.value || '',
-      is_homeopath: e.target.is_homeopath?.checked || false
+      name, email, phone, cpf, profession, custom_profession,
+      council_type, council_number, council_state, specialty, rqe, bio,
+      billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+      commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+      commercial_phone, is_homeopath
     };
 
     if (isOfflineMode) {
@@ -921,12 +1240,12 @@ export default function App() {
         const data = await res.json();
         if (res.ok) {
           setUser(prev => ({ ...prev, ...formData }));
-          setSuccess(data.message);
+          setSuccess(data.message || 'Perfil atualizado com sucesso!');
         } else {
-          setError(data.message);
+          setError(data.message || 'Erro ao atualizar perfil.');
         }
       } catch (err) {
-        setError('Erro ao salvar dados de cadastro.');
+        setError('Erro de rede.');
       }
     }
   };
@@ -1034,15 +1353,50 @@ export default function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     clearAlerts();
+    
     const name = e.target.name.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
-    const registrationType = e.target.registrationType.value;
-    const registrationNumber = e.target.registrationNumber.value;
-    const acceptTerms = e.target.acceptTerms.checked;
+    const phone = e.target.phone.value;
+    const cpf = e.target.cpf.value;
+    const profession = e.target.profession.value;
+    const custom_profession = e.target.custom_profession?.value || '';
+    
+    const council_type = getCouncilType(profession);
+    const council_state = e.target.council_state?.value || '';
+    const council_number = e.target.council_number?.value || '';
+    const specialty = e.target.specialty?.value || '';
+    
+    // Endereço de Cobrança
+    const billing_zip = e.target.billing_zip.value;
+    const billing_street = e.target.billing_street.value;
+    const billing_number = e.target.billing_number.value;
+    const billing_complement = e.target.billing_complement?.value || '';
+    const billing_neighborhood = e.target.billing_neighborhood.value;
+    const billing_city = e.target.billing_city.value;
+    const billing_state = e.target.billing_state.value;
+    
+    // Endereço Comercial
+    const commercial_zip = e.target.commercial_zip?.value || '';
+    const commercial_street = e.target.commercial_street?.value || '';
+    const commercial_number = e.target.commercial_number?.value || '';
+    const commercial_complement = e.target.commercial_complement?.value || '';
+    const commercial_neighborhood = e.target.commercial_neighborhood?.value || '';
+    const commercial_city = e.target.commercial_city?.value || '';
+    const commercial_state = e.target.commercial_state?.value || '';
+    const commercial_phone = e.target.commercial_phone?.value || '';
+    
+    const acceptGeneralTerms = e.target.acceptGeneralTerms.checked;
+    const acceptSigiloTerms = e.target.acceptSigiloTerms?.checked || false;
 
-    if (!acceptTerms) {
-      setError('Você precisa aceitar os Termos de Uso e Sigilo de dados.');
+    if (!acceptGeneralTerms) {
+      setError('Você precisa aceitar os Termos Gerais de Uso da plataforma.');
+      return;
+    }
+
+    const isHealthProfession = ['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(profession);
+    if (isHealthProfession && !acceptSigiloTerms) {
+      setError('Você precisa aceitar o Termo de Sigilo Científico.');
       return;
     }
 
@@ -1056,8 +1410,40 @@ export default function App() {
 
       const newUserId = 'student_' + Date.now();
       const newStudent = {
-        id: newUserId, name, email, password, role: 'STUDENT', status: 'ACTIVE',
-        registrationType, registrationNumber, terms_accepted: true, terms_accepted_at: new Date().toISOString()
+        id: newUserId,
+        name,
+        email,
+        password,
+        role: 'STUDENT',
+        status: 'ACTIVE',
+        phone,
+        cpf,
+        profession,
+        custom_profession: isHealthProfession ? '' : custom_profession,
+        council_type: isHealthProfession ? council_type : '',
+        council_number: isHealthProfession ? council_number : '',
+        council_state: isHealthProfession ? council_state : '',
+        specialty: isHealthProfession ? specialty : '',
+        billing_zip,
+        billing_street,
+        billing_number,
+        billing_complement,
+        billing_neighborhood,
+        billing_city,
+        billing_state,
+        commercial_zip: isHealthProfession ? commercial_zip : '',
+        commercial_street: isHealthProfession ? commercial_street : '',
+        commercial_number: isHealthProfession ? commercial_number : '',
+        commercial_complement: isHealthProfession ? commercial_complement : '',
+        commercial_neighborhood: isHealthProfession ? commercial_neighborhood : '',
+        commercial_city: isHealthProfession ? commercial_city : '',
+        commercial_state: isHealthProfession ? commercial_state : '',
+        commercial_phone: isHealthProfession ? commercial_phone : '',
+        is_homeopath: false, // por padrão começa desativado no cadastro
+        terms_accepted: isHealthProfession ? acceptSigiloTerms : false,
+        terms_accepted_at: isHealthProfession ? new Date().toISOString() : null,
+        general_terms_accepted: acceptGeneralTerms,
+        general_terms_accepted_at: new Date().toISOString()
       };
 
       // Matricular no curso livre padrão por 6 meses
@@ -1084,7 +1470,13 @@ export default function App() {
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, registrationType, registrationNumber, acceptTerms })
+          body: JSON.stringify({
+            name, email, password, phone, cpf, profession, custom_profession,
+            council_type, council_number, council_state, specialty,
+            billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+            commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+            commercial_phone, acceptGeneralTerms, acceptSigiloTerms
+          })
         });
         const data = await res.json();
         if (res.ok) {
@@ -2117,22 +2509,38 @@ NEWFILEENCODING:NONE
     const password = e.target.password.value;
     const role = e.target.role.value;
     const status = e.target.status.value;
+    
+    // Ler os campos comuns e de endereço do formulário
+    const phone = e.target.phone?.value || '';
+    const cpf = e.target.cpf?.value || '';
+    const profession = e.target.profession?.value || '';
+    const custom_profession = e.target.custom_profession?.value || '';
+    const council_type = getCouncilType(profession);
+    const council_state = e.target.council_state?.value || '';
+    const council_number = e.target.council_number?.value || '';
+    const specialty = e.target.specialty?.value || '';
+    
+    const rqe = e.target.rqe?.value || '';
+    const bio = e.target.bio?.value || '';
+    
+    const billing_zip = e.target.billing_zip?.value || '';
+    const billing_street = e.target.billing_street?.value || '';
+    const billing_number = e.target.billing_number?.value || '';
+    const billing_complement = e.target.billing_complement?.value || '';
+    const billing_neighborhood = e.target.billing_neighborhood?.value || '';
+    const billing_city = e.target.billing_city?.value || '';
+    const billing_state = e.target.billing_state?.value || '';
+    
+    const commercial_zip = e.target.commercial_zip?.value || '';
+    const commercial_street = e.target.commercial_street?.value || '';
+    const commercial_number = e.target.commercial_number?.value || '';
+    const commercial_complement = e.target.commercial_complement?.value || '';
+    const commercial_neighborhood = e.target.commercial_neighborhood?.value || '';
+    const commercial_city = e.target.commercial_city?.value || '';
+    const commercial_state = e.target.commercial_state?.value || '';
+    const commercial_phone = e.target.commercial_phone?.value || '';
+    
     const is_homeopath = e.target.is_homeopath?.checked || false;
-    
-    let registrationType = '';
-    let registrationNumber = '';
-    let crm = '';
-    let rqe = '';
-    let bio = '';
-    
-    if (role === 'STUDENT') {
-      registrationType = e.target.registrationType?.value || '';
-      registrationNumber = e.target.registrationNumber?.value || '';
-    } else if (role === 'TEACHER') {
-      crm = e.target.crm?.value || '';
-      rqe = e.target.rqe?.value || '';
-      bio = e.target.bio?.value || '';
-    }
 
     let errorOccurred = false;
 
@@ -2149,17 +2557,11 @@ NEWFILEENCODING:NONE
           if (u.id === editingUser.id) {
             return {
               ...u,
-              name,
-              email,
-              password,
-              role,
-              status,
-              registrationType,
-              registrationNumber,
-              crm,
-              rqe,
-              bio,
-              is_homeopath
+              name, email, password, role, status, is_homeopath,
+              phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty, rqe, bio,
+              billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+              commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+              commercial_phone
             };
           }
           return u;
@@ -2167,17 +2569,11 @@ NEWFILEENCODING:NONE
       } else {
         const newUser = {
           id: 'user-' + Date.now(),
-          name,
-          email,
-          password,
-          role,
-          status,
-          registrationType,
-          registrationNumber,
-          crm,
-          rqe,
-          bio,
-          is_homeopath
+          name, email, password, role, status, is_homeopath,
+          phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty, rqe, bio,
+          billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+          commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+          commercial_phone
         };
         updatedUsers = [...prev.users, newUser];
       }
@@ -2784,53 +3180,216 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: CADASTRO */}
         {currentPage === 'register' && (
           <div className="card auth-box auth-box-wide">
-            <h2 className="mb-2 text-center">Inscrição Profissional</h2>
-            <p className="text-muted text-center mb-5">
-              Preencha seus dados de saúde para validação acadêmica
+            <h2 className="mb-2 text-center">Formulário de cadastro</h2>
+            <p className="text-muted text-center mb-1">
+              Preencha os campos abaixo para criar sua conta.
+            </p>
+            <p className="text-muted text-center mb-5" style={{ fontSize: '0.85rem' }}>
+              Campos com <span style={{ color: 'red', fontWeight: 'bold' }}>*</span> são de preenchimento obrigatório.
             </p>
 
             <form onSubmit={handleRegister}>
-              <div className="form-group">
-                <label className="form-label">Nome Completo</label>
-                <input className="form-input" type="text" name="name" required placeholder="Dra. Roberta Silva" />
+              <h4 className="mb-3 section-title-underlined-thin">Informações de Login e Identificação</h4>
+              
+              <div className="grid-2col">
+                <div className="form-group">
+                  <label className="form-label">Nome Completo <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="name" required placeholder="Dra. Roberta Silva" />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email (Login) <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="email" name="email" required placeholder="contato@robertasilva.med.br" />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">E-mail de Trabalho</label>
-                <input className="form-input" type="email" name="email" required placeholder="contato@robertasilva.med.br" />
+              <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Senha de Acesso <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="password" name="password" required placeholder="Mínimo 6 caracteres" />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Telefone de Contato <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="phone" required placeholder="ex: (11) 99999-9999" />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">CPF <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="cpf" required placeholder="ex: 000.000.000-00" />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Senha de Acesso</label>
-                <input className="form-input" type="password" name="password" required placeholder="Mínimo 6 caracteres" />
+              <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Cobrança</h4>
+              
+              <div className="grid-2col">
+                <div className="form-group">
+                  <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="billing_zip" required placeholder="00000-000" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Logradouro / Rua <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="billing_street" required placeholder="Rua, Avenida, etc." />
+                </div>
+              </div>
+
+              <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Número <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="billing_number" required placeholder="123" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Complemento</label>
+                  <input className="form-input" type="text" name="billing_complement" placeholder="Apto, Bloco, etc." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Bairro <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="billing_neighborhood" required placeholder="Centro" />
+                </div>
               </div>
 
               <div className="grid-2col">
                 <div className="form-group">
-                  <label className="form-label">Conselho Profissional</label>
-                  <select className="form-input" name="registrationType">
-                    <option value="CRM">CRM (Medicina)</option>
-                    <option value="CRO">CRO (Odontologia)</option>
-                    <option value="CRF">CRF (Farmácia)</option>
-                    <option value="CRV">CRV (Veterinária)</option>
-                    <option value="OUTROS">Outros Conselhos Integrados</option>
-                  </select>
+                  <label className="form-label">Cidade <span style={{ color: 'red' }}>*</span></label>
+                  <input className="form-input" type="text" name="billing_city" required placeholder="Curitiba" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">Número de Registro</label>
-                  <input className="form-input" type="text" name="registrationNumber" required placeholder="ex: 123456-SP" />
+                  <label className="form-label">Estado (UF) <span style={{ color: 'red' }}>*</span></label>
+                  <select className="form-input" name="billing_state" required defaultValue="PR">
+                    {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Termos de Uso e Sigilo Científico</label>
-                <div className="terms-container">
-                  {TERMS_TEXT}
+              <h4 className="mt-4 mb-3 section-title-underlined-thin">Informações profissionais</h4>
+              
+              <div className="grid-2col">
+                <div className="form-group">
+                  <label className="form-label">Profissão <span style={{ color: 'red' }}>*</span></label>
+                  <select 
+                    className="form-input" 
+                    name="profession" 
+                    value={regProfession}
+                    onChange={(e) => setRegProfession(e.target.value)}
+                    required
+                  >
+                    <option value="médico(a)">médico(a)</option>
+                    <option value="odontologista">odontologista</option>
+                    <option value="veterinário(a)">veterinário(a)</option>
+                    <option value="farmaceutico(a)">farmacêutico(a)</option>
+                    <option value="outro">outro</option>
+                  </select>
+                </div>
+
+                {regProfession === 'outro' && (
+                  <div className="form-group">
+                    <label className="form-label">Nome da Profissão <span style={{ color: 'red' }}>*</span></label>
+                    <input className="form-input" type="text" name="custom_profession" required placeholder="ex: Fisioterapeuta" />
+                  </div>
+                )}
+              </div>
+
+              {/* Campos dinâmicos para Profissão de Saúde */}
+              {['médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)'].includes(regProfession) && (
+                <>
+                  <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">Conselho Regional</label>
+                      <input className="form-input" type="text" name="council_type" value={getCouncilType(regProfession)} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">UF do Conselho <span style={{ color: 'red' }}>*</span></label>
+                      <select className="form-input" name="council_state" required defaultValue="PR">
+                        {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Número do Conselho <span style={{ color: 'red' }}>*</span></label>
+                      <input 
+                        className="form-input" 
+                        type="text" 
+                        name="council_number" 
+                        required 
+                        placeholder="Apenas números"
+                        onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Especialidade</label>
+                    <input className="form-input" type="text" name="specialty" placeholder="ex: Homeopatia, Pediatria (Opcional)" />
+                  </div>
+
+                  <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço Comercial</h4>
+                  
+                  <div className="grid-2col">
+                    <div className="form-group">
+                      <label className="form-label">CEP Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" type="text" name="commercial_zip" required placeholder="00000-000" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Logradouro / Rua Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" type="text" name="commercial_street" required placeholder="Rua, Avenida, etc." />
+                    </div>
+                  </div>
+
+                  <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">Número Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" type="text" name="commercial_number" required placeholder="123" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Complemento Comercial</label>
+                      <input className="form-input" type="text" name="commercial_complement" placeholder="Sala, Andar, etc." />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Bairro Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" type="text" name="commercial_neighborhood" required placeholder="Centro" />
+                    </div>
+                  </div>
+
+                  <div className="grid-2col">
+                    <div className="form-group">
+                      <label className="form-label">Cidade Comercial <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" type="text" name="commercial_city" required placeholder="Curitiba" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Estado Comercial (UF) <span style={{ color: 'red' }}>*</span></label>
+                      <select className="form-input" name="commercial_state" required defaultValue="PR">
+                        {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Telefone Comercial <span style={{ color: 'red' }}>*</span></label>
+                    <input className="form-input" type="text" name="commercial_phone" required placeholder="ex: (11) 5555-5555" />
+                  </div>
+
+                  <div className="form-group mt-4">
+                    <label className="form-label">Termo de Sigilo Científico <span style={{ color: 'red' }}>*</span></label>
+                    <div className="terms-container" style={{ whiteSpace: 'pre-wrap' }}>
+                      {SIGILO_TERMS_TEXT}
+                    </div>
+                    <div className="flex-center-gap">
+                      <input type="checkbox" id="acceptSigiloTerms" name="acceptSigiloTerms" required />
+                      <label htmlFor="acceptSigiloTerms" className="cursor-pointer">Declaro que li e aceito as condições de sigilo de dados profissionais e científicos.</label>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="form-group mt-4">
+                <label className="form-label">Termo Geral de Uso <span style={{ color: 'red' }}>*</span></label>
+                <div className="terms-container" style={{ whiteSpace: 'pre-wrap' }}>
+                  {GENERAL_TERMS_TEXT}
                 </div>
                 <div className="flex-center-gap">
-                  <input type="checkbox" id="acceptTerms" name="acceptTerms" required />
-                  <label htmlFor="acceptTerms" className="cursor-pointer">Li e aceito os termos específicos para Homeopatas.</label>
+                  <input type="checkbox" id="acceptGeneralTerms" name="acceptGeneralTerms" required />
+                  <label htmlFor="acceptGeneralTerms" className="cursor-pointer">Li e aceito os Termos Gerais de Uso do site.</label>
                 </div>
               </div>
 
@@ -3210,14 +3769,14 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: LISTA DE HOMEOPATAS */}
         {currentPage === 'homeopaths' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Diretório de Profissionais Homeopatas</h2>
-            <p className="text-muted text-center mb-5">Encontre profissionais qualificados e credenciados no Método Sensação.</p>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Lista de Homeopatas Indicados</h2>
+            <p className="text-muted text-center mb-5">Encontre profissionais qualificados e reconhecidos pela TOSB</p>
 
             <div className="directory-search-box">
               <input 
                 type="text" 
                 className="form-input" 
-                placeholder="Buscar homeopata por nome, CRM, conselho ou cidade..." 
+                placeholder="Buscar homeopata por nome, conselho ou cidade..." 
                 value={homeopathsSearch} 
                 onChange={(e) => setHomeopathsSearch(e.target.value)} 
               />
@@ -3226,28 +3785,34 @@ NEWFILEENCODING:NONE
               )}
             </div>
 
-            <div className="directory-grid">
+            <div className="directory-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem', alignItems: 'stretch' }}>
               {getHomeopathsList().filter(h => {
                 const searchLower = homeopathsSearch.toLowerCase();
+                const professionText = h.profession || '';
+                const regText = h.reg || '';
+                const specialtyText = h.specialty || '';
+                const cityText = h.city || '';
                 return h.name.toLowerCase().includes(searchLower) ||
-                       h.reg.toLowerCase().includes(searchLower) ||
-                       h.specialty.toLowerCase().includes(searchLower) ||
-                       h.city.toLowerCase().includes(searchLower);
-              }).map((h, idx) => (
-                <div key={idx} className="homeopath-card">
-                  <div className="homeopath-avatar">
-                    {h.name.split(' ').slice(1).map(n => n[0]).join('').substring(0,2).toUpperCase()}
+                       regText.toLowerCase().includes(searchLower) ||
+                       professionText.toLowerCase().includes(searchLower) ||
+                       specialtyText.toLowerCase().includes(searchLower) ||
+                       cityText.toLowerCase().includes(searchLower);
+              }).map((h, idx) => {
+                const displayProfession = h.specialty 
+                  ? `${h.profession || ''} (${h.specialty})` 
+                  : (h.profession || '');
+                return (
+                  <div key={idx} className="homeopath-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', wordBreak: 'break-word', padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)' }}>
+                    <div className="homeopath-info" style={{ flexGrow: 1 }}>
+                      <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>{h.name}</h4>
+                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
+                      <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: '0.85rem' }}>📍 {h.city}</div>
+                      {h.phone && <div className="homeopath-contact-item" style={{ fontSize: '0.85rem' }}>📞 {h.phone}</div>}
+                    </div>
                   </div>
-                  <div className="homeopath-info">
-                    <h4>{h.name}</h4>
-                    <span className="homeopath-reg">{h.reg}</span>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>{h.specialty}</div>
-                    <div className="homeopath-contact-item">📍 {h.city}</div>
-                    <div className="homeopath-contact-item">📞 {h.phone}</div>
-                    <div className="homeopath-contact-item">✉️ {h.email}</div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -3729,111 +4294,7 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <h3 className="mb-4">Detalhes da Conta e Informações de Entrega</h3>
                     <form onSubmit={handleUpdateProfile}>
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Nome Completo</label>
-                          <input className="form-input" type="text" name="name" defaultValue={user?.name || ''} required />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">E-mail</label>
-                          <input className="form-input" type="email" name="email" defaultValue={user?.email || ''} required />
-                        </div>
-                      </div>
-
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Telefone de Contato</label>
-                          <input className="form-input" type="text" name="phone" placeholder="ex: (41) 99999-9999" defaultValue={user?.phone || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">CPF ou CNPJ</label>
-                          <input className="form-input" type="text" name="cpf_cnpj" placeholder="ex: 000.000.000-00" defaultValue={user?.cpf_cnpj || ''} />
-                        </div>
-                      </div>
-
-                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Correspondência</h4>
-                      
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">CEP</label>
-                          <input className="form-input" type="text" name="address_zip" placeholder="00000-000" defaultValue={user?.address_zip || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Logradouro / Rua</label>
-                          <input className="form-input" type="text" name="address_street" placeholder="Rua, Avenida, etc." defaultValue={user?.address_street || ''} />
-                        </div>
-                      </div>
-
-                      <div className="grid-container" style={{ gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Número</label>
-                          <input className="form-input" type="text" name="address_number" defaultValue={user?.address_number || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Complemento</label>
-                          <input className="form-input" type="text" name="address_complement" placeholder="Apto, Bloco, etc." defaultValue={user?.address_complement || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Bairro</label>
-                          <input className="form-input" type="text" name="address_neighborhood" defaultValue={user?.address_neighborhood || ''} />
-                        </div>
-                      </div>
-
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Cidade</label>
-                          <input className="form-input" type="text" name="address_city" defaultValue={user?.address_city || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Estado</label>
-                          <input className="form-input" type="text" name="address_state" placeholder="ex: PR" defaultValue={user?.address_state || ''} />
-                        </div>
-                      </div>
-
-                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Identificação de Saúde</h4>
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Conselho</label>
-                          <select 
-                            className="form-input" 
-                            name="professional_registration_type" 
-                            value={profileRegType}
-                            onChange={(e) => setProfileRegType(e.target.value)}
-                          >
-                            <option value="CRM">CRM (Medicina)</option>
-                            <option value="CRO">CRO (Odontologia)</option>
-                            <option value="CRF">CRF (Farmácia)</option>
-                            <option value="CRV">CRV (Veterinária)</option>
-                            <option value="OUTROS">Outros Conselhos Integrados</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Registro Profissional</label>
-                          <input 
-                            className="form-input" 
-                            type="text" 
-                            name="professional_registration_number" 
-                            value={profileRegNumber}
-                            onChange={(e) => setProfileRegNumber(e.target.value)} 
-                          />
-                        </div>
-                      </div>
-
-                      {profileRegType.toUpperCase() !== 'OUTROS' && profileRegNumber.trim() !== '' && (
-                        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <input 
-                            type="checkbox" 
-                            id="is_homeopath" 
-                            name="is_homeopath" 
-                            defaultChecked={user?.is_homeopath} 
-                            style={{ width: 'auto', margin: 0 }} 
-                          />
-                          <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
-                            Quero participar da lista de Homeopatas indicados
-                          </label>
-                        </div>
-                      )}
-
+                      {renderProfileFormFields(user, false, profileProfession, setProfileProfession)}
                       <button className="btn btn-primary w-full mt-4" type="submit">Salvar Alterações de Cadastro</button>
                     </form>
                   </div>
@@ -4313,68 +4774,7 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <h3 className="mb-4">Detalhes da Conta Docente</h3>
                     <form onSubmit={handleUpdateProfile}>
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Nome Completo</label>
-                          <input className="form-input" type="text" name="name" defaultValue={user?.name || ''} required />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">E-mail</label>
-                          <input className="form-input" type="email" name="email" defaultValue={user?.email || ''} required />
-                        </div>
-                      </div>
-
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">Telefone de Contato</label>
-                          <input className="form-input" type="text" name="phone" placeholder="ex: (41) 99999-9999" defaultValue={user?.phone || ''} />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">CPF ou CNPJ</label>
-                          <input className="form-input" type="text" name="cpf_cnpj" placeholder="ex: 000.000.000-00" defaultValue={user?.cpf_cnpj || ''} />
-                        </div>
-                      </div>
-
-                      <h4 className="mt-4 mb-3 section-title-underlined-thin">Identificação Profissional</h4>
-                      <div className="grid-2col">
-                        <div className="form-group">
-                          <label className="form-label">CRM / Conselho</label>
-                          <input 
-                            className="form-input" 
-                            type="text" 
-                            name="crm" 
-                            value={profileTeacherCrm} 
-                            onChange={(e) => setProfileTeacherCrm(e.target.value)} 
-                            required 
-                            placeholder="ex: CRM-PR 12345" 
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">RQE</label>
-                          <input className="form-input" type="text" name="rqe" defaultValue={user?.rqe || ''} placeholder="ex: RQE 6789" />
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Biografia Curta</label>
-                        <textarea className="form-input" name="bio" defaultValue={user?.bio || ''} placeholder="Descreva sua formação e experiência profissional..." style={{ minHeight: '100px' }} />
-                      </div>
-
-                      {profileTeacherCrm.trim() !== '' && (
-                        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <input 
-                            type="checkbox" 
-                            id="teacher_is_homeopath" 
-                            name="is_homeopath" 
-                            defaultChecked={user?.is_homeopath} 
-                            style={{ width: 'auto', margin: 0 }} 
-                          />
-                          <label htmlFor="teacher_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
-                            Quero participar da lista de Homeopatas indicados
-                          </label>
-                        </div>
-                      )}
-
+                      {renderProfileFormFields(user, false, profileProfession, setProfileProfession)}
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                         <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
                       </div>
@@ -4640,42 +5040,25 @@ NEWFILEENCODING:NONE
 
                 {adminActiveTab === 'students' && (
                   <div className="card">
-                    <div className="quiz-header mb-4">
-                      <h3>Gerenciamento de Usuários</h3>
-                      <button className="btn btn-primary" onClick={startAddUser}>＋ Adicionar Novo Usuário</button>
-                    </div>
-                    <p className="course-card-description mb-4">
-                      Adicione, edite, ative ou suspenda contas de usuários (alunos, professores e administradores) da plataforma.
-                    </p>
-
-                    {editingUser && (
+                    {editingUser ? (
                       <form onSubmit={handleSaveUser} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
-                        <h4 className="mb-4">{editingUser.id ? 'Editar Detalhes do Usuário' : 'Cadastrar Novo Usuário'}</h4>
+                        <h3 className="mb-4 font-serif-title">{editingUser.id ? 'Editar Detalhes do Usuário' : 'Cadastrar Novo Usuário'}</h3>
                         <input type="hidden" name="id" defaultValue={editingUser.id || ''} />
-                        
-                        <div className="grid-2col">
-                          <div className="form-group">
-                            <label className="form-label">Nome Completo</label>
-                            <input className="form-input" name="name" defaultValue={editingUser.name || ''} required placeholder="ex: Dr. Rajan Sankaran" />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">E-mail (Login)</label>
-                            <input className="form-input" type="email" name="email" defaultValue={editingUser.email || ''} required placeholder="ex: rajan@tosb.com" />
-                          </div>
-                        </div>
 
-                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="grid-2col" style={{ marginBottom: '1.5rem' }}>
                           <div className="form-group">
-                            <label className="form-label">Senha de Acesso</label>
-                            <input className="form-input" type="password" name="password" defaultValue={editingUser.password || 'senha123'} required placeholder="Mínimo 6 caracteres" />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Função / Perfil</label>
+                            <label className="form-label">Função / Perfil <span style={{ color: 'red' }}>*</span></label>
                             <select 
                               className="form-input" 
                               name="role" 
                               value={formUserRole} 
-                              onChange={(e) => setFormUserRole(e.target.value)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (window.confirm(`Tem certeza que deseja alterar o Perfil deste usuário para ${val}?`)) {
+                                  setFormUserRole(val);
+                                }
+                              }}
+                              required
                             >
                               <option value="STUDENT">Aluno (Profissional de Saúde)</option>
                               <option value="TEACHER">Professor Colaborador</option>
@@ -4683,172 +5066,77 @@ NEWFILEENCODING:NONE
                             </select>
                           </div>
                           <div className="form-group">
-                            <label className="form-label">Status da Conta</label>
-                            <select className="form-input" name="status" defaultValue={editingUser.status || 'ACTIVE'}>
-                              <option value="ACTIVE">Ativo / Liberado</option>
-                              <option value="SUSPENDED">Suspenso / Inativo</option>
+                            <label className="form-label">Status da conta <span style={{ color: 'red' }}>*</span></label>
+                            <select 
+                              className="form-input" 
+                              name="status" 
+                              value={adminUserStatus}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const label = val === 'ACTIVE' ? 'Ativo' : 'Suspenso';
+                                if (window.confirm(`Tem certeza que deseja alterar o Status da conta deste usuário para ${label}?`)) {
+                                  setAdminUserStatus(val);
+                                }
+                              }}
+                              required
+                            >
+                              <option value="ACTIVE">Ativo</option>
+                              <option value="SUSPENDED">Suspenso</option>
                             </select>
                           </div>
                         </div>
 
-                        {/* Campos Dinâmicos baseados na Função */}
-                        {formUserRole === 'STUDENT' && (
-                          <div className="grid-2col" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
-                            <div className="form-group">
-                              <label className="form-label">Tipo de Registro Acadêmico/Conselho</label>
-                              <select 
-                                className="form-input" 
-                                name="registrationType" 
-                                value={adminRegType}
-                                onChange={(e) => setAdminRegType(e.target.value)}
-                              >
-                                <option value="CRM">CRM (Medicina)</option>
-                                <option value="CRO">CRO (Odontologia)</option>
-                                <option value="CRF">CRF (Farmácia)</option>
-                                <option value="CRMV">CRMV (Veterinária)</option>
-                                <option value="Outros">Outros Conselhos</option>
-                              </select>
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Número do Conselho</label>
-                              <input 
-                                className="form-input" 
-                                name="registrationNumber" 
-                                value={adminRegNumber}
-                                onChange={(e) => setAdminRegNumber(e.target.value)}
-                                required 
-                                placeholder="ex: 12345-PR" 
-                              />
-                            </div>
-                          </div>
-                        )}
+                        {renderProfileFormFields(editingUser, true, adminUserProfession, setAdminUserProfession, formUserRole)}
 
-                        {formUserRole === 'TEACHER' && (
-                          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
-                            <div className="grid-2col">
-                              <div className="form-group">
-                                <label className="form-label">CRM / Conselho</label>
-                                <input 
-                                  className="form-input" 
-                                  name="crm" 
-                                  value={adminTeacherCrm}
-                                  onChange={(e) => setAdminTeacherCrm(e.target.value)}
-                                  required 
-                                  placeholder="ex: CRM-PR 12345" 
-                                />
-                              </div>
-                              <div className="form-group">
-                                <label className="form-label">RQE (Registro de Especialidade)</label>
-                                <input className="form-input" name="rqe" defaultValue={editingUser.rqe || ''} placeholder="ex: RQE 6789 (Homeopatia)" />
-                              </div>
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Biografia Curta</label>
-                              <textarea className="form-input" name="bio" defaultValue={editingUser.bio || ''} placeholder="Mini-currículo ou especialidades do docente..." />
-                            </div>
-                          </div>
-                        )}
-
-                        {((formUserRole === 'STUDENT' && adminRegType && adminRegType.toUpperCase() !== 'OUTROS' && adminRegNumber && adminRegNumber.trim() !== '') || 
-                          (formUserRole === 'TEACHER' && adminTeacherCrm && adminTeacherCrm.trim() !== '')) && (
-                          <div className="form-group mt-3 mb-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <input 
-                              type="checkbox" 
-                              id="admin_is_homeopath" 
-                              name="is_homeopath" 
-                              defaultChecked={editingUser.is_homeopath || false} 
-                              style={{ width: 'auto', margin: 0 }} 
-                            />
-                            <label htmlFor="admin_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
-                              Quero participar da lista de Homeopatas indicados
-                            </label>
-                          </div>
-                        )}
-
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingUser(null)}>Cancelar</button>
                           <button className="btn btn-primary flex-1" type="submit">Gravar Usuário</button>
                         </div>
                       </form>
-                    )}
+                    ) : (
+                      <>
+                        <div className="quiz-header mb-4">
+                          <h3>Gerenciamento de Usuários</h3>
+                          <button className="btn btn-primary" onClick={startAddUser}>＋ Adicionar Novo Usuário</button>
+                        </div>
+                        <p className="course-card-description mb-4">
+                          Adicione, edite, ative ou suspenda contas de usuários (alunos, professores e administradores) da plataforma.
+                        </p>
 
-                    <div className="table-responsive">
-                      <table className="lms-table">
-                        <thead>
-                          <tr>
-                            <th>Nome</th>
-                            <th>Função</th>
-                            <th>Cadastro / E-mail</th>
-                            <th>Status</th>
-                            <th>Histórico de Testes</th>
-                            <th>Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {mockDb.users.map(s => {
-                            const hasAttempts = mockDb.quiz_attempts[`${s.id}_quiz-p1`] || null;
-                            return (
-                              <tr key={s.id}>
-                                <td><strong>{s.name}</strong></td>
-                                <td>
-                                  <span className="course-type-badge">{s.role === 'STUDENT' ? 'Aluno' : s.role === 'TEACHER' ? 'Professor' : 'Administrador'}</span>
-                                </td>
-                                <td>
-                                  <div>{s.email}</div>
-                                  {s.role === 'STUDENT' && s.registrationType && (
-                                    <small className="text-muted">{s.registrationType}: {s.registrationNumber}</small>
-                                  )}
-                                  {s.role === 'TEACHER' && s.crm && (
-                                    <small className="text-muted">{s.crm} / {s.rqe || 'Sem RQE'}</small>
-                                  )}
-                                </td>
-                                <td>
-                                  <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
-                                    {s.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'}
-                                  </span>
-                                </td>
-                                <td>
-                                  {s.role === 'STUDENT' ? (
-                                    hasAttempts ? (
-                                      <div>
-                                        <span style={{ fontSize: '0.85rem' }}>Quiz Pós: <strong>{hasAttempts.attempts_count}</strong> tentativa(s)</span>
-                                        <button 
-                                          className="btn btn-secondary mt-1 w-full" 
-                                          style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem' }} 
-                                          onClick={() => resetQuizAttempts(s.id, 'quiz-p1')}
-                                        >
-                                          Reiniciar
-                                        </button>
-                                      </div>
-                                    ) : (
-                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Nenhuma tentativa</span>
-                                    )
-                                  ) : (
-                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>N/A</span>
-                                  )}
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => startEditUser(s)}>Editar</button>
-                                    {s.id !== user.id ? (
-                                      <button 
-                                        className={`btn ${s.status === 'ACTIVE' ? 'btn-danger' : 'btn-primary'}`} 
-                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                        onClick={() => toggleUserStatus(s.id)}
-                                      >
-                                        {s.status === 'ACTIVE' ? 'Suspender' : 'Ativar'}
-                                      </button>
-                                    ) : (
-                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Sua Conta</span>
-                                    )}
-                                  </div>
-                                </td>
+                        <div className="table-responsive">
+                          <table className="lms-table">
+                            <thead>
+                              <tr>
+                                <th style={{ width: '40%' }}>Nome</th>
+                                <th style={{ width: '20%' }}>Função</th>
+                                <th style={{ width: '25%' }}>E-mail</th>
+                                <th style={{ width: '10%' }}>Status</th>
+                                <th style={{ width: '5%' }}>Ações</th>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                            </thead>
+                            <tbody>
+                              {mockDb.users.map(s => (
+                                <tr key={s.id}>
+                                  <td><strong>{s.name}</strong></td>
+                                  <td>
+                                    <span className="course-type-badge">{s.role === 'STUDENT' ? 'Aluno' : s.role === 'TEACHER' ? 'Professor' : 'Administrador'}</span>
+                                  </td>
+                                  <td>{s.email}</td>
+                                  <td>
+                                    <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
+                                      {s.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
