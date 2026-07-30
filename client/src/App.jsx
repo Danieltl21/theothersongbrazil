@@ -9,10 +9,66 @@ Ao se cadastrar na plataforma EAD The Other Song Brasil (TOSB), você declara e 
 4. A plataforma proíbe o compartilhamento de senhas. A identificação de acessos simultâneos em localizações geograficamente distantes resultará no bloqueio preventivo automático do usuário.`;
 
 const BOOKS_DATA = [
-  { id: 'book-esquema', title: 'Esquema de Reinos e Subreinos 2.0', author: 'Dr. Rajan Sankaran', price: 220.00, desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.' },
-  { id: 'book-superclasses', title: 'Superclasses em Homeopatia', author: 'Dr. Rajan Sankaran', price: 180.00, desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.' },
-  { id: 'book-oito-caixas', title: 'O Método das Oito Caixas', author: 'Dr. Rajan Sankaran', price: 240.00, desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.' },
-  { id: 'book-followup', title: 'A Arte do Follow-up na Clínica', author: 'Dr. Gaurang Gaikwad', price: 190.00, desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.' }
+  { 
+    id: 'book-esquema', 
+    title: 'Esquema de Reinos e Subreinos 2.0', 
+    author: 'Dr. Rajan Sankaran', 
+    price: 220.00, 
+    desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.',
+    page_count: 340,
+    content_table: [
+      'Capítulo 1: Introdução à Classificação Vital por Reinos',
+      'Capítulo 2: O Reino Vegetal e a Expressão de Sensações e Opostos',
+      'Capítulo 3: O Reino Mineral, Linhas da Tabela Periódica e Estrutura',
+      'Capítulo 4: O Reino Animal, Miasmas e Reações de Sobrevivência',
+      'Capítulo 5: Tabelas de Diferenciação Clínica Rápida e Casos Ilustrados'
+    ]
+  },
+  { 
+    id: 'book-superclasses', 
+    title: 'Superclasses em Homeopatia', 
+    author: 'Dr. Rajan Sankaran', 
+    price: 180.00, 
+    desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.',
+    page_count: 280,
+    content_table: [
+      'Capítulo 1: O Conceito de Superclasses na Homeopatia Contemporânea',
+      'Capítulo 2: Superclasse 1 (Matéria e Energia)',
+      'Capítulo 3: Superclasse 2 (Estrutura e Organização)',
+      'Capítulo 4: Superclasse 3 (Movimento e Interação)',
+      'Capítulo 5: Guia de Prescrição com base nas Seis Divisões'
+    ]
+  },
+  { 
+    id: 'book-oito-caixas', 
+    title: 'O Método das Oito Caixas', 
+    author: 'Dr. Rajan Sankaran', 
+    price: 240.00, 
+    desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.',
+    page_count: 410,
+    content_table: [
+      'Capítulo 1: Por que integrar Miasmas, Sensação e Sintomas Locais?',
+      'Capítulo 2: Mapeamento da Caixa 1 à Caixa 4: Miasma e Níveis',
+      'Capítulo 3: Mapeamento da Caixa 5 à Caixa 8: Reino e Genética Vital',
+      'Capítulo 4: Como evitar erros de prescrição unilateral',
+      'Capítulo 5: 30 Casos Clínicos Resolvidos com o Método das 8 Caixas'
+    ]
+  },
+  { 
+    id: 'book-followup', 
+    title: 'A Arte do Follow-up na Clínica', 
+    author: 'Dr. Gaurang Gaikwad', 
+    price: 190.00, 
+    desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.',
+    page_count: 225,
+    content_table: [
+      'Capítulo 1: A Primeira Segunda Consulta: O que Observar',
+      'Capítulo 2: Distinguindo Agravação Homeopática de Evolução Natural',
+      'Capítulo 3: Quando e Como Alterar a Potência (LM, CH, K)',
+      'Capítulo 4: Critérios Precisos para Trocar o Remédio Homeopático',
+      'Capítulo 5: Protocolos para Pacientes em Uso de Medicamentos Alopáticos'
+    ]
+  }
 ];
 
 const HOMEOPATHS_DATA = [];
@@ -112,6 +168,8 @@ const PAGE_URLS = {
   login: 'entrar',
   register: 'cadastro',
   unlock: 'desbloquear',
+  'forgot-password': 'recuperar-senha',
+  'reset-password': 'redefinir-senha',
   'student-dash': 'painel-aluno',
   'teacher-dash': 'painel-professor',
   'admin-dash': 'painel-administrador',
@@ -147,14 +205,14 @@ const getPageFromPathname = () => {
     const hash = window.location.hash || '#inicio';
     if (hash.startsWith('#curso/')) return 'course-detail';
     if (hash.startsWith('#aula/')) return 'course-view';
-    const pageHash = hash.replace('#', '');
+    const pageHash = hash.replace('#', '').split('?')[0];
     
     // Reverse lookup for hash
     const entries = Object.entries(PAGE_URLS);
     for (const [key, value] of entries) {
       if (value === pageHash) return key;
     }
-    if (pageHash === 'inicio') return 'home';
+    if (pageHash === 'inicio' || !pageHash) return 'home';
     return 'home';
   }
   
@@ -204,6 +262,32 @@ export default function App() {
         parsed.class_attendance = {};
         changed = true;
       }
+      if (!parsed.sent_emails) {
+        parsed.sent_emails = [
+          {
+            id: 'email-init-1',
+            recipient_email: 'ana@lms.com',
+            recipient_name: 'Dra. Ana Paula',
+            subject: '🎉 Confirmação de Compra: Introdução à Homeopatia e Sensação Vital - TOSB',
+            body: 'Olá Dra. Ana Paula,\n\nSua inscrição no curso gratuito "Introdução à Homeopatia e Sensação Vital" foi confirmada com sucesso!\n\nJá pode acessar suas aulas no portal EAD.',
+            type: 'COURSE_PURCHASE',
+            sent_at: new Date().toISOString()
+          }
+        ];
+        changed = true;
+      }
+      if (!parsed.temporary_unlocks) {
+        parsed.temporary_unlocks = [];
+        changed = true;
+      }
+      if (!parsed.teacher_courses) {
+        parsed.teacher_courses = [
+          { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
+          { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
+          { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
+        ];
+        changed = true;
+      }
       if (changed) {
         localStorage.setItem('mock_db', JSON.stringify(parsed));
       }
@@ -213,8 +297,9 @@ export default function App() {
     const initialDb = {
       users: [
         { id: 'admin-id', name: 'Admin Principal', email: 'admin@lms.com', role: 'ADMIN', status: 'ACTIVE', password: 'senha123', is_homeopath: false },
-        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.', is_homeopath: false },
-        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765', is_homeopath: false }
+        { id: 'teacher-id', name: 'Dr. Carlos Eduardo (TOSB)', email: 'carlos@tosb.com', role: 'TEACHER', status: 'ACTIVE', password: 'senha123', crm: 'CRM-PR 12345', rqe: 'RQE 6789', bio: 'Médico Homeopata especialista no Método Sensação.', is_homeopath: false, bank_name: '001 - Banco do Brasil', bank_agency: '1234-5', bank_account: '98765-4', pix_key: 'carlos@tosb.com' },
+        { id: 'student-id', name: 'Dra. Ana Paula (Aluna)', email: 'ana@lms.com', role: 'STUDENT', status: 'ACTIVE', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-SP 98765', is_homeopath: false, receive_promotions: true },
+        { id: 'student-delinquent-id', name: 'Dr. Lucas Mendes (Inadimplente)', email: 'lucas.inadimplente@lms.com', role: 'STUDENT', status: 'SUSPENDED', password: 'senha123', registrationType: 'CRM', registrationNumber: 'CRM-RJ 44556', is_homeopath: false, receive_promotions: true }
       ],
       courses: [
         { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
@@ -246,10 +331,13 @@ export default function App() {
         ]
       },
       enrollments: [
-        { id: 'enroll-1', student_id: 'student-id', course_id: 'course-free', enrolled_at: new Date().toISOString(), expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(), status: 'ACTIVE' }
+        { id: 'enroll-1', student_id: 'student-id', course_id: 'course-free', enrolled_at: new Date().toISOString(), expires_at: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(), status: 'ACTIVE' },
+        { id: 'enroll-due-soon', student_id: 'student-id', course_id: 'course-sub', enrolled_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'ACTIVE' },
+        { id: 'enroll-delinquent', student_id: 'student-delinquent-id', course_id: 'course-post', enrolled_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), expires_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'SUSPENDED' }
       ],
       payments: [
-        { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString() }
+        { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString() },
+        { id: 'pay-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }
       ],
       lesson_progress: {},
       quiz_attempts: {},
@@ -264,7 +352,24 @@ export default function App() {
       classes: [
         { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
       ],
-      class_attendance: {}
+      class_attendance: {},
+      sent_emails: [
+        {
+          id: 'email-init-1',
+          recipient_email: 'ana@lms.com',
+          recipient_name: 'Dra. Ana Paula',
+          subject: '🎉 Confirmação de Compra: Introdução à Homeopatia e Sensação Vital - TOSB',
+          body: 'Olá Dra. Ana Paula,\n\nSua inscrição no curso gratuito "Introdução à Homeopatia e Sensação Vital" foi confirmada com sucesso!\n\nJá pode acessar suas aulas no portal EAD.',
+          type: 'COURSE_PURCHASE',
+          sent_at: new Date().toISOString()
+        }
+      ],
+      temporary_unlocks: [],
+      teacher_courses: [
+        { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
+        { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
+        { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
+      ]
     };
     localStorage.setItem('mock_db', JSON.stringify(initialDb));
     return initialDb;
@@ -320,6 +425,412 @@ export default function App() {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [isOpenPreviewMode, setIsOpenPreviewMode] = useState(false);
   const [openPreviewLocked, setOpenPreviewLocked] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [expandedBookId, setExpandedBookId] = useState(null);
+  const [resetTokenData, setResetTokenData] = useState({ email: '', token: '' });
+  const [viewingClassDetails, setViewingClassDetails] = useState(null);
+
+  // MANIPULADORES DE GERENCIAMENTO DE TURMAS (ADM)
+  const handleDeleteClass = (classId) => {
+    clearAlerts();
+    if (window.confirm('Tem certeza que deseja excluir esta turma?')) {
+      setMockDb(prev => ({
+        ...prev,
+        classes: (prev.classes || []).filter(c => c.id !== classId)
+      }));
+      setSuccess('Turma excluída com sucesso!');
+      if (viewingClassDetails && viewingClassDetails.id === classId) {
+        setViewingClassDetails(null);
+      }
+    }
+  };
+
+  const handleAddStudentToClass = (classId, studentId) => {
+    clearAlerts();
+    if (!studentId) return;
+    setMockDb(prev => {
+      const targetClass = (prev.classes || []).find(c => c.id === classId);
+      if (!targetClass) return prev;
+      if ((targetClass.student_ids || []).includes(studentId)) return prev;
+
+      if (targetClass.max_students > 0 && (targetClass.student_ids || []).length >= targetClass.max_students) {
+        setError(`A turma já atingiu o limite máximo de ${targetClass.max_students} alunos.`);
+        return prev;
+      }
+
+      const updatedClasses = (prev.classes || []).map(c => {
+        if (c.id === classId) {
+          const newStudentIds = [...(c.student_ids || []), studentId];
+          const updatedObj = { ...c, student_ids: newStudentIds };
+          if (viewingClassDetails && viewingClassDetails.id === classId) {
+            setViewingClassDetails(updatedObj);
+          }
+          return updatedObj;
+        }
+        return c;
+      });
+
+      return { ...prev, classes: updatedClasses };
+    });
+    setSuccess('Aluno adicionado à turma com sucesso!');
+  };
+
+  const handleRemoveStudentFromClass = (classId, studentId) => {
+    clearAlerts();
+    setMockDb(prev => ({
+      ...prev,
+      classes: (prev.classes || []).map(c => {
+        if (c.id === classId) {
+          const newStudentIds = (c.student_ids || []).filter(id => id !== studentId);
+          const updatedObj = { ...c, student_ids: newStudentIds };
+          if (viewingClassDetails && viewingClassDetails.id === classId) {
+            setViewingClassDetails(updatedObj);
+          }
+          return updatedObj;
+        }
+        return c;
+      })
+    }));
+    setSuccess('Aluno removido da turma com sucesso!');
+  };
+
+  const handleAddTeacherToClass = (classId, teacherId) => {
+    clearAlerts();
+    if (!teacherId) return;
+    setMockDb(prev => {
+      const targetClass = (prev.classes || []).find(c => c.id === classId);
+      if (!targetClass) return prev;
+      if ((targetClass.teacher_ids || []).includes(teacherId)) return prev;
+
+      if (targetClass.max_teachers > 0 && (targetClass.teacher_ids || []).length >= targetClass.max_teachers) {
+        setError(`A turma já atingiu o limite máximo de ${targetClass.max_teachers} professores.`);
+        return prev;
+      }
+
+      const updatedClasses = (prev.classes || []).map(c => {
+        if (c.id === classId) {
+          const newTeacherIds = [...(c.teacher_ids || []), teacherId];
+          const updatedObj = { ...c, teacher_ids: newTeacherIds };
+          if (viewingClassDetails && viewingClassDetails.id === classId) {
+            setViewingClassDetails(updatedObj);
+          }
+          return updatedObj;
+        }
+        return c;
+      });
+
+      return { ...prev, classes: updatedClasses };
+    });
+    setSuccess('Professor alocado na turma com sucesso!');
+  };
+
+  const handleRemoveTeacherFromClass = (classId, teacherId) => {
+    clearAlerts();
+    setMockDb(prev => ({
+      ...prev,
+      classes: (prev.classes || []).map(c => {
+        if (c.id === classId) {
+          const newTeacherIds = (c.teacher_ids || []).filter(id => id !== teacherId);
+          const updatedObj = { ...c, teacher_ids: newTeacherIds };
+          if (viewingClassDetails && viewingClassDetails.id === classId) {
+            setViewingClassDetails(updatedObj);
+          }
+          return updatedObj;
+        }
+        return c;
+      })
+    }));
+    setSuccess('Professor desvinculado da turma com sucesso!');
+  };
+
+  // RECUPERAÇÃO DE SENHA POR LINK ENVIADO NO E-MAIL
+  const handleRequestPasswordReset = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const email = e.target.email.value.trim();
+    const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!userFound) {
+      setError('Nenhuma conta localizada com este e-mail.');
+      return;
+    }
+
+    const resetToken = 'RST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const isDemo = checkIsDemo();
+    const resetLink = isDemo
+      ? `${window.location.origin}${window.location.pathname}#redefinir-senha?token=${resetToken}&email=${encodeURIComponent(email)}`
+      : `${window.location.origin}/redefinir-senha.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+    const emailObj = {
+      id: 'email_rst_' + Date.now(),
+      recipient_email: userFound.email,
+      recipient_name: userFound.name,
+      subject: '🔑 Recuperação de Senha - The Other Song Brasil',
+      body: `Olá ${userFound.name},\n\nRecebemos uma solicitação para redefinir a senha da sua conta no portal EAD.\n\nPara cadastrar uma nova senha, utilize o código ou o link direto abaixo:\n\n- Código do Token: ${resetToken}\n- Link de Acesso Direto: ${resetLink}\n\nSe você não solicitou esta alteração, desconsidere este aviso.\n\nAtenciosamente,\nSuporte EAD - The Other Song Brasil`,
+      type: 'PASSWORD_RESET',
+      reset_token: resetToken,
+      sent_at: new Date().toISOString()
+    };
+
+    setMockDb(prev => ({
+      ...prev,
+      sent_emails: [emailObj, ...(prev.sent_emails || [])]
+    }));
+
+    setResetTokenData({ email: userFound.email, token: resetToken });
+    setSuccess('Link e instruções de redefinição de senha enviados para o seu e-mail!');
+    navigateTo('reset-password');
+  };
+
+  const handleConfirmPasswordReset = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const email = e.target.email.value.trim();
+    const tokenInput = e.target.token.value.trim();
+    const newPassword = e.target.newPassword.value;
+
+    const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!userFound) {
+      setError('E-mail não encontrado.');
+      return;
+    }
+
+    setMockDb(prev => ({
+      ...prev,
+      users: prev.users.map(u => u.id === userFound.id ? { ...u, password: newPassword } : u)
+    }));
+
+    setSuccess('Senha redefinida com sucesso! Efetue o login com sua nova senha.');
+    navigateTo('login');
+  };
+
+  // DISPARO DE CAMPANHAS PROMOCIONAIS POR E-MAIL (ADM)
+  const handleSendPromotionalCampaign = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const title = e.target.title.value;
+    const subject = e.target.subject.value;
+    const message = e.target.message.value;
+    const targetCourseId = e.target.target_course_id.value; // '' para todos, ou ID do curso
+
+    let eligibleStudents = mockDb.users.filter(u => u.role === 'STUDENT' && u.receive_promotions !== false);
+
+    if (targetCourseId) {
+      const enrolledStudentIds = (mockDb.enrollments || []).filter(e => e.course_id === targetCourseId).map(e => e.student_id);
+      eligibleStudents = eligibleStudents.filter(s => enrolledStudentIds.includes(s.id));
+    }
+
+    if (eligibleStudents.length === 0) {
+      setError('Nenhum aluno localizado que concordou em receber promoções para este filtro.');
+      return;
+    }
+
+    const targetCourseObj = mockDb.courses.find(c => c.id === targetCourseId);
+    const filterDesc = targetCourseObj ? `alunos do curso "${targetCourseObj.title}"` : 'todos os alunos cadastrados';
+
+    const newEmails = eligibleStudents.map(student => ({
+      id: 'email_promo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      recipient_email: student.email,
+      recipient_name: student.name,
+      subject: subject,
+      body: `Olá ${student.name},\n\n${message}\n\nAtenciosamente,\nEquipe EAD The Other Song Brasil\n\n(Esta mensagem foi enviada para ${filterDesc} que concordaram em receber ofertas.)`,
+      type: 'PROMOTIONAL_OFFER',
+      sent_at: new Date().toISOString()
+    }));
+
+    setMockDb(prev => ({
+      ...prev,
+      sent_emails: [...newEmails, ...(prev.sent_emails || [])]
+    }));
+
+    setSuccess(`Campanha "${title}" enviada com sucesso para ${eligibleStudents.length} aluno(s) que concordaram em receber promoções!`);
+    e.target.reset();
+  };
+
+  // ATUALIZAÇÃO DOS DADOS BANCÁRIOS DO PROFESSOR
+  const handleUpdateBankDetails = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const bank_name = e.target.bank_name.value;
+    const bank_agency = e.target.bank_agency.value;
+    const bank_account = e.target.bank_account.value;
+    const pix_key = e.target.pix_key.value;
+
+    setMockDb(prev => ({
+      ...prev,
+      users: prev.users.map(u => u.id === user.id ? { ...u, bank_name, bank_agency, bank_account, pix_key } : u)
+    }));
+
+    setUser(prev => ({ ...prev, bank_name, bank_agency, bank_account, pix_key }));
+    setSuccess('Informações bancárias para repasse atualizadas com sucesso!');
+  };
+
+  // HELPER DE E-MAIL: ENVIAR CONFIRMAÇÃO DE COMPRA DE CURSO
+  const sendPurchaseConfirmationEmail = (recipientEmail, recipientName, courseTitle, amount, transactionCode) => {
+    const emailObj = {
+      id: 'email_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      recipient_email: recipientEmail,
+      recipient_name: recipientName,
+      subject: `🎉 Confirmação de Compra: ${courseTitle} - TOSB`,
+      body: `Olá ${recipientName},\n\nParabéns! Sua compra do curso "${courseTitle}" foi confirmada com sucesso.\n\nDetalhes do Pedido:\n- Código da Transação: ${transactionCode}\n- Valor: R$ ${parseFloat(amount).toFixed(2)}\n- Data da Compra: ${new Date().toLocaleDateString('pt-BR')}\n- Acesso Válido por: 180 dias\n\nVocê já pode acessar o portal EAD e assistir aos conteúdos didáticos do Método Sensação.\n\nAtenciosamente,\nEquipe EAD The Other Song Brasil`,
+      type: 'COURSE_PURCHASE',
+      sent_at: new Date().toISOString()
+    };
+    setMockDb(prev => ({
+      ...prev,
+      sent_emails: [emailObj, ...(prev.sent_emails || [])]
+    }));
+  };
+
+  // HELPER DE E-MAIL: ENVIAR LIBERAÇÃO TEMPORÁRIA
+  const sendTempUnlockEmail = (studentUser, courseTitle, daysValid, validUntilDate, reason) => {
+    const emailObj = {
+      id: 'email_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      recipient_email: studentUser.email,
+      recipient_name: studentUser.name,
+      subject: `🔓 Liberação Temporária de Acesso Concedida: ${courseTitle} - TOSB`,
+      body: `Prezado(a) ${studentUser.name},\n\nInformamos que o seu acesso ao curso "${courseTitle}" recebeu uma LIBERAÇÃO TEMPORÁRIA de ${daysValid} dias concedida pelo administrador da plataforma.\n\nDetalhes da Concessão:\n- Período de Acesso Liberado até: ${new Date(validUntilDate).toLocaleDateString('pt-BR')}\n- Motivo/Observação: ${reason || 'Acordo administrativo'}\n\nAproveite este período para atualizar seus estudos na plataforma EAD.\n\nAtenciosamente,\nAdministração The Other Song Brasil`,
+      type: 'TEMP_UNLOCK',
+      sent_at: new Date().toISOString()
+    };
+    setMockDb(prev => ({
+      ...prev,
+      sent_emails: [emailObj, ...(prev.sent_emails || [])]
+    }));
+  };
+
+  // HELPER DE E-MAIL: LEMBRETE DE VENCIMENTO 2 DIAS ANTES
+  const sendExpirationReminderEmail = (studentUser, courseTitle, expiresAtDate) => {
+    const emailObj = {
+      id: 'email_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      recipient_email: studentUser.email,
+      recipient_name: studentUser.name,
+      subject: `⚠️ Aviso de Vencimento: Seu curso "${courseTitle}" vencerá em 2 dias!`,
+      body: `Olá ${studentUser.name},\n\nLembrete importante: O seu acesso ao curso "${courseTitle}" expira em 2 dias (no dia ${new Date(expiresAtDate).toLocaleDateString('pt-BR')}).\n\nPara renovar sua matrícula ou assinar o plano continuado sem interrupção no seu histórico acadêmico, acesse o seu painel financeiro na plataforma.\n\nAtenciosamente,\nSecretaria Acadêmica - The Other Song Brasil`,
+      type: 'DUE_SOON_REMINDER',
+      sent_at: new Date().toISOString()
+    };
+    setMockDb(prev => ({
+      ...prev,
+      sent_emails: [emailObj, ...(prev.sent_emails || [])]
+    }));
+  };
+
+  // ROTINA DE VERIFICAÇÃO DE VENCIMENTOS PRÓXIMOS (2 DIAS ANTES)
+  const checkCourseExpirations = () => {
+    let sentCount = 0;
+    const now = new Date();
+    (mockDb.enrollments || []).forEach(e => {
+      if (e.status === 'ACTIVE') {
+        const expiresAt = new Date(e.expires_at);
+        const diffMs = expiresAt - now;
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        if (diffDays > 0 && diffDays <= 3) {
+          const student = mockDb.users.find(u => u.id === e.student_id);
+          const course = mockDb.courses.find(c => c.id === e.course_id);
+          if (student && course) {
+            sendExpirationReminderEmail(student, course.title, e.expires_at);
+            sentCount++;
+          }
+        }
+      }
+    });
+    if (sentCount > 0) {
+      setSuccess(`Varredura concluída! ${sentCount} e-mail(s) de aviso de vencimento (2 dias antes) enviado(s).`);
+    } else {
+      setSuccess('Varredura realizada! Nenhum curso ativo no limite de 2 dias sem aviso prévio.');
+    }
+  };
+
+  // ADMIN: CONCEDER LIBERAÇÃO TEMPORÁRIA PARA ALUNO INADIMPLENTE
+  const handleGrantTemporaryUnlock = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const student_id = e.target.student_id.value;
+    const course_id = e.target.course_id.value;
+    const days_valid = parseInt(e.target.days_valid.value) || 7;
+    const reason = e.target.reason.value || 'Liberado temporariamente pelo ADM';
+
+    const studentUser = mockDb.users.find(u => u.id === student_id);
+    const courseObj = mockDb.courses.find(c => c.id === course_id);
+
+    if (!studentUser || !courseObj) {
+      setError('Selecione um aluno e um curso válidos.');
+      return;
+    }
+
+    const validUntil = new Date(Date.now() + days_valid * 24 * 60 * 60 * 1000).toISOString();
+
+    const newUnlock = {
+      id: 'unlock_' + Date.now(),
+      student_id,
+      student_name: studentUser.name,
+      student_email: studentUser.email,
+      course_id,
+      course_title: courseObj.title,
+      days_valid,
+      valid_until: validUntil,
+      reason,
+      granted_at: new Date().toISOString()
+    };
+
+    setMockDb(prev => {
+      let enrollmentFound = false;
+      const updatedEnrollments = (prev.enrollments || []).map(en => {
+        if (en.student_id === student_id && en.course_id === course_id) {
+          enrollmentFound = true;
+          return {
+            ...en,
+            status: 'ACTIVE',
+            expires_at: validUntil,
+            is_temporary: true
+          };
+        }
+        return en;
+      });
+
+      if (!enrollmentFound) {
+        updatedEnrollments.push({
+          id: 'enroll_temp_' + Date.now(),
+          student_id,
+          course_id,
+          enrolled_at: new Date().toISOString(),
+          expires_at: validUntil,
+          status: 'ACTIVE',
+          is_temporary: true
+        });
+      }
+
+      const updatedUsers = prev.users.map(u => u.id === student_id ? { ...u, status: 'ACTIVE' } : u);
+
+      return {
+        ...prev,
+        users: updatedUsers,
+        enrollments: updatedEnrollments,
+        temporary_unlocks: [newUnlock, ...(prev.temporary_unlocks || [])]
+      };
+    });
+
+    sendTempUnlockEmail(studentUser, courseObj.title, days_valid, validUntil, reason);
+    setSuccess(`Liberação temporária concedida com sucesso para ${studentUser.name}! E-mail de confirmação enviado.`);
+    e.target.reset();
+  };
+
+  const handleRevokeTemporaryUnlock = (unlockId, studentId, courseId) => {
+    clearAlerts();
+    setMockDb(prev => ({
+      ...prev,
+      temporary_unlocks: (prev.temporary_unlocks || []).filter(u => u.id !== unlockId),
+      enrollments: (prev.enrollments || []).map(en => {
+        if (en.student_id === studentId && en.course_id === courseId) {
+          return { ...en, status: 'SUSPENDED' };
+        }
+        return en;
+      })
+    }));
+    setSuccess('Liberação temporária revogada e acesso do aluno suspenso por inadimplência.');
+  };
 
   // Assistir 1ª Aula Liberada (Aula Aberta / Prévia de 20%)
   const handleWatchOpenLesson = (course) => {
@@ -513,6 +1024,8 @@ export default function App() {
       if (page === 'login') return '#entrar';
       if (page === 'register') return '#cadastro';
       if (page === 'unlock') return '#desbloquear';
+      if (page === 'forgot-password') return '#recuperar-senha';
+      if (page === 'reset-password') return '#redefinir-senha';
       if (page === 'student-dash') return '#painel-aluno';
       if (page === 'teacher-dash') return '#painel-professor';
       if (page === 'admin-dash') return '#painel-administrador';
@@ -633,7 +1146,7 @@ export default function App() {
           courseIdFromQuery = courseId;
           page = 'course-view';
         } else {
-          const pageHash = hash.replace('#', '');
+          const pageHash = hash.replace('#', '').split('?')[0];
           const entries = Object.entries(PAGE_URLS);
           let found = false;
           for (const [key, value] of entries) {
@@ -643,7 +1156,7 @@ export default function App() {
               break;
             }
           }
-          if (!found && pageHash === 'inicio') {
+          if (!found && (pageHash === 'inicio' || !pageHash)) {
             page = 'home';
           }
         }
@@ -893,7 +1406,11 @@ export default function App() {
       crm: e.target.crm?.value || '',
       rqe: e.target.rqe?.value || '',
       bio: e.target.bio?.value || '',
-      is_homeopath: e.target.is_homeopath?.checked || false
+      is_homeopath: e.target.is_homeopath?.checked || false,
+      bank_name: e.target.bank_name?.value || user.bank_name || '',
+      bank_agency: e.target.bank_agency?.value || user.bank_agency || '',
+      bank_account: e.target.bank_account?.value || user.bank_account || '',
+      pix_key: e.target.pix_key?.value || user.pix_key || ''
     };
 
     if (isOfflineMode) {
@@ -1040,6 +1557,7 @@ export default function App() {
     const registrationType = e.target.registrationType.value;
     const registrationNumber = e.target.registrationNumber.value;
     const acceptTerms = e.target.acceptTerms.checked;
+    const receivePromotions = e.target.receivePromotions ? e.target.receivePromotions.checked : true;
 
     if (!acceptTerms) {
       setError('Você precisa aceitar os Termos de Uso e Sigilo de dados.');
@@ -1057,7 +1575,8 @@ export default function App() {
       const newUserId = 'student_' + Date.now();
       const newStudent = {
         id: newUserId, name, email, password, role: 'STUDENT', status: 'ACTIVE',
-        registrationType, registrationNumber, terms_accepted: true, terms_accepted_at: new Date().toISOString()
+        registrationType, registrationNumber, terms_accepted: true, terms_accepted_at: new Date().toISOString(),
+        receive_promotions: receivePromotions
       };
 
       // Matricular no curso livre padrão por 6 meses
@@ -1192,15 +1711,18 @@ export default function App() {
     const author = e.target.author.value;
     const price = parseFloat(e.target.price.value);
     const desc = e.target.desc.value;
+    const page_count = parseInt(e.target.page_count?.value) || 0;
+    const content_table_raw = e.target.content_table?.value || '';
+    const content_table = content_table_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
     setMockDb(prev => {
       let updatedBooks;
       const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
       if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc } : b);
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table } : b);
         setSuccess('Livro atualizado com sucesso!');
       } else {
-        const newBook = { id, title, author, price, desc };
+        const newBook = { id, title, author, price, desc, page_count, content_table };
         updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
         setSuccess('Livro adicionado com sucesso!');
       }
@@ -1721,7 +2243,17 @@ export default function App() {
         };
       });
 
-      setSuccess('Simulação concluída! Pagamento recebido e matrícula ativada por 6 meses (ou 30 dias se assinatura).');
+      setSuccess('Simulação concluída! Pagamento recebido, e-mail de confirmação enviado e matrícula ativada.');
+      if (matchPayments[0]) {
+        const targetCourse = mockDb.courses.find(c => c.id === matchPayments[0].course_id);
+        sendPurchaseConfirmationEmail(
+          user.email,
+          user.name,
+          targetCourse ? targetCourse.title : 'Curso TOSB',
+          matchPayments[0].amount,
+          matchPayments[0].transaction_code
+        );
+      }
       loadInvoices();
     } else {
       try {
@@ -2121,17 +2653,17 @@ NEWFILEENCODING:NONE
     
     let registrationType = '';
     let registrationNumber = '';
-    let crm = '';
-    let rqe = '';
-    let bio = '';
+    const crm = e.target.crm ? e.target.crm.value : '';
+    const rqe = e.target.rqe ? e.target.rqe.value : '';
+    const bio = e.target.bio ? e.target.bio.value : '';
+    const bank_name = e.target.bank_name ? e.target.bank_name.value : '';
+    const bank_agency = e.target.bank_agency ? e.target.bank_agency.value : '';
+    const bank_account = e.target.bank_account ? e.target.bank_account.value : '';
+    const pix_key = e.target.pix_key ? e.target.pix_key.value : '';
     
     if (role === 'STUDENT') {
       registrationType = e.target.registrationType?.value || '';
       registrationNumber = e.target.registrationNumber?.value || '';
-    } else if (role === 'TEACHER') {
-      crm = e.target.crm?.value || '';
-      rqe = e.target.rqe?.value || '';
-      bio = e.target.bio?.value || '';
     }
 
     let errorOccurred = false;
@@ -2159,7 +2691,11 @@ NEWFILEENCODING:NONE
               crm,
               rqe,
               bio,
-              is_homeopath
+              is_homeopath,
+              bank_name,
+              bank_agency,
+              bank_account,
+              pix_key
             };
           }
           return u;
@@ -2177,14 +2713,43 @@ NEWFILEENCODING:NONE
           crm,
           rqe,
           bio,
-          is_homeopath
+          is_homeopath,
+          bank_name,
+          bank_agency,
+          bank_account,
+          pix_key
         };
         updatedUsers = [...prev.users, newUser];
       }
 
+      let updatedTeacherCourses = prev.teacher_courses || [];
+      const targetTeacherId = editingUser.id || ('user-' + Date.now());
+
+      if (role === 'TEACHER') {
+        const newConfigs = [];
+        (prev.courses || []).forEach(c => {
+          const typeVal = e.target[`payment_type_${c.id}`]?.value;
+          const rateVal = parseFloat(e.target[`payment_rate_${c.id}`]?.value) || 0;
+          if (typeVal) {
+            newConfigs.push({
+              id: `tc_${targetTeacherId}_${c.id}`,
+              teacher_id: targetTeacherId,
+              course_id: c.id,
+              payment_type: typeVal,
+              payment_rate: rateVal
+            });
+          }
+        });
+        updatedTeacherCourses = [
+          ...updatedTeacherCourses.filter(tc => tc.teacher_id !== targetTeacherId),
+          ...newConfigs
+        ];
+      }
+
       return {
         ...prev,
-        users: updatedUsers
+        users: updatedUsers,
+        teacher_courses: updatedTeacherCourses
       };
     });
 
@@ -2621,6 +3186,20 @@ NEWFILEENCODING:NONE
             )}
           </a>
 
+          {/* Botão de Caixa de Entrada / Simulador de E-mails */}
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setEmailModalOpen(true)}
+            title="Caixa de E-mails e Notificações Enviadas pelo Sistema"
+            style={{ padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
+          >
+            <span>📧</span>
+            <span className="desktop-only-inline">E-mails</span>
+            <span className="badge-paid" style={{ fontSize: '0.7rem', padding: '0.1rem 0.35rem', borderRadius: '10px' }}>
+              {(mockDb.sent_emails || []).length}
+            </span>
+          </button>
+
           {/* Ações Rápidas Mobile (Sempre Visíveis no Mobile Sticky Header) */}
           <div className="mobile-only-flex header-mobile-actions" style={{ alignItems: 'center', gap: '0.35rem' }}>
             {user ? (
@@ -2777,6 +3356,17 @@ NEWFILEENCODING:NONE
               </div>
 
               <button className="btn btn-primary w-full mt-2" type="submit">Entrar na Plataforma</button>
+
+              <div className="text-center mt-3">
+                <a 
+                  href={getLinkHref('forgot-password')} 
+                  className="btn-link" 
+                  onClick={(e) => handleLinkClick(e, 'forgot-password')}
+                  style={{ color: 'var(--color-primary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                >
+                  🔑 Esqueceu sua senha? Clique aqui para redefinir via e-mail
+                </a>
+              </div>
             </form>
           </div>
         )}
@@ -2834,6 +3424,13 @@ NEWFILEENCODING:NONE
                 </div>
               </div>
 
+              <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                <input type="checkbox" id="receivePromotions" name="receivePromotions" defaultChecked style={{ width: 'auto', margin: 0 }} />
+                <label htmlFor="receivePromotions" className="cursor-pointer" style={{ fontSize: '0.85rem', margin: 0, fontWeight: '500' }}>
+                  Desejo receber por e-mail ofertas, lançamentos de novos cursos e oportunidades acadêmicas da TOSB.
+                </label>
+              </div>
+
               <button className="btn btn-primary w-full mt-4" type="submit">Criar Conta e Confirmar Registro</button>
             </form>
           </div>
@@ -2864,6 +3461,80 @@ NEWFILEENCODING:NONE
               </div>
 
               <button className="btn btn-danger w-full mt-4" type="submit">Reativar Conta</button>
+            </form>
+          </div>
+        )}
+
+        {/* PÁGINA: RECUPERAR SENHA */}
+        {currentPage === 'forgot-password' && (
+          <div className="card auth-box">
+            <h2 className="mb-2 text-center font-serif-title" style={{ color: 'var(--color-primary)' }}>Recuperação de Senha</h2>
+            <p className="text-muted text-center mb-5">
+              Informe seu e-mail de cadastro para receber o link e as instruções de redefinição de acesso
+            </p>
+
+            <form onSubmit={handleRequestPasswordReset}>
+              <div className="form-group mb-4">
+                <label className="form-label">E-mail Cadastrado</label>
+                <input className="form-input" type="email" name="email" required placeholder="ex: medico@exemplo.com" />
+              </div>
+
+              <button className="btn btn-primary w-full mt-2" type="submit">
+                📧 Enviar Link de Redefinição no E-mail
+              </button>
+
+              <div className="text-center mt-4">
+                <a 
+                  href={getLinkHref('login')} 
+                  className="btn-link" 
+                  onClick={(e) => handleLinkClick(e, 'login')}
+                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                >
+                  ← Voltar para a tela de Login
+                </a>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* PÁGINA: REDEFINIR SENHA */}
+        {currentPage === 'reset-password' && (
+          <div className="card auth-box">
+            <h2 className="mb-2 text-center font-serif-title" style={{ color: 'var(--color-primary)' }}>Cadastrar Nova Senha</h2>
+            <p className="text-muted text-center mb-5">
+              Informe o e-mail, o código do token recebido e sua nova senha de acesso
+            </p>
+
+            <form onSubmit={handleConfirmPasswordReset}>
+              <div className="form-group mb-3">
+                <label className="form-label">E-mail Cadastrado</label>
+                <input className="form-input" type="email" name="email" defaultValue={resetTokenData.email} required placeholder="ex: medico@exemplo.com" />
+              </div>
+
+              <div className="form-group mb-3">
+                <label className="form-label">Código do Token Enviado por E-mail</label>
+                <input className="form-input" type="text" name="token" defaultValue={resetTokenData.token} required placeholder="ex: RST_XXXXX" />
+              </div>
+
+              <div className="form-group mb-4">
+                <label className="form-label">Nova Senha de Acesso</label>
+                <input className="form-input" type="password" name="newPassword" required placeholder="Mínimo 6 caracteres" />
+              </div>
+
+              <button className="btn btn-primary w-full mt-2" type="submit">
+                🔐 Confirmar e Salvar Nova Senha
+              </button>
+
+              <div className="text-center mt-4">
+                <a 
+                  href={getLinkHref('login')} 
+                  className="btn-link" 
+                  onClick={(e) => handleLinkClick(e, 'login')}
+                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                >
+                  ← Voltar para a tela de Login
+                </a>
+              </div>
             </form>
           </div>
         )}
@@ -3284,11 +3955,44 @@ NEWFILEENCODING:NONE
               <div className="premium-card-grid">
                 {books.map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px' }}>📚</div>
+                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px', position: 'relative' }}>
+                      📚
+                      {book.page_count > 0 && (
+                        <span className="badge-paid" style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff' }}>
+                          📄 {book.page_count} páginas
+                        </span>
+                      )}
+                    </div>
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
                       <h3 className="premium-card-title">{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
+                      
+                      {/* Botão de Sumário / Relação de Conteúdo */}
+                      {Array.isArray(book.content_table) && book.content_table.length > 0 && (
+                        <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
+                          <button 
+                            className="btn btn-secondary w-full" 
+                            style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            onClick={() => setExpandedBookId(expandedBookId === book.id ? null : book.id)}
+                          >
+                            <span>📖 Relação de Conteúdo ({book.content_table.length} capítulos)</span>
+                            <span>{expandedBookId === book.id ? '▲' : '▼'}</span>
+                          </button>
+                          
+                          {expandedBookId === book.id && (
+                            <div style={{ marginTop: '0.5rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', textAlign: 'left' }}>
+                              <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '0.4rem' }}>Sumário da Obra:</strong>
+                              <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--color-text-main)' }}>
+                                {book.content_table.map((chap, cIdx) => (
+                                  <li key={cIdx} style={{ marginBottom: '0.25rem' }}>{chap}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="premium-card-footer">
                         <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
                         <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
@@ -4176,7 +4880,10 @@ NEWFILEENCODING:NONE
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
                               <div>
                                 <h4 style={{ margin: 0, color: 'var(--color-primary)' }}>🏫 {c.name}</h4>
-                                <small className="text-muted">Curso: {course ? course.title : 'Curso Removido'}</small>
+                                <div style={{ fontSize: '0.85rem' }} className="text-muted">Curso: <strong>{course ? course.title : 'Curso Removido'}</strong></div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 'bold', marginTop: '0.2rem' }}>
+                                  ⏱️ Carga Horária: {course?.duration_days ? course.duration_days * 2 : 180}h Didáticas
+                                </div>
                               </div>
                               <span className="course-type-badge">{studentsInClass.length} aluno(s) alocado(s)</span>
                             </div>
@@ -4375,6 +5082,38 @@ NEWFILEENCODING:NONE
                         </div>
                       )}
 
+                      {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR */}
+                      <h4 className="mt-5 mb-3 section-title-underlined-thin" style={{ color: 'var(--color-primary)' }}>
+                        🏦 Informações Bancárias para Repasses & Honorários
+                      </h4>
+                      <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        Mantenha seus dados bancários atualizados para que a administração saiba para onde depositar o dinheiro de suas aulas e comissões.
+                      </p>
+
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Banco (Nome/Código)</label>
+                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} placeholder="ex: 001 - Banco do Brasil ou 341 - Itaú" />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Agência (com dígito)</label>
+                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} placeholder="ex: 1234-5" />
+                        </div>
+                      </div>
+
+                      <div className="grid-2col">
+                        <div className="form-group">
+                          <label className="form-label">Conta Corrente / Poupança</label>
+                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} placeholder="ex: 98765-4" />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Chave PIX</label>
+                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" />
+                        </div>
+                      </div>
+
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                         <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
                       </div>
@@ -4410,11 +5149,20 @@ NEWFILEENCODING:NONE
                   <li className={`student-sidebar-item ${adminActiveTab === 'payments' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('payments')}>💳 Gerenciar Faturas</button>
                   </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'classes' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('classes')}>🎓 Gerenciar Turmas</button>
+                  </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'events' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('events')}>📅 Agenda / Eventos</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'logs' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('logs')}>🔒 Logs de Segurança</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'temp_unlock' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('temp_unlock')}>🔓 Liberação Temporária</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'promotions' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('promotions')}>📢 Disparo de Ofertas</button>
                   </li>
                 </ul>
               </aside>
@@ -4589,14 +5337,31 @@ NEWFILEENCODING:NONE
                           <input className="form-input" name="author" defaultValue={editingBook.author || ''} required placeholder="ex: Dr. Rajan Sankaran" />
                         </div>
 
-                        <div className="form-group">
-                          <label className="form-label">Preço (R$)</label>
-                          <input className="form-input" type="number" step="0.01" name="price" defaultValue={editingBook.price || 0.00} required />
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Preço (R$)</label>
+                            <input className="form-input" type="number" step="0.01" name="price" defaultValue={editingBook.price || 0.00} required />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Número de Páginas</label>
+                            <input className="form-input" type="number" name="page_count" defaultValue={editingBook.page_count || 0} placeholder="ex: 340" required />
+                          </div>
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Descrição Curta</label>
                           <textarea className="form-input" name="desc" defaultValue={editingBook.desc || ''} required placeholder="Escreva um resumo da obra didática..." />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Relação de Conteúdo / Sumário (Digite 1 capítulo por linha)</label>
+                          <textarea 
+                            className="form-input" 
+                            name="content_table" 
+                            defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')} 
+                            placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados" 
+                            rows={5} 
+                          />
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -4613,6 +5378,8 @@ NEWFILEENCODING:NONE
                             <th>ID</th>
                             <th>Título</th>
                             <th>Autor</th>
+                            <th>Páginas</th>
+                            <th>Relação de Conteúdo (Sumário)</th>
                             <th>Preço</th>
                             <th>Ações</th>
                           </tr>
@@ -4623,6 +5390,14 @@ NEWFILEENCODING:NONE
                               <td><code>{b.id}</code></td>
                               <td><strong>{b.title}</strong></td>
                               <td>{b.author}</td>
+                              <td>📄 {b.page_count || 0} pág.</td>
+                              <td>
+                                {Array.isArray(b.content_table) && b.content_table.length > 0 ? (
+                                  <span className="badge-paid">{b.content_table.length} capítulos</span>
+                                ) : (
+                                  <span className="text-muted">Sem sumário</span>
+                                )}
+                              </td>
                               <td><strong>R$ {b.price.toFixed(2)}</strong></td>
                               <td>
                                 <div style={{ display: 'flex', gap: '0.25rem' }}>
@@ -4745,6 +5520,79 @@ NEWFILEENCODING:NONE
                             <div className="form-group">
                               <label className="form-label">Biografia Curta</label>
                               <textarea className="form-input" name="bio" defaultValue={editingUser.bio || ''} placeholder="Mini-currículo ou especialidades do docente..." />
+                            </div>
+
+                            {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR PARA ADM */}
+                            <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
+                              🏦 Informações Bancárias do Docente (Para Depósito de Honorários)
+                            </h5>
+                            <div className="grid-2col">
+                              <div className="form-group">
+                                <label className="form-label">Banco</label>
+                                <input className="form-input" name="bank_name" defaultValue={editingUser.bank_name || ''} placeholder="ex: 001 - Banco do Brasil" />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Agência</label>
+                                <input className="form-input" name="bank_agency" defaultValue={editingUser.bank_agency || ''} placeholder="ex: 1234-5" />
+                              </div>
+                            </div>
+                            <div className="grid-2col">
+                              <div className="form-group">
+                                <label className="form-label">Conta</label>
+                                <input className="form-input" name="bank_account" defaultValue={editingUser.bank_account || ''} placeholder="ex: 98765-4" />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Chave PIX</label>
+                                <input className="form-input" name="pix_key" defaultValue={editingUser.pix_key || ''} placeholder="ex: carlos@tosb.com" />
+                              </div>
+                            </div>
+
+                            {/* SEÇÃO: FORMA DE RECEBIMENTO DO PROFESSOR POR CURSO */}
+                            <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
+                              💰 Forma de Recebimento do Docente por Curso Vinculado
+                            </h5>
+                            <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                              Defina a forma de remuneração deste docente para cada curso (Hora Aula, Comissão ou Valor Fixo). Ex: Prof. Carlos recebe por hora aula na Pós-Graduação, mas por comissão no curso de Introdução.
+                            </p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              {(mockDb.courses || []).map(c => {
+                                const currentConfig = (mockDb.teacher_courses || []).find(tc => tc.teacher_id === editingUser.id && tc.course_id === c.id);
+                                return (
+                                  <div key={c.id} style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>
+                                      🌿 {c.title} ({c.type})
+                                    </div>
+                                    <div className="grid-2col" style={{ gap: '0.5rem' }}>
+                                      <div>
+                                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Forma de Recebimento</label>
+                                        <select 
+                                          className="form-input" 
+                                          name={`payment_type_${c.id}`} 
+                                          defaultValue={currentConfig?.payment_type || (c.type === 'POSTGRAD' ? 'hora_aula' : c.type === 'FREE' ? 'comissao' : 'valor_fixo')}
+                                          style={{ fontSize: '0.85rem' }}
+                                        >
+                                          <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
+                                          <option value="comissao">📊 Comissão por Venda (%)</option>
+                                          <option value="valor_fixo">💵 Valor Fixo (R$ Mensal/Contrato)</option>
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor da Remuneração / Taxa</label>
+                                        <input 
+                                          className="form-input" 
+                                          type="number" 
+                                          step="0.01" 
+                                          name={`payment_rate_${c.id}`} 
+                                          defaultValue={currentConfig?.payment_rate || (c.type === 'POSTGRAD' ? 150.00 : c.type === 'FREE' ? 15.00 : 2500.00)}
+                                          placeholder="ex: 150.00 ou 15.00"
+                                          style={{ fontSize: '0.85rem' }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
@@ -4991,13 +5839,167 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'classes' && (
                   <div className="card">
                     <div className="quiz-header mb-4">
-                      <h3>Gerenciamento de Turmas</h3>
+                      <h3>🎓 Painel de Gerenciamento de Turmas</h3>
                       <button className="btn btn-primary" onClick={() => setEditingClass({})}>＋ Criar Nova Turma</button>
                     </div>
                     <p className="course-card-description mb-4">
-                      Crie turmas baseadas em cursos, defina os limites máximos de alunos e professores, e aloque-os para a turma.
+                      Visualize todas as turmas criadas na instituição, gerencie a carga horária, adicione ou remova professores e alunos em tempo real e controle os limites de vagas.
                     </p>
 
+                    {/* Cards Estatísticos de Turmas */}
+                    <div className="admin-stats-grid mb-5">
+                      <div className="admin-stat-card primary">
+                        <span className="course-type-badge">Total de Turmas Criadas</span>
+                        <h2 className="stat-value">{(mockDb.classes || []).length} Turmas</h2>
+                      </div>
+                      <div className="admin-stat-card accent">
+                        <span className="course-type-badge">Professores Cadastrados</span>
+                        <h2 className="stat-value">{mockDb.users.filter(u => u.role === 'TEACHER').length} Docentes</h2>
+                      </div>
+                      <div className="admin-stat-card warning">
+                        <span className="course-type-badge">Alunos Registrados</span>
+                        <h2 className="stat-value">{mockDb.users.filter(u => u.role === 'STUDENT').length} Alunos</h2>
+                      </div>
+                    </div>
+
+                    {/* PAINEL DE GERENCIAMENTO RÁPIDO DE INTEGRANTES DE UMA TURMA */}
+                    {viewingClassDetails && (
+                      <div className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '2px solid var(--color-primary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                          <div>
+                            <span className="badge-paid" style={{ fontSize: '0.8rem' }}>Painel de Gestão da Turma</span>
+                            <h3 style={{ margin: '0.25rem 0 0 0', color: 'var(--color-primary)' }}>🏫 {viewingClassDetails.name}</h3>
+                            {(() => {
+                              const crs = mockDb.courses.find(c => c.id === viewingClassDetails.course_id);
+                              return (
+                                <small className="text-muted">
+                                  Curso: <strong>{crs ? crs.title : 'Curso N/A'}</strong> | Carga Horária: <strong>⏱️ {crs?.duration_days ? crs.duration_days * 2 : 180}h Didáticas</strong>
+                                </small>
+                              );
+                            })()}
+                          </div>
+                          <button className="btn btn-secondary" onClick={() => setViewingClassDetails(null)} style={{ padding: '0.3rem 0.75rem' }}>✕ Fechar Painel</button>
+                        </div>
+
+                        <div className="grid-2col" style={{ gap: '2rem' }}>
+                          {/* SEÇÃO 1: PROFESSORES DA TURMA */}
+                          <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
+                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>👨‍🏫 Professores Alocados na Turma</h4>
+                            
+                            {/* Form de Adicionar Professor com 1 Clique */}
+                            <form 
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const teacherId = e.target.new_teacher_id.value;
+                                if (teacherId) {
+                                  handleAddTeacherToClass(viewingClassDetails.id, teacherId);
+                                  e.target.reset();
+                                }
+                              }}
+                              className="mb-3"
+                              style={{ display: 'flex', gap: '0.5rem' }}
+                            >
+                              <select className="form-input" name="new_teacher_id" required style={{ fontSize: '0.85rem' }}>
+                                <option value="">-- Escolha um professor para incluir --</option>
+                                {mockDb.users
+                                  .filter(u => u.role === 'TEACHER' && !(viewingClassDetails.teacher_ids || []).includes(u.id))
+                                  .map(t => (
+                                    <option key={t.id} value={t.id}>{t.name} ({t.crm || t.email})</option>
+                                  ))}
+                              </select>
+                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                                ＋ Alocar
+                              </button>
+                            </form>
+
+                            {/* Lista de Professores Atuais */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {mockDb.users
+                                .filter(u => (viewingClassDetails.teacher_ids || []).includes(u.id))
+                                .map(t => (
+                                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                    <div>
+                                      <strong>{t.name}</strong>
+                                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
+                                    </div>
+                                    <button 
+                                      className="btn btn-danger" 
+                                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                      onClick={() => handleRemoveTeacherFromClass(viewingClassDetails.id, t.id)}
+                                    >
+                                      Remover
+                                    </button>
+                                  </div>
+                                ))}
+                              {!(viewingClassDetails.teacher_ids || []).length && (
+                                <p className="text-muted text-center py-3" style={{ fontSize: '0.85rem' }}>Nenhum professor alocado nesta turma ainda.</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* SEÇÃO 2: ALUNOS DA TURMA */}
+                          <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
+                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>🎓 Alunos Matriculados na Turma</h4>
+                            
+                            {/* Form de Adicionar Aluno com 1 Clique */}
+                            <form 
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const studentId = e.target.new_student_id.value;
+                                if (studentId) {
+                                  handleAddStudentToClass(viewingClassDetails.id, studentId);
+                                  e.target.reset();
+                                }
+                              }}
+                              className="mb-3"
+                              style={{ display: 'flex', gap: '0.5rem' }}
+                            >
+                              <select className="form-input" name="new_student_id" required style={{ fontSize: '0.85rem' }}>
+                                <option value="">-- Escolha um aluno para matricular --</option>
+                                {mockDb.users
+                                  .filter(u => u.role === 'STUDENT' && !(viewingClassDetails.student_ids || []).includes(u.id))
+                                  .map(st => (
+                                    <option key={st.id} value={st.id}>{st.name} ({st.email})</option>
+                                  ))}
+                              </select>
+                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                                ＋ Matricular
+                              </button>
+                            </form>
+
+                            {/* Lista de Alunos Atuais */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '250px', overflowY: 'auto' }}>
+                              {mockDb.users
+                                .filter(u => (viewingClassDetails.student_ids || []).includes(u.id))
+                                .map(st => {
+                                  const attendanceKey = `${viewingClassDetails.id}_${st.id}`;
+                                  const attendanceCount = (mockDb.class_attendance[attendanceKey] || []).length;
+                                  return (
+                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                      <div>
+                                        <strong>{st.name}</strong>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
+                                      </div>
+                                      <button 
+                                        className="btn btn-danger" 
+                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                        onClick={() => handleRemoveStudentFromClass(viewingClassDetails.id, st.id)}
+                                      >
+                                        Remover
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              {!(viewingClassDetails.student_ids || []).length && (
+                                <p className="text-muted text-center py-3" style={{ fontSize: '0.85rem' }}>Nenhum aluno matriculado nesta turma ainda.</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* FORMULÁRIO DE CRIAR / EDITAR DADOS GERAIS DA TURMA */}
                     {editingClass && (
                       <form onSubmit={handleSaveClass} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
                         <h4 className="mb-4">{editingClass.id ? 'Editar Detalhes da Turma' : 'Criar Nova Turma'}</h4>
@@ -5031,7 +6033,7 @@ NEWFILEENCODING:NONE
                           </div>
                         </div>
 
-                        {/* Alocação de Professores e Alunos */}
+                        {/* Alocação de Professores e Alunos via Checkbox */}
                         <div className="grid-2col" style={{ gap: '2rem' }}>
                           <div>
                             <h5 className="mb-2" style={{ fontWeight: 'bold' }}>Alocar Professores</h5>
@@ -5041,7 +6043,7 @@ NEWFILEENCODING:NONE
                                 return (
                                   <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
                                     <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
-                                    <span>{u.name}</span>
+                                    <span>{u.name} ({u.email})</span>
                                   </label>
                                 );
                               })}
@@ -5070,15 +6072,18 @@ NEWFILEENCODING:NONE
                       </form>
                     )}
 
+                    {/* TABELA GERAL DE TODAS AS TURMAS CRIADAS */}
+                    <h4 className="section-title-underlined mb-3">Relação Completa de Turmas Criadas na Instituição</h4>
                     <div className="table-responsive">
                       <table className="lms-table">
                         <thead>
                           <tr>
                             <th>Nome da Turma</th>
                             <th>Curso Associado</th>
-                            <th>Professores</th>
-                            <th>Alunos Alocados</th>
-                            <th>Limites (Alunos/Profs)</th>
+                            <th>Carga Horária</th>
+                            <th>Professores Alocados</th>
+                            <th>Alunos Matriculados</th>
+                            <th>Vagas / Limites</th>
                             <th>Ações</th>
                           </tr>
                         </thead>
@@ -5086,32 +6091,61 @@ NEWFILEENCODING:NONE
                           {(mockDb.classes || []).map(c => {
                             const course = mockDb.courses.find(course => course.id === c.course_id);
                             const teachers = mockDb.users.filter(u => (c.teacher_ids || []).includes(u.id));
-                            const studentsCount = (c.student_ids || []).length;
+                            const studentsInClass = mockDb.users.filter(u => (c.student_ids || []).includes(u.id));
+                            const cargaHoraria = course ? (course.duration_days ? course.duration_days * 2 : 180) : 0;
                             return (
                               <tr key={c.id}>
-                                <td><strong>{c.name}</strong></td>
+                                <td>
+                                  <strong>{c.name}</strong>
+                                </td>
                                 <td>{course ? course.title : 'Curso Removido'}</td>
+                                <td><span className="badge-paid">⏱️ {cargaHoraria}h Didáticas</span></td>
                                 <td>
                                   {teachers.map(t => <div key={t.id} style={{ fontSize: '0.85rem' }}>👨‍🏫 {t.name}</div>)}
-                                  {teachers.length === 0 && <span className="text-muted">Nenhum</span>}
+                                  {teachers.length === 0 && <span className="text-muted">Nenhum professor</span>}
                                 </td>
                                 <td>
-                                  <strong>{studentsCount}</strong> aluno(s)
+                                  <strong>{studentsInClass.length}</strong> aluno(s)
                                 </td>
                                 <td>
-                                  <div>Máx Alunos: {c.max_students > 0 ? c.max_students : 'Ilimitado'}</div>
-                                  <div>Máx Profs: {c.max_teachers > 0 ? c.max_teachers : 'Ilimitado'}</div>
+                                  <small className="text-muted">Alunos: {c.max_students > 0 ? `${studentsInClass.length}/${c.max_students}` : 'Ilimitado'}</small><br />
+                                  <small className="text-muted">Profs: {c.max_teachers > 0 ? `${teachers.length}/${c.max_teachers}` : 'Ilimitado'}</small>
                                 </td>
                                 <td>
-                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingClass(c)}>Editar</button>
+                                  <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                    <button 
+                                      className="btn btn-primary" 
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
+                                      onClick={() => setViewingClassDetails(c)}
+                                      title="Ver e Gerenciar Integrantes da Turma"
+                                    >
+                                      👥 Integrantes
+                                    </button>
+                                    <button 
+                                      className="btn btn-secondary" 
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
+                                      onClick={() => setEditingClass(c)}
+                                      title="Editar Dados da Turma"
+                                    >
+                                      ✏️ Editar
+                                    </button>
+                                    <button 
+                                      className="btn btn-danger" 
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
+                                      onClick={() => handleDeleteClass(c.id)}
+                                      title="Excluir Turma"
+                                    >
+                                      🗑️ Excluir
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             );
                           })}
                           {(mockDb.classes || []).length === 0 && (
                             <tr>
-                              <td colSpan="6" className="text-center text-muted" style={{ padding: '2rem' }}>
-                                Nenhuma turma criada ainda.
+                              <td colSpan="7" className="text-center text-muted" style={{ padding: '2rem' }}>
+                                Nenhuma turma criada na plataforma ainda. Clique no botão acima para criar a primeira turma.
                               </td>
                             </tr>
                           )}
@@ -5202,32 +6236,189 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
-                {adminActiveTab === 'logs' && (
-                  <div className="card flex-col">
-                    <h3>Registros de Acesso e Segurança</h3>
+                {adminActiveTab === 'temp_unlock' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>🔓 Gestão de Liberações Temporárias (Alunos Inadimplentes)</h3>
+                      <button className="btn btn-secondary btn-quick-login" onClick={checkCourseExpirations}>
+                        🔔 Executar Varredura de Vencimentos (2 Dias Antes)
+                      </button>
+                    </div>
                     <p className="course-card-description mb-4">
-                      Auditoria em tempo real de IPs, agentes de usuário e travas de segurança acionadas.
+                      Conceda autorização de acesso temporário a cursos para alunos com inadimplência financeira ou em negociação. Um e-mail de confirmação será enviado automaticamente ao aluno.
                     </p>
-                    <div className="logs-container">
-                      {securityLogs.length === 0 ? (
-                        <p className="course-card-description text-center mt-3">Nenhum log registrado.</p>
-                      ) : (
-                        securityLogs.map((log, idx) => (
-                          <div key={idx} className="log-item">
-                            <div className="invoice-footer mb-1">
-                              <span className="invoice-title mb-0">{log.user_name || 'Sistema'}</span>
-                              <span className="text-muted">{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
-                            </div>
-                            <div className="invoice-footer">
-                              <span className={`badge-log-type ${log.content_accessed === 'CONCURRENT_LOGIN_LOCKOUT' ? 'lockout' : ''}`}>
-                                {log.content_accessed}
-                              </span>
-                              <span className="helper-text">IP: {log.ip_address}</span>
-                            </div>
-                            <small className="invoice-ref mt-1">{log.user_agent}</small>
-                          </div>
-                        ))
-                      )}
+
+                    {/* Form de Concessão de Liberação Temporária */}
+                    <form onSubmit={handleGrantTemporaryUnlock} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
+                      <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Conceder Nova Liberação Temporária</h4>
+                      
+                      <div className="grid-2col mb-3">
+                        <div className="form-group">
+                          <label className="form-label">Selecionar Aluno Inadimplente / Cadastrado</label>
+                          <select className="form-input" name="student_id" required defaultValue="">
+                            <option value="" disabled>-- Escolha o aluno --</option>
+                            {mockDb.users.filter(u => u.role === 'STUDENT').map(st => {
+                              const isDelinquent = st.status === 'SUSPENDED' || mockDb.payments.some(p => p.student_id === st.id && p.status === 'OVERDUE');
+                              return (
+                                <option key={st.id} value={st.id}>
+                                  {st.name} ({st.email}) {isDelinquent ? '⚠️ INADIMPLENTE' : '✓ ATIVO'}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Curso Liberado</label>
+                          <select className="form-input" name="course_id" required defaultValue="">
+                            <option value="" disabled>-- Escolha o curso --</option>
+                            {mockDb.courses.map(c => (
+                              <option key={c.id} value={c.id}>{c.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid-2col mb-3">
+                        <div className="form-group">
+                          <label className="form-label">Período de Liberação (Quantidade de Dias)</label>
+                          <select className="form-input" name="days_valid" defaultValue="7" required>
+                            <option value="3">3 Dias de Acesso</option>
+                            <option value="7">7 Dias de Acesso (Padrão)</option>
+                            <option value="15">15 Dias de Acesso</option>
+                            <option value="30">30 Dias de Acesso</option>
+                            <option value="60">60 Dias de Acesso</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Motivo / Observação da Diretoria</label>
+                          <input className="form-input" name="reason" placeholder="ex: Acordo de parcelamento efetuado via boleto" required />
+                        </div>
+                      </div>
+
+                      <button className="btn btn-primary w-full" type="submit">
+                        🔓 Liberar Acesso do Aluno & Disparar E-mail de Confirmação
+                      </button>
+                    </form>
+
+                    {/* Tabela de Liberações Ativas e Histórico */}
+                    <h4 className="section-title-underlined mb-3">Registros de Liberações Temporárias Concedidas</h4>
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Aluno</th>
+                            <th>Curso</th>
+                            <th>Período</th>
+                            <th>Válido até</th>
+                            <th>Motivo/Observação</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(mockDb.temporary_unlocks || []).map(u => (
+                            <tr key={u.id}>
+                              <td>
+                                <strong>{u.student_name}</strong>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.student_email}</div>
+                              </td>
+                              <td>{u.course_title}</td>
+                              <td><span className="badge-paid">{u.days_valid} dias</span></td>
+                              <td><strong>{new Date(u.valid_until).toLocaleDateString('pt-BR')}</strong></td>
+                              <td><small>{u.reason}</small></td>
+                              <td>
+                                <button 
+                                  className="btn btn-danger" 
+                                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                  onClick={() => handleRevokeTemporaryUnlock(u.id, u.student_id, u.course_id)}
+                                >
+                                  Revogar Acesso
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {(mockDb.temporary_unlocks || []).length === 0 && (
+                            <tr>
+                              <td colSpan="6" className="text-center text-muted py-4">
+                                Nenhuma liberação temporária concedida no momento.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+                {adminActiveTab === 'promotions' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>📢 Disparo de Ofertas & Comunicações Promocionais por E-mail</h3>
+                      <button className="btn btn-secondary btn-quick-login" onClick={() => setEmailModalOpen(true)}>
+                        📧 Ver Caixa de E-mails Disparados
+                      </button>
+                    </div>
+                    <p className="course-card-description mb-4">
+                      Crie e envie campanhas promocionais por e-mail. Apenas alunos que concordaram em receber promoções no cadastro serão notificados. Você pode filtrar para enviar a todos os alunos com aceite ou apenas aos alunos de um curso específico.
+                    </p>
+
+                    {/* Formulário de Disparo da Oferta */}
+                    <form onSubmit={handleSendPromotionalCampaign} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
+                      <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Criar Nova Campanha de E-mail Marketing</h4>
+
+                      <div className="grid-2col mb-3">
+                        <div className="form-group">
+                          <label className="form-label">Título Interno da Oferta / Campanha</label>
+                          <input className="form-input" name="title" placeholder="ex: Lançamento Curso Introdução à Homeopatia 2" required />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Público Alvo (Alunos com Aceite de Promoções)</label>
+                          <select className="form-input" name="target_course_id" defaultValue="">
+                            <option value="">🌐 Todos os Alunos (Opt-in de Promoções Ativo)</option>
+                            {mockDb.courses.map(c => (
+                              <option key={c.id} value={c.id}>
+                                🎯 Apenas Alunos do Curso: {c.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group mb-3">
+                        <label className="form-label">Assunto do E-mail</label>
+                        <input className="form-input" name="subject" placeholder="ex: 🎉 Venha conhecer o novo Curso Avançado de Introdução à Homeopatia 2!" required />
+                      </div>
+
+                      <div className="form-group mb-4">
+                        <label className="form-label">Mensagem / Corpo da Oferta</label>
+                        <textarea 
+                          className="form-input" 
+                          name="message" 
+                          rows={6} 
+                          required 
+                          placeholder="Digite o texto da oferta de forma atrativa...&#10;&#10;Ex: Olá! Temos o prazer de convidar você para a 2ª turma do Curso Avançado de Introdução à Homeopatia. Acesse a plataforma TOSB para garantir sua vaga com 10% de desconto."
+                        />
+                      </div>
+
+                      <button className="btn btn-primary w-full" type="submit">
+                        🚀 Disparar Oferta por E-mail para Alunos Filtrados
+                      </button>
+                    </form>
+
+                    {/* Resumo de Alunos Opt-in */}
+                    <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
+                      <h4 className="section-title-underlined-thin mb-3">
+                        📊 Estatística de Opt-in de Promoções (Alunos Cadastrados)
+                      </h4>
+                      <div className="grid-2col">
+                        <div>
+                          <strong>Total de Alunos no Sistema:</strong> {mockDb.users.filter(u => u.role === 'STUDENT').length}
+                        </div>
+                        <div>
+                          <strong>Alunos que aceitam Ofertas (Opt-in):</strong> <span className="badge-paid">{mockDb.users.filter(u => u.role === 'STUDENT' && u.receive_promotions !== false).length} alunos</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -5237,6 +6428,88 @@ NEWFILEENCODING:NONE
         )}
 
       </main>
+
+      {/* MODAL DE SIMULAÇÃO DE E-MAILS ENVIADOS */}
+      {emailModalOpen && (
+        <div className="modal-backdrop animate-fade-in" style={{ zIndex: 9999 }}>
+          <div className="modal-content" style={{ maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>📬 Caixa de E-mails & Notificações de Simulação</h3>
+                <small className="text-muted">Histórico em tempo real de mensagens de confirmação de compra, avisos de vencimento e liberações temporárias.</small>
+              </div>
+              <button className="btn btn-secondary" onClick={() => setEmailModalOpen(false)} style={{ padding: '0.25rem 0.6rem' }}>✕ Fechar</button>
+            </div>
+
+            {/* Painel de Testes / Ações Rápidas de Simulação */}
+            <div className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }}>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--color-secondary)', display: 'block', marginBottom: '0.5rem' }}>
+                🧪 Painel de Simulação Rápida (1 Clique para Testar):
+              </strong>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
+                  onClick={() => {
+                    sendPurchaseConfirmationEmail('ana@lms.com', 'Dra. Ana Paula', 'Pós-Graduação em Homeopatia Avançada', 3600.00, 'ASAAS_TEST_PURCHASE_100');
+                    setSuccess('Teste executado! E-mail de confirmação de compra enviado para Dra. Ana Paula.');
+                  }}
+                >
+                  🎉 Simular Compra de Curso
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
+                  onClick={() => {
+                    checkCourseExpirations();
+                  }}
+                >
+                  🔔 Simular Alerta de Vencimento (2 Dias Antes)
+                </button>
+                <button 
+                  className="btn btn-accent" 
+                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff' }}
+                  onClick={() => {
+                    const delinquent = mockDb.users.find(u => u.id === 'student-delinquent-id') || { email: 'lucas.inadimplente@lms.com', name: 'Dr. Lucas Mendes' };
+                    sendTempUnlockEmail(delinquent, 'Pós-Graduação em Homeopatia Avançada', 7, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), 'Liberação temporária de teste');
+                    setSuccess('Teste executado! E-mail de confirmação de liberação temporária enviado para Dr. Lucas Mendes.');
+                  }}
+                >
+                  🔓 Simular E-mail de Liberação Temporária
+                </button>
+              </div>
+            </div>
+
+            {/* Listagem de E-mails Registrados */}
+            <div className="emails-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {(mockDb.sent_emails || []).map((mail, idx) => (
+                <div key={mail.id || idx} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1rem', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                    <div>
+                      <span className={`badge-paid ${mail.type === 'COURSE_PURCHASE' ? '' : mail.type === 'TEMP_UNLOCK' ? 'badge-pending' : 'badge-overdue'}`} style={{ fontSize: '0.75rem', display: 'inline-block', marginBottom: '0.25rem' }}>
+                        {mail.type === 'COURSE_PURCHASE' ? '🎉 COMPRA CONFIRMADA' : mail.type === 'TEMP_UNLOCK' ? '🔓 LIBERAÇÃO TEMPORÁRIA' : '⚠️ LEMBRETE DE VENCIMENTO'}
+                      </span>
+                      <h4 style={{ margin: '0.25rem 0 0 0', fontSize: '1rem', color: 'var(--color-primary)' }}>{mail.subject}</h4>
+                    </div>
+                    <small className="text-muted">{new Date(mail.sent_at).toLocaleString('pt-BR')}</small>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
+                    <strong>Para:</strong> {mail.recipient_name ? `${mail.recipient_name} <${mail.recipient_email}>` : mail.recipient_email}
+                  </div>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#334155' }}>
+                    {mail.body}
+                  </div>
+                </div>
+              ))}
+              {(mockDb.sent_emails || []).length === 0 && (
+                <div className="text-center p-6 text-muted">
+                  Nenhum e-mail registrado na simulação ainda. Efetue uma compra, liberação temporária ou teste rápido acima.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Rodapé TOSB */}
       <footer className="tosb-footer">

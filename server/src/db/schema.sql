@@ -292,3 +292,72 @@ VALUES (
     CURRENT_TIMESTAMP + INTERVAL '180 days',
     'ACTIVE'
 ) ON CONFLICT (id) DO NOTHING;
+
+-- Tabela de Livros da Livraria TOSB (Com Páginas e Relação de Conteúdo)
+CREATE TABLE IF NOT EXISTS books (
+    id VARCHAR(100) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    description TEXT,
+    page_count INTEGER NOT NULL DEFAULT 0,
+    content_table TEXT -- Sumário / Relação de Conteúdo em formato JSON ou texto
+);
+ALTER TABLE books ADD COLUMN IF NOT EXISTS page_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE books ADD COLUMN IF NOT EXISTS content_table TEXT;
+
+-- Tabela de Liberações Temporárias para Alunos Inadimplentes (ADM)
+CREATE TABLE IF NOT EXISTS temporary_unlocks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    student_name VARCHAR(255) NOT NULL,
+    student_email VARCHAR(255) NOT NULL,
+    granted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    days_valid INTEGER NOT NULL,
+    valid_until TIMESTAMP WITH TIME ZONE NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Formas de Recebimento de Professor por Curso
+CREATE TABLE IF NOT EXISTS teacher_course_payments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    teacher_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+    payment_type VARCHAR(50) NOT NULL CHECK (payment_type IN ('HOURLY', 'COMMISSION', 'FIXED')), -- 'hora_aula', 'comissao', 'valor_fixo'
+    payment_rate DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_teacher_course UNIQUE (teacher_id, course_id)
+);
+
+-- Alterações adicionais em student_profiles e teacher_profiles
+ALTER TABLE student_profiles ADD COLUMN IF NOT EXISTS receive_promotions BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE teacher_profiles ADD COLUMN IF NOT EXISTS bank_name VARCHAR(100);
+ALTER TABLE teacher_profiles ADD COLUMN IF NOT EXISTS bank_agency VARCHAR(50);
+ALTER TABLE teacher_profiles ADD COLUMN IF NOT EXISTS bank_account VARCHAR(50);
+ALTER TABLE teacher_profiles ADD COLUMN IF NOT EXISTS pix_key VARCHAR(100);
+
+-- Tabela de Tokens de Redefinição de Senha
+CREATE TABLE IF NOT EXISTS password_resets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Campanhas Promocionais (E-mail Marketing ADM)
+CREATE TABLE IF NOT EXISTS promotional_campaigns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    target_course_id UUID REFERENCES courses(id) ON DELETE SET NULL, -- NULL para todos os alunos que aceitaram promoções
+    sent_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+
