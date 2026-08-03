@@ -535,59 +535,37 @@ export default function App() {
           parsed.class_attendance = {};
           changed = true;
         }
+        if (!parsed.sent_emails) {
+          parsed.sent_emails = [
+            {
+              id: 'email-init-1',
+              recipient_email: 'ana@lms.com',
+              recipient_name: 'Dra. Ana Paula',
+              subject: '🎉 Confirmação de Compra: Introdução à Homeopatia e Sensação Vital - TOSB',
+              body: 'Olá Dra. Ana Paula,\n\nSua inscrição no curso gratuito "Introdução à Homeopatia e Sensação Vital" foi confirmada com sucesso!\n\nJá pode acessar suas aulas no portal EAD.',
+              type: 'COURSE_PURCHASE',
+              sent_at: new Date().toISOString()
+            }
+          ];
+          changed = true;
+        }
+        if (!parsed.temporary_unlocks) {
+          parsed.temporary_unlocks = [];
+          changed = true;
+        }
+        if (!parsed.teacher_courses) {
+          parsed.teacher_courses = [
+            { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
+            { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
+            { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
+          ];
+          changed = true;
+        }
         if (changed) {
           localStorage.setItem('mock_db', JSON.stringify(parsed));
         }
         return parsed;
       }
-      if (!parsed.events) {
-        parsed.events = [
-          { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
-          { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
-          { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
-        ];
-        changed = true;
-      }
-      if (!parsed.classes) {
-        parsed.classes = [
-          { id: 'class-1', name: 'Turma Alfa - Sensação Vital 2026', course_id: 'course-free', teacher_ids: ['teacher-id'], student_ids: ['student-id'], max_students: 30, max_teachers: 2 }
-        ];
-        changed = true;
-      }
-      if (!parsed.class_attendance) {
-        parsed.class_attendance = {};
-        changed = true;
-      }
-      if (!parsed.sent_emails) {
-        parsed.sent_emails = [
-          {
-            id: 'email-init-1',
-            recipient_email: 'ana@lms.com',
-            recipient_name: 'Dra. Ana Paula',
-            subject: '🎉 Confirmação de Compra: Introdução à Homeopatia e Sensação Vital - TOSB',
-            body: 'Olá Dra. Ana Paula,\n\nSua inscrição no curso gratuito "Introdução à Homeopatia e Sensação Vital" foi confirmada com sucesso!\n\nJá pode acessar suas aulas no portal EAD.',
-            type: 'COURSE_PURCHASE',
-            sent_at: new Date().toISOString()
-          }
-        ];
-        changed = true;
-      }
-      if (!parsed.temporary_unlocks) {
-        parsed.temporary_unlocks = [];
-        changed = true;
-      }
-      if (!parsed.teacher_courses) {
-        parsed.teacher_courses = [
-          { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
-          { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
-          { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
-        ];
-        changed = true;
-      }
-      if (changed) {
-        localStorage.setItem('mock_db', JSON.stringify(parsed));
-      }
-      return parsed;
     }
 
     const initialDb = {
@@ -3148,8 +3126,6 @@ NEWFILEENCODING:NONE
     let registrationType = '';
     let registrationNumber = '';
     const crm = e.target.crm ? e.target.crm.value : '';
-    const rqe = e.target.rqe ? e.target.rqe.value : '';
-    const bio = e.target.bio ? e.target.bio.value : '';
     const bank_name = e.target.bank_name ? e.target.bank_name.value : '';
     const bank_agency = e.target.bank_agency ? e.target.bank_agency.value : '';
     const bank_account = e.target.bank_account ? e.target.bank_account.value : '';
