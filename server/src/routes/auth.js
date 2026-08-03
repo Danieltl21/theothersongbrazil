@@ -8,10 +8,65 @@ const router = express.Router();
 
 // Registro de Aluno (Com termos e registro profissional)
 router.post('/register', async (req, res) => {
-  const { name, email, password, registrationType, registrationNumber, acceptTerms } = req.body;
+  const {
+    name,
+    email,
+    password,
+    phone,
+    cpf,
+    profession,
+    custom_profession,
+    council_type,
+    council_number,
+    council_state,
+    specialty,
+    billing_zip,
+    billing_street,
+    billing_number,
+    billing_complement,
+    billing_neighborhood,
+    billing_city,
+    billing_state,
+    commercial_zip,
+    commercial_street,
+    commercial_number,
+    commercial_complement,
+    commercial_neighborhood,
+    commercial_city,
+    commercial_state,
+    commercial_phone,
+    acceptGeneralTerms,
+    acceptSigiloTerms
+  } = req.body;
 
-  if (!name || !email || !password || !registrationType || !registrationNumber || !acceptTerms) {
-    return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  // Validação dos campos comuns obrigatórios
+  if (
+    !name || !email || !password || !phone || !cpf ||
+    !billing_zip || !billing_street || !billing_number || !billing_neighborhood || !billing_city || !billing_state ||
+    !profession || !acceptGeneralTerms
+  ) {
+    return res.status(400).json({ message: 'Todos os campos obrigatórios de identificação e endereço de cobrança devem ser preenchidos.' });
+  }
+
+  // Validação de saúde vs outro
+  const isHealthProfession = [
+    'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
+    'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
+  ].includes(profession);
+  if (isHealthProfession) {
+    if (
+      !council_type || !council_state || !council_number ||
+      !commercial_zip || !commercial_street || !commercial_number || !commercial_neighborhood || !commercial_city || !commercial_state || !commercial_phone ||
+      !acceptSigiloTerms
+    ) {
+      return res.status(400).json({ message: 'Para profissionais da área da saúde, os campos de registro profissional, endereço comercial e termo de sigilo são obrigatórios.' });
+    }
+  } else if (profession === 'outro' || profession === 'Outro') {
+    if (!custom_profession) {
+      return res.status(400).json({ message: 'Por favor, informe o nome da sua profissão.' });
+    }
+  } else {
+    return res.status(400).json({ message: 'Profissão inválida.' });
   }
 
   const client = await pool.connect();
@@ -30,16 +85,42 @@ router.post('/register', async (req, res) => {
 
     // Inserir Usuário
     const userInsert = await client.query(
-      'INSERT INTO users (name, email, password_hash, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      [name, email, passwordHash, 'STUDENT', 'ACTIVE']
+      `INSERT INTO users (
+        name, email, password_hash, role, status, is_homeopath,
+        phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
+        billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+        commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+        commercial_phone, terms_accepted, terms_accepted_at, general_terms_accepted, general_terms_accepted_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10, $11, $12, $13, $14,
+        $15, $16, $17, $18, $19, $20, $21,
+        $22, $23, $24, $25, $26, $27, $28,
+        $29, $30, $31, $32, $33
+      ) RETURNING id`,
+      [
+        name, email, passwordHash, 'STUDENT', 'ACTIVE', false, // por padrão começa desativado
+        phone, cpf, profession, isHealthProfession ? null : custom_profession,
+        isHealthProfession ? council_type : null,
+        isHealthProfession ? council_number : null,
+        isHealthProfession ? council_state : null,
+        isHealthProfession ? specialty : null,
+        billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+        isHealthProfession ? commercial_zip : null,
+        isHealthProfession ? commercial_street : null,
+        isHealthProfession ? commercial_number : null,
+        isHealthProfession ? commercial_complement : null,
+        isHealthProfession ? commercial_neighborhood : null,
+        isHealthProfession ? commercial_city : null,
+        isHealthProfession ? commercial_state : null,
+        isHealthProfession ? commercial_phone : null,
+        isHealthProfession ? !!acceptSigiloTerms : false,
+        isHealthProfession ? new Date() : null,
+        !!acceptGeneralTerms,
+        new Date()
+      ]
     );
     const userId = userInsert.rows[0].id;
-
-    // Inserir Perfil de Aluno
-    await client.query(
-      'INSERT INTO student_profiles (user_id, terms_accepted, professional_registration_type, professional_registration_number) VALUES ($1, $2, $3, $4)',
-      [userId, true, registrationType, registrationNumber]
-    );
 
     // Matricular o aluno automaticamente em um curso livre padrão para que ele já comece com acesso!
     const freeCourse = await client.query("SELECT id FROM courses WHERE type = 'FREE' LIMIT 1");
@@ -204,25 +285,13 @@ router.post('/unlock', async (req, res) => {
 // Carregar Perfil do Usuário Logado
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    let profileData = {};
-    if (req.user.role === 'STUDENT') {
-      const sp = await pool.query('SELECT * FROM student_profiles WHERE user_id = $1', [req.user.id]);
-      profileData = sp.rows[0] || {};
-    } else if (req.user.role === 'TEACHER') {
-      const tp = await pool.query('SELECT * FROM teacher_profiles WHERE user_id = $1', [req.user.id]);
-      profileData = tp.rows[0] || {};
+    const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
     }
-
-    res.json({
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-        role: req.user.role,
-        is_homeopath: req.user.is_homeopath,
-        ...profileData
-      }
-    });
+    const user = userResult.rows[0];
+    delete user.password_hash;
+    res.json({ user });
   } catch (error) {
     res.status(500).json({ message: 'Erro ao carregar dados do usuário.' });
   }
@@ -234,110 +303,102 @@ router.put('/profile', authenticateToken, async (req, res) => {
     name,
     email,
     phone,
-    cpf_cnpj,
-    address_zip,
-    address_street,
-    address_number,
-    address_complement,
-    address_neighborhood,
-    address_city,
-    address_state,
-    professional_registration_type,
-    professional_registration_number,
-    crm,
+    cpf,
+    profession,
+    custom_profession,
+    council_type,
+    council_number,
+    council_state,
+    specialty,
     rqe,
     bio,
+    billing_zip,
+    billing_street,
+    billing_number,
+    billing_complement,
+    billing_neighborhood,
+    billing_city,
+    billing_state,
+    commercial_zip,
+    commercial_street,
+    commercial_number,
+    commercial_complement,
+    commercial_neighborhood,
+    commercial_city,
+    commercial_state,
+    commercial_phone,
     is_homeopath
   } = req.body;
 
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-
-    // Atualizar tabela users
-    await client.query(
-      'UPDATE users SET name = $1, email = $2, is_homeopath = $3 WHERE id = $4',
-      [name, email, is_homeopath === undefined ? req.user.is_homeopath : !!is_homeopath, req.user.id]
+    await pool.query(
+      `UPDATE users SET 
+        name = $1, 
+        email = $2, 
+        phone = $3, 
+        cpf = $4, 
+        profession = $5, 
+        custom_profession = $6, 
+        council_type = $7, 
+        council_number = $8, 
+        council_state = $9, 
+        specialty = $10, 
+        rqe = $11, 
+        bio = $12, 
+        billing_zip = $13, 
+        billing_street = $14, 
+        billing_number = $15, 
+        billing_complement = $16, 
+        billing_neighborhood = $17, 
+        billing_city = $18, 
+        billing_state = $19, 
+        commercial_zip = $20, 
+        commercial_street = $21, 
+        commercial_number = $22, 
+        commercial_complement = $23, 
+        commercial_neighborhood = $24, 
+        commercial_city = $25, 
+        commercial_state = $26, 
+        commercial_phone = $27, 
+        is_homeopath = $28
+       WHERE id = $29`,
+      [
+        name,
+        email,
+        phone,
+        cpf,
+        profession,
+        custom_profession,
+        council_type,
+        council_number,
+        council_state,
+        specialty,
+        rqe,
+        bio,
+        billing_zip,
+        billing_street,
+        billing_number,
+        billing_complement,
+        billing_neighborhood,
+        billing_city,
+        billing_state,
+        commercial_zip,
+        commercial_street,
+        commercial_number,
+        commercial_complement,
+        commercial_neighborhood,
+        commercial_city,
+        commercial_state,
+        commercial_phone,
+        is_homeopath === undefined ? req.user.is_homeopath : !!is_homeopath,
+        req.user.id
+      ]
     );
 
-    if (req.user.role === 'STUDENT') {
-      // Upsert student_profile
-      const checkProfile = await client.query('SELECT user_id FROM student_profiles WHERE user_id = $1', [req.user.id]);
-      if (checkProfile.rows.length > 0) {
-        await client.query(
-          `UPDATE student_profiles SET 
-            professional_registration_type = $1, 
-            professional_registration_number = $2, 
-            phone = $3, 
-            cpf_cnpj = $4, 
-            address_zip = $5, 
-            address_street = $6, 
-            address_number = $7, 
-            address_complement = $8, 
-            address_neighborhood = $9, 
-            address_city = $10, 
-            address_state = $11 
-           WHERE user_id = $12`,
-          [
-            professional_registration_type,
-            professional_registration_number,
-            phone,
-            cpf_cnpj,
-            address_zip,
-            address_street,
-            address_number,
-            address_complement,
-            address_neighborhood,
-            address_city,
-            address_state,
-            req.user.id
-          ]
-        );
-      } else {
-        await client.query(
-          `INSERT INTO student_profiles 
-            (user_id, professional_registration_type, professional_registration_number, phone, cpf_cnpj, address_zip, address_street, address_number, address_complement, address_neighborhood, address_city, address_state) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-          [
-            req.user.id,
-            professional_registration_type,
-            professional_registration_number,
-            phone,
-            cpf_cnpj,
-            address_zip,
-            address_street,
-            address_number,
-            address_complement,
-            address_neighborhood,
-            address_city,
-            address_state
-          ]
-        );
-      }
-    } else if (req.user.role === 'TEACHER') {
-      // Upsert teacher_profile
-      const checkProfile = await client.query('SELECT user_id FROM teacher_profiles WHERE user_id = $1', [req.user.id]);
-      if (checkProfile.rows.length > 0) {
-        await client.query(
-          'UPDATE teacher_profiles SET crm = $1, rqe = $2, bio = $3 WHERE user_id = $4',
-          [crm, rqe, bio, req.user.id]
-        );
-      } else {
-        await client.query(
-          'INSERT INTO teacher_profiles (user_id, crm, rqe, bio) VALUES ($1, $2, $3, $4)',
-          [req.user.id, crm, rqe, bio]
-        );
-      }
-    }
-
-    await client.query('COMMIT');
     res.json({ message: 'Perfil atualizado com sucesso!' });
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error(error);
     res.status(500).json({ message: 'Erro ao atualizar perfil.' });
-  } finally {
-    client.release();
   }
 });
 
@@ -345,38 +406,31 @@ router.put('/profile', authenticateToken, async (req, res) => {
 router.get('/homeopaths', async (req, res) => {
   try {
     const queryStr = `
-      SELECT u.id, u.name, u.email, u.role,
-             sp.professional_registration_type, sp.professional_registration_number, sp.phone, sp.address_city, sp.address_state,
-             tp.crm, tp.rqe, tp.bio
-      FROM users u
-      LEFT JOIN student_profiles sp ON sp.user_id = u.id
-      LEFT JOIN teacher_profiles tp ON tp.user_id = u.id
-      WHERE u.is_homeopath = TRUE AND u.status = 'ACTIVE'
-      ORDER BY u.name ASC
+      SELECT id, name, email, role, profession, custom_profession,
+             council_type, council_number, council_state, specialty, rqe, bio,
+             commercial_city, commercial_state, commercial_phone
+      FROM users
+      WHERE is_homeopath = TRUE AND status = 'ACTIVE'
+      ORDER BY name ASC
     `;
     const result = await pool.query(queryStr);
     
     const homeopaths = result.rows.map(row => {
       let reg = '';
-      let specialty = '';
-      let city = '';
-      
-      if (row.role === 'TEACHER') {
-        reg = row.crm || 'CRM';
-        specialty = 'Professor / Método Sensação Vital';
-        city = 'Curitiba - PR';
-      } else {
-        reg = `${row.professional_registration_type || 'CRM'} ${row.professional_registration_number || ''}`;
-        specialty = 'Homeopatia Clássica';
-        city = (row.address_city && row.address_state) ? `${row.address_city} - ${row.address_state}` : 'Não informado';
+      if (row.council_type && row.council_number) {
+        reg = `${row.council_type}-${row.council_state || ''} ${row.council_number}`;
       }
+      
+      let specialty = row.specialty || '';
+      let city = (row.commercial_city && row.commercial_state) ? `${row.commercial_city} - ${row.commercial_state}` : 'Não informado';
       
       return {
         name: row.name,
         reg: reg.trim(),
+        profession: row.profession === 'outro' ? row.custom_profession : row.profession,
         specialty: specialty,
         city: city,
-        phone: row.phone || '',
+        phone: row.commercial_phone || '',
         email: row.email
       };
     });
