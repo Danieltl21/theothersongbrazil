@@ -1215,6 +1215,10 @@ export default function App() {
   const [editingUser, setEditingUser] = useState(null);
   const [editingPayment, setEditingPayment] = useState(null);
   const [editingClass, setEditingClass] = useState(null);
+  const [courseBannerPreview, setCourseBannerPreview] = useState('');
+  const [classCourseSearch, setClassCourseSearch] = useState('');
+  const [classTeacherSearch, setClassTeacherSearch] = useState('');
+  const [classStudentSearch, setClassStudentSearch] = useState('');
   const [formUserRole, setFormUserRole] = useState('STUDENT');
   const [adminRegType, setAdminRegType] = useState('CRM');
   const [adminRegNumber, setAdminRegNumber] = useState('');
@@ -2161,6 +2165,8 @@ export default function App() {
     const description = e.target.description.value;
     const type = e.target.type.value;
     const duration_days = parseInt(e.target.duration_days.value) || 180;
+    const workload_hours = parseInt(e.target.workload_hours?.value) || (duration_days ? duration_days * 2 : 180);
+    const banner_url = e.target.banner_url?.value || courseBannerPreview || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800';
     const finishing_message = e.target.finishing_message?.value || '';
     const teacher_id = e.target.teacher_id.value;
 
@@ -2177,6 +2183,8 @@ export default function App() {
               description,
               type,
               duration_days,
+              workload_hours,
+              banner_url,
               finishing_message,
               teacher_id
             };
@@ -2190,6 +2198,8 @@ export default function App() {
           description,
           type,
           duration_days,
+          workload_hours,
+          banner_url,
           finishing_message,
           teacher_id,
           active: true
@@ -3397,8 +3407,6 @@ NEWFILEENCODING:NONE
     clearAlerts();
     const name = e.target.name.value;
     const course_id = e.target.course_id.value;
-    const max_students = parseInt(e.target.max_students.value) || 0;
-    const max_teachers = parseInt(e.target.max_teachers.value) || 0;
 
     const selectedTeachers = Array.from(e.target.elements)
       .filter(el => el.name === 'teacher_ids' && el.checked)
@@ -3407,16 +3415,6 @@ NEWFILEENCODING:NONE
     const selectedStudents = Array.from(e.target.elements)
       .filter(el => el.name === 'student_ids' && el.checked)
       .map(el => el.value);
-
-    if (max_students > 0 && selectedStudents.length > max_students) {
-      setError(`O número de alunos alocados (${selectedStudents.length}) excede o limite máximo permitido (${max_students}).`);
-      return;
-    }
-
-    if (max_teachers > 0 && selectedTeachers.length > max_teachers) {
-      setError(`O número de professores alocados (${selectedTeachers.length}) excede o limite máximo permitido (${max_teachers}).`);
-      return;
-    }
 
     setMockDb(prev => {
       let updatedClasses;
@@ -3428,9 +3426,7 @@ NEWFILEENCODING:NONE
               name,
               course_id,
               teacher_ids: selectedTeachers,
-              student_ids: selectedStudents,
-              max_students,
-              max_teachers
+              student_ids: selectedStudents
             };
           }
           return c;
@@ -3441,9 +3437,7 @@ NEWFILEENCODING:NONE
           name,
           course_id,
           teacher_ids: selectedTeachers,
-          student_ids: selectedStudents,
-          max_students,
-          max_teachers
+          student_ids: selectedStudents
         };
         updatedClasses = [...(prev.classes || []), newClass];
       }
@@ -5812,7 +5806,7 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <div className="quiz-header mb-4">
                       <h3>Gerenciamento de Cursos Acadêmicos</h3>
-                      <button className="btn btn-primary" onClick={() => setEditingCourse({})}>＋ Criar Novo Curso</button>
+                      <button className="btn btn-primary" onClick={() => { setEditingCourse({}); setCourseBannerPreview(''); }}>＋ Criar Novo Curso</button>
                     </div>
 
                     {editingCourse && (
@@ -5825,12 +5819,52 @@ NEWFILEENCODING:NONE
                           <input className="form-input" name="title" defaultValue={editingCourse.title || ''} required placeholder="ex: Introdução à Sensação Vital" />
                         </div>
 
+                        {/* UPLOAD DE BANNER DO CURSO */}
+                        <div className="form-group mb-4">
+                          <label className="form-label">Banner / Capa do Curso</label>
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <input 
+                              className="form-input" 
+                              name="banner_url" 
+                              value={courseBannerPreview || editingCourse.banner_url || ''} 
+                              onChange={(e) => setCourseBannerPreview(e.target.value)} 
+                              placeholder="URL da imagem de capa..." 
+                            />
+                            <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0, padding: '0.5rem 1rem' }}>
+                              📁 Upload Imagem
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                style={{ display: 'none' }} 
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => setCourseBannerPreview(reader.result);
+                                    reader.readAsDataURL(file);
+                                  }
+                                }} 
+                              />
+                            </label>
+                          </div>
+                          {(courseBannerPreview || editingCourse.banner_url) && (
+                            <div style={{ marginTop: '0.5rem', borderRadius: '8px', overflow: 'hidden', maxHeight: '180px', border: '1px solid var(--color-border)' }}>
+                              <img 
+                                src={courseBannerPreview || editingCourse.banner_url} 
+                                alt="Banner do Curso" 
+                                style={{ width: '100%', height: '180px', objectFit: 'cover' }} 
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            </div>
+                          )}
+                        </div>
+
                         <div className="form-group">
                           <label className="form-label">Descrição</label>
                           <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Descreva os objetivos do curso..." />
                         </div>
 
-                        <div className="grid-2col">
+                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                           <div className="form-group">
                             <label className="form-label">Tipo de Curso</label>
                             <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
@@ -5842,6 +5876,10 @@ NEWFILEENCODING:NONE
                           <div className="form-group">
                             <label className="form-label">Duração de Acesso (Dias)</label>
                             <input className="form-input" type="number" name="duration_days" defaultValue={editingCourse.duration_days || 180} required />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Carga Horária (Horas)</label>
+                            <input className="form-input" type="number" name="workload_hours" defaultValue={editingCourse.workload_hours || (editingCourse.duration_days ? editingCourse.duration_days * 2 : 180)} required placeholder="ex: 180" />
                           </div>
                         </div>
 
@@ -5925,8 +5963,24 @@ NEWFILEENCODING:NONE
                           </div>
                         </div>
 
+                        {/* BOTÕES DE AÇÃO INTERNOS DA EDIÇÃO DE CURSO */}
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingCourse(null)}>Cancelar</button>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => { setEditingCourse(null); setCourseBannerPreview(''); }}>Cancelar</button>
+                          {editingCourse.id && (
+                            <button 
+                              className="btn btn-danger flex-1" 
+                              type="button" 
+                              onClick={() => {
+                                if (window.confirm(`Tem certeza que deseja excluir o curso "${editingCourse.title}"? Esta ação não poderá ser desfeita.`)) {
+                                  handleDeleteCourse(editingCourse.id);
+                                  setEditingCourse(null);
+                                  setCourseBannerPreview('');
+                                }
+                              }}
+                            >
+                              🗑️ Excluir Curso
+                            </button>
+                          )}
                           <button className="btn btn-primary flex-1" type="submit">Gravar Curso no LMS</button>
                         </div>
                       </form>
@@ -5940,53 +5994,27 @@ NEWFILEENCODING:NONE
                             <th>Título</th>
                             <th>Tipo</th>
                             <th>Duração</th>
-                            <th>Professor / Valores Configurados</th>
+                            <th>Carga Horária</th>
                             <th>Ações</th>
                           </tr>
                         </thead>
                         <tbody>
                           {mockDb.courses.map(c => {
-                            const mainTeacher = mockDb.users.find(u => u.id === c.teacher_id);
-                            const courseConfigs = (mockDb.teacher_courses || []).filter(tc => tc.course_id === c.id);
-                            const historyCount = (mockDb.teacher_payment_history || []).filter(h => h.course_id === c.id).length;
+                            const cargaHoraria = c.workload_hours || (c.duration_days ? c.duration_days * 2 : 180);
 
                             return (
                               <tr key={c.id}>
                                 <td><code>{c.id}</code></td>
-                                <td><strong>{c.title}</strong></td>
+                                <td>
+                                  <strong>{c.title}</strong>
+                                </td>
                                 <td><span className="course-type-badge">{c.type}</span></td>
                                 <td>{c.duration_days} dias</td>
+                                <td><span className="badge-paid">⏱️ {cargaHoraria}h Didáticas</span></td>
                                 <td>
-                                  <div style={{ fontSize: '0.85rem' }}>
-                                    <div>👤 <strong>{mainTeacher ? mainTeacher.name : c.teacher_id}</strong></div>
-                                    {courseConfigs.map(tc => {
-                                      const tObj = mockDb.users.find(u => u.id === tc.teacher_id);
-                                      const typeLabel = tc.payment_type === 'hora_aula' ? '⏱️ Hora Aula' : tc.payment_type === 'percentual' ? '📊 Percentual' : '💵 Valor Fixo';
-                                      const rateStr = tc.payment_type === 'percentual' ? `${tc.payment_rate}%` : `R$ ${parseFloat(tc.payment_rate).toFixed(2)}`;
-                                      return (
-                                        <div key={tc.id} className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                                          • {tObj ? tObj.name.split(' ')[0] : 'Prof'}: {typeLabel} ({rateStr})
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>
-                                      ✏️ Editar
-                                    </button>
-                                    <button 
-                                      className="btn btn-secondary" 
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#e2e8f0' }} 
-                                      onClick={() => setViewingCourseHistory({ courseId: c.id, courseTitle: c.title })}
-                                    >
-                                      📜 Histórico ({historyCount})
-                                    </button>
-                                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>
-                                      🗑️ Excluir
-                                    </button>
-                                  </div>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setEditingCourse(c); setCourseBannerPreview(c.banner_url || ''); }}>
+                                    ✏️ Editar
+                                  </button>
                                 </td>
                               </tr>
                             );
@@ -6701,62 +6729,99 @@ NEWFILEENCODING:NONE
                             <input className="form-input" name="name" defaultValue={editingClass.name || ''} required placeholder="ex: Turma Alfa - Sensação Vital 2026" />
                           </div>
                           <div className="form-group">
-                            <label className="form-label">Curso Associado</label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                              <label className="form-label" style={{ margin: 0 }}>Curso Associado</label>
+                              <input 
+                                className="form-input" 
+                                placeholder="🔍 Pesquisar curso por nome..." 
+                                value={classCourseSearch} 
+                                onChange={(e) => setClassCourseSearch(e.target.value)} 
+                                style={{ width: '220px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                              />
+                            </div>
                             <select className="form-input" name="course_id" defaultValue={editingClass.course_id || ''} required>
                               <option value="" disabled>-- Selecione o Curso --</option>
-                              {mockDb.courses.map(c => (
-                                <option key={c.id} value={c.id}>{c.title} ({c.type})</option>
-                              ))}
+                              {mockDb.courses
+                                .filter(c => c.title.toLowerCase().includes(classCourseSearch.toLowerCase()))
+                                .map(c => (
+                                  <option key={c.id} value={c.id}>{c.title} ({c.type})</option>
+                                ))}
                             </select>
                           </div>
                         </div>
 
-                        {/* Abas/Campos de Limites */}
-                        <div className="grid-2col" style={{ margin: '1rem 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: '1rem 0' }}>
-                          <div className="form-group">
-                            <label className="form-label">📊 Limite Máximo de Alunos (0 para ilimitado)</label>
-                            <input className="form-input" type="number" name="max_students" defaultValue={editingClass.max_students || 0} required />
+                        {/* Alocação de Professores e Alunos via Checkbox com Busca por Nome */}
+                        <div className="grid-2col" style={{ gap: '2rem', marginTop: '1.5rem' }}>
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <h5 style={{ fontWeight: 'bold', margin: 0 }}>Alocar Professores</h5>
+                              <input 
+                                className="form-input" 
+                                placeholder="🔍 Pesquisar professor..." 
+                                value={classTeacherSearch} 
+                                onChange={(e) => setClassTeacherSearch(e.target.value)} 
+                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                              />
+                            </div>
+                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
+                              {mockDb.users
+                                .filter(u => u.role === 'TEACHER' && u.name.toLowerCase().includes(classTeacherSearch.toLowerCase()))
+                                .map(u => {
+                                  const isChecked = (editingClass.teacher_ids || []).includes(u.id);
+                                  return (
+                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                      <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
+                                      <span><strong>{u.name}</strong> <span className="text-muted">({u.email})</span></span>
+                                    </label>
+                                  );
+                                })}
+                            </div>
                           </div>
-                          <div className="form-group">
-                            <label className="form-label">👥 Limite Máximo de Professores (0 para ilimitado)</label>
-                            <input className="form-input" type="number" name="max_teachers" defaultValue={editingClass.max_teachers || 0} required />
+
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <h5 style={{ fontWeight: 'bold', margin: 0 }}>Alocar Alunos</h5>
+                              <input 
+                                className="form-input" 
+                                placeholder="🔍 Pesquisar aluno..." 
+                                value={classStudentSearch} 
+                                onChange={(e) => setClassStudentSearch(e.target.value)} 
+                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                              />
+                            </div>
+                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
+                              {mockDb.users
+                                .filter(u => u.role === 'STUDENT' && u.name.toLowerCase().includes(classStudentSearch.toLowerCase()))
+                                .map(u => {
+                                  const isChecked = (editingClass.student_ids || []).includes(u.id);
+                                  return (
+                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                      <input type="checkbox" name="student_ids" value={u.id} defaultChecked={isChecked} />
+                                      <span><strong>{u.name}</strong> <span className="text-muted">({u.email})</span></span>
+                                    </label>
+                                  );
+                                })}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Alocação de Professores e Alunos via Checkbox */}
-                        <div className="grid-2col" style={{ gap: '2rem' }}>
-                          <div>
-                            <h5 className="mb-2" style={{ fontWeight: 'bold' }}>Alocar Professores</h5>
-                            <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px' }}>
-                              {mockDb.users.filter(u => u.role === 'TEACHER').map(u => {
-                                const isChecked = (editingClass.teacher_ids || []).includes(u.id);
-                                return (
-                                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                                    <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
-                                    <span>{u.name} ({u.email})</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                          <div>
-                            <h5 className="mb-2" style={{ fontWeight: 'bold' }}>Alocar Alunos</h5>
-                            <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px' }}>
-                              {mockDb.users.filter(u => u.role === 'STUDENT').map(u => {
-                                const isChecked = (editingClass.student_ids || []).includes(u.id);
-                                return (
-                                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                                    <input type="checkbox" name="student_ids" value={u.id} defaultChecked={isChecked} />
-                                    <span>{u.name} ({u.email})</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-
+                        {/* BOTÕES DE AÇÃO DO MENU DE EDIÇÃO DE TURMAS */}
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingClass(null)}>Cancelar</button>
+                          {editingClass.id && (
+                            <button 
+                              className="btn btn-danger flex-1" 
+                              type="button" 
+                              onClick={() => {
+                                if (window.confirm(`Tem certeza que deseja excluir a turma "${editingClass.name}"? Esta ação não poderá ser desfeita.`)) {
+                                  handleDeleteClass(editingClass.id);
+                                  setEditingClass(null);
+                                }
+                              }}
+                            >
+                              🗑️ Excluir Turma
+                            </button>
+                          )}
                           <button className="btn btn-primary flex-1" type="submit">Gravar Turma</button>
                         </div>
                       </form>
@@ -6770,10 +6835,8 @@ NEWFILEENCODING:NONE
                           <tr>
                             <th>Nome da Turma</th>
                             <th>Curso Associado</th>
-                            <th>Carga Horária</th>
                             <th>Professores Alocados</th>
                             <th>Alunos Matriculados</th>
-                            <th>Vagas / Limites</th>
                             <th>Ações</th>
                           </tr>
                         </thead>
@@ -6782,24 +6845,19 @@ NEWFILEENCODING:NONE
                             const course = mockDb.courses.find(course => course.id === c.course_id);
                             const teachers = mockDb.users.filter(u => (c.teacher_ids || []).includes(u.id));
                             const studentsInClass = mockDb.users.filter(u => (c.student_ids || []).includes(u.id));
-                            const cargaHoraria = course ? (course.duration_days ? course.duration_days * 2 : 180) : 0;
+
                             return (
                               <tr key={c.id}>
                                 <td>
                                   <strong>{c.name}</strong>
                                 </td>
                                 <td>{course ? course.title : 'Curso Removido'}</td>
-                                <td><span className="badge-paid">⏱️ {cargaHoraria}h Didáticas</span></td>
                                 <td>
                                   {teachers.map(t => <div key={t.id} style={{ fontSize: '0.85rem' }}>👨‍🏫 {t.name}</div>)}
                                   {teachers.length === 0 && <span className="text-muted">Nenhum professor</span>}
                                 </td>
                                 <td>
                                   <strong>{studentsInClass.length}</strong> aluno(s)
-                                </td>
-                                <td>
-                                  <small className="text-muted">Alunos: {c.max_students > 0 ? `${studentsInClass.length}/${c.max_students}` : 'Ilimitado'}</small><br />
-                                  <small className="text-muted">Profs: {c.max_teachers > 0 ? `${teachers.length}/${c.max_teachers}` : 'Ilimitado'}</small>
                                 </td>
                                 <td>
                                   <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
@@ -6818,14 +6876,6 @@ NEWFILEENCODING:NONE
                                       title="Editar Dados da Turma"
                                     >
                                       ✏️ Editar
-                                    </button>
-                                    <button 
-                                      className="btn btn-danger" 
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
-                                      onClick={() => handleDeleteClass(c.id)}
-                                      title="Excluir Turma"
-                                    >
-                                      🗑️ Excluir
                                     </button>
                                   </div>
                                 </td>
