@@ -2868,8 +2868,33 @@ function App() {
         if (!parsed.teacher_courses) {
           parsed.teacher_courses = [
             { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
-            { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
+            { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'percentual', payment_rate: 15.00 },
             { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
+          ];
+          changed = true;
+        }
+        if (!parsed.teacher_payment_history) {
+          parsed.teacher_payment_history = [
+            {
+              id: 'tph-init-1',
+              course_id: 'course-post',
+              teacher_id: 'teacher-id',
+              teacher_name: 'Dr. Carlos Eduardo (TOSB)',
+              payment_type: 'hora_aula',
+              payment_rate: 150.00,
+              created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+              notes: 'Configuração Inicial do Curso de Pós-Graduação'
+            },
+            {
+              id: 'tph-init-2',
+              course_id: 'course-free',
+              teacher_id: 'teacher-id',
+              teacher_name: 'Dr. Carlos Eduardo (TOSB)',
+              payment_type: 'percentual',
+              payment_rate: 15.00,
+              created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+              notes: 'Configuração Inicial no Curso Introdutório'
+            }
           ];
           changed = true;
         }
@@ -2953,8 +2978,30 @@ function App() {
       temporary_unlocks: [],
       teacher_courses: [
         { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
-        { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'comissao', payment_rate: 15.00 },
+        { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'percentual', payment_rate: 15.00 },
         { id: 'tc-3', teacher_id: 'teacher-id', course_id: 'course-sub', payment_type: 'valor_fixo', payment_rate: 2500.00 }
+      ],
+      teacher_payment_history: [
+        {
+          id: 'tph-init-1',
+          course_id: 'course-post',
+          teacher_id: 'teacher-id',
+          teacher_name: 'Dr. Carlos Eduardo (TOSB)',
+          payment_type: 'hora_aula',
+          payment_rate: 150.00,
+          created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          notes: 'Configuração Inicial do Curso de Pós-Graduação'
+        },
+        {
+          id: 'tph-init-2',
+          course_id: 'course-free',
+          teacher_id: 'teacher-id',
+          teacher_name: 'Dr. Carlos Eduardo (TOSB)',
+          payment_type: 'percentual',
+          payment_rate: 15.00,
+          created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+          notes: 'Configuração Inicial no Curso Introdutório'
+        }
       ]
     };
     localStorage.setItem('mock_db', JSON.stringify(initialDb));
@@ -3475,6 +3522,7 @@ function App() {
   // Estados de Edição CRUD Administrador
   const [adminCrudTab, setAdminCrudTab] = useState('courses'); // courses, books
   const [editingCourse, setEditingCourse] = useState(null);
+  const [viewingCourseHistory, setViewingCourseHistory] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [editingPayment, setEditingPayment] = useState(null);
@@ -4420,41 +4468,114 @@ function App() {
   const handleSaveCourse = (e) => {
     e.preventDefault();
     clearAlerts();
-    const id = e.target.id.value || 'course_' + Date.now();
+    const id = e.target.id?.value;
     const title = e.target.title.value;
     const description = e.target.description.value;
     const type = e.target.type.value;
     const duration_days = parseInt(e.target.duration_days.value) || 180;
-    const finishing_message = e.target.finishing_message.value;
-    const teacher_id = e.target.teacher_id.value || 'teacher-id';
+    const finishing_message = e.target.finishing_message?.value || '';
+    const teacher_id = e.target.teacher_id.value;
+
+    const targetCourseId = id || ('course-' + Date.now());
 
     setMockDb(prev => {
       let updatedCourses;
-      const exists = prev.courses.some(c => c.id === id);
-      if (exists) {
-        updatedCourses = prev.courses.map(c => c.id === id ? { ...c, title, description, type, duration_days, finishing_message, teacher_id } : c);
-        setSuccess('Curso atualizado com sucesso!');
+      if (id) {
+        updatedCourses = prev.courses.map(c => {
+          if (c.id === id) {
+            return {
+              ...c,
+              title,
+              description,
+              type,
+              duration_days,
+              finishing_message,
+              teacher_id
+            };
+          }
+          return c;
+        });
       } else {
-        const newCourse = { id, title, description, type, duration_days, finishing_message, teacher_id, active: true };
+        const newCourse = {
+          id: targetCourseId,
+          title,
+          description,
+          type,
+          duration_days,
+          finishing_message,
+          teacher_id,
+          active: true
+        };
         updatedCourses = [...prev.courses, newCourse];
-        setSuccess('Curso criado com sucesso!');
       }
-      return { ...prev, courses: updatedCourses };
+
+      // Atualizar Valores dos Professores para este curso e registrar no Histórico
+      let updatedTeacherCourses = [...(prev.teacher_courses || [])];
+      let updatedHistory = [...(prev.teacher_payment_history || [])];
+
+      const teachers = prev.users.filter(u => u.role === 'TEACHER');
+      teachers.forEach(t => {
+        const typeInput = e.target[`payment_type_${t.id}`];
+        const rateInput = e.target[`payment_rate_${t.id}`];
+
+        if (typeInput && rateInput) {
+          const newType = typeInput.value;
+          const newRate = parseFloat(rateInput.value) || 0;
+
+          // Verificar configuração atual
+          const existingConfigIndex = updatedTeacherCourses.findIndex(tc => tc.teacher_id === t.id && tc.course_id === targetCourseId);
+          const currentConfig = existingConfigIndex > -1 ? updatedTeacherCourses[existingConfigIndex] : null;
+
+          // Se mudou ou é novo, adiciona ao histórico permanentemente para consulta
+          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate) {
+            const historyEntry = {
+              id: 'tph-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+              course_id: targetCourseId,
+              teacher_id: t.id,
+              teacher_name: t.name,
+              payment_type: newType,
+              payment_rate: newRate,
+              created_at: new Date().toISOString(),
+              notes: id ? 'Atualização de valor na Gestão de Cursos' : 'Valores definidos na criação do curso'
+            };
+            updatedHistory.unshift(historyEntry);
+          }
+
+          const newTcObj = {
+            id: currentConfig ? currentConfig.id : `tc_${t.id}_${targetCourseId}`,
+            teacher_id: t.id,
+            course_id: targetCourseId,
+            payment_type: newType,
+            payment_rate: newRate,
+            updated_at: new Date().toISOString()
+          };
+
+          if (existingConfigIndex > -1) {
+            updatedTeacherCourses[existingConfigIndex] = newTcObj;
+          } else {
+            updatedTeacherCourses.push(newTcObj);
+          }
+        }
+      });
+
+      return {
+        ...prev,
+        courses: updatedCourses,
+        teacher_courses: updatedTeacherCourses,
+        teacher_payment_history: updatedHistory
+      };
     });
 
+    setSuccess(id ? 'Curso e valores de pagamento docentes salvos no histórico!' : 'Curso cadastrado com valores docentes no histórico!');
     setEditingCourse(null);
-    e.target.reset();
   };
 
-  const handleDeleteCourse = (id) => {
-    clearAlerts();
-    if (confirm('Tem certeza que deseja remover este curso do catálogo?')) {
-      setMockDb(prev => {
-        const updatedCourses = prev.courses.filter(c => c.id !== id);
-        return { ...prev, courses: updatedCourses };
-      });
-      setSuccess('Curso removido com sucesso!');
-    }
+  const handleDeleteCourse = (courseId) => {
+    setMockDb(prev => ({
+      ...prev,
+      courses: (prev.courses || []).filter(c => c.id !== courseId)
+    }));
+    setSuccess('Curso removido com sucesso.');
   };
 
   const handleSaveBook = (e) => {
@@ -8042,8 +8163,78 @@ NEWFILEENCODING:NONE
                         </div>
 
                         <div className="form-group">
-                          <label className="form-label">ID do Professor Responsável</label>
-                          <input className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required />
+                          <label className="form-label">Professor Responsável Principal</label>
+                          <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
+                            {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
+                              <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* SEÇÃO: DEFINIÇÃO DE REMUNERAÇÃO DOS PROFESSORES PARA ESTE CURSO */}
+                        <div style={{ marginTop: '2rem', padding: '1.25rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                          <h4 className="mb-2" style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            💰 Valores & Remuneração dos Professores Cadastrados
+                          </h4>
+                          <p className="text-muted mb-4" style={{ fontSize: '0.85rem' }}>
+                            Defina os honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong>. As alterações são gravadas no histórico para consulta.
+                          </p>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {mockDb.users.filter(u => u.role === 'TEACHER').map(t => {
+                              const currentConfig = (mockDb.teacher_courses || []).find(tc => tc.teacher_id === t.id && tc.course_id === (editingCourse.id || ''));
+                              const teacherHistoryCount = (mockDb.teacher_payment_history || []).filter(h => h.teacher_id === t.id && h.course_id === editingCourse.id).length;
+                              
+                              return (
+                                <div key={t.id} style={{ padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                    <span style={{ fontWeight: '600', color: 'var(--color-text)', fontSize: '0.95rem' }}>
+                                      👨‍🏫 {t.name} <span className="text-muted" style={{ fontWeight: 'normal', fontSize: '0.85rem' }}>({t.email})</span>
+                                    </span>
+                                    {editingCourse.id && (
+                                      <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                                        onClick={() => setViewingCourseHistory({ courseId: editingCourse.id, teacherId: t.id, teacherName: t.name, courseTitle: editingCourse.title })}
+                                      >
+                                        📜 Consultar Histórico ({teacherHistoryCount})
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <div className="grid-2col" style={{ gap: '0.75rem' }}>
+                                    <div>
+                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Modalidade de Pagamento</label>
+                                      <select 
+                                        className="form-input" 
+                                        name={`payment_type_${t.id}`} 
+                                        defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
+                                        style={{ fontSize: '0.85rem' }}
+                                      >
+                                        <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
+                                        <option value="valor_fixo">💵 Valor Fixo (R$)</option>
+                                        <option value="percentual">📊 Percentual (%)</option>
+                                      </select>
+                                    </div>
+
+                                    <div>
+                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa (R$ ou %)</label>
+                                      <input 
+                                        className="form-input" 
+                                        type="number" 
+                                        step="0.01" 
+                                        name={`payment_rate_${t.id}`} 
+                                        defaultValue={currentConfig?.payment_rate || (editingCourse.type === 'POSTGRAD' ? 150.00 : editingCourse.type === 'FREE' ? 15.00 : 2500.00)}
+                                        placeholder="ex: 150.00 ou 15.00"
+                                        style={{ fontSize: '0.85rem' }}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -8060,28 +8251,139 @@ NEWFILEENCODING:NONE
                             <th>ID</th>
                             <th>Título</th>
                             <th>Tipo</th>
-                            <th>Duração (Dias)</th>
+                            <th>Duração</th>
+                            <th>Professor / Valores Configurados</th>
                             <th>Ações</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {mockDb.courses.map(c => (
-                            <tr key={c.id}>
-                              <td><code>{c.id}</code></td>
-                              <td><strong>{c.title}</strong></td>
-                              <td><span className="course-type-badge">{c.type}</span></td>
-                              <td>{c.duration_days} dias</td>
-                              <td>
-                                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>Editar</button>
-                                  <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>Excluir</button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {mockDb.courses.map(c => {
+                            const mainTeacher = mockDb.users.find(u => u.id === c.teacher_id);
+                            const courseConfigs = (mockDb.teacher_courses || []).filter(tc => tc.course_id === c.id);
+                            const historyCount = (mockDb.teacher_payment_history || []).filter(h => h.course_id === c.id).length;
+
+                            return (
+                              <tr key={c.id}>
+                                <td><code>{c.id}</code></td>
+                                <td><strong>{c.title}</strong></td>
+                                <td><span className="course-type-badge">{c.type}</span></td>
+                                <td>{c.duration_days} dias</td>
+                                <td>
+                                  <div style={{ fontSize: '0.85rem' }}>
+                                    <div>👤 <strong>{mainTeacher ? mainTeacher.name : c.teacher_id}</strong></div>
+                                    {courseConfigs.map(tc => {
+                                      const tObj = mockDb.users.find(u => u.id === tc.teacher_id);
+                                      const typeLabel = tc.payment_type === 'hora_aula' ? '⏱️ Hora Aula' : tc.payment_type === 'percentual' ? '📊 Percentual' : '💵 Valor Fixo';
+                                      const rateStr = tc.payment_type === 'percentual' ? `${tc.payment_rate}%` : `R$ ${parseFloat(tc.payment_rate).toFixed(2)}`;
+                                      return (
+                                        <div key={tc.id} className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.2rem' }}>
+                                          • {tObj ? tObj.name.split(' ')[0] : 'Prof'}: {typeLabel} ({rateStr})
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingCourse(c)}>
+                                      ✏️ Editar
+                                    </button>
+                                    <button 
+                                      className="btn btn-secondary" 
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#e2e8f0' }} 
+                                      onClick={() => setViewingCourseHistory({ courseId: c.id, courseTitle: c.title })}
+                                    >
+                                      📜 Histórico ({historyCount})
+                                    </button>
+                                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteCourse(c.id)}>
+                                      🗑️ Excluir
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
+
+                    {/* MODAL DE HISTÓRICO DE VALORES PARA CONSULTA */}
+                    {viewingCourseHistory && (
+                      <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
+                        <div className="card p-5" style={{ maxWidth: '850px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
+                            <div>
+                              <h3 className="font-serif-title" style={{ color: 'var(--color-primary)', margin: 0 }}>
+                                📜 Histórico de Consulta de Valores Docentes
+                              </h3>
+                              <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
+                                Curso: <strong>{viewingCourseHistory.courseTitle}</strong> {viewingCourseHistory.teacherName && `| Professor: ${viewingCourseHistory.teacherName}`}
+                              </p>
+                            </div>
+                            <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setViewingCourseHistory(null)}>
+                              ✕ Fechar
+                            </button>
+                          </div>
+
+                          {(() => {
+                            const historyList = (mockDb.teacher_payment_history || []).filter(h => {
+                              if (viewingCourseHistory.teacherId) {
+                                return h.course_id === viewingCourseHistory.courseId && h.teacher_id === viewingCourseHistory.teacherId;
+                              }
+                              return h.course_id === viewingCourseHistory.courseId;
+                            });
+
+                            if (historyList.length === 0) {
+                              return (
+                                <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--color-text-muted)' }}>
+                                  <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '1rem' }}>📁</span>
+                                  <p>Nenhum registro de valor anterior localizado no histórico para este filtro.</p>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div className="table-responsive">
+                                <table className="lms-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Data / Hora da Alteração</th>
+                                      <th>Professor</th>
+                                      <th>Modalidade</th>
+                                      <th>Valor / Taxa Registrado</th>
+                                      <th>Observações / Origem</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {historyList.map(h => {
+                                      const dateStr = new Date(h.created_at).toLocaleString('pt-BR');
+                                      const typeLabel = h.payment_type === 'hora_aula' ? '⏱️ Hora Aula (R$/h)' : h.payment_type === 'percentual' ? '📊 Percentual (%)' : '💵 Valor Fixo (R$)';
+                                      const rateStr = h.payment_type === 'percentual' ? `${h.payment_rate}%` : `R$ ${parseFloat(h.payment_rate).toFixed(2)}`;
+
+                                      return (
+                                        <tr key={h.id}>
+                                          <td><small className="text-muted">{dateStr}</small></td>
+                                          <td><strong>{h.teacher_name}</strong></td>
+                                          <td><span className="course-type-badge">{typeLabel}</span></td>
+                                          <td><strong style={{ color: 'var(--color-primary)' }}>{rateStr}</strong></td>
+                                          <td><small>{h.notes || 'Atualização no cadastro'}</small></td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            );
+                          })()}
+
+                          <div style={{ textAlign: 'right', marginTop: '1.5rem' }}>
+                            <button className="btn btn-primary" onClick={() => setViewingCourseHistory(null)}>
+                              Fechar Consulta
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
