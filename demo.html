@@ -713,6 +713,15 @@ h1, h2, h3, h4 {
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: bold;
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.badge-overdue {
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
   background-color: #fee2e2;
   color: #991b1b;
 }
@@ -1051,6 +1060,37 @@ h1, h2, h3, h4 {
   padding: 0.35rem 0.75rem;
   border-radius: 20px;
   border: 1px solid var(--color-border);
+}
+
+.accessibility-popover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.accessibility-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 24px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.accessibility-popover::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 10px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent white transparent;
 }
 
 .btn-acc {
@@ -2303,6 +2343,43 @@ body.high-contrast .nav-link.active {
 
 
 
+/* Finance Module Specific Styles */
+.finance-sub-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.finance-sub-tabs .btn {
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+
+.finance-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.finance-kpi-grid .admin-stat-card {
+  padding: 1.25rem;
+}
+
+.finance-kpi-grid .stat-title {
+  font-size: 0.85rem;
+  color: var(--color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+}
+
+.finance-kpi-grid .stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+
   </style>
 </head>
 <body>
@@ -2347,11 +2424,11 @@ const getCouncilType = (profession) => {
 };
 
 const BOOKS_DATA = [
-  { 
-    id: 'book-esquema', 
-    title: 'Esquema de Reinos e Subreinos 2.0', 
-    author: 'Dr. Rajan Sankaran', 
-    price: 220.00, 
+  {
+    id: 'book-esquema',
+    title: 'Esquema de Reinos e Subreinos 2.0',
+    author: 'Dr. Rajan Sankaran',
+    price: 220.00,
     desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.',
     page_count: 340,
     content_table: [
@@ -2362,11 +2439,11 @@ const BOOKS_DATA = [
       'Capítulo 5: Tabelas de Diferenciação Clínica Rápida e Casos Ilustrados'
     ]
   },
-  { 
-    id: 'book-superclasses', 
-    title: 'Superclasses em Homeopatia', 
-    author: 'Dr. Rajan Sankaran', 
-    price: 180.00, 
+  {
+    id: 'book-superclasses',
+    title: 'Superclasses em Homeopatia',
+    author: 'Dr. Rajan Sankaran',
+    price: 180.00,
     desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.',
     page_count: 280,
     content_table: [
@@ -2377,11 +2454,11 @@ const BOOKS_DATA = [
       'Capítulo 5: Guia de Prescrição com base nas Seis Divisões'
     ]
   },
-  { 
-    id: 'book-oito-caixas', 
-    title: 'O Método das Oito Caixas', 
-    author: 'Dr. Rajan Sankaran', 
-    price: 240.00, 
+  {
+    id: 'book-oito-caixas',
+    title: 'O Método das Oito Caixas',
+    author: 'Dr. Rajan Sankaran',
+    price: 240.00,
     desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.',
     page_count: 410,
     content_table: [
@@ -2392,11 +2469,11 @@ const BOOKS_DATA = [
       'Capítulo 5: 30 Casos Clínicos Resolvidos com o Método das 8 Caixas'
     ]
   },
-  { 
-    id: 'book-followup', 
-    title: 'A Arte do Follow-up na Clínica', 
-    author: 'Dr. Gaurang Gaikwad', 
-    price: 190.00, 
+  {
+    id: 'book-followup',
+    title: 'A Arte do Follow-up na Clínica',
+    author: 'Dr. Gaurang Gaikwad',
+    price: 190.00,
     desc: 'Casos práticos de acompanhamento clínico e estratégias de redosagem e troca de remédio homeopático.',
     page_count: 225,
     content_table: [
@@ -2544,7 +2621,7 @@ const getPageFromPathname = () => {
     if (hash.startsWith('#curso/')) return 'course-detail';
     if (hash.startsWith('#aula/')) return 'course-view';
     const pageHash = hash.replace('#', '').split('?')[0];
-    
+
     // Reverse lookup for hash
     const entries = Object.entries(PAGE_URLS);
     for (const [key, value] of entries) {
@@ -2553,7 +2630,7 @@ const getPageFromPathname = () => {
     if (pageHash === 'inicio' || !pageHash) return 'home';
     return 'home';
   }
-  
+
   const pathname = window.location.pathname;
   for (const [key, value] of Object.entries(PAGE_URLS)) {
     if (pathname.endsWith(`/${value}.html`) || pathname.endsWith(`/${value}`)) {
@@ -2568,7 +2645,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
     'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
     'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
   ].includes(currentProfession);
-  
+
   const isReq = (field) => {
     if (isAdmin) return false;
     if (['billing_complement', 'commercial_complement', 'specialty'].includes(field)) return false;
@@ -2614,7 +2691,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
       </div>
 
       <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Cobrança</h4>
-      
+
       <div className="grid-2col">
         <div className="form-group">
           <label className="form-label">CEP {isReq('billing_zip') && <span style={{ color: 'red' }}>*</span>}</label>
@@ -2655,13 +2732,13 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
       </div>
 
       <h4 className="mt-4 mb-3 section-title-underlined-thin">Informações profissionais</h4>
-      
+
       <div className="grid-2col">
         <div className="form-group">
           <label className="form-label">Profissão {isReq('profession') && <span style={{ color: 'red' }}>*</span>}</label>
-          <select 
-            className="form-input" 
-            name="profession" 
+          <select
+            className="form-input"
+            name="profession"
             value={currentProfession}
             onChange={(e) => setCurrentProfession(e.target.value)}
             required={isReq('profession')}
@@ -2699,12 +2776,12 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
             <div className="form-group">
               <label className="form-label">Número do Conselho {isReq('council_number') && <span style={{ color: 'red' }}>*</span>}</label>
-              <input 
-                className="form-input" 
-                type="text" 
-                name="council_number" 
+              <input
+                className="form-input"
+                type="text"
+                name="council_number"
                 defaultValue={targetUser?.council_number || ''}
-                required={isReq('council_number')} 
+                required={isReq('council_number')}
                 placeholder="Apenas números"
                 onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
               />
@@ -2721,11 +2798,11 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
               <div className="grid-2col">
                 <div className="form-group">
                   <label className="form-label">RQE (Registro de Especialidade) <span style={{ color: 'red' }}>*</span></label>
-                  <input 
-                    className="form-input" 
-                    type="text" 
-                    name="rqe" 
-                    defaultValue={targetUser?.rqe || ''} 
+                  <input
+                    className="form-input"
+                    type="text"
+                    name="rqe"
+                    defaultValue={targetUser?.rqe || ''}
                     required={!isAdmin}
                     placeholder="Apenas números"
                     onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
@@ -2740,7 +2817,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           )}
 
           <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço Comercial</h4>
-          
+
           <div className="grid-2col">
             <div className="form-group">
               <label className="form-label">CEP {isReq('commercial_zip') && <span style={{ color: 'red' }}>*</span>}</label>
@@ -2787,12 +2864,12 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
           {targetUser?.id && (
             <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input 
-                type="checkbox" 
-                id="is_homeopath" 
-                name="is_homeopath" 
-                defaultChecked={targetUser?.is_homeopath || false} 
-                style={{ width: 'auto', margin: 0 }} 
+              <input
+                type="checkbox"
+                id="is_homeopath"
+                name="is_homeopath"
+                defaultChecked={targetUser?.is_homeopath || false}
+                style={{ width: 'auto', margin: 0 }}
               />
               <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
                 Quero participar da lista de Homeopatas indicados
@@ -2920,25 +2997,33 @@ function App() {
       books: BOOKS_DATA,
       modules: {
         'course-free': [
-          { id: 'mod-f1', title: 'Módulo 1: Fundamentos da Homeopatia', lessons: [
-            { id: 'les-f1', title: 'Aula 1: A Lei dos Semelhantes e a história', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
-          ]}
+          {
+            id: 'mod-f1', title: 'Módulo 1: Fundamentos da Homeopatia', lessons: [
+              { id: 'les-f1', title: 'Aula 1: A Lei dos Semelhantes e a história', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
+            ]
+          }
         ],
         'course-sub': [
-          { id: 'mod-s1', title: 'Módulo 1: O Reino Mineral', lessons: [
-            { id: 'les-s1', title: 'Aula 1: Elementos da Tabela Periódica na Homeopatia', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
-          ]}
+          {
+            id: 'mod-s1', title: 'Módulo 1: O Reino Mineral', lessons: [
+              { id: 'les-s1', title: 'Aula 1: Elementos da Tabela Periódica na Homeopatia', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10 }
+            ]
+          }
         ],
         'course-post': [
-          { id: 'mod-p1', title: 'Módulo de Especialização 1: Método Sensação na Prática', lessons: [
-            { id: 'les-p1', title: 'Aula 1.1: O Conceito de Sensação Vital no Reino Vegetal', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10, quiz: {
-              id: 'quiz-p1', title: 'Quiz: Avaliação do Reino Vegetal e Sensação Vital', max_attempts: 2, passing_score: 70.00,
-              questions: [
-                { id: 'q1', question_text: 'Qual é o foco principal do Método Sensação de Rajan Sankaran?', options: ['Identificar apenas sintomas locais', 'Encontrar a Sensação Vital profunda que conecta mente e corpo', 'Prescrever com base na cor da pele do paciente', 'Nenhuma das anteriores'], correct: 1 },
-                { id: 'q2', question_text: 'A Sensação Vital expressa-se através de quais reinos da natureza?', options: ['Apenas Mineral', 'Apenas Vegetal', 'Vegetal, Mineral e Animal', 'Nenhum reino da natureza'], correct: 2 }
-              ]
-            }}
-          ]}
+          {
+            id: 'mod-p1', title: 'Módulo de Especialização 1: Método Sensação na Prática', lessons: [
+              {
+                id: 'les-p1', title: 'Aula 1.1: O Conceito de Sensação Vital no Reino Vegetal', video_url: 'https://www.w3schools.com/html/mov_bbb.mp4', duration_seconds: 10, quiz: {
+                  id: 'quiz-p1', title: 'Quiz: Avaliação do Reino Vegetal e Sensação Vital', max_attempts: 2, passing_score: 70.00,
+                  questions: [
+                    { id: 'q1', question_text: 'Qual é o foco principal do Método Sensação de Rajan Sankaran?', options: ['Identificar apenas sintomas locais', 'Encontrar a Sensação Vital profunda que conecta mente e corpo', 'Prescrever com base na cor da pele do paciente', 'Nenhuma das anteriores'], correct: 1 },
+                    { id: 'q2', question_text: 'A Sensação Vital expressa-se através de quais reinos da natureza?', options: ['Apenas Mineral', 'Apenas Vegetal', 'Vegetal, Mineral e Animal', 'Nenhum reino da natureza'], correct: 2 }
+                  ]
+                }
+              }
+            ]
+          }
         ]
       },
       enrollments: [
@@ -2947,8 +3032,14 @@ function App() {
         { id: 'enroll-delinquent', student_id: 'student-delinquent-id', course_id: 'course-post', enrolled_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), expires_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'SUSPENDED' }
       ],
       payments: [
-        { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString() },
-        { id: 'pay-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }
+        { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
+        { id: 'pay-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null }
+      ],
+      expenses: [
+        { id: 'exp-1', description: 'Servidor AWS Hospedagem', category: 'Infraestrutura', amount: 250.00, date: new Date().toISOString().split('T')[0], status: 'PAID', receipt_proof: null }
+      ],
+      teacher_payouts: [
+        { id: 'payout-1', teacher_id: 'teacher-id', amount: 1500.00, period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], period_end: new Date().toISOString().split('T')[0], status: 'PAID', paid_at: new Date().toISOString(), receipt_proof: null }
       ],
       lesson_progress: {},
       quiz_attempts: {},
@@ -3041,6 +3132,7 @@ function App() {
   const [fontMultiplier, setFontMultiplier] = useState(() => {
     return parseFloat(localStorage.getItem('fontMultiplier')) || 1.0;
   });
+  const [fontMenuOpen, setFontMenuOpen] = useState(false);
 
   // Estado do Carrinho de Compras
   const [cartItems, setCartItems] = useState(() => {
@@ -3495,7 +3587,7 @@ function App() {
     // Identifica e redireciona para a 1ª aula do curso
     const courseDetails = COURSES_DETAILS_DATA[course.id];
     const firstLessonTitle = courseDetails?.modules?.[0]?.lessons?.[0] || 'Aula 1: Introdução';
-    
+
     const firstLesson = {
       id: `${course.id}_les_1`,
       title: typeof firstLessonTitle === 'string' ? firstLessonTitle : (firstLessonTitle.title || 'Aula 1: Introdução à Sensação Vital'),
@@ -3569,6 +3661,34 @@ function App() {
   const [homeopathsSearch, setHomeopathsSearch] = useState('');
   const [teacherActiveTab, setTeacherActiveTab] = useState('panel');
   const [adminActiveTab, setAdminActiveTab] = useState('stats');
+  const [financeTab, setFinanceTab] = useState('overview'); // overview, income, expenses, receivables
+  const [financeFilter, setFinanceFilter] = useState('ALL');
+  const [financeSearch, setFinanceSearch] = useState('');
+  const getCurrentMonthRange = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const lastDayNum = new Date(year, now.getMonth() + 1, 0).getDate();
+    const lastDay = String(lastDayNum).padStart(2, '0');
+    return {
+      start: `${year}-${month}-01`,
+      end: `${year}-${month}-${lastDay}`
+    };
+  };
+
+  const [financeDateRange, setFinanceDateRange] = useState(getCurrentMonthRange());
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [viewingReceipt, setViewingReceipt] = useState(null);
+  const [entryProductType, setEntryProductType] = useState('NONE');
+  const [entryStudentSearch, setEntryStudentSearch] = useState('');
+  const [entryProductSearch, setEntryProductSearch] = useState('');
+
+  const openEditPayment = (paymentObj = {}) => {
+    setEditingPayment(paymentObj);
+    setEntryProductType(paymentObj.book_id ? 'BOOK' : paymentObj.course_id ? 'COURSE' : 'NONE');
+    setEntryStudentSearch('');
+    setEntryProductSearch('');
+  };
 
   useEffect(() => {
     if (user) {
@@ -3609,20 +3729,20 @@ function App() {
           } else {
             reg = `${u.registrationType || 'CRM'} ${u.registrationNumber || ''}`;
           }
-          
+
           let specialty = u.specialty || '';
           if (!specialty && u.role === 'TEACHER') {
             specialty = 'Professor / Método Sensação Vital';
           }
-          
-          let city = (u.commercial_city && u.commercial_state) 
-            ? `${u.commercial_city} - ${u.commercial_state}` 
+
+          let city = (u.commercial_city && u.commercial_state)
+            ? `${u.commercial_city} - ${u.commercial_state}`
             : (u.address_city && u.address_state)
               ? `${u.address_city} - ${u.address_state}`
               : 'Não informado';
-          
+
           let phone = u.commercial_phone || u.phone || '';
-          
+
           return {
             name: u.name,
             reg: reg.trim(),
@@ -3661,7 +3781,7 @@ function App() {
 
     return combined;
   };
-  
+
   // Estados adicionais para administração de eventos e cadastros
   const [editingEvent, setEditingEvent] = useState(null);
 
@@ -3723,7 +3843,7 @@ function App() {
     clearAlerts();
     setMobileMenuOpen(false);
     setActiveDropdown(null);
-    
+
     if (targetPage === 'student-dash') {
       setStudentActiveTab(tabName);
     } else if (targetPage === 'teacher-dash') {
@@ -3731,7 +3851,7 @@ function App() {
     } else if (targetPage === 'admin-dash') {
       setAdminActiveTab(tabName);
     }
-    
+
     if (currentPage !== targetPage) {
       navigateTo(targetPage);
     }
@@ -3743,6 +3863,9 @@ function App() {
       if (!e.target.closest('.nav-dropdown') && !e.target.closest('.hamburger-btn')) {
         setActiveDropdown(null);
       }
+      if (!e.target.closest('.accessibility-popover-wrapper')) {
+        setFontMenuOpen(false);
+      }
     };
     document.addEventListener('click', handleOutsideClick);
     return () => document.removeEventListener('click', handleOutsideClick);
@@ -3752,6 +3875,7 @@ function App() {
   useEffect(() => {
     setMobileMenuOpen(false);
     setActiveDropdown(null);
+    setFontMenuOpen(false);
   }, [currentPage]);
 
   // Sincronizar Acessibilidade com Documento e LocalStorage
@@ -3787,8 +3911,8 @@ function App() {
         if (hash.startsWith('#curso/')) {
           const slug = hash.replace('#curso/', '');
           const courseList = mockDb?.courses || [];
-          const course = courseList.find(c => 
-            getSlug(c.title) === slug || 
+          const course = courseList.find(c =>
+            getSlug(c.title) === slug ||
             c.id === slug ||
             (c.id === 'course-free' && slug === 'introducao-homeopatia') ||
             (c.id === 'course-sub' && slug === 'clube-tosb-estudos') ||
@@ -3866,7 +3990,7 @@ function App() {
 
 
   const [lessonProgress, setLessonProgress] = useState(null); // { completed, seconds_watched }
-  
+
   // Estado do Quiz
   const [quizData, setQuizData] = useState(null);
   const [quizAnswers, setQuizAnswers] = useState({});
@@ -3907,7 +4031,7 @@ function App() {
           const data = await res.json();
           setUser(data.user);
           setIsOfflineMode(false);
-          
+
           // Só redireciona se estiver na página de login/cadastro/desbloqueio
           const pathname = window.location.pathname;
           if (pathname.includes('login') || pathname.includes('register') || pathname.includes('unlock')) {
@@ -3945,13 +4069,13 @@ function App() {
   useEffect(() => {
     const pathname = window.location.pathname;
     const isDemo = checkIsDemo();
-    
+
     if (!isDemo) {
       const isDashboard = pathname.includes('student-dash') || pathname.includes('teacher-dash') || pathname.includes('admin-dash') || pathname.includes('course-view') || pathname.includes('checkout');
       const isAuthPage = pathname.includes('login') || pathname.includes('register') || pathname.includes('unlock');
-      
+
       const storedToken = localStorage.getItem('token');
-      
+
       if (isDashboard) {
         if (!storedToken) {
           navigateTo('login');
@@ -3960,7 +4084,7 @@ function App() {
           navigateTo('login');
         }
       }
-      
+
       if (isAuthPage && user) {
         redirectToDashboard(user.role);
       }
@@ -3984,7 +4108,7 @@ function App() {
   const redirectToDashboard = (role) => {
     const pathname = window.location.pathname;
     const isDemo = checkIsDemo();
-    
+
     if (role === 'STUDENT') {
       if (isDemo || (!pathname.endsWith('/student-dash.html') && !pathname.endsWith('/student-dash'))) {
         navigateTo('student-dash');
@@ -4045,14 +4169,14 @@ function App() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     clearAlerts();
-    
+
     const name = e.target.name.value;
     const email = e.target.email.value;
     const phone = e.target.phone.value;
     const cpf = e.target.cpf.value;
     const profession = e.target.profession?.value || user.profession || '';
     const custom_profession = e.target.custom_profession?.value || '';
-    
+
     const isHealthProfession = [
       'médico(a)', 'odontologista', 'veterinário(a)', 'farmaceutico(a)',
       'Médico(a)', 'Odontologista', 'Veterinário(a)', 'Farmacêutico(a)'
@@ -4061,7 +4185,7 @@ function App() {
     const council_state = e.target.council_state?.value || '';
     const council_number = e.target.council_number?.value || '';
     const specialty = e.target.specialty?.value || '';
-    
+
     // RQE para Professor
     const rqe = e.target.rqe?.value || '';
     const bio = e.target.bio?.value || '';
@@ -4070,7 +4194,7 @@ function App() {
       setError('O campo RQE é obrigatório para professores.');
       return;
     }
-    
+
     // Endereço de Cobrança
     const billing_zip = e.target.billing_zip.value;
     const billing_street = e.target.billing_street.value;
@@ -4079,7 +4203,7 @@ function App() {
     const billing_neighborhood = e.target.billing_neighborhood.value;
     const billing_city = e.target.billing_city.value;
     const billing_state = e.target.billing_state.value;
-    
+
     // Endereço Comercial
     const commercial_zip = e.target.commercial_zip?.value || '';
     const commercial_street = e.target.commercial_street?.value || '';
@@ -4089,7 +4213,7 @@ function App() {
     const commercial_city = e.target.commercial_city?.value || '';
     const commercial_state = e.target.commercial_state?.value || '';
     const commercial_phone = e.target.commercial_phone?.value || '';
-    
+
     const is_homeopath = e.target.is_homeopath?.checked || false;
 
     const formData = {
@@ -4264,7 +4388,7 @@ function App() {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     setUser(null);
     setToken('');
@@ -4276,7 +4400,7 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     clearAlerts();
-    
+
     const name = e.target.name.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
@@ -4288,12 +4412,12 @@ function App() {
     const cpf = e.target.cpf?.value || '';
     const profession = e.target.profession?.value || '';
     const custom_profession = e.target.custom_profession?.value || '';
-    
+
     const council_type = getCouncilType(profession);
     const council_state = e.target.council_state?.value || '';
     const council_number = e.target.council_number?.value || '';
     const specialty = e.target.specialty?.value || '';
-    
+
     // Endereço de Cobrança
     const billing_zip = e.target.billing_zip?.value || '';
     const billing_street = e.target.billing_street?.value || '';
@@ -4302,7 +4426,7 @@ function App() {
     const billing_neighborhood = e.target.billing_neighborhood?.value || '';
     const billing_city = e.target.billing_city?.value || '';
     const billing_state = e.target.billing_state?.value || '';
-    
+
     // Endereço Comercial
     const commercial_zip = e.target.commercial_zip?.value || '';
     const commercial_street = e.target.commercial_street?.value || '';
@@ -4312,7 +4436,7 @@ function App() {
     const commercial_city = e.target.commercial_city?.value || '';
     const commercial_state = e.target.commercial_state?.value || '';
     const commercial_phone = e.target.commercial_phone?.value || '';
-    
+
     const acceptGeneralTerms = e.target.acceptGeneralTerms?.checked || acceptTerms || false;
     const acceptSigiloTerms = e.target.acceptSigiloTerms?.checked || false;
 
@@ -4658,7 +4782,7 @@ function App() {
           const data = await res.json();
           setCourses(data);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -4778,10 +4902,10 @@ function App() {
       if (videoRef.current) {
         const currentSeconds = Math.floor(videoRef.current.currentTime);
         const duration = Math.floor(videoRef.current.duration) || selectedLesson.duration_seconds;
-        
+
         // Se assistiu mais de 60%, marca localmente como completo
         const completed = currentSeconds >= Math.floor(duration * 0.60);
-        
+
         setLessonProgress({
           seconds_watched: currentSeconds,
           completed: completed || lessonProgress.completed
@@ -4792,7 +4916,7 @@ function App() {
           setMockDb(prev => {
             const key = `${user.id}_${selectedLesson.id}`;
             const currentProg = prev.lesson_progress[key] || { completed: false, seconds_watched: 0 };
-            
+
             return {
               ...prev,
               lesson_progress: {
@@ -4817,7 +4941,7 @@ function App() {
               },
               body: JSON.stringify({ secondsWatched: currentSeconds })
             });
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     }, 2000); // Envia progresso a cada 2 segundos
@@ -4861,7 +4985,7 @@ function App() {
         } else {
           setError(data.message);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -4875,7 +4999,7 @@ function App() {
   const submitQuiz = async () => {
     clearAlerts();
     const answersList = quizData.questions.map(q => quizAnswers[q.id]);
-    
+
     if (answersList.includes(undefined)) {
       setError('Por favor, responda todas as perguntas.');
       return;
@@ -4961,7 +5085,7 @@ function App() {
           const data = await res.json();
           setMyInvoices(data);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -4982,7 +5106,7 @@ function App() {
 
     const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
-    
+
     // Calcular preço total
     let totalAmt = 0;
     itemsToBuy.forEach(item => {
@@ -4995,7 +5119,7 @@ function App() {
 
     if (isOfflineMode) {
       const newPayments = [];
-      
+
       // Se for boleto parcelado do curso pós-graduação
       const hasPostgrad = itemsToBuy.some(item => item.type === 'course' && item.product.type === 'POSTGRAD');
       if (paymentMethod === 'CARNE' && hasPostgrad) {
@@ -5084,7 +5208,7 @@ function App() {
     clearAlerts();
     if (isOfflineMode) {
       const matchPayments = mockDb.payments.filter(p => p.asaas_payment_id === asaasPaymentId || p.asaas_payment_id.startsWith(`${asaasPaymentId}_`));
-      
+
       if (matchPayments.length === 0) return;
 
       setMockDb(prev => {
@@ -5175,7 +5299,7 @@ function App() {
         .map(e => {
           const student = mockDb.users.find(u => u.id === e.student_id);
           const course = myCourses.find(c => c.id === e.course_id);
-          
+
           // Progresso de aulas (quantidade)
           const courseModules = mockDb.modules[course.id] || [];
           let totalLessons = 0;
@@ -5232,7 +5356,7 @@ function App() {
           const data = await res.json();
           setTeacherReportData(data);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -5283,7 +5407,7 @@ function App() {
           setAdminReportData(finData);
           setSecurityLogs(logData);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -5312,7 +5436,7 @@ function App() {
       }
 
       const results = { reconciled: [], divergent: [], unmatched: [], processedCount: parsedTx.length };
-      
+
       setMockDb(prev => {
         const currentPayments = [...prev.payments];
         const currentEnrollments = [...prev.enrollments];
@@ -5345,12 +5469,12 @@ function App() {
           // Conciliar
           if (p.status === 'PENDING') {
             currentPayments[payIdx] = { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
-            
+
             // Ativar matrícula
             const c = prev.courses.find(course => course.id === p.course_id);
             const duration = c ? c.duration_days : 180;
             const enIdx = currentEnrollments.findIndex(e => e.student_id === p.student_id && e.course_id === p.course_id);
-            
+
             if (enIdx !== -1) {
               currentEnrollments[enIdx] = { ...currentEnrollments[enIdx], status: 'ACTIVE', expires_at: new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() };
             } else {
@@ -5534,7 +5658,7 @@ NEWFILEENCODING:NONE
     const password = e.target.password.value;
     const role = e.target.role.value;
     const status = e.target.status.value;
-    
+
     // Ler os campos comuns e de endereço do formulário
     const phone = e.target.phone?.value || '';
     const cpf = e.target.cpf?.value || '';
@@ -5544,10 +5668,10 @@ NEWFILEENCODING:NONE
     const council_state = e.target.council_state?.value || '';
     const council_number = e.target.council_number?.value || '';
     const specialty = e.target.specialty?.value || '';
-    
+
     const rqe = e.target.rqe?.value || '';
     const bio = e.target.bio?.value || '';
-    
+
     const billing_zip = e.target.billing_zip?.value || '';
     const billing_street = e.target.billing_street?.value || '';
     const billing_number = e.target.billing_number?.value || '';
@@ -5555,7 +5679,7 @@ NEWFILEENCODING:NONE
     const billing_neighborhood = e.target.billing_neighborhood?.value || '';
     const billing_city = e.target.billing_city?.value || '';
     const billing_state = e.target.billing_state?.value || '';
-    
+
     const commercial_zip = e.target.commercial_zip?.value || '';
     const commercial_street = e.target.commercial_street?.value || '';
     const commercial_number = e.target.commercial_number?.value || '';
@@ -5564,7 +5688,7 @@ NEWFILEENCODING:NONE
     const commercial_city = e.target.commercial_city?.value || '';
     const commercial_state = e.target.commercial_state?.value || '';
     const commercial_phone = e.target.commercial_phone?.value || '';
-    
+
     const is_homeopath = e.target.is_homeopath?.checked || false;
     let registrationType = '';
     let registrationNumber = '';
@@ -5573,7 +5697,7 @@ NEWFILEENCODING:NONE
     const bank_agency = e.target.bank_agency ? e.target.bank_agency.value : '';
     const bank_account = e.target.bank_account ? e.target.bank_account.value : '';
     const pix_key = e.target.pix_key ? e.target.pix_key.value : '';
-    
+
     if (role === 'STUDENT') {
       registrationType = e.target.registrationType?.value || '';
       registrationNumber = e.target.registrationNumber?.value || '';
@@ -5662,13 +5786,25 @@ NEWFILEENCODING:NONE
     e.preventDefault();
     clearAlerts();
     const student_id = e.target.student_id.value;
-    const course_id = e.target.course_id.value || null;
+    const product_type = e.target.product_type?.value || 'NONE';
+    const course_id = product_type === 'COURSE' ? (e.target.course_id?.value || null) : null;
+    const book_id = product_type === 'BOOK' ? (e.target.book_id?.value || null) : null;
+    const description = product_type === 'NONE' ? (e.target.description?.value || null) : null;
     const amount = parseFloat(e.target.amount.value) || 0;
     const payment_method = e.target.payment_method.value;
     const status = e.target.status.value;
     const due_date = e.target.due_date.value;
     const transaction_code = e.target.transaction_code.value || ('ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase());
-    const paid_at = status === 'RECEIVED' ? (editingPayment.paid_at || new Date().toISOString().split('T')[0]) : null;
+
+    // Suporte para Comprovante
+    let receipt_proof = editingPayment.receipt_proof || null;
+    if (window.pendingReceiptBase64) {
+      receipt_proof = window.pendingReceiptBase64;
+      window.pendingReceiptBase64 = null;
+    }
+
+    const paid_at_input = e.target.paid_at?.value;
+    const paid_at = paid_at_input ? paid_at_input : (status === 'RECEIVED' ? (editingPayment.paid_at || new Date().toISOString().split('T')[0]) : null);
 
     setMockDb(prev => {
       let updatedPayments;
@@ -5679,12 +5815,15 @@ NEWFILEENCODING:NONE
               ...p,
               student_id,
               course_id,
+              book_id,
+              description,
               amount,
               payment_method,
               status,
               due_date,
               transaction_code,
-              paid_at
+              paid_at,
+              receipt_proof
             };
           }
           return p;
@@ -5694,23 +5833,52 @@ NEWFILEENCODING:NONE
           id: 'pay-' + Date.now(),
           student_id,
           course_id,
+          book_id,
+          description,
           amount,
           payment_method,
           status,
           due_date,
           transaction_code,
-          paid_at
+          paid_at,
+          receipt_proof
         };
         updatedPayments = [...prev.payments, newPayment];
       }
 
+      // Se o status for RECEIVED e houver um curso associado, liberar/ativar a matrícula do aluno
+      let updatedEnroll = [...prev.enrollments];
+      if (status === 'RECEIVED' && course_id && student_id) {
+        const courseObj = prev.courses.find(c => c.id === course_id);
+        const durationDays = courseObj?.duration_days || 180;
+        const enrollIndex = updatedEnroll.findIndex(e => e.student_id === student_id && e.course_id === course_id);
+
+        if (enrollIndex > -1) {
+          updatedEnroll[enrollIndex] = {
+            ...updatedEnroll[enrollIndex],
+            status: 'ACTIVE',
+            expires_at: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString()
+          };
+        } else {
+          updatedEnroll.push({
+            id: 'enroll_' + Date.now(),
+            student_id,
+            course_id,
+            enrolled_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'ACTIVE'
+          });
+        }
+      }
+
       return {
         ...prev,
-        payments: updatedPayments
+        payments: updatedPayments,
+        enrollments: updatedEnroll
       };
     });
 
-    setSuccess(editingPayment.id ? 'Fatura atualizada com sucesso!' : 'Fatura criada com sucesso!');
+    setSuccess(editingPayment.id ? 'Fatura/Entrada atualizada com sucesso!' : 'Fatura/Entrada criada com sucesso!');
     setEditingPayment(null);
   };
 
@@ -5771,7 +5939,7 @@ NEWFILEENCODING:NONE
     setMockDb(prev => {
       const attendanceKey = `${classId}_${studentId}`;
       const currentRecords = prev.class_attendance[attendanceKey] || [];
-      
+
       const exists = currentRecords.find(r => r.date === todayStr);
       if (exists) {
         alreadyExists = true;
@@ -5779,7 +5947,7 @@ NEWFILEENCODING:NONE
       }
 
       const newRecords = [...currentRecords, { date: todayStr, present: true }];
-      
+
       const updatedAttendance = {
         ...prev.class_attendance,
         [attendanceKey]: newRecords
@@ -5810,18 +5978,24 @@ NEWFILEENCODING:NONE
     setSuccess('Tentativas de avaliação do aluno reiniciadas com sucesso.');
   };
 
-  const simulatePaymentConfirm = (paymentId) => {
+  const simulatePaymentConfirm = (paymentId, receiptProof = null, transactionCode = null) => {
     setMockDb(prev => {
       const updatedPayments = prev.payments.map(p => {
         if (p.id === paymentId) {
-          return { ...p, status: 'RECEIVED', paid_at: new Date().toISOString() };
+          return {
+            ...p,
+            status: 'RECEIVED',
+            paid_at: new Date().toISOString(),
+            receipt_proof: receiptProof || p.receipt_proof,
+            transaction_code: transactionCode || p.transaction_code
+          };
         }
         return p;
       });
-      
+
       const paymentObj = updatedPayments.find(p => p.id === paymentId);
       let updatedEnroll = [...prev.enrollments];
-      
+
       if (paymentObj && paymentObj.course_id) {
         const enrollIndex = updatedEnroll.findIndex(e => e.student_id === paymentObj.student_id && e.course_id === paymentObj.course_id);
         if (enrollIndex > -1) {
@@ -5841,7 +6015,7 @@ NEWFILEENCODING:NONE
           });
         }
       }
-      
+
       return {
         ...prev,
         payments: updatedPayments,
@@ -5908,16 +6082,12 @@ NEWFILEENCODING:NONE
             </div>
           </a>
 
-          {isOfflineMode && (
-            <div className="offline-mode-badge" style={{ fontSize: '0.75rem' }}>
-              🔌 Simulação
-            </div>
-          )}
+
         </div>
 
         {/* Botão Hamburger Mobile */}
-        <button 
-          className="hamburger-btn" 
+        <button
+          className="hamburger-btn"
           onClick={() => setMobileMenuOpen(prev => !prev)}
           aria-label="Alternar Menu"
         >
@@ -5927,9 +6097,9 @@ NEWFILEENCODING:NONE
         {/* Menu Principal */}
         <nav className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ gap: '0.75rem' }}>
           <a href={getLinkHref('home')} className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'home')}>Início</a>
-          
+
           <div className="nav-dropdown">
-            <button 
+            <button
               className={`nav-link ${['about', 'homeopaths'].includes(currentPage) ? 'active' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -5945,7 +6115,7 @@ NEWFILEENCODING:NONE
           </div>
 
           <div className="nav-dropdown">
-            <button 
+            <button
               className="nav-link"
               onClick={(e) => {
                 e.stopPropagation();
@@ -5993,8 +6163,8 @@ NEWFILEENCODING:NONE
           <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
             {user ? (
               <div className="nav-dropdown">
-                <button 
-                  className="nav-link w-full text-left" 
+                <button
+                  className="nav-link w-full text-left"
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -6049,12 +6219,24 @@ NEWFILEENCODING:NONE
 
         {/* Painel do Usuário, Carrinho e Acessibilidade */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          
+
           {/* Controles de Acessibilidade */}
-          <div className="accessibility-bar">
-            <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.max(0.8, prev - 0.1))} title="Diminuir Fonte (A-)" aria-label="Diminuir Fonte">A-</button>
-            <button className="btn-acc" onClick={() => setFontMultiplier(1.0)} title="Tamanho Padrão (A)" aria-label="Restaurar Fonte">A</button>
-            <button className="btn-acc" onClick={() => setFontMultiplier(prev => Math.min(1.6, prev + 0.1))} title="Aumentar Fonte (A+)" aria-label="Aumentar Fonte">A+</button>
+          <div className="accessibility-popover-wrapper">
+            <button
+              className="btn-acc"
+              onClick={() => setFontMenuOpen(!fontMenuOpen)}
+              title="Tamanho da Fonte (Acessibilidade)"
+              aria-label="Tamanho da Fonte"
+            >
+              Aa
+            </button>
+            {fontMenuOpen && (
+              <div className="accessibility-popover">
+                <button className="btn-acc" onClick={() => { setFontMultiplier(prev => Math.max(0.8, prev - 0.1)); setFontMenuOpen(false); }} title="Diminuir Fonte (A-)" aria-label="Diminuir Fonte">A-</button>
+                <button className="btn-acc" onClick={() => { setFontMultiplier(1.0); setFontMenuOpen(false); }} title="Tamanho Padrão (A)" aria-label="Restaurar Fonte">A</button>
+                <button className="btn-acc" onClick={() => { setFontMultiplier(prev => Math.min(1.6, prev + 0.1)); setFontMenuOpen(false); }} title="Aumentar Fonte (A+)" aria-label="Aumentar Fonte">A+</button>
+              </div>
+            )}
           </div>
 
           {/* Carrinho de Compras */}
@@ -6068,8 +6250,8 @@ NEWFILEENCODING:NONE
           </a>
 
           {/* Botão de Caixa de Entrada / Simulador de E-mails */}
-          <button 
-            className="btn btn-secondary" 
+          <button
+            className="btn btn-secondary"
             onClick={() => setEmailModalOpen(true)}
             title="Caixa de E-mails e Notificações Enviadas pelo Sistema"
             style={{ padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
@@ -6085,8 +6267,8 @@ NEWFILEENCODING:NONE
           <div className="mobile-only-flex header-mobile-actions" style={{ alignItems: 'center', gap: '0.35rem' }}>
             {user ? (
               <div className="nav-dropdown">
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -6131,17 +6313,17 @@ NEWFILEENCODING:NONE
               </div>
             ) : (
               <>
-                <a 
-                  href={getLinkHref('login')} 
-                  className="btn btn-secondary" 
+                <a
+                  href={getLinkHref('login')}
+                  className="btn btn-secondary"
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => handleLinkClick(e, 'login')}
                 >
                   Entrar
                 </a>
-                <a 
-                  href={getLinkHref('register')} 
-                  className="btn btn-primary" 
+                <a
+                  href={getLinkHref('register')}
+                  className="btn btn-primary"
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => handleLinkClick(e, 'register')}
                 >
@@ -6155,8 +6337,8 @@ NEWFILEENCODING:NONE
           <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
             {user ? (
               <div className="nav-dropdown">
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -6198,7 +6380,7 @@ NEWFILEENCODING:NONE
 
       {/* Conteúdo das Páginas */}
       <main className="main-content">
-        
+
         {/* PÁGINA: LOGIN */}
         {currentPage === 'login' && (
           <div className="card auth-box">
@@ -6223,7 +6405,7 @@ NEWFILEENCODING:NONE
                 <label className="form-label">E-mail</label>
                 <input className="form-input" type="email" name="email" required placeholder="ex: medico@exemplo.com" />
               </div>
-              
+
               <div className="form-group">
                 <label className="form-label">Senha</label>
                 <input className="form-input" type="password" name="password" required placeholder="Digite sua senha" />
@@ -6239,9 +6421,9 @@ NEWFILEENCODING:NONE
               <button className="btn btn-primary w-full mt-2" type="submit">Entrar na Plataforma</button>
 
               <div className="text-center mt-3">
-                <a 
-                  href={getLinkHref('forgot-password')} 
-                  className="btn-link" 
+                <a
+                  href={getLinkHref('forgot-password')}
+                  className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'forgot-password')}
                   style={{ color: 'var(--color-primary)', textDecoration: 'underline', fontSize: '0.9rem' }}
                 >
@@ -6265,7 +6447,7 @@ NEWFILEENCODING:NONE
 
             <form onSubmit={handleRegister}>
               <h4 className="mb-3 section-title-underlined-thin">Informações de Login e Identificação</h4>
-              
+
               <div className="grid-2col">
                 <div className="form-group">
                   <label className="form-label">Nome Completo <span style={{ color: 'red' }}>*</span></label>
@@ -6296,7 +6478,7 @@ NEWFILEENCODING:NONE
               </div>
 
               <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço de Cobrança</h4>
-              
+
               <div className="grid-2col">
                 <div className="form-group">
                   <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
@@ -6337,13 +6519,13 @@ NEWFILEENCODING:NONE
               </div>
 
               <h4 className="mt-4 mb-3 section-title-underlined-thin">Informações profissionais</h4>
-              
+
               <div className="grid-2col">
                 <div className="form-group">
                   <label className="form-label">Profissão <span style={{ color: 'red' }}>*</span></label>
-                  <select 
-                    className="form-input" 
-                    name="profession" 
+                  <select
+                    className="form-input"
+                    name="profession"
                     value={regProfession}
                     onChange={(e) => setRegProfession(e.target.value)}
                     required
@@ -6382,11 +6564,11 @@ NEWFILEENCODING:NONE
 
                     <div className="form-group">
                       <label className="form-label">Número do Conselho <span style={{ color: 'red' }}>*</span></label>
-                      <input 
-                        className="form-input" 
-                        type="text" 
-                        name="council_number" 
-                        required 
+                      <input
+                        className="form-input"
+                        type="text"
+                        name="council_number"
+                        required
                         placeholder="Apenas números"
                         onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                       />
@@ -6399,7 +6581,7 @@ NEWFILEENCODING:NONE
                   </div>
 
                   <h4 className="mt-4 mb-3 section-title-underlined-thin">Endereço Comercial</h4>
-                  
+
                   <div className="grid-2col">
                     <div className="form-group">
                       <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
@@ -6528,9 +6710,9 @@ NEWFILEENCODING:NONE
               </button>
 
               <div className="text-center mt-4">
-                <a 
-                  href={getLinkHref('login')} 
-                  className="btn-link" 
+                <a
+                  href={getLinkHref('login')}
+                  className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'login')}
                   style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
                 >
@@ -6570,9 +6752,9 @@ NEWFILEENCODING:NONE
               </button>
 
               <div className="text-center mt-4">
-                <a 
-                  href={getLinkHref('login')} 
-                  className="btn-link" 
+                <a
+                  href={getLinkHref('login')}
+                  className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'login')}
                   style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
                 >
@@ -6597,7 +6779,7 @@ NEWFILEENCODING:NONE
             <section id="online-courses" className="mb-7">
               <h2 className="home-section-title">Cursos de Homeopatia Online</h2>
               <div className="premium-card-grid">
-                
+
                 {/* Curso Livre */}
                 <div className="premium-card animate-fade-in">
                   <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>🌿</div>
@@ -6663,8 +6845,8 @@ NEWFILEENCODING:NONE
                 </div>
                 <div>
                   <div className="video-wrapper-embed">
-                    <iframe 
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                    <iframe
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
                       title="Introdução ao Método de Sankaran"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -6679,7 +6861,7 @@ NEWFILEENCODING:NONE
             <section id="inperson-courses" className="mb-7">
               <h2 className="home-section-title">Seminários e Cursos Presenciais</h2>
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-                
+
                 <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
                   <div className="premium-card-content">
                     <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
@@ -6777,7 +6959,7 @@ NEWFILEENCODING:NONE
             <div className="course-detail-grid">
               <div>
                 <h3 className="section-title-underlined mb-4">Ementa e Módulos do Curso</h3>
-                
+
                 {COURSES_DETAILS_DATA[selectedDetailCourse.id]?.modules.map((mod, idx) => (
                   <div key={idx} className="syllabus-module-card">
                     <div className="syllabus-module-header">{mod.title}</div>
@@ -6790,8 +6972,8 @@ NEWFILEENCODING:NONE
                     </ul>
                   </div>
                 )) || (
-                  <p className="text-muted">A ementa detalhada estará disponível em breve.</p>
-                )}
+                    <p className="text-muted">A ementa detalhada estará disponível em breve.</p>
+                  )}
 
                 <h3 className="section-title-underlined mt-6 mb-4">Corpo Docente</h3>
                 <div className="teacher-bio-card">
@@ -6929,12 +7111,12 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-5">Encontre profissionais qualificados e reconhecidos pela TOSB</p>
 
             <div className="directory-search-box">
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="Buscar homeopata por nome, conselho ou cidade..." 
-                value={homeopathsSearch} 
-                onChange={(e) => setHomeopathsSearch(e.target.value)} 
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Buscar homeopata por nome, conselho ou cidade..."
+                value={homeopathsSearch}
+                onChange={(e) => setHomeopathsSearch(e.target.value)}
               />
               {homeopathsSearch && (
                 <button className="btn btn-secondary" onClick={() => setHomeopathsSearch('')}>Limpar</button>
@@ -6949,13 +7131,13 @@ NEWFILEENCODING:NONE
                 const specialtyText = h.specialty || '';
                 const cityText = h.city || '';
                 return h.name.toLowerCase().includes(searchLower) ||
-                       regText.toLowerCase().includes(searchLower) ||
-                       professionText.toLowerCase().includes(searchLower) ||
-                       specialtyText.toLowerCase().includes(searchLower) ||
-                       cityText.toLowerCase().includes(searchLower);
+                  regText.toLowerCase().includes(searchLower) ||
+                  professionText.toLowerCase().includes(searchLower) ||
+                  specialtyText.toLowerCase().includes(searchLower) ||
+                  cityText.toLowerCase().includes(searchLower);
               }).map((h, idx) => {
-                const displayProfession = h.specialty 
-                  ? `${h.profession || ''} (${h.specialty})` 
+                const displayProfession = h.specialty
+                  ? `${h.profession || ''} (${h.specialty})`
                   : (h.profession || '');
                 return (
                   <div key={idx} className="homeopath-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', wordBreak: 'break-word', padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)' }}>
@@ -7017,19 +7199,19 @@ NEWFILEENCODING:NONE
                       <span className="premium-card-tag">{book.author}</span>
                       <h3 className="premium-card-title">{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
-                      
+
                       {/* Botão de Sumário / Relação de Conteúdo */}
                       {Array.isArray(book.content_table) && book.content_table.length > 0 && (
                         <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
-                          <button 
-                            className="btn btn-secondary w-full" 
+                          <button
+                            className="btn btn-secondary w-full"
                             style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                             onClick={() => setExpandedBookId(expandedBookId === book.id ? null : book.id)}
                           >
                             <span>📖 Relação de Conteúdo ({book.content_table.length} capítulos)</span>
                             <span>{expandedBookId === book.id ? '▲' : '▼'}</span>
                           </button>
-                          
+
                           {expandedBookId === book.id && (
                             <div style={{ marginTop: '0.5rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', textAlign: 'left' }}>
                               <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '0.4rem' }}>Sumário da Obra:</strong>
@@ -7057,7 +7239,7 @@ NEWFILEENCODING:NONE
             <div className="testimonials-section">
               <h2 className="home-section-title">Relatos de Nossos Leitores</h2>
               <p className="text-muted text-center mb-5">Veja o impacto das obras de Rajan Sankaran na prática clínica de médicos e homeopatas no Brasil.</p>
-              
+
               <div className="testimonial-grid">
                 <div className="testimonial-card">
                   <div className="testimonial-stars">★★★★★</div>
@@ -7091,7 +7273,7 @@ NEWFILEENCODING:NONE
               <p className="mb-4">
                 O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
-              
+
               <h3 className="font-serif-title mb-3 mt-5">Tutoriais Exclusivos da Filial Brasil:</h3>
               <div className="invoices-list" style={{ gap: '1rem' }}>
                 <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
@@ -7175,7 +7357,7 @@ NEWFILEENCODING:NONE
         {currentPage === 'cart' && (
           <div>
             <h2 className="mb-5 font-serif-title">Seu Carrinho de Compras</h2>
-            
+
             {cartItems.length === 0 ? (
               <div className="placeholder-box text-center">
                 <span style={{ fontSize: '3rem' }}>🛒</span>
@@ -7194,12 +7376,12 @@ NEWFILEENCODING:NONE
                         <h4 className="mt-1">{item.product.title}</h4>
                         <span className="helper-text">{item.type === 'course' ? '' : `Autor: ${item.product.author}`}</span>
                       </div>
-                      
+
                       <div className="cart-item-actions">
                         <span style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
                           R$ {(item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00) : item.product.price * item.quantity).toFixed(2)}
                         </span>
-                        
+
                         {item.type === 'book' && (
                           <div className="cart-quantity-selector">
                             <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
@@ -7212,7 +7394,7 @@ NEWFILEENCODING:NONE
                       </div>
                     </div>
                   ))}
-                  
+
                   <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
                     <button className="btn btn-secondary btn-quick-login" onClick={clearCart}>Esvaziar Carrinho</button>
                   </div>
@@ -7233,14 +7415,14 @@ NEWFILEENCODING:NONE
                     <span>Descontos:</span>
                     <span>R$ 0.00</span>
                   </div>
-                  
+
                   <div className="summary-total">
                     <span>Total Geral:</span>
                     <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
                   </div>
 
-                  <button 
-                    className="btn btn-primary w-full mt-5" 
+                  <button
+                    className="btn btn-primary w-full mt-5"
                     onClick={() => {
                       if (!user) {
                         setError('Por favor, faça login ou crie uma conta para poder finalizar a compra do seu carrinho.');
@@ -7299,7 +7481,7 @@ NEWFILEENCODING:NONE
                   </li>
                 </ul>
               </aside>
- 
+
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
                 {studentActiveTab === 'panel' && (
@@ -7327,7 +7509,7 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
- 
+
                 {studentActiveTab === 'courses' && (
                   <div className="card">
                     <h3 className="mb-4">Meus Cursos e Disciplinas</h3>
@@ -7417,12 +7599,12 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
- 
+
                 {studentActiveTab === 'agenda' && (
                   <div className="card">
                     <h3 className="mb-4">Agenda & Eventos Científicos</h3>
                     <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
-                    
+
                     <div className="agenda-list">
                       {(mockDb.events || []).map(event => (
                         <div key={event.id} className="agenda-card">
@@ -7446,7 +7628,7 @@ NEWFILEENCODING:NONE
                     </div>
                   </div>
                 )}
- 
+
                 {studentActiveTab === 'payments' && (
                   <div className="card">
                     <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
@@ -7497,7 +7679,7 @@ NEWFILEENCODING:NONE
         {currentPage === 'checkout' && checkoutCourse && (
           <div className="card auth-box">
             <h2 className="section-title-underlined-thin">Matrícula & Checkout Asaas</h2>
-            
+
             <div className="mb-5">
               <span className="course-type-badge">Item Selecionado</span>
               <h3>{checkoutCourse.title}</h3>
@@ -7547,12 +7729,12 @@ NEWFILEENCODING:NONE
             </button>
 
             <div className="lms-layout">
-              
+
               {/* Player Principal e Aulas */}
               <div>
                 <h2>{selectedCourse.course.title}</h2>
                 <p className="course-card-description mb-5">{selectedCourse.course.description}</p>
-                
+
                 {selectedLesson ? (
                   <div>
                     <div className="player-container video-player-container">
@@ -7582,8 +7764,8 @@ NEWFILEENCODING:NONE
                             <span style={{ fontSize: '3.5rem' }}>🔒</span>
                             <h3>Prévia de 20% Concluída</h3>
                             <p>Você assistiu aos primeiros 20% da 1ª aula aberta deste curso. O restante do vídeo e do conteúdo é liberado mediante pagamento/matrícula.</p>
-                            <button 
-                              className="btn btn-primary w-full mt-3" 
+                            <button
+                              className="btn btn-primary w-full mt-3"
                               onClick={() => {
                                 setIsOpenPreviewMode(false);
                                 setOpenPreviewLocked(false);
@@ -7603,7 +7785,7 @@ NEWFILEENCODING:NONE
                         <span className="course-card-expires">
                           Assistido: <strong>{lessonProgress ? lessonProgress.seconds_watched : 0}s</strong> / {selectedLesson.duration_seconds}s
                         </span>
-                        
+
                         <span className={lessonProgress && lessonProgress.completed ? 'lesson-progress-badge-completed' : 'lesson-progress-badge-pending'}>
                           {lessonProgress && lessonProgress.completed ? '✓ Concluído (60%+)' : 'Pendente'}
                         </span>
@@ -7656,7 +7838,7 @@ NEWFILEENCODING:NONE
                                           type="radio"
                                           name={`q_${q.id}`}
                                           checked={quizAnswers[q.id] === oIdx}
-                                          onChange={() => {}}
+                                          onChange={() => { }}
                                           className="pointer-events-none"
                                         />
                                         <span>{opt}</span>
@@ -7669,8 +7851,8 @@ NEWFILEENCODING:NONE
                               </div>
                             ) : (
                               <div className="alert alert-warning">
-                                {quizData.attempts.some(a => a.passed) 
-                                  ? '✓ Você já está aprovado nesta avaliação!' 
+                                {quizData.attempts.some(a => a.passed)
+                                  ? '✓ Você já está aprovado nesta avaliação!'
                                   : '❌ Você esgotou suas tentativas de questionário nesta disciplina.'}
                               </div>
                             )}
@@ -7701,7 +7883,7 @@ NEWFILEENCODING:NONE
               {/* Lista de Módulos / Aulas Laterais */}
               <div className="lms-sidebar">
                 <h3 className="sidebar-title">Módulos do Curso</h3>
-                
+
                 {selectedCourse.modules.map(mod => (
                   <div key={mod.id} className="modules-list-container">
                     <div className="module-header-title">
@@ -7770,7 +7952,7 @@ NEWFILEENCODING:NONE
                           .filter(p => p.status === 'RECEIVED' && mockDb.courses.filter(c => c.teacher_id === user.id).map(c => c.id).includes(p.course_id))
                           .reduce((sum, p) => sum + p.amount, 0).toFixed(2)}</h2>
                       </div>
-                      
+
                       <div className="admin-stat-card accent">
                         <span className="course-type-badge">Cursos Vinculados</span>
                         <h2 className="stat-value">{mockDb.courses.filter(c => c.teacher_id === user.id).length} Cursos</h2>
@@ -7849,7 +8031,7 @@ NEWFILEENCODING:NONE
                                   {studentsInClass.map(s => {
                                     const attendanceKey = `${c.id}_${s.id}`;
                                     const attendanceList = mockDb.class_attendance[attendanceKey] || [];
-                                    
+
                                     // Match student progress in this course
                                     const studentProgress = teacherReportData.find(rep => rep.studentEmail === s.email && rep.courseTitle === course?.title);
                                     const progressStr = studentProgress ? `${studentProgress.completedLessons}/${studentProgress.totalLessons} (${studentProgress.progressPercent}%)` : '-';
@@ -7874,8 +8056,8 @@ NEWFILEENCODING:NONE
                                           )}
                                         </td>
                                         <td className="text-center">
-                                          <button 
-                                            className="btn btn-primary" 
+                                          <button
+                                            className="btn btn-primary"
                                             style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                                             onClick={() => registerAttendance(c.id, s.id)}
                                           >
@@ -8028,17 +8210,17 @@ NEWFILEENCODING:NONE
                   <li className={`student-sidebar-item ${adminActiveTab === 'books' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('books')}>📚 Gerenciar Livros</button>
                   </li>
-                  <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
-                    <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Usuários</button>
-                  </li>
-                  <li className={`student-sidebar-item ${adminActiveTab === 'payments' ? 'active' : ''}`}>
-                    <button onClick={() => setAdminActiveTab('payments')}>💳 Gerenciar Faturas</button>
-                  </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'classes' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('classes')}>🎓 Gerenciar Turmas</button>
                   </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Usuários</button>
+                  </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'events' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('events')}>📅 Agenda / Eventos</button>
+                  </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'finance' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('finance')}>💰 Gerenciar Contas</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'logs' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('logs')}>🔒 Logs de Segurança</button>
@@ -8125,7 +8307,7 @@ NEWFILEENCODING:NONE
                       <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
                         <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
                         <input type="hidden" name="id" defaultValue={editingCourse.id || ''} />
-                        
+
                         <div className="form-group">
                           <label className="form-label">Título do Curso</label>
                           <input className="form-input" name="title" defaultValue={editingCourse.title || ''} required placeholder="ex: Introdução à Sensação Vital" />
@@ -8135,19 +8317,19 @@ NEWFILEENCODING:NONE
                         <div className="form-group mb-4">
                           <label className="form-label">Banner / Capa do Curso</label>
                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <input 
-                              className="form-input" 
-                              name="banner_url" 
-                              value={courseBannerPreview || editingCourse.banner_url || ''} 
-                              onChange={(e) => setCourseBannerPreview(e.target.value)} 
-                              placeholder="URL da imagem de capa..." 
+                            <input
+                              className="form-input"
+                              name="banner_url"
+                              value={courseBannerPreview || editingCourse.banner_url || ''}
+                              onChange={(e) => setCourseBannerPreview(e.target.value)}
+                              placeholder="URL da imagem de capa..."
                             />
                             <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0, padding: '0.5rem 1rem' }}>
                               📁 Upload Imagem
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                style={{ display: 'none' }} 
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
                                 onChange={(e) => {
                                   const file = e.target.files[0];
                                   if (file) {
@@ -8155,16 +8337,16 @@ NEWFILEENCODING:NONE
                                     reader.onloadend = () => setCourseBannerPreview(reader.result);
                                     reader.readAsDataURL(file);
                                   }
-                                }} 
+                                }}
                               />
                             </label>
                           </div>
                           {(courseBannerPreview || editingCourse.banner_url) && (
                             <div style={{ marginTop: '0.5rem', borderRadius: '8px', overflow: 'hidden', maxHeight: '180px', border: '1px solid var(--color-border)' }}>
-                              <img 
-                                src={courseBannerPreview || editingCourse.banner_url} 
-                                alt="Banner do Curso" 
-                                style={{ width: '100%', height: '180px', objectFit: 'cover' }} 
+                              <img
+                                src={courseBannerPreview || editingCourse.banner_url}
+                                alt="Banner do Curso"
+                                style={{ width: '100%', height: '180px', objectFit: 'cover' }}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                               />
                             </div>
@@ -8222,7 +8404,7 @@ NEWFILEENCODING:NONE
                             {mockDb.users.filter(u => u.role === 'TEACHER').map(t => {
                               const currentConfig = (mockDb.teacher_courses || []).find(tc => tc.teacher_id === t.id && tc.course_id === (editingCourse.id || ''));
                               const teacherHistoryCount = (mockDb.teacher_payment_history || []).filter(h => h.teacher_id === t.id && h.course_id === editingCourse.id).length;
-                              
+
                               return (
                                 <div key={t.id} style={{ padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -8230,9 +8412,9 @@ NEWFILEENCODING:NONE
                                       👨‍🏫 {t.name} <span className="text-muted" style={{ fontWeight: 'normal', fontSize: '0.85rem' }}>({t.email})</span>
                                     </span>
                                     {editingCourse.id && (
-                                      <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
+                                      <button
+                                        type="button"
+                                        className="btn btn-secondary"
                                         style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
                                         onClick={() => setViewingCourseHistory({ courseId: editingCourse.id, teacherId: t.id, teacherName: t.name, courseTitle: editingCourse.title })}
                                       >
@@ -8244,9 +8426,9 @@ NEWFILEENCODING:NONE
                                   <div className="grid-2col" style={{ gap: '0.75rem' }}>
                                     <div>
                                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Modalidade de Pagamento</label>
-                                      <select 
-                                        className="form-input" 
-                                        name={`payment_type_${t.id}`} 
+                                      <select
+                                        className="form-input"
+                                        name={`payment_type_${t.id}`}
                                         defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
                                         style={{ fontSize: '0.85rem' }}
                                       >
@@ -8258,11 +8440,11 @@ NEWFILEENCODING:NONE
 
                                     <div>
                                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa (R$ ou %)</label>
-                                      <input 
-                                        className="form-input" 
-                                        type="number" 
-                                        step="0.01" 
-                                        name={`payment_rate_${t.id}`} 
+                                      <input
+                                        className="form-input"
+                                        type="number"
+                                        step="0.01"
+                                        name={`payment_rate_${t.id}`}
                                         defaultValue={currentConfig?.payment_rate || (editingCourse.type === 'POSTGRAD' ? 150.00 : editingCourse.type === 'FREE' ? 15.00 : 2500.00)}
                                         placeholder="ex: 150.00 ou 15.00"
                                         style={{ fontSize: '0.85rem' }}
@@ -8279,9 +8461,9 @@ NEWFILEENCODING:NONE
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => { setEditingCourse(null); setCourseBannerPreview(''); }}>Cancelar</button>
                           {editingCourse.id && (
-                            <button 
-                              className="btn btn-danger flex-1" 
-                              type="button" 
+                            <button
+                              className="btn btn-danger flex-1"
+                              type="button"
                               onClick={() => {
                                 if (window.confirm(`Tem certeza que deseja excluir o curso "${editingCourse.title}"? Esta ação não poderá ser desfeita.`)) {
                                   handleDeleteCourse(editingCourse.id);
@@ -8426,7 +8608,7 @@ NEWFILEENCODING:NONE
                       <form onSubmit={handleSaveBook} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
                         <h4 className="mb-4">{editingBook.id ? 'Editar Detalhes do Livro' : 'Adicionar Novo Livro'}</h4>
                         <input type="hidden" name="id" defaultValue={editingBook.id || ''} />
-                        
+
                         <div className="form-group">
                           <label className="form-label">Título do Livro</label>
                           <input className="form-input" name="title" defaultValue={editingBook.title || ''} required placeholder="ex: O Método das Oito Caixas" />
@@ -8455,12 +8637,12 @@ NEWFILEENCODING:NONE
 
                         <div className="form-group">
                           <label className="form-label">Relação de Conteúdo / Sumário (Digite 1 capítulo por linha)</label>
-                          <textarea 
-                            className="form-input" 
-                            name="content_table" 
-                            defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')} 
-                            placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados" 
-                            rows={5} 
+                          <textarea
+                            className="form-input"
+                            name="content_table"
+                            defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')}
+                            placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados"
+                            rows={5}
                           />
                         </div>
 
@@ -8523,10 +8705,10 @@ NEWFILEENCODING:NONE
                         <div className="grid-2col" style={{ marginBottom: '1.5rem' }}>
                           <div className="form-group">
                             <label className="form-label">Perfil <span style={{ color: 'red' }}>*</span></label>
-                            <select 
-                              className="form-input" 
-                              name="role" 
-                              value={formUserRole} 
+                            <select
+                              className="form-input"
+                              name="role"
+                              value={formUserRole}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 if (window.confirm(`Tem certeza que deseja alterar o Perfil deste usuário para ${val}?`)) {
@@ -8542,9 +8724,9 @@ NEWFILEENCODING:NONE
                           </div>
                           <div className="form-group">
                             <label className="form-label">Status da conta <span style={{ color: 'red' }}>*</span></label>
-                            <select 
-                              className="form-input" 
-                              name="status" 
+                            <select
+                              className="form-input"
+                              name="status"
                               value={adminUserStatus}
                               onChange={(e) => {
                                 const val = e.target.value;
@@ -8568,13 +8750,13 @@ NEWFILEENCODING:NONE
                             <div className="grid-2col">
                               <div className="form-group">
                                 <label className="form-label">CRM / Conselho</label>
-                                <input 
-                                  className="form-input" 
-                                  name="crm" 
+                                <input
+                                  className="form-input"
+                                  name="crm"
                                   value={adminTeacherCrm}
                                   onChange={(e) => setAdminTeacherCrm(e.target.value)}
-                                  required 
-                                  placeholder="ex: CRM-PR 12345" 
+                                  required
+                                  placeholder="ex: CRM-PR 12345"
                                 />
                               </div>
                               <div className="form-group">
@@ -8631,9 +8813,9 @@ NEWFILEENCODING:NONE
                                     <div className="grid-2col" style={{ gap: '0.5rem' }}>
                                       <div>
                                         <label className="form-label" style={{ fontSize: '0.8rem' }}>Forma de Recebimento</label>
-                                        <select 
-                                          className="form-input" 
-                                          name={`payment_type_${c.id}`} 
+                                        <select
+                                          className="form-input"
+                                          name={`payment_type_${c.id}`}
                                           defaultValue={currentConfig?.payment_type || (c.type === 'POSTGRAD' ? 'hora_aula' : c.type === 'FREE' ? 'comissao' : 'valor_fixo')}
                                           style={{ fontSize: '0.85rem' }}
                                         >
@@ -8644,11 +8826,11 @@ NEWFILEENCODING:NONE
                                       </div>
                                       <div>
                                         <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor da Remuneração / Taxa</label>
-                                        <input 
-                                          className="form-input" 
-                                          type="number" 
-                                          step="0.01" 
-                                          name={`payment_rate_${c.id}`} 
+                                        <input
+                                          className="form-input"
+                                          type="number"
+                                          step="0.01"
+                                          name={`payment_rate_${c.id}`}
                                           defaultValue={currentConfig?.payment_rate || (c.type === 'POSTGRAD' ? 150.00 : c.type === 'FREE' ? 15.00 : 2500.00)}
                                           placeholder="ex: 150.00 ou 15.00"
                                           style={{ fontSize: '0.85rem' }}
@@ -8662,21 +8844,21 @@ NEWFILEENCODING:NONE
                           </div>
                         )}
 
-                        {((formUserRole === 'STUDENT' && adminRegType && adminRegType.toUpperCase() !== 'OUTROS' && adminRegNumber && adminRegNumber.trim() !== '') || 
+                        {((formUserRole === 'STUDENT' && adminRegType && adminRegType.toUpperCase() !== 'OUTROS' && adminRegNumber && adminRegNumber.trim() !== '') ||
                           (formUserRole === 'TEACHER' && adminTeacherCrm && adminTeacherCrm.trim() !== '')) && (
-                          <div className="form-group mt-3 mb-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <input 
-                              type="checkbox" 
-                              id="admin_is_homeopath" 
-                              name="is_homeopath" 
-                              defaultChecked={editingUser.is_homeopath || false} 
-                              style={{ width: 'auto', margin: 0 }} 
-                            />
-                            <label htmlFor="admin_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
-                              Quero participar da lista de Homeopatas indicados
-                            </label>
-                          </div>
-                        )}
+                            <div className="form-group mt-3 mb-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <input
+                                type="checkbox"
+                                id="admin_is_homeopath"
+                                name="is_homeopath"
+                                defaultChecked={editingUser.is_homeopath || false}
+                                style={{ width: 'auto', margin: 0 }}
+                              />
+                              <label htmlFor="admin_is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                                Quero participar da lista de Homeopatas indicados
+                              </label>
+                            </div>
+                          )}
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingUser(null)}>Cancelar</button>
@@ -8730,139 +8912,648 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
-                {adminActiveTab === 'payments' && (
-                  <div className="card">
+
+
+                {adminActiveTab === 'finance' && (
+                  <div className="card finance-module">
                     <div className="quiz-header mb-4">
-                      <h3>Gerenciamento de Faturas e Cobranças</h3>
-                      <button className="btn btn-primary" onClick={() => setEditingPayment({})}>＋ Criar Nova Fatura</button>
+                      <h3>💰 Gerenciar Contas</h3>
                     </div>
-                    <p className="course-card-description mb-4">
-                      Visualize o status das cobranças geradas pelo sistema EAD, edite seus dados ou simule/confirme o recebimento manualmente.
-                    </p>
 
-                    {editingPayment && (
-                      <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
-                        <h4 className="mb-4">{editingPayment.id ? 'Editar Fatura' : 'Criar Nova Fatura'}</h4>
-                        <input type="hidden" name="id" defaultValue={editingPayment.id || ''} />
+                    <div className="finance-sub-tabs">
+                      <button className={`btn ${financeTab === 'overview' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFinanceTab('overview')}>Visão Geral</button>
+                      <button className={`btn ${financeTab === 'income' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFinanceTab('income')}>Entradas</button>
+                      <button className={`btn ${financeTab === 'expenses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFinanceTab('expenses')}>Saídas</button>
+                    </div>
 
-                        <div className="grid-2col">
-                          <div className="form-group">
-                            <label className="form-label">Selecionar Aluno (Responsável)</label>
-                            <select className="form-input" name="student_id" defaultValue={editingPayment.student_id || ''} required>
-                              <option value="" disabled>-- Selecione o Aluno --</option>
-                              {mockDb.users.filter(u => u.role === 'STUDENT').map(u => (
-                                <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                              ))}
-                            </select>
+                    <div className="finance-filter-bar card p-3 mb-4 mt-4" style={{ backgroundColor: '#f8fafc', border: '1px solid var(--color-border)' }}>
+                      {financeTab === 'overview' ? (
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', maxWidth: '500px' }}>
+                          <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Data Inicial (De)</label>
+                            <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
                           </div>
-                          <div className="form-group">
-                            <label className="form-label">Curso Associado (Opcional)</label>
-                            <select className="form-input" name="course_id" defaultValue={editingPayment.course_id || ''}>
-                              <option value="">Nenhum / Avulso / Livro</option>
-                              {mockDb.courses.map(c => (
-                                <option key={c.id} value={c.id}>{c.title}</option>
-                              ))}
-                            </select>
+                          <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Data Final (Até)</label>
+                            <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
                           </div>
                         </div>
-
-                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                          <div className="form-group">
-                            <label className="form-label">Valor (R$)</label>
-                            <input className="form-input" type="number" step="0.01" name="amount" defaultValue={editingPayment.amount || 0.00} required placeholder="0.00" />
+                      ) : (
+                        <div className="grid-3col">
+                          <div className="form-group mb-0">
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Pesquisar (Aluno, Transação, Descrição)</label>
+                            <input type="text" className="form-input" style={{ padding: '0.4rem' }} value={financeSearch} onChange={(e) => setFinanceSearch(e.target.value)} placeholder="Ex: ASAAS_123..." />
                           </div>
-                          <div className="form-group">
-                            <label className="form-label">Forma de Pagamento</label>
-                            <select className="form-input" name="payment_method" defaultValue={editingPayment.payment_method || 'PIX'}>
-                              <option value="PIX">Pix</option>
-                              <option value="BOLETO">Boleto Bancário</option>
-                              <option value="CREDIT_CARD">Cartão de Crédito</option>
-                              <option value="CARNE">Carnê</option>
+                          <div className="form-group mb-0">
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Status / Tipo</label>
+                            <select className="form-input" style={{ padding: '0.4rem' }} value={financeFilter} onChange={(e) => setFinanceFilter(e.target.value)}>
+                              <option value="ALL">Todos</option>
+                              <option value="CONFIRMED">Confirmado</option>
+                              <option value="PENDING">Pendente</option>
+                              <option value="OVERDUE">Atrasado</option>
+                              <option value="CANCELLED">Cancelado</option>
                             </select>
                           </div>
-                          <div className="form-group">
-                            <label className="form-label">Status da Fatura</label>
-                            <select className="form-input" name="status" defaultValue={editingPayment.status || 'PENDING'}>
-                              <option value="PENDING">PENDING (Pendente)</option>
-                              <option value="RECEIVED">RECEIVED (Pago)</option>
-                              <option value="OVERDUE">OVERDUE (Vencido)</option>
-                            </select>
+                          <div className="form-group mb-0" style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ flex: 1 }}>
+                              <label className="form-label" style={{ fontSize: '0.8rem' }}>De</label>
+                              <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <label className="form-label" style={{ fontSize: '0.8rem' }}>Até</label>
+                              <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
+                            </div>
                           </div>
                         </div>
+                      )}
+                    </div>
 
-                        <div className="grid-2col">
-                          <div className="form-group">
-                            <label className="form-label">Data de Vencimento</label>
-                            <input className="form-input" type="date" name="due_date" defaultValue={editingPayment.due_date || ''} required />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Código de Transação / Referência</label>
-                            <input className="form-input" name="transaction_code" defaultValue={editingPayment.transaction_code || ''} placeholder="Gerado automaticamente se vazio" />
-                          </div>
-                        </div>
+                    {financeTab === 'overview' && (
+                      <div className="finance-overview">
+                        {(() => {
+                          const totalReceived = mockDb.payments
+                            .filter(p => p.status === 'RECEIVED')
+                            .filter(p => {
+                              const d = p.paid_at ? p.paid_at.split('T')[0] : '';
+                              if (!d) return false;
+                              if (financeDateRange.start && d < financeDateRange.start) return false;
+                              if (financeDateRange.end && d > financeDateRange.end) return false;
+                              return true;
+                            })
+                            .reduce((acc, p) => acc + p.amount, 0);
 
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingPayment(null)}>Cancelar</button>
-                          <button className="btn btn-primary flex-1" type="submit">Gravar Fatura</button>
-                        </div>
-                      </form>
+                          const totalPending = mockDb.payments
+                            .filter(p => p.status === 'PENDING')
+                            .filter(p => {
+                              const d = p.due_date ? p.due_date.split('T')[0] : '';
+                              if (!d) return true;
+                              if (financeDateRange.start && d < financeDateRange.start) return false;
+                              if (financeDateRange.end && d > financeDateRange.end) return false;
+                              return true;
+                            })
+                            .reduce((acc, p) => acc + p.amount, 0);
+
+                          const totalOverdue = mockDb.payments
+                            .filter(p => p.status === 'OVERDUE')
+                            .filter(p => {
+                              const d = p.due_date ? p.due_date.split('T')[0] : '';
+                              if (!d) return true;
+                              if (financeDateRange.start && d < financeDateRange.start) return false;
+                              if (financeDateRange.end && d > financeDateRange.end) return false;
+                              return true;
+                            })
+                            .reduce((acc, p) => acc + p.amount, 0);
+
+                          const filteredExpenses = (mockDb.expenses || [])
+                            .filter(e => {
+                              const d = e.date ? e.date.split('T')[0] : '';
+                              if (!d) return true;
+                              if (financeDateRange.start && d < financeDateRange.start) return false;
+                              if (financeDateRange.end && d > financeDateRange.end) return false;
+                              return true;
+                            })
+                            .reduce((acc, e) => acc + e.amount, 0);
+
+                          const filteredPayouts = (mockDb.teacher_payouts || [])
+                            .filter(p => {
+                              const d = p.period_end ? p.period_end.split('T')[0] : '';
+                              if (!d) return true;
+                              if (financeDateRange.start && d < financeDateRange.start) return false;
+                              if (financeDateRange.end && d > financeDateRange.end) return false;
+                              return true;
+                            })
+                            .reduce((acc, p) => acc + p.amount, 0);
+
+                          const totalExpenses = filteredExpenses + filteredPayouts;
+                          const netResult = totalReceived - totalExpenses;
+
+                          return (
+                            <>
+                              <div className="admin-stats-grid finance-kpi-grid">
+                                <div className="admin-stat-card primary">
+                                  <h3 className="stat-title">Recebimentos</h3>
+                                  <div className="stat-value" style={{ color: 'var(--color-success)' }}>R$ {totalReceived.toFixed(2)}</div>
+                                </div>
+                                <div className="admin-stat-card warning">
+                                  <h3 className="stat-title">A Receber</h3>
+                                  <div className="stat-value" style={{ color: '#d97706' }}>R$ {totalPending.toFixed(2)}</div>
+                                </div>
+                                <div className="admin-stat-card error">
+                                  <h3 className="stat-title">Inadimplência</h3>
+                                  <div className="stat-value" style={{ color: 'var(--color-error)' }}>R$ {totalOverdue.toFixed(2)}</div>
+                                </div>
+                                <div className="admin-stat-card error" style={{ borderLeftColor: '#f43f5e' }}>
+                                  <h3 className="stat-title">Despesas</h3>
+                                  <div className="stat-value" style={{ color: '#f43f5e' }}>R$ {totalExpenses.toFixed(2)}</div>
+                                </div>
+                                <div className="admin-stat-card primary" style={{ borderLeftColor: netResult >= 0 ? '#10b981' : '#f43f5e' }}>
+                                  <h3 className="stat-title">Faturamento</h3>
+                                  <div className="stat-value" style={{ color: netResult >= 0 ? '#10b981' : '#f43f5e' }}>R$ {netResult.toFixed(2)}</div>
+                                </div>
+                              </div>
+                            </>
+                          )
+                        })()}
+                      </div>
                     )}
 
-                    <div className="table-responsive">
-                      <table className="lms-table">
-                        <thead>
-                          <tr>
-                            <th>Ref / Transação</th>
-                            <th>Aluno</th>
-                            <th>Valor</th>
-                            <th>Método</th>
-                            <th>Vencimento</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {mockDb.payments.map(p => {
-                            const student = mockDb.users.find(u => u.id === p.student_id);
-                            return (
-                              <tr key={p.id}>
-                                <td>
-                                  <small><code>{p.transaction_code || p.id}</code></small>
-                                </td>
-                                <td>
-                                  <strong>{student ? student.name : 'Aluno Removido'}</strong>
-                                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
-                                </td>
-                                <td><strong>R$ {p.amount.toFixed(2)}</strong></td>
-                                <td><span className="course-type-badge">{p.payment_method}</span></td>
-                                <td>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</td>
-                                <td>
-                                  <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'}>
-                                    {p.status}
-                                  </span>
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingPayment(p)}>Editar</button>
-                                    {p.status !== 'RECEIVED' ? (
-                                      <button 
-                                        className="btn btn-primary" 
-                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                        onClick={() => simulatePaymentConfirm(p.id)}
-                                      >
-                                        Confirmar
-                                      </button>
-                                    ) : (
-                                      <span className="text-muted" style={{ fontSize: '0.85rem' }}>Pago {p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
-                                    )}
-                                  </div>
-                                </td>
+                    {financeTab === 'income' && (
+                      <div className="finance-income">
+                        <button className="btn btn-secondary mb-4" onClick={() => openEditPayment({})}>＋ Nova Entrada / Fatura</button>
+
+                        {editingPayment && (
+                          <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
+                            <h4 className="mb-4" style={{ color: 'var(--color-primary)' }}>{editingPayment.id ? 'Editar Entrada / Fatura' : 'Cadastrar Nova Entrada'}</h4>
+                            <input type="hidden" name="id" defaultValue={editingPayment.id || ''} />
+
+                            <div className="grid-2col mb-3">
+                              <div className="form-group">
+                                <label className="form-label">Selecionar Aluno (Responsável)</label>
+                                <input
+                                  type="text"
+                                  className="form-input mb-1"
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  placeholder="🔍 Pesquisar aluno por nome ou e-mail..."
+                                  value={entryStudentSearch}
+                                  onChange={(e) => setEntryStudentSearch(e.target.value)}
+                                />
+                                <select className="form-input" name="student_id" defaultValue={editingPayment.student_id || ''} required>
+                                  <option value="" disabled>-- Selecione o Aluno --</option>
+                                  {mockDb.users
+                                    .filter(u => u.role === 'STUDENT')
+                                    .filter(u => !entryStudentSearch || u.name?.toLowerCase().includes(entryStudentSearch.toLowerCase()) || u.email?.toLowerCase().includes(entryStudentSearch.toLowerCase()))
+                                    .map(u => (
+                                      <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                                    ))
+                                  }
+                                </select>
+                              </div>
+
+                              <div className="form-group">
+                                <label className="form-label">Tipo de Produto</label>
+                                <select
+                                  className="form-input"
+                                  name="product_type"
+                                  value={entryProductType}
+                                  onChange={(e) => {
+                                    setEntryProductType(e.target.value);
+                                    setEntryProductSearch('');
+                                  }}
+                                >
+                                  <option value="COURSE">Curso</option>
+                                  <option value="BOOK">Livro</option>
+                                  <option value="NONE">Avulso</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {entryProductType === 'NONE' && (
+                              <div className="form-group mb-3">
+                                <label className="form-label">Descrição / Detalhes da Transação Avulsa</label>
+                                <input
+                                  type="text"
+                                  className="form-input"
+                                  name="description"
+                                  defaultValue={editingPayment.description || ''}
+                                  placeholder="Ex: Consultoria presencial, Inscrição em evento avulso, taxa de emissão..."
+                                />
+                              </div>
+                            )}
+
+                            {entryProductType === 'COURSE' && (
+                              <div className="form-group mb-3">
+                                <label className="form-label">Selecionar Curso</label>
+                                <input
+                                  type="text"
+                                  className="form-input mb-1"
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  placeholder="🔍 Pesquisar curso por nome..."
+                                  value={entryProductSearch}
+                                  onChange={(e) => setEntryProductSearch(e.target.value)}
+                                />
+                                <select className="form-input" name="course_id" defaultValue={editingPayment.course_id || ''} required>
+                                  <option value="">-- Escolha o Curso --</option>
+                                  {mockDb.courses
+                                    .filter(c => !entryProductSearch || c.title?.toLowerCase().includes(entryProductSearch.toLowerCase()))
+                                    .map(c => (
+                                      <option key={c.id} value={c.id}>{c.title}</option>
+                                    ))
+                                  }
+                                </select>
+                              </div>
+                            )}
+
+                            {entryProductType === 'BOOK' && (
+                              <div className="form-group mb-3">
+                                <label className="form-label">Selecionar Livro</label>
+                                <input
+                                  type="text"
+                                  className="form-input mb-1"
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  placeholder="🔍 Pesquisar livro por título ou autor..."
+                                  value={entryProductSearch}
+                                  onChange={(e) => setEntryProductSearch(e.target.value)}
+                                />
+                                <select className="form-input" name="book_id" defaultValue={editingPayment.book_id || ''} required>
+                                  <option value="">-- Escolha o Livro --</option>
+                                  {(mockDb.books || [])
+                                    .filter(b => !entryProductSearch || b.title?.toLowerCase().includes(entryProductSearch.toLowerCase()) || b.author?.toLowerCase().includes(entryProductSearch.toLowerCase()))
+                                    .map(b => (
+                                      <option key={b.id} value={b.id}>{b.title}</option>
+                                    ))
+                                  }
+                                </select>
+                              </div>
+                            )}
+
+                            <div className="grid-3col mb-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                              <div className="form-group">
+                                <label className="form-label">Valor (R$)</label>
+                                <input className="form-input" type="number" step="0.01" name="amount" defaultValue={editingPayment.amount || 0.00} required placeholder="0.00" />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Forma de Pagamento</label>
+                                <select className="form-input" name="payment_method" defaultValue={editingPayment.payment_method || 'PIX'}>
+                                  <option value="PIX">Pix</option>
+                                  <option value="BOLETO">Boleto Bancário</option>
+                                  <option value="CREDIT_CARD">Cartão de Crédito</option>
+                                  <option value="CARNE">Carnê</option>
+                                  <option value="TRANSFER">Transferência Bancária</option>
+                                </select>
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Status da Fatura</label>
+                                <select className="form-input" name="status" defaultValue={editingPayment.status || 'PENDING'}>
+                                  <option value="PENDING">Pendente</option>
+                                  <option value="RECEIVED">Confirmado</option>
+                                  <option value="OVERDUE">Atrasado</option>
+                                  <option value="CANCELLED">Cancelado</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="grid-2col mb-3">
+                              <div className="form-group">
+                                <label className="form-label">Data de Vencimento</label>
+                                <input className="form-input" type="date" name="due_date" defaultValue={editingPayment.due_date ? editingPayment.due_date.split('T')[0] : new Date().toISOString().split('T')[0]} required />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Data de Pagamento (Efetiva)</label>
+                                <input className="form-input" type="date" name="paid_at" defaultValue={editingPayment.paid_at ? editingPayment.paid_at.split('T')[0] : ''} />
+                              </div>
+                            </div>
+
+                            <div className="grid-2col mb-3">
+                              <div className="form-group">
+                                <label className="form-label">Código de Transação / Referência (ID Asaas)</label>
+                                <input className="form-input" name="transaction_code" defaultValue={editingPayment.transaction_code || ''} placeholder="ID Asaas ou Automático" />
+                              </div>
+                              <div className="form-group">
+                                <label className="form-label">Comprovante (Transferência)</label>
+                                <input className="form-input" type="file" name="receipt_proof" accept="image/*" />
+                                {editingPayment.receipt_proof && <small style={{ color: 'var(--color-primary)', display: 'block' }}>Comprovante anexado</small>}
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                              <button className="btn btn-primary flex-1" type="submit">Salvar Entrada / Fatura</button>
+                              <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingPayment(null)}>Cancelar</button>
+                            </div>
+                          </form>
+                        )}
+                        <div className="table-responsive">
+                          <table className="lms-table">
+                            <thead>
+                              <tr>
+                                <th>Vencimento / Pagamento</th>
+                                <th>Aluno</th>
+                                <th>Curso / Livro</th>
+                                <th style={{ minWidth: '110px' }}>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                            </thead>
+                            <tbody>
+                              {mockDb.payments
+                                .filter(p => financeFilter === 'ALL' || p.status === financeFilter || (financeFilter === 'CONFIRMED' && p.status === 'RECEIVED'))
+                                .filter(p => !financeSearch || p.transaction_code?.includes(financeSearch) || mockDb.users.find(u => u.id === p.student_id)?.name?.toLowerCase().includes(financeSearch.toLowerCase()) || p.description?.toLowerCase().includes(financeSearch.toLowerCase()))
+                                .filter(p => {
+                                  const d = p.due_date ? p.due_date.split('T')[0] : '';
+                                  if (!d) return true;
+                                  if (financeDateRange.start && d < financeDateRange.start) return false;
+                                  if (financeDateRange.end && d > financeDateRange.end) return false;
+                                  return true;
+                                })
+                                .map(p => {
+                                  const student = mockDb.users.find(u => u.id === p.student_id);
+                                  const course = mockDb.courses.find(c => c.id === p.course_id);
+                                  const book = (mockDb.books || []).find(b => b.id === p.book_id);
+                                  return (
+                                    <tr key={p.id}>
+                                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                        <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
+                                          <span>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</span>
+                                        </div>
+                                        <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
+                                          <span>{p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
+                                        </div>
+                                      </td>
+                                      <td>
+                                        <strong>{student?.name || 'Aluno Removido'}</strong>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
+                                      </td>
+                                      <td>
+                                        {course ? (
+                                          <span>🌿 {course.title}</span>
+                                        ) : book ? (
+                                          <span>📚 {book.title}</span>
+                                        ) : (
+                                          <span>{p.description || 'Avulso'}</span>
+                                        )}
+                                      </td>
+                                      <td style={{ color: p.status === 'RECEIVED' ? 'var(--color-success)' : 'inherit', fontWeight: 'bold' }}>R$ {p.amount.toFixed(2)}</td>
+                                      <td>
+                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
+                                          {p.status === 'RECEIVED' ? 'Confirmado' : p.status === 'OVERDUE' ? 'Atrasado' : p.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <button
+                                          className="btn btn-secondary"
+                                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                          onClick={() => openEditPayment(p)}
+                                        >
+                                          Editar
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {financeTab === 'expenses' && (
+                      <div className="finance-expenses">
+                        <button className="btn btn-secondary mb-4" onClick={() => setEditingExpense({})}>＋ Lançar Despesa / Saída Avulsa</button>
+
+                        {editingExpense && (
+                          <form className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }} onSubmit={(e) => {
+                            e.preventDefault();
+                            if (editingExpense.isPayout) {
+                              setMockDb(prev => ({
+                                ...prev,
+                                teacher_payouts: (prev.teacher_payouts || []).map(p => {
+                                  if (p.id === editingExpense.id) {
+                                    const paid_at_input = e.target.paid_at?.value;
+                                    const paid_at = paid_at_input ? paid_at_input : (e.target.status.value === 'PAID' ? (p.paid_at || new Date().toISOString().split('T')[0]) : null);
+                                    return {
+                                      ...p,
+                                      status: e.target.status.value,
+                                      paid_at,
+                                      receipt_proof: e.target.receipt_proof?.files?.[0] ? 'Base64 Placeholder' : p.receipt_proof
+                                    };
+                                  }
+                                  return p;
+                                })
+                              }));
+                              setEditingExpense(null);
+                              setSuccess('Honorário docente atualizado com sucesso.');
+                              return;
+                            }
+
+                            const paid_at_input = e.target.paid_at?.value;
+                            const paid_at = paid_at_input ? paid_at_input : (e.target.status.value === 'PAID' ? (editingExpense.receipt_proof || new Date().toISOString().split('T')[0]) : null);
+
+                            const newExp = {
+                              id: editingExpense.id || 'exp-' + Date.now(),
+                              description: e.target.description.value,
+                              category: e.target.category.value,
+                              amount: parseFloat(e.target.amount.value),
+                              date: e.target.date.value,
+                              paid_at: paid_at,
+                              status: e.target.status.value,
+                              receipt_proof: e.target.receipt_proof?.files?.[0] ? 'Base64 Placeholder' : editingExpense.receipt_proof || null
+                            };
+                            setMockDb(prev => ({
+                              ...prev,
+                              expenses: editingExpense.id
+                                ? (prev.expenses || []).map(x => x.id === newExp.id ? newExp : x)
+                                : [...(prev.expenses || []), newExp]
+                            }));
+                            setEditingExpense(null);
+                            setSuccess(editingExpense.id ? 'Saída/Despesa atualizada com sucesso.' : 'Saída/Despesa registrada com sucesso.');
+                          }}>
+                            <h4 className="mb-3">{editingExpense.isPayout ? 'Editar Honorário Docente (Automático)' : editingExpense.id ? 'Editar Saída / Despesa' : 'Nova Saída / Despesa'}</h4>
+
+                            {editingExpense.isPayout ? (
+                              <>
+                                <div className="grid-3col mb-3">
+                                  <div className="form-group">
+                                    <label className="form-label">Descrição</label>
+                                    <input className="form-input" value={editingExpense.description || ''} disabled style={{ backgroundColor: '#e2e8f0' }} />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Tipo de Despesa</label>
+                                    <input className="form-input" value="Honorários" disabled style={{ backgroundColor: '#e2e8f0' }} />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Valor (R$) - Calculado (Bloqueado)</label>
+                                    <input className="form-input" value={`R$ ${editingExpense.amount.toFixed(2)}`} disabled style={{ backgroundColor: '#e2e8f0', fontWeight: 'bold' }} />
+                                  </div>
+                                </div>
+                                <div className="grid-3col mb-3">
+                                  <div className="form-group">
+                                    <label className="form-label">Data de Vencimento</label>
+                                    <input className="form-input" value={editingExpense.date || ''} disabled style={{ backgroundColor: '#e2e8f0' }} />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Data de Pagamento (Efetiva)</label>
+                                    <input type="date" name="paid_at" className="form-input" defaultValue={editingExpense.paid_at ? editingExpense.paid_at.split('T')[0] : ''} />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Status do Pagamento</label>
+                                    <select name="status" className="form-input" defaultValue={editingExpense.status || 'PENDING'}>
+                                      <option value="PENDING">Pendente</option>
+                                      <option value="PAID">Confirmado</option>
+                                      <option value="OVERDUE">Atrasado</option>
+                                      <option value="CANCELLED">Cancelado</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="form-group mb-3">
+                                  <label className="form-label">Comprovante de Transferência</label>
+                                  <input type="file" name="receipt_proof" className="form-input" accept="image/*" />
+                                  {editingExpense.receipt_proof && <small style={{ color: 'var(--color-primary)', display: 'block' }}>Comprovante anexado</small>}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="grid-3col mb-3">
+                                  <div className="form-group">
+                                    <label className="form-label">Descrição</label>
+                                    <input name="description" className="form-input" defaultValue={editingExpense.description || ''} required placeholder="Ex: Aluguel da sede, Servidor AWS, etc." />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Tipo de Despesa</label>
+                                    <select name="category" className="form-input" defaultValue={editingExpense.category || 'Outros'}>
+                                      <option value="Honorários">Honorários</option>
+                                      <option value="Infraestrutura">Infraestrutura</option>
+                                      <option value="Outros">Outros</option>
+                                    </select>
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Valor (R$)</label>
+                                    <input type="number" step="0.01" name="amount" className="form-input" defaultValue={editingExpense.amount || 0.00} required />
+                                  </div>
+                                </div>
+                                <div className="grid-3col mb-3">
+                                  <div className="form-group">
+                                    <label className="form-label">Data de Vencimento</label>
+                                    <input type="date" name="date" className="form-input" defaultValue={editingExpense.date || new Date().toISOString().split('T')[0]} required />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Data de Pagamento (Efetiva)</label>
+                                    <input type="date" name="paid_at" className="form-input" defaultValue={editingExpense.paid_at ? editingExpense.paid_at.split('T')[0] : ''} />
+                                  </div>
+                                  <div className="form-group">
+                                    <label className="form-label">Status</label>
+                                    <select name="status" className="form-input" defaultValue={editingExpense.status || 'PAID'}>
+                                      <option value="PAID">Pago</option>
+                                      <option value="PENDING">Pendente</option>
+                                      <option value="OVERDUE">Atrasado</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="form-group mb-3">
+                                  <label className="form-label">Comprovante (Imagem)</label>
+                                  <input type="file" name="receipt_proof" className="form-input" accept="image/*" />
+                                  {editingExpense.receipt_proof && <small style={{ color: 'var(--color-primary)', display: 'block' }}>Comprovante anexado</small>}
+                                </div>
+                              </>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button type="submit" className="btn btn-primary">Salvar Saída / Honorário</button>
+                              <button type="button" className="btn btn-secondary" onClick={() => setEditingExpense(null)}>Cancelar</button>
+                            </div>
+                          </form>
+                        )}
+
+                        <div className="table-responsive">
+                          <table className="lms-table">
+                            <thead>
+                              <tr>
+                                <th>Vencimento / Pagamento</th>
+                                <th>Descrição</th>
+                                <th style={{ minWidth: '110px' }}>Valor</th>
+                                <th>Tipo de Despesa</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(mockDb.expenses || [])
+                                .filter(e => financeFilter === 'ALL' || e.status === financeFilter || (financeFilter === 'CONFIRMED' && e.status === 'PAID'))
+                                .filter(e => !financeSearch || e.description?.toLowerCase().includes(financeSearch.toLowerCase()) || e.category?.toLowerCase().includes(financeSearch.toLowerCase()))
+                                .filter(e => {
+                                  const d = e.date ? e.date.split('T')[0] : '';
+                                  if (!d) return true;
+                                  if (financeDateRange.start && d < financeDateRange.start) return false;
+                                  if (financeDateRange.end && d > financeDateRange.end) return false;
+                                  return true;
+                                })
+                                .map(e => (
+                                  <tr key={e.id}>
+                                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                      <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                        <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
+                                        <span>{e.date ? new Date(e.date).toLocaleDateString('pt-BR') : '-'}</span>
+                                      </div>
+                                      <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                        <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
+                                        <span>{e.paid_at ? new Date(e.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
+                                      </div>
+                                    </td>
+                                    <td><strong>{e.description}</strong></td>
+                                    <td style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>R$ {e.amount.toFixed(2)}</td>
+                                    <td>{e.category || 'Outros'}</td>
+                                    <td>
+                                      <span className={e.status === 'PAID' ? 'badge-paid' : e.status === 'OVERDUE' ? 'badge-overdue' : e.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={e.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
+                                        {e.status === 'PAID' ? 'Confirmado' : e.status === 'OVERDUE' ? 'Atrasado' : e.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <button
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                        onClick={() => setEditingExpense(e)}
+                                      >
+                                        Editar
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              {(mockDb.teacher_payouts || [])
+                                .filter(p => financeFilter === 'ALL' || p.status === financeFilter || (financeFilter === 'CONFIRMED' && p.status === 'PAID'))
+                                .filter(p => {
+                                  const d = p.period_end ? p.period_end.split('T')[0] : '';
+                                  if (!d) return true;
+                                  if (financeDateRange.start && d < financeDateRange.start) return false;
+                                  if (financeDateRange.end && d > financeDateRange.end) return false;
+                                  return true;
+                                })
+                                .map(p => {
+                                  const teacher = mockDb.users.find(u => u.id === p.teacher_id);
+                                  return (
+                                    <tr key={p.id}>
+                                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                        <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
+                                          <span>{p.period_end ? new Date(p.period_end).toLocaleDateString('pt-BR') : '-'}</span>
+                                        </div>
+                                        <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
+                                          <span>{p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
+                                        </div>
+                                      </td>
+                                      <td><strong>Honorários Docentes ({teacher?.name || 'Professor'})</strong></td>
+                                      <td style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>R$ {p.amount.toFixed(2)}</td>
+                                      <td>Honorários</td>
+                                      <td>
+                                        <span className={p.status === 'PAID' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
+                                          {p.status === 'PAID' ? 'Confirmado' : p.status === 'OVERDUE' ? 'Atrasado' : p.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <button
+                                          className="btn btn-secondary"
+                                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                          onClick={() => setEditingExpense({
+                                            ...p,
+                                            isPayout: true,
+                                            description: `Honorários Docentes (${teacher?.name || 'Professor'})`,
+                                            category: 'Honorários',
+                                            date: p.period_end ? p.period_end.split('T')[0] : new Date().toISOString().split('T')[0]
+                                          })}
+                                        >
+                                          Editar
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+
                   </div>
                 )}
 
@@ -8915,9 +9606,9 @@ NEWFILEENCODING:NONE
                           {/* SEÇÃO 1: PROFESSORES DA TURMA */}
                           <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
                             <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>👨‍🏫 Professores Alocados na Turma</h4>
-                            
+
                             {/* Form de Adicionar Professor com 1 Clique */}
-                            <form 
+                            <form
                               onSubmit={(e) => {
                                 e.preventDefault();
                                 const teacherId = e.target.new_teacher_id.value;
@@ -8952,8 +9643,8 @@ NEWFILEENCODING:NONE
                                       <strong>{t.name}</strong>
                                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
                                     </div>
-                                    <button 
-                                      className="btn btn-danger" 
+                                    <button
+                                      className="btn btn-danger"
                                       style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
                                       onClick={() => handleRemoveTeacherFromClass(viewingClassDetails.id, t.id)}
                                     >
@@ -8970,9 +9661,9 @@ NEWFILEENCODING:NONE
                           {/* SEÇÃO 2: ALUNOS DA TURMA */}
                           <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
                             <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>🎓 Alunos Matriculados na Turma</h4>
-                            
+
                             {/* Form de Adicionar Aluno com 1 Clique */}
-                            <form 
+                            <form
                               onSubmit={(e) => {
                                 e.preventDefault();
                                 const studentId = e.target.new_student_id.value;
@@ -9010,8 +9701,8 @@ NEWFILEENCODING:NONE
                                         <strong>{st.name}</strong>
                                         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
                                       </div>
-                                      <button 
-                                        className="btn btn-danger" 
+                                      <button
+                                        className="btn btn-danger"
                                         style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
                                         onClick={() => handleRemoveStudentFromClass(viewingClassDetails.id, st.id)}
                                       >
@@ -9043,11 +9734,11 @@ NEWFILEENCODING:NONE
                           <div className="form-group">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                               <label className="form-label" style={{ margin: 0 }}>Curso Associado</label>
-                              <input 
-                                className="form-input" 
-                                placeholder="🔍 Pesquisar curso por nome..." 
-                                value={classCourseSearch} 
-                                onChange={(e) => setClassCourseSearch(e.target.value)} 
+                              <input
+                                className="form-input"
+                                placeholder="🔍 Pesquisar curso por nome..."
+                                value={classCourseSearch}
+                                onChange={(e) => setClassCourseSearch(e.target.value)}
                                 style={{ width: '220px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
                               />
                             </div>
@@ -9067,11 +9758,11 @@ NEWFILEENCODING:NONE
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                               <h5 style={{ fontWeight: 'bold', margin: 0 }}>Alocar Professores</h5>
-                              <input 
-                                className="form-input" 
-                                placeholder="🔍 Pesquisar professor..." 
-                                value={classTeacherSearch} 
-                                onChange={(e) => setClassTeacherSearch(e.target.value)} 
+                              <input
+                                className="form-input"
+                                placeholder="🔍 Pesquisar professor..."
+                                value={classTeacherSearch}
+                                onChange={(e) => setClassTeacherSearch(e.target.value)}
                                 style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                               />
                             </div>
@@ -9093,11 +9784,11 @@ NEWFILEENCODING:NONE
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                               <h5 style={{ fontWeight: 'bold', margin: 0 }}>Alocar Alunos</h5>
-                              <input 
-                                className="form-input" 
-                                placeholder="🔍 Pesquisar aluno..." 
-                                value={classStudentSearch} 
-                                onChange={(e) => setClassStudentSearch(e.target.value)} 
+                              <input
+                                className="form-input"
+                                placeholder="🔍 Pesquisar aluno..."
+                                value={classStudentSearch}
+                                onChange={(e) => setClassStudentSearch(e.target.value)}
                                 style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                               />
                             </div>
@@ -9121,9 +9812,9 @@ NEWFILEENCODING:NONE
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingClass(null)}>Cancelar</button>
                           {editingClass.id && (
-                            <button 
-                              className="btn btn-danger flex-1" 
-                              type="button" 
+                            <button
+                              className="btn btn-danger flex-1"
+                              type="button"
                               onClick={() => {
                                 if (window.confirm(`Tem certeza que deseja excluir a turma "${editingClass.name}"? Esta ação não poderá ser desfeita.`)) {
                                   handleDeleteClass(editingClass.id);
@@ -9173,17 +9864,17 @@ NEWFILEENCODING:NONE
                                 </td>
                                 <td>
                                   <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                                    <button 
-                                      className="btn btn-primary" 
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
+                                    <button
+                                      className="btn btn-primary"
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                                       onClick={() => setViewingClassDetails(c)}
                                       title="Ver e Gerenciar Integrantes da Turma"
                                     >
                                       👥 Integrantes
                                     </button>
-                                    <button 
-                                      className="btn btn-secondary" 
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} 
+                                    <button
+                                      className="btn btn-secondary"
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                                       onClick={() => setEditingClass(c)}
                                       title="Editar Dados da Turma"
                                     >
@@ -9266,8 +9957,8 @@ NEWFILEENCODING:NONE
                                 <td><strong>{event.title}</strong></td>
                                 <td>{event.location}</td>
                                 <td>
-                                  <button 
-                                    className="btn btn-danger" 
+                                  <button
+                                    className="btn btn-danger"
                                     style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                                     onClick={() => handleDeleteEvent(event.id)}
                                   >
@@ -9303,7 +9994,7 @@ NEWFILEENCODING:NONE
                     {/* Form de Concessão de Liberação Temporária */}
                     <form onSubmit={handleGrantTemporaryUnlock} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
                       <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Conceder Nova Liberação Temporária</h4>
-                      
+
                       <div className="grid-2col mb-3">
                         <div className="form-group">
                           <label className="form-label">Selecionar Aluno Inadimplente / Cadastrado</label>
@@ -9380,8 +10071,8 @@ NEWFILEENCODING:NONE
                               <td><strong>{new Date(u.valid_until).toLocaleDateString('pt-BR')}</strong></td>
                               <td><small>{u.reason}</small></td>
                               <td>
-                                <button 
-                                  className="btn btn-danger" 
+                                <button
+                                  className="btn btn-danger"
                                   style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                                   onClick={() => handleRevokeTemporaryUnlock(u.id, u.student_id, u.course_id)}
                                 >
@@ -9444,11 +10135,11 @@ NEWFILEENCODING:NONE
 
                       <div className="form-group mb-4">
                         <label className="form-label">Mensagem / Corpo da Oferta</label>
-                        <textarea 
-                          className="form-input" 
-                          name="message" 
-                          rows={6} 
-                          required 
+                        <textarea
+                          className="form-input"
+                          name="message"
+                          rows={6}
+                          required
                           placeholder="Digite o texto da oferta de forma atrativa...&#10;&#10;Ex: Olá! Temos o prazer de convidar você para a 2ª turma do Curso Avançado de Introdução à Homeopatia. Acesse a plataforma TOSB para garantir sua vaga com 10% de desconto."
                         />
                       </div>
@@ -9499,8 +10190,8 @@ NEWFILEENCODING:NONE
                 🧪 Painel de Simulação Rápida (1 Clique para Testar):
               </strong>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
                   onClick={() => {
                     sendPurchaseConfirmationEmail('ana@lms.com', 'Dra. Ana Paula', 'Pós-Graduação em Homeopatia Avançada', 3600.00, 'ASAAS_TEST_PURCHASE_100');
@@ -9509,8 +10200,8 @@ NEWFILEENCODING:NONE
                 >
                   🎉 Simular Compra de Curso
                 </button>
-                <button 
-                  className="btn btn-secondary" 
+                <button
+                  className="btn btn-secondary"
                   style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
                   onClick={() => {
                     checkCourseExpirations();
@@ -9518,8 +10209,8 @@ NEWFILEENCODING:NONE
                 >
                   🔔 Simular Alerta de Vencimento (2 Dias Antes)
                 </button>
-                <button 
-                  className="btn btn-accent" 
+                <button
+                  className="btn btn-accent"
                   style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff' }}
                   onClick={() => {
                     const delinquent = mockDb.users.find(u => u.id === 'student-delinquent-id') || { email: 'lucas.inadimplente@lms.com', name: 'Dr. Lucas Mendes' };
@@ -9595,22 +10286,22 @@ NEWFILEENCODING:NONE
             </p>
           </div>
         </div>
-        
+
         <div className="footer-bottom">
           <span>&copy; {new Date().getFullYear()} The Other Song Brasil. Todos os direitos reservados.</span>
           <span>Plataforma Desenvolvida com Elevado Rigor Acadêmico.</span>
         </div>
       </footer>
       {/* Botão Flutuante do WhatsApp */}
-      <a 
-        href="https://wa.me/5541991112233" 
+      <a
+        href="https://wa.me/5541991112233"
         className={`whatsapp-float-btn animate-fade-in ${!showWhatsappText ? 'text-hidden' : ''}`}
-        target="_blank" 
+        target="_blank"
         rel="noopener noreferrer"
         title="Fale Conosco no WhatsApp"
       >
         <svg className="whatsapp-icon-svg" viewBox="0 0 24 24">
-          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.578 1.98 14.116.953 11.49.951 6.058.951 1.632 5.321 1.628 10.75c-.001 1.71.463 3.384 1.34 4.877l-.994 3.633 3.737-.981zM17.11 13.99c-.27-.135-1.597-.788-1.846-.878-.25-.09-.432-.135-.612.135-.18.27-.697.878-.855 1.058-.158.18-.315.202-.585.067-.27-.135-1.14-.42-2.172-1.34-.803-.717-1.346-1.603-1.503-1.872-.158-.27-.017-.417.118-.552.122-.122.27-.315.405-.472.135-.158.18-.27.27-.45.09-.18.045-.337-.022-.472-.068-.135-.612-1.474-.838-2.016-.22-.53-.442-.459-.612-.468-.158-.008-.338-.008-.517-.008-.18 0-.473.067-.72.337-.247.27-.945.923-.945 2.25 0 1.328.968 2.61 1.103 2.79.135.18 1.902 2.905 4.608 4.07 1.1.474 1.88.66 2.532.766.702.112 1.34.08 1.843.005.56-.083 1.598-.653 1.822-1.282.225-.63.225-1.17.158-1.282-.068-.113-.248-.18-.518-.315z"/>
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.578 1.98 14.116.953 11.49.951 6.058.951 1.632 5.321 1.628 10.75c-.001 1.71.463 3.384 1.34 4.877l-.994 3.633 3.737-.981zM17.11 13.99c-.27-.135-1.597-.788-1.846-.878-.25-.09-.432-.135-.612.135-.18.27-.697.878-.855 1.058-.158.18-.315.202-.585.067-.27-.135-1.14-.42-2.172-1.34-.803-.717-1.346-1.603-1.503-1.872-.158-.27-.017-.417.118-.552.122-.122.27-.315.405-.472.135-.158.18-.27.27-.45.09-.18.045-.337-.022-.472-.068-.135-.612-1.474-.838-2.016-.22-.53-.442-.459-.612-.468-.158-.008-.338-.008-.517-.008-.18 0-.473.067-.72.337-.247.27-.945.923-.945 2.25 0 1.328.968 2.61 1.103 2.79.135.18 1.902 2.905 4.608 4.07 1.1.474 1.88.66 2.532.766.702.112 1.34.08 1.843.005.56-.083 1.598-.653 1.822-1.282.225-.63.225-1.17.158-1.282-.068-.113-.248-.18-.518-.315z" />
         </svg>
         <span className={`whatsapp-text ${!showWhatsappText ? 'hidden' : ''}`}>Fale Conosco</span>
       </a>

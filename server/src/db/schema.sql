@@ -129,12 +129,18 @@ CREATE TABLE IF NOT EXISTS payments (
     asaas_payment_id VARCHAR(255),
     transaction_code VARCHAR(255) UNIQUE,
     amount DECIMAL(10, 2) NOT NULL,
-    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('CREDIT_CARD', 'PIX', 'BOLETO', 'CARNE')),
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('CREDIT_CARD', 'PIX', 'BOLETO', 'CARNE', 'TRANSFER')),
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'RECEIVED', 'OVERDUE', 'REFUNDED')),
     due_date DATE NOT NULL,
     paid_at TIMESTAMP WITH TIME ZONE,
+    receipt_proof_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Atualizar CHECK constraint se já existir para permitir TRANSFER
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_payment_method_check;
+ALTER TABLE payments ADD CONSTRAINT payments_payment_method_check CHECK (payment_method IN ('CREDIT_CARD', 'PIX', 'BOLETO', 'CARNE', 'TRANSFER'));
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS receipt_proof_url TEXT;
 
 -- Tabela de Quizzes
 CREATE TABLE IF NOT EXISTS quizzes (
@@ -417,6 +423,38 @@ CREATE TABLE IF NOT EXISTS promotional_campaigns (
     message TEXT NOT NULL,
     target_course_id UUID REFERENCES courses(id) ON DELETE SET NULL, -- NULL para todos os alunos que aceitaram promoções
     sent_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+-- Tabela de Despesas (Saidas)
+CREATE TABLE IF NOT EXISTS expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    description VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    date DATE NOT NULL,
+    paid_at DATE,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID', 'OVERDUE')),
+    receipt_proof_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS paid_at DATE;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS book_id UUID REFERENCES books(id) ON DELETE SET NULL;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS description TEXT;
+
+-- Tabela de Pagamentos a Professores (Honorarios)
+CREATE TABLE IF NOT EXISTS teacher_payouts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    teacher_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    amount DECIMAL(10, 2) NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID', 'OVERDUE')),
+    receipt_proof_url TEXT,
+    paid_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

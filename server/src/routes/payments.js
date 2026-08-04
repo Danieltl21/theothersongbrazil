@@ -279,7 +279,7 @@ router.post('/simulate-webhook', authenticateToken, async (req, res) => {
 });
 
 // Relatório financeiro para dashboard do administrador (Vendas por mês, MRR, Inadimplência)
-router.get('/admin-report', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+router.get('/admin-finance-report', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
   try {
     // 1. Receita total líquida recebida
     const receivedRevenue = await pool.query(
@@ -291,9 +291,9 @@ router.get('/admin-report', authenticateToken, requireRole(['ADMIN']), async (re
       "SELECT SUM(amount) as total FROM payments WHERE status = 'PENDING'"
     );
 
-    // 3. Taxa de inadimplência (Quantidade de faturas OVERDUE + PENDING vencidas há mais de 10 dias)
+    // 3. Taxa de inadimplência (Quantidade de faturas OVERDUE + PENDING vencidas)
     const overdueRevenue = await pool.query(
-      "SELECT SUM(amount) as total FROM payments WHERE status = 'PENDING' AND due_date < CURRENT_DATE"
+      "SELECT SUM(amount) as total FROM payments WHERE status IN ('OVERDUE') OR (status = 'PENDING' AND due_date < CURRENT_DATE)"
     );
 
     // 4. Receita recorrente mensal (MRR) aproximada das assinaturas ativas
@@ -309,18 +309,359 @@ router.get('/admin-report', authenticateToken, requireRole(['ADMIN']), async (re
       "SELECT payment_method, COUNT(*)::int as count, SUM(amount) as total FROM payments GROUP BY payment_method"
     );
 
+    // 6. Total de despesas pagas
+    const expensesResult = await pool.query(
+      "SELECT SUM(amount) as total FROM expenses WHERE status = 'PAID'"
+    );
+
+    // 7. Total de honorários pagos
+    const payoutsResult = await pool.query(
+      "SELECT SUM(amount) as total FROM teacher_payouts WHERE status = 'PAID'"
+    );
+
     res.json({
       summary: {
         totalReceived: parseFloat(receivedRevenue.rows[0].total || 0),
         totalPending: parseFloat(pendingRevenue.rows[0].total || 0),
         totalOverdue: parseFloat(overdueRevenue.rows[0].total || 0),
-        mrr: parseFloat(mrrResult.rows[0].mrr || 0)
+        mrr: parseFloat(mrrResult.rows[0].mrr || 0),
+        totalExpenses: parseFloat(expensesResult.rows[0].total || 0),
+        totalPayouts: parseFloat(payoutsResult.rows[0].total || 0)
       },
       salesByMethod: salesByMethod.rows
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao obter relatório financeiro.' });
+  }
+});
+
+export default router;
+
+// Registrar Despesa
+router.post('/expenses', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { description, category, amount, date, status, receipt_proof_url } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO expenses (description, category, amount, date, status, receipt_proof_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [description, category, amount, date, status, receipt_proof_url]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao registrar despesa.' });
+  }
+});
+
+// Listar Despesas
+router.get('/expenses', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM expenses ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao listar despesas.' });
+  }
+});
+
+// Confirmar pagamento manualmente
+router.put('/:id/confirm-transfer', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { id } = req.params;
+  const { receipt_proof_url, transaction_code } = req.body;
+  
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Atualiza pagamento
+    const paymentResult = await client.query(
+      "UPDATE payments SET status = 'RECEIVED', paid_at = NOW(), receipt_proof_url = $1, transaction_code = COALESCE($2, transaction_code) WHERE id = $3 RETURNING *",
+      [receipt_proof_url, transaction_code, id]
+    );
+    
+    if (paymentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Pagamento não encontrado.' });
+    }
+    
+    const localPayment = paymentResult.rows[0];
+    
+    // Buscar curso
+    const courseResult = await client.query('SELECT duration_days FROM courses WHERE id = $1', [localPayment.course_id]);
+    if (courseResult.rows.length > 0) {
+      const durationDays = courseResult.rows[0].duration_days;
+      
+      const checkEnroll = await client.query(
+        'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+        [localPayment.student_id, localPayment.course_id]
+      );
+
+      if (checkEnroll.rows.length > 0) {
+        await client.query(
+          "UPDATE enrollments SET status = 'ACTIVE', expires_at = NOW() + ($1 || ' days')::INTERVAL WHERE id = $2",
+          [durationDays, checkEnroll.rows[0].id]
+        );
+      } else {
+        await client.query(
+          "INSERT INTO enrollments (student_id, course_id, expires_at, status) VALUES ($1, $2, NOW() + ($3 || ' days')::INTERVAL, 'ACTIVE')",
+          [localPayment.student_id, localPayment.course_id, durationDays]
+        );
+      }
+    }
+    
+    await client.query('COMMIT');
+    res.json({ message: 'Pagamento confirmado com sucesso.', payment: localPayment });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ message: 'Erro ao confirmar pagamento.' });
+  const { asaasPaymentId } = req.body;
+
+  if (!asaasPaymentId) {
+    return res.status(400).json({ message: 'ID da fatura Asaas obrigatório.' });
+  }
+
+  try {
+    const checkPayment = await pool.query('SELECT * FROM payments WHERE asaas_payment_id = $1', [asaasPaymentId]);
+    if (checkPayment.rows.length === 0) {
+      return res.status(404).json({ message: 'Pagamento não localizado no banco local.' });
+    }
+
+    const localPayment = checkPayment.rows[0];
+
+    // Fazer uma chamada simulada ao webhook local
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      await client.query(
+        "UPDATE payments SET status = 'RECEIVED', paid_at = NOW() WHERE id = $1",
+        [localPayment.id]
+      );
+
+      const courseResult = await client.query('SELECT duration_days FROM courses WHERE id = $1', [localPayment.course_id]);
+      const durationDays = courseResult.rows[0].duration_days;
+
+      const checkEnroll = await client.query(
+        'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+        [localPayment.student_id, localPayment.course_id]
+      );
+
+      if (checkEnroll.rows.length > 0) {
+        await client.query(
+          "UPDATE enrollments SET status = 'ACTIVE', expires_at = NOW() + ($1 || ' days')::INTERVAL WHERE id = $2",
+          [durationDays, checkEnroll.rows[0].id]
+        );
+      } else {
+        await client.query(
+          "INSERT INTO enrollments (student_id, course_id, expires_at, status) VALUES ($1, $2, NOW() + ($3 || ' days')::INTERVAL, 'ACTIVE')",
+          [localPayment.student_id, localPayment.course_id, durationDays]
+        );
+      }
+
+      await client.query('COMMIT');
+      res.json({ message: 'Sucesso: Pagamento simulado com sucesso. Matrícula ativada.' });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao processar simulação.' });
+  }
+});
+
+// Relatório financeiro para dashboard do administrador (Vendas por mês, MRR, Inadimplência)
+router.get('/admin-finance-report', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  try {
+    // 1. Receita total líquida recebida
+    const receivedRevenue = await pool.query(
+      "SELECT SUM(amount) as total FROM payments WHERE status = 'RECEIVED'"
+    );
+
+    // 2. Receita prevista em aberto (Boletos pendentes)
+    const pendingRevenue = await pool.query(
+      "SELECT SUM(amount) as total FROM payments WHERE status = 'PENDING'"
+    );
+
+    // 3. Taxa de inadimplência (Quantidade de faturas OVERDUE + PENDING vencidas)
+    const overdueRevenue = await pool.query(
+      "SELECT SUM(amount) as total FROM payments WHERE status IN ('OVERDUE') OR (status = 'PENDING' AND due_date < CURRENT_DATE)"
+    );
+
+    // 4. Receita recorrente mensal (MRR) aproximada das assinaturas ativas
+    const mrrResult = await pool.query(
+      "SELECT SUM(p.amount) as mrr FROM payments p " +
+      "JOIN courses c ON c.id = p.course_id " +
+      "WHERE c.type = 'SUBSCRIPTION' AND p.status = 'RECEIVED' " +
+      "AND p.paid_at >= NOW() - INTERVAL '30 days'"
+    );
+
+    // 5. Contagem de vendas por método
+    const salesByMethod = await pool.query(
+      "SELECT payment_method, COUNT(*)::int as count, SUM(amount) as total FROM payments GROUP BY payment_method"
+    );
+
+    // 6. Total de despesas pagas
+    const expensesResult = await pool.query(
+      "SELECT SUM(amount) as total FROM expenses WHERE status = 'PAID'"
+    );
+
+    // 7. Total de honorários pagos
+    const payoutsResult = await pool.query(
+      "SELECT SUM(amount) as total FROM teacher_payouts WHERE status = 'PAID'"
+    );
+
+    res.json({
+      summary: {
+        totalReceived: parseFloat(receivedRevenue.rows[0].total || 0),
+        totalPending: parseFloat(pendingRevenue.rows[0].total || 0),
+        totalOverdue: parseFloat(overdueRevenue.rows[0].total || 0),
+        mrr: parseFloat(mrrResult.rows[0].mrr || 0),
+        totalExpenses: parseFloat(expensesResult.rows[0].total || 0),
+        totalPayouts: parseFloat(payoutsResult.rows[0].total || 0)
+      },
+      salesByMethod: salesByMethod.rows
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao obter relatório financeiro.' });
+  }
+});
+
+// Confirmar pagamento manualmente
+router.put('/:id/confirm-transfer', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { id } = req.params;
+  const { receipt_proof_url, transaction_code } = req.body;
+  
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Atualiza pagamento
+    const paymentResult = await client.query(
+      "UPDATE payments SET status = 'RECEIVED', paid_at = NOW(), receipt_proof_url = $1, transaction_code = COALESCE($2, transaction_code) WHERE id = $3 RETURNING *",
+      [receipt_proof_url, transaction_code, id]
+    );
+    
+    if (paymentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Pagamento não encontrado.' });
+    }
+    
+    const localPayment = paymentResult.rows[0];
+    
+    // Buscar curso
+    const courseResult = await client.query('SELECT duration_days FROM courses WHERE id = $1', [localPayment.course_id]);
+    if (courseResult.rows.length > 0) {
+      const durationDays = courseResult.rows[0].duration_days;
+      
+      const checkEnroll = await client.query(
+        'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+        [localPayment.student_id, localPayment.course_id]
+      );
+
+      if (checkEnroll.rows.length > 0) {
+        await client.query(
+          "UPDATE enrollments SET status = 'ACTIVE', expires_at = NOW() + ($1 || ' days')::INTERVAL WHERE id = $2",
+          [durationDays, checkEnroll.rows[0].id]
+        );
+      } else {
+        await client.query(
+          "INSERT INTO enrollments (student_id, course_id, expires_at, status) VALUES ($1, $2, NOW() + ($3 || ' days')::INTERVAL, 'ACTIVE')",
+          [localPayment.student_id, localPayment.course_id, durationDays]
+        );
+      }
+    }
+    
+    await client.query('COMMIT');
+    res.json({ message: 'Pagamento confirmado com sucesso.', payment: localPayment });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ message: 'Erro ao confirmar pagamento.' });
+  } finally {
+    client.release();
+  }
+});
+
+// Registrar Pagamento de Professor
+router.post('/teacher-payouts', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { teacher_id, amount, period_start, period_end, status, receipt_proof_url, paid_at } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO teacher_payouts (teacher_id, amount, period_start, period_end, status, receipt_proof_url, paid_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [teacher_id, amount, period_start, period_end, status, receipt_proof_url, paid_at]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao registrar pagamento ao professor.' });
+  }
+});
+
+// Obter Despesas (Saídas)
+router.get('/expenses', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM expenses ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar despesas.' });
+  }
+});
+
+// Criar / Atualizar Despesa
+router.post('/expenses', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { id, description, category, amount, date, paid_at, status, receipt_proof_url } = req.body;
+  try {
+    if (id) {
+      const result = await pool.query(
+        'UPDATE expenses SET description = $1, category = $2, amount = $3, date = $4, paid_at = $5, status = $6, receipt_proof_url = $7 WHERE id = $8 RETURNING *',
+        [description, category, amount, date, paid_at, status, receipt_proof_url, id]
+      );
+      return res.json(result.rows[0]);
+    } else {
+      const result = await pool.query(
+        'INSERT INTO expenses (description, category, amount, date, paid_at, status, receipt_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [description, category, amount, date, paid_at, status, receipt_proof_url]
+      );
+      return res.json(result.rows[0]);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao salvar despesa.' });
+  }
+});
+
+// Obter Pagamentos a Professores
+router.get('/teacher-payouts', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT tp.*, u.name as teacher_name, u.email as teacher_email FROM teacher_payouts tp JOIN users u ON u.id = tp.teacher_id ORDER BY tp.period_end DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar pagamentos de professores.' });
+  }
+});
+
+// Atualizar Pagamento de Professor
+router.put('/teacher-payouts/:id', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
+  const { id } = req.params;
+  const { status, receipt_proof_url, paid_at } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE teacher_payouts SET status = $1, receipt_proof_url = $2, paid_at = $3 WHERE id = $4 RETURNING *',
+      [status, receipt_proof_url, paid_at, id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar pagamento do professor.' });
   }
 });
 
