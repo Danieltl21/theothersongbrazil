@@ -6,10 +6,10 @@
   <title>Simulação LMS Homeopatia - The Other Song Brasil</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>" />
   
-  <!-- Fontes Premium -->
+  <!-- Fontes Premium & Identidade TOSB -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
   <!-- React, ReactDOM, Babel Standalone da CDN -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -17,36 +17,68 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
 :root {
-  /* Cores principais - Paleta premium refinada e moderna (TOSB) */
-  --color-primary: #0b3c2e;       /* Verde Floresta Escuro */
-  --color-primary-light: #eef5f2; /* Verde suave muito claro */
-  --color-secondary: #0f172a;     /* Slate escuro para alta legibilidade */
-  --color-accent: #c5a880;        /* Ouro fosco/champagne premium */
-  --color-bg-base: #faf9f6;       /* Creme/Off-white quente e confortável */
-  --color-bg-card: #ffffff;       /* Branco para cartões */
-  --color-text-main: #1e293b;     /* Slate escuro para excelente legibilidade (idosos) */
-  --color-text-muted: #475569;    /* Cinza escuro legível para metadados */
-  --color-border: #cbd5e1;        /* Borda com contraste adequado */
-  --color-success: #166534;       /* Verde sucesso */
-  --color-error: #9f1239;         /* Vermelho elegante para erros/bloqueios */
-  --color-warning: #9a3412;       /* Laranja escuro quente */
+  /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
+  --tosb-green-950: #07180F;
+  --tosb-green-900: #0B2418;
+  --tosb-green-800: #123523;
+  --tosb-green-700: #214B33;
+
+  --tosb-gold-700: #9A6A18;
+  --tosb-gold-600: #B68A35;
+  --tosb-gold-500: #D0A54E;
+  --tosb-gold-300: #E8CC8D;
+
+  --tosb-cream-50: #FFFDF8;
+  --tosb-cream-100: #FAF2E6;
+  --tosb-cream-200: #F3EADA;
+  --tosb-cream-300: #DDD2BD;
+  --tosb-ink: #121913;
+  --tosb-muted: #625E54;
+  --tosb-white: #FFFFFF;
+
+  /* Mapeamento de Variáveis Globais (Usando Apenas Cores da Tabela) */
+  --color-primary: var(--tosb-green-900);
+  /* #0B2418 */
+  --color-primary-light: var(--tosb-cream-200);
+  /* #F3EADA */
+  --color-secondary: var(--tosb-green-950);
+  /* #07180F */
+  --color-accent: var(--tosb-gold-600);
+  /* #B68A35 */
+  --color-bg-base: var(--tosb-cream-100);
+  /* #FAF2E6 */
+  --color-bg-card: var(--tosb-cream-50);
+  /* #FFFDF8 */
+  --color-text-main: var(--tosb-ink);
+  /* #121913 */
+  --color-text-muted: var(--tosb-muted);
+  /* #625E54 */
+  --color-border: var(--tosb-cream-300);
+  /* #DDD2BD */
+
+  /* Mensagens de Sucesso, Erro e Aviso (Exceções autorizadas pelo usuário) */
+  --color-success: #166534;
+  --color-error: #9f1239;
+  --color-warning: #9a3412;
 
   /* Acessibilidade */
   --font-multiplier: 1;
 
   /* Tipografia */
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Montserrat', Arial, sans-serif;
 
   /* Efeitos */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 2px 8px rgba(7, 24, 15, 0.06);
+  --shadow-md: 0 6px 18px rgba(7, 24, 15, 0.10);
+  --shadow-lg: 0 12px 28px rgba(7, 24, 15, 0.16);
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --border-radius-sm: 6px;
-  --border-radius-md: 10px;
-  --border-radius-lg: 16px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 22px;
 }
 
 /* Reset básico */
@@ -69,7 +101,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-serif);
   color: var(--color-secondary);
   font-weight: 600;
@@ -145,7 +180,8 @@ h1, h2, h3, h4 {
   border-radius: var(--border-radius-sm);
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--color-primary);
   background-color: var(--color-primary-light);
 }
@@ -372,7 +408,8 @@ h1, h2, h3, h4 {
 .player-container {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  padding-top: 56.25%;
+  /* 16:9 Aspect Ratio */
   background-color: #000;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
@@ -438,12 +475,14 @@ h1, h2, h3, h4 {
     gap: 1rem;
     padding: 1rem;
   }
+
   .nav-links {
     width: 100%;
     justify-content: center;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
+
   .main-content {
     padding: 1.5rem 1rem;
   }
@@ -480,8 +519,13 @@ h1, h2, h3, h4 {
   width: 100%;
 }
 
-.flex-1 { flex: 1; }
-.flex-2 { flex: 2; }
+.flex-1 {
+  flex: 1;
+}
+
+.flex-2 {
+  flex: 2;
+}
 
 .cursor-pointer {
   cursor: pointer;
@@ -492,20 +536,57 @@ h1, h2, h3, h4 {
 }
 
 /* Margens utilitárias */
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 0.75rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-5 { margin-bottom: 1.5rem; }
-.mb-6 { margin-bottom: 2rem; }
-.mb-7 { margin-bottom: 2.5rem; }
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
 
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 0.75rem; }
-.mt-4 { margin-top: 1rem; }
-.mt-5 { margin-top: 1.5rem; }
-.mt-6 { margin-top: 2rem; }
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-5 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-6 {
+  margin-bottom: 2rem;
+}
+
+.mb-7 {
+  margin-bottom: 2.5rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-5 {
+  margin-top: 1.5rem;
+}
+
+.mt-6 {
+  margin-top: 2rem;
+}
 
 /* Grid e Flex Layouts Gerais */
 .flex-center-gap {
@@ -866,7 +947,7 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: var(--transition-smooth);
 }
 
@@ -1128,7 +1209,8 @@ h1, h2, h3, h4 {
 body.high-contrast {
   --color-primary: #ffffff;
   --color-primary-light: #2d3748;
-  --color-secondary: #ffff00; /* Amarelo sobre preto */
+  --color-secondary: #ffff00;
+  /* Amarelo sobre preto */
   --color-accent: #ffff00;
   --color-bg-base: #000000;
   --color-bg-card: #121212;
@@ -1162,7 +1244,7 @@ body.high-contrast .lesson-item-sidebar.active {
   color: #000000 !important;
 }
 
-body.high-contrast .nav-link:hover, 
+body.high-contrast .nav-link:hover,
 body.high-contrast .nav-link.active {
   background-color: #2d3748 !important;
   color: #ffff00 !important;
@@ -1237,18 +1319,22 @@ body.high-contrast .nav-link.active {
   .student-panel-container {
     flex-direction: column;
   }
+
   .student-sidebar {
     width: 100%;
   }
+
   .student-sidebar-menu {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
   }
+
   .student-sidebar-item button {
     padding: 0.6rem 0.8rem;
     font-size: 0.85rem;
   }
+
   .addresses-grid {
     grid-template-columns: 1fr;
   }
@@ -1945,6 +2031,7 @@ body.high-contrast .nav-link.active {
    ========================================================================== */
 
 @media (max-width: 768px) {
+
   /* Header e Menu hamburger */
   .hamburger-btn {
     display: inline-flex;
@@ -2099,6 +2186,7 @@ body.high-contrast .nav-link.active {
   .mobile-only-block {
     display: none !important;
   }
+
   .mobile-only-flex {
     display: none !important;
   }
@@ -2108,10 +2196,11 @@ body.high-contrast .nav-link.active {
   .desktop-only-block {
     display: none !important;
   }
+
   .mobile-only-flex {
     display: flex !important;
   }
-  
+
   /* Ajustes do Cabeçalho Mobile para ser Sticky e Menor */
   .tosb-header {
     position: sticky !important;
@@ -2126,7 +2215,7 @@ body.high-contrast .nav-link.active {
     border-bottom: 1px solid var(--color-border) !important;
     box-shadow: var(--shadow-sm) !important;
   }
-  
+
   .accessibility-bar {
     display: none !important;
   }
@@ -2153,7 +2242,8 @@ body.high-contrast .nav-link.active {
   }
 
   .nav-links {
-    top: 55px !important; /* Ajusta para a altura do novo header menor */
+    top: 55px !important;
+    /* Ajusta para a altura do novo header menor */
   }
 }
 
@@ -2241,6 +2331,7 @@ body.high-contrast .nav-link.active {
     transform: translateX(120%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -2379,7 +2470,654 @@ body.high-contrast .nav-link.active {
   font-weight: 800;
 }
 
+/* ==========================================================================
+   TOSB - GUIA TÉCNICO DE IDENTIDADE VISUAL DIGITAL v1.0 (DESIGN 2)
+   Especificação completa para Design System, Cores, Tipografia e Componentes
+   ========================================================================== */
 
+.theme-tosb-v2 {
+  /* Design Tokens de Cores Oficiais */
+  --tosb-green-950: #07180F;
+  --tosb-green-900: #0B2418;
+  --tosb-green-800: #123523;
+  --tosb-green-700: #214B33;
+
+  --tosb-gold-700: #9A6A18;
+  --tosb-gold-600: #B68A35;
+  --tosb-gold-500: #D0A54E;
+  --tosb-gold-300: #E8CC8D;
+
+  --tosb-cream-50: #FFFDF8;
+  --tosb-cream-100: #FAF2E6;
+  --tosb-cream-200: #F3EADA;
+  --tosb-cream-300: #DDD2BD;
+  --tosb-ink: #121913;
+  --tosb-muted: #625E54;
+  --tosb-white: #FFFFFF;
+
+  /* Tokens Semânticos */
+  --color-bg-page: var(--tosb-cream-100);
+  --color-bg-surface: var(--tosb-cream-50);
+  --color-bg-brand: var(--tosb-green-950);
+  --color-bg-brand-soft: var(--tosb-green-900);
+  --color-text-primary: var(--tosb-ink);
+  --color-text-secondary: var(--tosb-muted);
+  --color-text-inverse: var(--tosb-cream-50);
+  --color-accent: var(--tosb-gold-600);
+  --color-accent-strong: var(--tosb-gold-700);
+  --color-border: rgba(154, 106, 24, 0.30);
+  --color-focus: var(--tosb-gold-500);
+
+  /* Mapeamento para Legado */
+  --color-primary: var(--tosb-green-900);
+  --color-primary-light: var(--tosb-cream-200);
+  --color-secondary: var(--tosb-green-950);
+  --color-bg-base: var(--tosb-cream-100);
+  --color-bg-card: var(--tosb-cream-50);
+  --color-text-main: var(--tosb-ink);
+  --color-text-muted: var(--tosb-muted);
+
+  /* Tipografia Oficial */
+  --font-display: "Cormorant Garamond";
+  --font-ui: "Montserrat";
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-ui);
+
+  /* Raios e Sombras */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 22px;
+
+  --shadow-sm: 0 4px 12px rgba(7, 24, 15, 0.10);
+  --shadow-md: 0 10px 28px rgba(7, 24, 15, 0.14);
+  --shadow-lg: 0 16px 36px rgba(7, 24, 15, 0.20);
+  --shadow-brand: 0 8px 20px rgba(7, 24, 15, 0.28);
+  --shadow-gold: 0 0 0 1px rgba(182, 138, 53, .35), 0 8px 18px rgba(154, 106, 24, .16);
+
+  /* Gradientes */
+  --gradient-brand: linear-gradient(135deg, #07180F 0%, #0B2418 58%, #123523 100%);
+  --gradient-gold-line: linear-gradient(90deg, transparent 0%, #B68A35 24%, #E8CC8D 50%, #B68A35 76%, transparent 100%);
+  --gradient-cream: linear-gradient(180deg, #FFFDF8 0%, #FAF2E6 100%);
+
+  background-color: var(--tosb-cream-100);
+  color: var(--tosb-ink);
+  font-family: var(--font-ui);
+}
+
+/* Regras de Tipografia para TOSB v2 */
+.theme-tosb-v2 h1,
+.theme-tosb-v2 h2,
+.theme-tosb-v2 h3,
+.theme-tosb-v2 .section-title,
+.theme-tosb-v2 .hero-title {
+  font-family: var(--font-display);
+  color: var(--tosb-green-950);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.theme-tosb-v2 h4,
+.theme-tosb-v2 h5,
+.theme-tosb-v2 h6 {
+  font-family: var(--font-ui);
+  color: var(--tosb-green-900);
+  font-weight: 600;
+}
+
+.theme-tosb-v2 p,
+.theme-tosb-v2 span,
+.theme-tosb-v2 div,
+.theme-tosb-v2 li {
+  font-family: var(--font-ui);
+}
+
+/* Cabeçalho Institucional - Design 2 TOSB */
+.theme-tosb-v2 .tosb-header {
+  background: var(--gradient-brand);
+  border-bottom: 1px solid var(--tosb-gold-600);
+  box-shadow: var(--shadow-brand);
+  padding: 1rem 2rem;
+  position: relative;
+}
+
+.theme-tosb-v2 .tosb-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-gold-line);
+  opacity: 0.75;
+}
+
+.theme-tosb-v2 .logo-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--tosb-gold-300);
+  letter-spacing: 0.06em;
+}
+
+.theme-tosb-v2 .logo-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  color: var(--tosb-cream-200);
+  letter-spacing: 0.15em;
+  opacity: 0.9;
+}
+
+.theme-tosb-v2 .nav-link {
+  color: var(--tosb-cream-100);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-normal, 220ms) ease;
+}
+
+.theme-tosb-v2 .nav-link:hover,
+.theme-tosb-v2 .nav-link.active {
+  color: var(--tosb-gold-300);
+  background-color: var(--tosb-green-800);
+  border-bottom: 2px solid var(--tosb-gold-500);
+}
+
+/* Botões do Sistema - TOSB v2 */
+.theme-tosb-v2 .btn-primary {
+  background: var(--tosb-green-900);
+  color: var(--tosb-cream-50);
+  border: 1px solid var(--tosb-gold-600);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  box-shadow: var(--shadow-brand);
+  transition: background-color 220ms ease, box-shadow 220ms ease, transform 160ms ease;
+}
+
+.theme-tosb-v2 .btn-primary:hover {
+  background: var(--tosb-green-800);
+  color: var(--tosb-cream-50);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-1px);
+}
+
+.theme-tosb-v2 .btn-secondary {
+  background: transparent;
+  color: var(--tosb-green-950);
+  border: 1px solid var(--tosb-gold-600);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  transition: all 220ms ease;
+}
+
+.theme-tosb-v2 .btn-secondary:hover {
+  background: var(--tosb-cream-200);
+  color: var(--tosb-green-900);
+  border-color: var(--tosb-gold-700);
+}
+
+.theme-tosb-v2 .btn-accent {
+  background: var(--tosb-gold-600);
+  color: var(--tosb-green-950);
+  border: 1px solid var(--tosb-gold-300);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+.theme-tosb-v2 .btn-accent:hover {
+  background: var(--tosb-gold-500);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Cards e Superfícies Elevadas - TOSB v2 */
+.theme-tosb-v2 .card,
+.theme-tosb-v2 .dashboard-card,
+.theme-tosb-v2 .course-card,
+.theme-tosb-v2 .book-card,
+.theme-tosb-v2 .stat-card {
+  background-color: var(--tosb-cream-50);
+  border: 1px solid rgba(182, 138, 53, 0.30);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.theme-tosb-v2 .card-hover:hover,
+.theme-tosb-v2 .course-card:hover,
+.theme-tosb-v2 .book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-gold);
+  border-color: var(--tosb-gold-600);
+}
+
+/* Menu Lateral / Painel do Aluno - TOSB v2 */
+.theme-tosb-v2 .student-sidebar,
+.theme-tosb-v2 .sidebar {
+  background: var(--gradient-brand);
+  border-right: 1px solid rgba(182, 138, 53, 0.35);
+  color: var(--tosb-cream-100);
+  border-radius: var(--radius-lg);
+}
+
+.theme-tosb-v2 .sidebar-nav-item,
+.theme-tosb-v2 .nav-item {
+  color: var(--tosb-cream-200);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all 200ms ease;
+  min-height: 48px;
+}
+
+.theme-tosb-v2 .sidebar-nav-item.active,
+.theme-tosb-v2 .nav-item.active {
+  background: var(--tosb-green-800);
+  color: var(--tosb-cream-50);
+  border-left: 3px solid var(--tosb-gold-500);
+  box-shadow: 0 4px 14px rgba(7, 24, 15, 0.3);
+}
+
+.theme-tosb-v2 .sidebar-nav-item:hover {
+  background: rgba(18, 53, 35, 0.7);
+  color: var(--tosb-gold-300);
+}
+
+/* Formulários e Inputs - TOSB v2 */
+.theme-tosb-v2 .form-input,
+.theme-tosb-v2 select.form-input,
+.theme-tosb-v2 textarea.form-input {
+  background-color: var(--tosb-cream-50);
+  border: 1px solid var(--tosb-cream-300);
+  border-radius: var(--radius-sm);
+  color: var(--tosb-ink);
+  font-family: var(--font-ui);
+  min-height: 44px;
+}
+
+.theme-tosb-v2 .form-input:focus {
+  border-color: var(--tosb-gold-500);
+  outline: 2px solid var(--tosb-gold-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(208, 165, 78, 0.18);
+}
+
+.theme-tosb-v2 .form-label {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--tosb-green-950);
+}
+
+/* Badges e Destaques - TOSB v2 */
+.theme-tosb-v2 .badge-paid,
+.theme-tosb-v2 .badge-active {
+  background-color: var(--tosb-green-900);
+  color: var(--tosb-cream-50);
+  border: 1px solid var(--tosb-gold-600);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+}
+
+.theme-tosb-v2 .badge-pending {
+  background-color: var(--tosb-cream-200);
+  color: var(--tosb-gold-700);
+  border: 1px solid var(--tosb-gold-500);
+  border-radius: var(--radius-pill);
+}
+
+/* Rodapé Institucional - TOSB v2 */
+.theme-tosb-v2 .tosb-footer {
+  background: var(--tosb-green-950);
+  border-top: 3px solid var(--tosb-gold-600);
+  color: var(--tosb-cream-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-tosb-v2 .tosb-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-gold-line);
+}
+
+.theme-tosb-v2 .footer-section h4 {
+  font-family: var(--font-display);
+  color: var(--tosb-gold-300);
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(182, 138, 53, 0.25);
+  padding-bottom: 0.5rem;
+}
+
+.theme-tosb-v2 .footer-link {
+  color: var(--tosb-cream-200);
+  font-family: var(--font-ui);
+}
+
+.theme-tosb-v2 .footer-link:hover {
+  color: var(--tosb-gold-300);
+}
+
+.theme-tosb-v2 .footer-bottom {
+  border-top: 1px solid rgba(232, 204, 141, 0.2);
+  color: var(--tosb-cream-300);
+  font-size: 0.85rem;
+}
+
+/* Componente do Seletor de Layout (Design Switcher) */
+.layout-switcher-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(7, 24, 15, 0.85);
+  border: 1px solid var(--tosb-gold-500);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  color: var(--tosb-gold-300);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.layout-switcher-pill:hover {
+  background: var(--tosb-green-900);
+  color: #FFFFFF;
+  border-color: var(--tosb-gold-300);
+  box-shadow: 0 0 12px rgba(208, 165, 78, 0.35);
+  transform: translateY(-1px);
+}
+
+.layout-badge {
+  background: var(--tosb-gold-600);
+  color: var(--tosb-green-950);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS REPLICANDO A CAPA DO PDF DA TOSB (PAGE 1)
+   ========================================================================== */
+
+.theme-tosb-v2 .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.theme-tosb-v2 .dashboard-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--tosb-green-950);
+  margin-bottom: 0.25rem;
+}
+
+.theme-tosb-v2 .student-panel-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.theme-tosb-v2 .student-sidebar {
+  background: var(--gradient-brand);
+  border: 1px solid rgba(182, 138, 53, 0.45);
+  border-radius: 22px;
+  padding: 1.5rem 1rem 4rem 1rem;
+  box-shadow: 0 10px 28px rgba(7, 24, 15, 0.28), inset 0 0 15px rgba(182, 138, 53, 0.10);
+  position: relative;
+  overflow: hidden;
+  min-height: 480px;
+}
+
+.theme-tosb-v2 .student-sidebar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 150' opacity='0.35'%3E%3Cpath fill='none' stroke='%23B68A35' stroke-width='1.5' d='M10,140 Q50,70 120,130 Q160,60 190,140 M30,110 Q60,50 40,30 M90,100 Q120,40 140,20'/%3E%3Ccircle cx='40' cy='30' r='4' fill='%23B68A35'/%3E%3Ccircle cx='140' cy='20' r='4' fill='%23B68A35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.theme-tosb-v2 .student-sidebar-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 2;
+}
+
+.theme-tosb-v2 .student-sidebar-item button,
+.theme-tosb-v2 .student-sidebar-item button span {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #FAF2E6 !important;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.theme-tosb-v2 .student-sidebar-item button {
+  padding: 0.85rem 1.1rem;
+}
+
+.theme-tosb-v2 .student-sidebar-item.active button,
+.theme-tosb-v2 .student-sidebar-item.active button span {
+  background: #0B2418 !important;
+  border: 1px solid #B68A35 !important;
+  color: #FFFDF8 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 0 8px rgba(182, 138, 53, 0.2);
+}
+
+.theme-tosb-v2 .student-sidebar-item button:hover,
+.theme-tosb-v2 .student-sidebar-item button:hover span {
+  color: #E8CC8D !important;
+  border-color: rgba(182, 138, 53, 0.35);
+}
+
+.theme-tosb-v2 .nav-dropdown>button.nav-link {
+  background: transparent !important;
+  color: #FAF2E6 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.theme-tosb-v2 .nav-dropdown>button.nav-link:hover,
+.theme-tosb-v2 .nav-dropdown>button.nav-link.active {
+  color: #E8CC8D !important;
+  background: rgba(18, 53, 35, 0.7) !important;
+}
+
+/* Painel de Conteúdo e Cards de Ação Exatos do PDF */
+.theme-tosb-v2 .tosb-panel-card {
+  background: var(--tosb-cream-50);
+  border: 1px solid rgba(182, 138, 53, 0.35);
+  border-radius: 22px;
+  padding: 2.25rem;
+  box-shadow: 0 6px 24px rgba(7, 24, 15, 0.08);
+}
+
+.theme-tosb-v2 .tosb-panel-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--tosb-green-950);
+  margin-bottom: 0.75rem;
+}
+
+.theme-tosb-v2 .tosb-action-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 992px) {
+  .theme-tosb-v2 .tosb-action-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-tosb-v2 .student-panel-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.theme-tosb-v2 .tosb-action-card {
+  background: linear-gradient(180deg, #FFFDF8 0%, #FAF2E6 100%);
+  border: 1.5px solid var(--tosb-gold-600);
+  border-radius: 22px;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(7, 24, 15, 0.06);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.theme-tosb-v2 .tosb-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(182, 138, 53, 0.25);
+}
+
+.theme-tosb-v2 .tosb-card-category-label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--tosb-gold-700);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.theme-tosb-v2 .tosb-circular-icon-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--tosb-green-950);
+  border: 2px solid var(--tosb-gold-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tosb-gold-300);
+  font-size: 2.2rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 12px rgba(7, 24, 15, 0.25);
+}
+
+.theme-tosb-v2 .tosb-action-card-title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--tosb-green-950);
+  margin-bottom: 0.5rem;
+}
+
+.theme-tosb-v2 .tosb-diamond-divider {
+  color: var(--tosb-gold-500);
+  font-size: 0.85rem;
+  margin: 0.5rem 0 1.25rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.theme-tosb-v2 .tosb-diamond-divider::before,
+.theme-tosb-v2 .tosb-diamond-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--tosb-gold-500), transparent);
+}
+
+.theme-tosb-v2 .tosb-btn-pill-dark {
+  background: #0B2418 !important;
+  color: #FFFDF8 !important;
+  border: 1px solid #B68A35 !important;
+  border-radius: 999px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  transition: all 220ms ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.theme-tosb-v2 .tosb-btn-pill-dark:hover {
+  background: #123523 !important;
+  color: #FFFDF8 !important;
+  box-shadow: 0 0 16px rgba(182, 138, 53, 0.55) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Faixa de Rodapé da Capa (Page 1) */
+.theme-tosb-v2 .tosb-page1-footer-bar {
+  background: var(--tosb-green-950);
+  border-top: 2px solid var(--tosb-gold-600);
+  padding: 1.5rem 2.5rem;
+  margin-top: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--tosb-cream-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-tosb-v2 .tosb-quote-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--tosb-gold-300);
+  font-size: 1.15rem;
+  margin-bottom: 0.25rem;
+}
+
+.theme-tosb-v2 .tosb-subquote-text {
+  font-family: var(--font-ui);
+  color: var(--tosb-cream-200);
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
   </style>
 </head>
 <body>
@@ -2883,6 +3621,17 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 };
 
 function App() {
+  // Controle do Layout / Identidade Visual (Design 1 - Clássico vs Design 2 - Novo Guia TOSB)
+  const [layoutMode, setLayoutMode] = useState(() => {
+    return localStorage.getItem('tosb_layout_mode') || 'tosb-v2';
+  });
+
+  const toggleLayoutMode = () => {
+    const nextMode = layoutMode === 'tosb-v2' ? 'classic' : 'tosb-v2';
+    setLayoutMode(nextMode);
+    localStorage.setItem('tosb_layout_mode', nextMode);
+  };
+
   // Controle de Estado Geral
   const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
   const [user, setUser] = useState(null);
@@ -6070,16 +6819,36 @@ NEWFILEENCODING:NONE
   }
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${layoutMode === 'tosb-v2' ? 'theme-tosb-v2' : ''}`}>
       {/* Cabeçalho */}
       <header className="tosb-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
-            <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
-            <div className="logo-text">
-              <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
-              <span className="logo-subtitle">Brasil | Homeopatia</span>
-            </div>
+            {layoutMode === 'tosb-v2' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="50" cy="50" r="46" stroke="#B68A35" strokeWidth="2.5" fill="#07180F"/>
+                  <circle cx="50" cy="50" r="41" stroke="#D0A54E" strokeWidth="1" strokeDasharray="2 2" fill="none"/>
+                  <path d="M50 78 V48 M50 56 Q35 45 28 32 Q42 32 50 48 M50 52 Q65 42 72 28 Q58 28 50 44 M50 42 Q30 28 25 15 Q40 18 50 35 M50 38 Q70 24 75 12 Q60 15 50 32 M50 28 Q40 15 50 8 Q60 15 50 28" stroke="#D0A54E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <circle cx="50" cy="8" r="2.5" fill="#E8CC8D"/>
+                  <circle cx="25" cy="15" r="2" fill="#E8CC8D"/>
+                  <circle cx="75" cy="12" r="2" fill="#E8CC8D"/>
+                </svg>
+                <div className="logo-text">
+                  <span className="logo-title" style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
+                  <span style={{ fontSize: '0.7rem', color: '#FFFDF8', fontWeight: '500', letterSpacing: '0.05em' }}>The Other Song Brasil</span>
+                  <span style={{ fontSize: '0.55rem', color: '#E8CC8D', textTransform: 'uppercase', letterSpacing: '0.12em', opacity: 0.85 }}>ENSINO INTERNACIONAL EM HOMEOPATIA</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
+                <div className="logo-text">
+                  <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
+                  <span className="logo-subtitle">Brasil | Homeopatia</span>
+                </div>
+              </>
+            )}
           </a>
 
 
@@ -6194,8 +6963,9 @@ NEWFILEENCODING:NONE
                   )}
                   {user.role === 'ADMIN' && (
                     <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'stats')}>📊 Estatísticas / OFX</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🌿 Gerenciar Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'panel')}>📊 Dashboard Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'reports')}>📈 Relatório Financeiro</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🎓 Gerenciar Cursos</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
@@ -6217,8 +6987,22 @@ NEWFILEENCODING:NONE
           </div>
         </nav>
 
-        {/* Painel do Usuário, Carrinho e Acessibilidade */}
+        {/* Painel do Usuário, Carrinho, Alternador de Layout e Acessibilidade */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+
+          {/* Seletor de Layout / Identidade Visual (Design 1 vs Design 2) */}
+          <button
+            type="button"
+            className="layout-switcher-pill"
+            onClick={toggleLayoutMode}
+            title="Alternar entre o Design Clássico e o Novo Guia de Identidade Visual TOSB"
+            style={{ marginLeft: '0.25rem', marginRight: '0.25rem' }}
+          >
+            <span>🎨 Layout:</span>
+            <span className="layout-badge">
+              {layoutMode === 'tosb-v2' ? 'Design 2 (Guia TOSB)' : 'Design 1 (Clássico)'}
+            </span>
+          </button>
 
           {/* Controles de Acessibilidade */}
           <div className="accessibility-popover-wrapper">
@@ -7465,19 +8249,29 @@ NEWFILEENCODING:NONE
               <aside className="student-sidebar">
                 <ul className="student-sidebar-menu">
                   <li className={`student-sidebar-item ${studentActiveTab === 'panel' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('panel')}>📊 Painel Geral</button>
+                    <button onClick={() => setStudentActiveTab('panel')}>
+                      <span style={{ fontSize: '1.1rem' }}>🔲</span> Painel Geral
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('courses')}>🌿 Meus Cursos</button>
+                    <button onClick={() => setStudentActiveTab('courses')}>
+                      <span style={{ fontSize: '1.1rem' }}>📖</span> Meus Cursos
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'agenda' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('agenda')}>📅 Agenda & Eventos</button>
+                    <button onClick={() => setStudentActiveTab('agenda')}>
+                      <span style={{ fontSize: '1.1rem' }}>📅</span> Agenda & Eventos
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('payments')}>💳 Pedidos / Financeiro</button>
+                    <button onClick={() => setStudentActiveTab('payments')}>
+                      <span style={{ fontSize: '1.1rem' }}>💳</span> Pedidos / Financeiro
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('account')}>⚙️ Detalhes da Conta</button>
+                    <button onClick={() => setStudentActiveTab('account')}>
+                      <span style={{ fontSize: '1.1rem' }}>⚙️</span> Detalhes da Conta
+                    </button>
                   </li>
                 </ul>
               </aside>
@@ -7485,26 +8279,50 @@ NEWFILEENCODING:NONE
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
                 {studentActiveTab === 'panel' && (
-                  <div className="card">
-                    <h3 className="mb-4">Painel Geral</h3>
-                    <p style={{ marginBottom: '1.5rem' }}>
+                  <div className="tosb-panel-card card">
+                    <h2 className="tosb-panel-title">Painel Geral</h2>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.98rem', lineHeight: '1.6', marginBottom: '2rem' }}>
                       A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
-                    <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-primary)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Acesso Acadêmico</span>
-                        <h4 className="mt-1">Cursos Ativos</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('courses')}>Acessar Aulas</button>
+
+                    <div className="tosb-action-cards-grid">
+                      {/* CARD 1: ACESSO ACADÊMICO */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">ACESSO ACADÊMICO</span>
+                        <div className="tosb-circular-icon-box">
+                          🎓
+                        </div>
+                        <h3 className="tosb-action-card-title">Cursos Ativos</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('courses')}>
+                          Acessar Aulas <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-accent)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Financeiro</span>
-                        <h4 className="mt-1">Faturas & Cobranças</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('payments')}>Ver Cobranças</button>
+
+                      {/* CARD 2: FINANCEIRO */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">FINANCEIRO</span>
+                        <div className="tosb-circular-icon-box">
+                          💳
+                        </div>
+                        <h3 className="tosb-action-card-title">Faturas & Cobranças</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('payments')}>
+                          Ver Cobranças <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-success)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Dados Cadastrais</span>
-                        <h4 className="mt-1">Editar Perfil</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('account')}>Editar Cadastro</button>
+
+                      {/* CARD 3: DADOS CADASTRAIS */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">DADOS CADASTRAIS</span>
+                        <div className="tosb-circular-icon-box">
+                          👤
+                        </div>
+                        <h3 className="tosb-action-card-title">Editar Perfil</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('account')}>
+                          Editar Cadastro <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
                     </div>
                   </div>

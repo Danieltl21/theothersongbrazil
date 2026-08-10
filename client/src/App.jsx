@@ -494,6 +494,17 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 };
 
 export default function App() {
+  // Controle do Layout / Identidade Visual (Design 1 - Clássico vs Design 2 - Novo Guia TOSB)
+  const [layoutMode, setLayoutMode] = useState(() => {
+    return localStorage.getItem('tosb_layout_mode') || 'tosb-v2';
+  });
+
+  const toggleLayoutMode = () => {
+    const nextMode = layoutMode === 'tosb-v2' ? 'classic' : 'tosb-v2';
+    setLayoutMode(nextMode);
+    localStorage.setItem('tosb_layout_mode', nextMode);
+  };
+
   // Controle de Estado Geral
   const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
   const [user, setUser] = useState(null);
@@ -3681,16 +3692,36 @@ NEWFILEENCODING:NONE
   }
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${layoutMode === 'tosb-v2' ? 'theme-tosb-v2' : ''}`}>
       {/* Cabeçalho */}
       <header className="tosb-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
-            <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
-            <div className="logo-text">
-              <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
-              <span className="logo-subtitle">Brasil | Homeopatia</span>
-            </div>
+            {layoutMode === 'tosb-v2' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="50" cy="50" r="46" stroke="#B68A35" strokeWidth="2.5" fill="#07180F"/>
+                  <circle cx="50" cy="50" r="41" stroke="#D0A54E" strokeWidth="1" strokeDasharray="2 2" fill="none"/>
+                  <path d="M50 78 V48 M50 56 Q35 45 28 32 Q42 32 50 48 M50 52 Q65 42 72 28 Q58 28 50 44 M50 42 Q30 28 25 15 Q40 18 50 35 M50 38 Q70 24 75 12 Q60 15 50 32 M50 28 Q40 15 50 8 Q60 15 50 28" stroke="#D0A54E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <circle cx="50" cy="8" r="2.5" fill="#E8CC8D"/>
+                  <circle cx="25" cy="15" r="2" fill="#E8CC8D"/>
+                  <circle cx="75" cy="12" r="2" fill="#E8CC8D"/>
+                </svg>
+                <div className="logo-text">
+                  <span className="logo-title" style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
+                  <span style={{ fontSize: '0.7rem', color: '#FFFDF8', fontWeight: '500', letterSpacing: '0.05em' }}>The Other Song Brasil</span>
+                  <span style={{ fontSize: '0.55rem', color: '#E8CC8D', textTransform: 'uppercase', letterSpacing: '0.12em', opacity: 0.85 }}>ENSINO INTERNACIONAL EM HOMEOPATIA</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
+                <div className="logo-text">
+                  <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
+                  <span className="logo-subtitle">Brasil | Homeopatia</span>
+                </div>
+              </>
+            )}
           </a>
 
 
@@ -3805,8 +3836,9 @@ NEWFILEENCODING:NONE
                   )}
                   {user.role === 'ADMIN' && (
                     <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'stats')}>📊 Estatísticas / OFX</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🌿 Gerenciar Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'panel')}>📊 Dashboard Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'reports')}>📈 Relatório Financeiro</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🎓 Gerenciar Cursos</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
                       <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
@@ -3828,8 +3860,22 @@ NEWFILEENCODING:NONE
           </div>
         </nav>
 
-        {/* Painel do Usuário, Carrinho e Acessibilidade */}
+        {/* Painel do Usuário, Carrinho, Alternador de Layout e Acessibilidade */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+
+          {/* Seletor de Layout / Identidade Visual (Design 1 vs Design 2) */}
+          <button
+            type="button"
+            className="layout-switcher-pill"
+            onClick={toggleLayoutMode}
+            title="Alternar entre o Design Clássico e o Novo Guia de Identidade Visual TOSB"
+            style={{ marginLeft: '0.25rem', marginRight: '0.25rem' }}
+          >
+            <span>🎨 Layout:</span>
+            <span className="layout-badge">
+              {layoutMode === 'tosb-v2' ? 'Design 2 (Guia TOSB)' : 'Design 1 (Clássico)'}
+            </span>
+          </button>
 
           {/* Controles de Acessibilidade */}
           <div className="accessibility-popover-wrapper">
@@ -5076,19 +5122,29 @@ NEWFILEENCODING:NONE
               <aside className="student-sidebar">
                 <ul className="student-sidebar-menu">
                   <li className={`student-sidebar-item ${studentActiveTab === 'panel' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('panel')}>📊 Painel Geral</button>
+                    <button onClick={() => setStudentActiveTab('panel')}>
+                      <span style={{ fontSize: '1.1rem' }}>🔲</span> Painel Geral
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('courses')}>🌿 Meus Cursos</button>
+                    <button onClick={() => setStudentActiveTab('courses')}>
+                      <span style={{ fontSize: '1.1rem' }}>📖</span> Meus Cursos
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'agenda' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('agenda')}>📅 Agenda & Eventos</button>
+                    <button onClick={() => setStudentActiveTab('agenda')}>
+                      <span style={{ fontSize: '1.1rem' }}>📅</span> Agenda & Eventos
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('payments')}>💳 Pedidos / Financeiro</button>
+                    <button onClick={() => setStudentActiveTab('payments')}>
+                      <span style={{ fontSize: '1.1rem' }}>💳</span> Pedidos / Financeiro
+                    </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
-                    <button onClick={() => setStudentActiveTab('account')}>⚙️ Detalhes da Conta</button>
+                    <button onClick={() => setStudentActiveTab('account')}>
+                      <span style={{ fontSize: '1.1rem' }}>⚙️</span> Detalhes da Conta
+                    </button>
                   </li>
                 </ul>
               </aside>
@@ -5096,26 +5152,50 @@ NEWFILEENCODING:NONE
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
                 {studentActiveTab === 'panel' && (
-                  <div className="card">
-                    <h3 className="mb-4">Painel Geral</h3>
-                    <p style={{ marginBottom: '1.5rem' }}>
+                  <div className="tosb-panel-card card">
+                    <h2 className="tosb-panel-title">Painel Geral</h2>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.98rem', lineHeight: '1.6', marginBottom: '2rem' }}>
                       A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
-                    <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-primary)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Acesso Acadêmico</span>
-                        <h4 className="mt-1">Cursos Ativos</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('courses')}>Acessar Aulas</button>
+
+                    <div className="tosb-action-cards-grid">
+                      {/* CARD 1: ACESSO ACADÊMICO */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">ACESSO ACADÊMICO</span>
+                        <div className="tosb-circular-icon-box">
+                          🎓
+                        </div>
+                        <h3 className="tosb-action-card-title">Cursos Ativos</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('courses')}>
+                          Acessar Aulas <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-accent)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Financeiro</span>
-                        <h4 className="mt-1">Faturas & Cobranças</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('payments')}>Ver Cobranças</button>
+
+                      {/* CARD 2: FINANCEIRO */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">FINANCEIRO</span>
+                        <div className="tosb-circular-icon-box">
+                          💳
+                        </div>
+                        <h3 className="tosb-action-card-title">Faturas & Cobranças</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('payments')}>
+                          Ver Cobranças <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
-                      <div className="card" style={{ borderLeft: '4px solid var(--color-success)', padding: '1.25rem' }}>
-                        <span className="course-type-badge">Dados Cadastrais</span>
-                        <h4 className="mt-1">Editar Perfil</h4>
-                        <button className="btn btn-secondary btn-quick-login mt-4 w-full" onClick={() => setStudentActiveTab('account')}>Editar Cadastro</button>
+
+                      {/* CARD 3: DADOS CADASTRAIS */}
+                      <div className="tosb-action-card">
+                        <span className="tosb-card-category-label">DADOS CADASTRAIS</span>
+                        <div className="tosb-circular-icon-box">
+                          👤
+                        </div>
+                        <h3 className="tosb-action-card-title">Editar Perfil</h3>
+                        <div className="tosb-diamond-divider">❖</div>
+                        <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('account')}>
+                          Editar Cadastro <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                        </button>
                       </div>
                     </div>
                   </div>
