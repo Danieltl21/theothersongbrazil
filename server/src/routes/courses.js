@@ -327,4 +327,66 @@ router.post('/quizzes/:quizId/submit', authenticateToken, async (req, res) => {
   }
 });
 
+// --- PLATFORM SETTINGS (Modelo de Certificado) ---
+router.get('/platform-settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT key, value FROM platform_settings');
+    const settings = {};
+    result.rows.forEach(r => { settings[r.key] = r.value; });
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar configurações.' });
+  }
+});
+
+router.post('/admin-certificate-template', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const { certificate_template_url } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO platform_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+      ['certificate_template_url', certificate_template_url]
+    );
+    res.json({ message: 'Modelo de certificado atualizado com sucesso!' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao salvar modelo de certificado.' });
+  }
+});
+
+// --- GESTÃO DE LIVROS COM MÚLTIPLAS FOTOS ---
+router.get('/books/all', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM books ORDER BY title ASC');
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao listar livros.' });
+  }
+});
+
+router.post('/admin-books', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const { id, title, author, price, description, page_count, content_table, images } = req.body;
+  try {
+    const bookId = id || `book-${Date.now()}`;
+    const imagesJson = JSON.stringify(images || []);
+    await pool.query(
+      `INSERT INTO books (id, title, author, price, description, page_count, content_table, images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO UPDATE SET
+         title = EXCLUDED.title,
+         author = EXCLUDED.author,
+         price = EXCLUDED.price,
+         description = EXCLUDED.description,
+         page_count = EXCLUDED.page_count,
+         content_table = EXCLUDED.content_table,
+         images = EXCLUDED.images`,
+      [bookId, title, author, price, description, page_count, content_table, imagesJson]
+    );
+    res.json({ message: 'Livro salvo com sucesso!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao salvar livro.' });
+  }
+});
+
 export default router;

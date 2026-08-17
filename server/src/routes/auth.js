@@ -402,6 +402,54 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// Atualizar Usuário por ADM (Incluindo Dados Bancários e Moeda de Pagamento)
+router.put('/admin/users/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const targetId = req.params.id;
+  const {
+    name, email, role, status, is_homeopath, phone, cpf, profession, custom_profession,
+    council_type, council_number, council_state, specialty, rqe, bio,
+    bank_name, bank_agency, bank_account, pix_key, payout_currency
+  } = req.body;
+
+  try {
+    await pool.query(
+      `UPDATE users SET
+        name = COALESCE($1, name),
+        email = COALESCE($2, email),
+        role = COALESCE($3, role),
+        status = COALESCE($4, status),
+        is_homeopath = COALESCE($5, is_homeopath),
+        phone = COALESCE($6, phone),
+        cpf = COALESCE($7, cpf),
+        profession = COALESCE($8, profession),
+        custom_profession = COALESCE($9, custom_profession),
+        council_type = COALESCE($10, council_type),
+        council_number = COALESCE($11, council_number),
+        council_state = COALESCE($12, council_state),
+        specialty = COALESCE($13, specialty),
+        rqe = COALESCE($14, rqe),
+        bio = COALESCE($15, bio),
+        bank_name = COALESCE($16, bank_name),
+        bank_agency = COALESCE($17, bank_agency),
+        bank_account = COALESCE($18, bank_account),
+        pix_key = COALESCE($19, pix_key),
+        payout_currency = COALESCE($20, payout_currency)
+       WHERE id = $21`,
+      [
+        name, email, role, status, is_homeopath, phone, cpf, profession, custom_profession,
+        council_type, council_number, council_state, specialty, rqe, bio,
+        bank_name, bank_agency, bank_account, pix_key, payout_currency, targetId
+      ]
+    );
+
+    res.json({ message: 'Dados do usuário atualizados com sucesso pelo Administrador!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar usuário pelo ADM.' });
+  }
+});
+
 // Obter lista de homeopatas cadastrados (Público)
 router.get('/homeopaths', async (req, res) => {
   try {

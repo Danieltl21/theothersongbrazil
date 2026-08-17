@@ -9,7 +9,7 @@
   <!-- Fontes Premium & Identidade TOSB -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
   <!-- React, ReactDOM, Babel Standalone da CDN -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -17,7 +17,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
   /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
@@ -68,8 +68,7 @@
   --font-multiplier: 1;
 
   /* Tipografia */
-  /* Tipografia */
-  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Montserrat', Arial, sans-serif;
 
   /* Efeitos */
@@ -2488,7 +2487,7 @@ body.high-contrast .nav-link.active {
   --tosb-gold-500: #D0A54E;
   --tosb-gold-300: #E8CC8D;
 
-  --tosb-cream-50: #FFFFFF;
+  --tosb-cream-50: #FFFDF8;
   --tosb-cream-100: #FAF2E6;
   --tosb-cream-200: #F3EADA;
   --tosb-cream-300: #DDD2BD;
@@ -2498,12 +2497,12 @@ body.high-contrast .nav-link.active {
 
   /* Tokens Semânticos */
   --color-bg-page: var(--tosb-cream-100);
-  --color-bg-surface: var(--tosb-white);
+  --color-bg-surface: var(--tosb-cream-50);
   --color-bg-brand: var(--tosb-green-950);
   --color-bg-brand-soft: var(--tosb-green-900);
   --color-text-primary: var(--tosb-ink);
   --color-text-secondary: var(--tosb-muted);
-  --color-text-inverse: var(--tosb-white);
+  --color-text-inverse: var(--tosb-cream-50);
   --color-accent: var(--tosb-gold-600);
   --color-accent-strong: var(--tosb-gold-700);
   --color-border: rgba(154, 106, 24, 0.30);
@@ -2514,24 +2513,12 @@ body.high-contrast .nav-link.active {
   --color-primary-light: var(--tosb-cream-200);
   --color-secondary: var(--tosb-green-950);
   --color-bg-base: var(--tosb-cream-100);
-  --color-bg-card: var(--tosb-white);
+  --color-bg-card: var(--tosb-cream-50);
   --color-text-main: var(--tosb-ink);
   --color-text-muted: var(--tosb-muted);
-  
-  /* Novas Variáveis Semânticas para Refatoração */
-  --color-bg-surface-alt: var(--tosb-white);
-  --color-bg-muted: var(--tosb-cream-200);
-  --color-border-soft: var(--tosb-cream-300);
-  --color-text-label: var(--tosb-green-700);
-  --color-text-footer: var(--tosb-cream-300);
-  --color-border-footer: rgba(232, 204, 141, 0.2);
-  --color-text-strong: var(--tosb-ink);
-  --color-finance-pending: var(--tosb-gold-700);
-  --color-finance-expense: var(--color-error);
-  --color-hero-subtitle: var(--tosb-gold-300);
 
   /* Tipografia Oficial */
-  --font-display: "DM Serif Display";
+  --font-display: "Cormorant Garamond";
   --font-ui: "Montserrat";
   --font-serif: var(--font-display);
   --font-sans: var(--font-ui);
@@ -2642,9 +2629,9 @@ body.high-contrast .nav-link.active {
 
 /* Botões do Sistema - TOSB v2 */
 .theme-tosb-v2 .btn-primary {
-  background: var(--tosb-green-900) !important;
-  color: var(--tosb-white) !important;
-  border: 1px solid var(--tosb-gold-600) !important;
+  background: var(--tosb-green-900);
+  color: var(--tosb-cream-50);
+  border: 1px solid var(--tosb-gold-600);
   border-radius: var(--radius-md);
   font-family: var(--font-ui);
   font-weight: 600;
@@ -2653,16 +2640,16 @@ body.high-contrast .nav-link.active {
 }
 
 .theme-tosb-v2 .btn-primary:hover {
-  background: var(--tosb-green-800) !important;
-  color: var(--tosb-white) !important;
+  background: var(--tosb-green-800);
+  color: var(--tosb-cream-50);
   box-shadow: var(--shadow-gold);
   transform: translateY(-1px);
 }
 
 .theme-tosb-v2 .btn-secondary {
-  background: var(--tosb-white) !important;
-  color: var(--tosb-green-950) !important;
-  border: 1px solid var(--tosb-gold-600) !important;
+  background: transparent;
+  color: var(--tosb-green-950);
+  border: 1px solid var(--tosb-gold-600);
   border-radius: var(--radius-md);
   font-family: var(--font-ui);
   font-weight: 600;
@@ -2670,33 +2657,32 @@ body.high-contrast .nav-link.active {
 }
 
 .theme-tosb-v2 .btn-secondary:hover {
-  background: var(--tosb-green-900) !important;
-  color: var(--tosb-white) !important;
-  border-color: var(--tosb-gold-700) !important;
+  background: var(--tosb-cream-200);
+  color: var(--tosb-green-900);
+  border-color: var(--tosb-gold-700);
 }
 
 .theme-tosb-v2 .btn-accent {
-  background: var(--tosb-gold-600) !important;
-  color: var(--tosb-green-950) !important;
-  border: 1px solid var(--tosb-gold-300) !important;
+  background: var(--tosb-gold-600);
+  color: var(--tosb-green-950);
+  border: 1px solid var(--tosb-gold-300);
   border-radius: var(--radius-md);
   font-family: var(--font-ui);
   font-weight: 600;
 }
 
 .theme-tosb-v2 .btn-accent:hover {
-  background: var(--tosb-gold-500) !important;
+  background: var(--tosb-gold-500);
   box-shadow: var(--shadow-gold);
 }
 
 /* Cards e Superfícies Elevadas - TOSB v2 */
 .theme-tosb-v2 .card,
-.theme-tosb-v2 .premium-card,
 .theme-tosb-v2 .dashboard-card,
 .theme-tosb-v2 .course-card,
 .theme-tosb-v2 .book-card,
 .theme-tosb-v2 .stat-card {
-  background-color: var(--tosb-white) !important;
+  background-color: var(--tosb-cream-50);
   border: 1px solid rgba(182, 138, 53, 0.30);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -2828,162 +2814,6 @@ body.high-contrast .nav-link.active {
   color: var(--tosb-cream-300);
   font-size: 0.85rem;
 }
-
-/* ==========================================================================
-   OVERRIDES DE CLASSES BASE PARA DESIGN 2 (GUIA TOSB)
-   ========================================================================== */
-.theme-tosb-v2 .quick-login-container,
-.theme-tosb-v2 .conciliation-results,
-.theme-tosb-v2 .logs-container,
-.theme-tosb-v2 .cart-items-list,
-.theme-tosb-v2 .cart-summary-box,
-.theme-tosb-v2 .directory-search-box {
-  background-color: var(--color-bg-surface-alt);
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .video-section-home,
-.theme-tosb-v2 .homeopath-card,
-.theme-tosb-v2 .syllabus-module-card {
-  background-color: var(--color-bg-card);
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .helper-text,
-.theme-tosb-v2 .course-card-expires,
-.theme-tosb-v2 .invoice-ref,
-.theme-tosb-v2 .invoice-due {
-  color: var(--color-text-secondary);
-}
-
-.theme-tosb-v2 .badge-paid,
-.theme-tosb-v2 .badge-status-active,
-.theme-tosb-v2 .lesson-progress-badge-completed {
-  background-color: var(--tosb-green-900);
-  color: var(--tosb-gold-300);
-  border: 1px solid var(--tosb-gold-600);
-}
-
-.theme-tosb-v2 .badge-pending,
-.theme-tosb-v2 .lesson-progress-badge-pending,
-.theme-tosb-v2 .badge-log-type {
-  background-color: var(--color-bg-muted);
-  color: var(--color-text-label);
-  border: 1px solid var(--color-border-soft);
-}
-
-.theme-tosb-v2 .badge-overdue,
-.theme-tosb-v2 .badge-status-suspended,
-.theme-tosb-v2 .badge-log-type.lockout {
-  background-color: var(--tosb-cream-200);
-  color: var(--color-error);
-  border: 1px solid var(--color-error);
-}
-
-.theme-tosb-v2 .homeopath-reg {
-  background-color: var(--color-bg-muted);
-  color: var(--color-text-label);
-}
-
-.theme-tosb-v2 .log-item,
-.theme-tosb-v2 .cart-item-row,
-.theme-tosb-v2 .premium-card-footer,
-.theme-tosb-v2 .dropdown-item,
-.theme-tosb-v2 .syllabus-lesson-item {
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .invoice-card,
-.theme-tosb-v2 .lesson-item-sidebar {
-  background-color: var(--color-bg-surface);
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .btn-qty {
-  background-color: var(--tosb-white) !important;
-  color: var(--tosb-green-950) !important;
-  border: 1px solid var(--tosb-gold-600) !important;
-}
-
-.theme-tosb-v2 .form-input,
-.theme-tosb-v2 .terms-container {
-  background-color: var(--color-bg-surface);
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .footer-grid {
-  border-color: var(--color-border-footer);
-}
-
-.theme-tosb-v2 .hero-section {
-  background: var(--gradient-brand);
-  border-color: var(--color-accent);
-}
-
-.theme-tosb-v2 .hero-section h1 {
-  color: var(--tosb-cream-50);
-}
-
-.theme-tosb-v2 .hero-subtitle {
-  color: var(--color-hero-subtitle);
-}
-
-.theme-tosb-v2 .gallery-placeholder-img {
-  background: linear-gradient(135deg, var(--tosb-cream-200) 0%, var(--tosb-cream-300) 100%);
-  color: var(--color-text-label);
-}
-
-.theme-tosb-v2 .gallery-caption {
-  background: rgba(7, 24, 15, 0.9);
-  color: var(--tosb-cream-50);
-}
-
-.theme-tosb-v2 .accessibility-popover {
-  background-color: var(--color-bg-surface);
-  border-color: var(--color-border-soft);
-}
-
-.theme-tosb-v2 .btn-acc {
-  background-color: var(--tosb-white) !important;
-  color: var(--tosb-green-950) !important;
-  border: 1px solid var(--tosb-gold-600) !important;
-}
-
-.theme-tosb-v2 .offline-mode-badge {
-  background-color: var(--tosb-cream-200);
-  border-color: var(--tosb-gold-500);
-  color: var(--tosb-gold-700);
-}
-
-.theme-tosb-v2 .tosb-toast {
-  color: var(--color-text-strong);
-  background-color: rgba(255, 253, 248, 0.95);
-}
-
-.theme-tosb-v2 .badge-modality-online {
-  background-color: var(--tosb-cream-200);
-  color: var(--tosb-green-900);
-}
-
-.theme-tosb-v2 .badge-modality-presencial {
-  background-color: var(--tosb-cream-200);
-  color: var(--tosb-gold-700);
-}
-
-.theme-tosb-v2 .badge-modality-hibrido {
-  background-color: var(--tosb-cream-200);
-  color: var(--tosb-green-700);
-}
-
-.theme-tosb-v2 .nav-link {
-  background-color: transparent;
-  border-color: transparent;
-}
-
-.theme-tosb-v2 .admin-stat-card.primary { border-left-color: var(--color-primary); }
-.theme-tosb-v2 .admin-stat-card.warning { border-left-color: var(--color-warning); }
-.theme-tosb-v2 .admin-stat-card.error { border-left-color: var(--color-error); }
-.theme-tosb-v2 .admin-stat-card.accent { border-left-color: var(--color-accent); }
 
 /* Componente do Seletor de Layout (Design Switcher) */
 .layout-switcher-pill {
@@ -3122,7 +2952,6 @@ body.high-contrast .nav-link.active {
   background: transparent !important;
   color: #FAF2E6 !important;
   border: none !important;
-  border-bottom: 2px solid transparent !important;
   box-shadow: none !important;
 }
 
@@ -3130,7 +2959,6 @@ body.high-contrast .nav-link.active {
 .theme-tosb-v2 .nav-dropdown>button.nav-link.active {
   color: #E8CC8D !important;
   background: rgba(18, 53, 35, 0.7) !important;
-  border-bottom: 2px solid var(--tosb-gold-500) !important;
 }
 
 /* Painel de Conteúdo e Cards de Ação Exatos do PDF */
@@ -3289,47 +3117,6 @@ body.high-contrast .nav-link.active {
   color: var(--tosb-cream-200);
   font-size: 0.85rem;
   opacity: 0.9;
-}
-
-/* ==========================================================================
-   TIPOGRAFIA GLOBAL UNIFICADA (Aplicada a ambos os designs)
-   ========================================================================== */
-body, p, span:not(.logo-symbol), div:not(.ofx-textarea), li, a, button, input, textarea:not(.ofx-textarea), select, label, td, th {
-  font-family: var(--font-sans), 'Montserrat', sans-serif !important;
-}
-
-h1, h2, h3, h4, h5, h6, 
-.section-title, .section-title-underlined, .section-title-underlined-thin, 
-.hero-title, .font-serif-title, .premium-card-title, .course-card-title, 
-.agenda-title, .logo-title, .tosb-panel-title, .tosb-action-card-title,
-.dashboard-header h1, .checkout-item-title, .sidebar-title,
-.module-header-title, .invoice-title, .testimonial-author {
-  font-family: var(--font-serif), 'DM Serif Display', serif !important;
-}
-
-code, pre, .ofx-textarea {
-  font-family: monospace !important;
-}
-
-/* Sobrescritas para botões do Cabeçalho/Menu - Design 2 TOSB */
-.theme-tosb-v2 .tosb-header .btn,
-.theme-tosb-v2 .tosb-header .btn-secondary,
-.theme-tosb-v2 .tosb-header .btn-acc,
-.theme-tosb-v2 .tosb-header .btn-qty,
-.theme-tosb-v2 .tosb-header .btn-primary {
-  background-color: var(--tosb-green-900) !important;
-  color: var(--tosb-white) !important;
-  border: 1px solid var(--tosb-gold-600) !important;
-}
-
-.theme-tosb-v2 .tosb-header .btn:hover,
-.theme-tosb-v2 .tosb-header .btn-secondary:hover,
-.theme-tosb-v2 .tosb-header .btn-acc:hover,
-.theme-tosb-v2 .tosb-header .btn-qty:hover,
-.theme-tosb-v2 .tosb-header .btn-primary:hover {
-  background-color: var(--tosb-green-800) !important;
-  color: var(--tosb-white) !important;
-  border-color: var(--tosb-gold-300) !important;
 }
   </style>
 </head>
@@ -3715,7 +3502,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div className="form-group">
               <label className="form-label">Conselho Regional</label>
-              <input className="form-input" type="text" name="council_type" value={getCouncilType(currentProfession)} readOnly style={{ backgroundColor: 'var(--color-bg-muted, #f1f5f9)', cursor: 'not-allowed' }} />
+              <input className="form-input" type="text" name="council_type" value={getCouncilType(currentProfession)} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
             </div>
 
             <div className="form-group">
@@ -3812,22 +3599,22 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
             <label className="form-label">Telefone {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
             <input className="form-input" type="text" name="commercial_phone" defaultValue={targetUser?.commercial_phone || ''} required={isReq('commercial_phone')} placeholder="ex: (11) 5555-5555" />
           </div>
-
-          {targetUser?.id && (
-            <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                id="is_homeopath"
-                name="is_homeopath"
-                defaultChecked={targetUser?.is_homeopath || false}
-                style={{ width: 'auto', margin: 0 }}
-              />
-              <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
-                Quero participar da lista de Homeopatas indicados
-              </label>
-            </div>
-          )}
         </>
+      )}
+
+      {targetUser?.id && (
+        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderTop: '1px dashed var(--color-border)', paddingTop: '1rem' }}>
+          <input
+            type="checkbox"
+            id="is_homeopath"
+            name="is_homeopath"
+            defaultChecked={targetUser?.is_homeopath || false}
+            style={{ width: 'auto', margin: 0 }}
+          />
+          <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500', color: 'var(--color-primary)' }}>
+            🌿 Quero participar da Lista Pública de Homeopatas da TOSB (Diretório Oficial)
+          </label>
+        </div>
       )}
     </>
   );
@@ -3870,9 +3657,9 @@ function App() {
         }
         if (!parsed.events) {
           parsed.events = [
-            { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
-            { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
-            { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
+            { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom", time: "19:30 - 21:00" },
+            { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra", time: "20:00" },
+            { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial", time: "09:00 - 17:00" }
           ];
           changed = true;
         }
@@ -4068,6 +3855,115 @@ function App() {
 
   // Estados de Responsividade e Dropdowns
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [certificateTemplateUrl, setCertificateTemplateUrl] = useState(() => localStorage.getItem('tosb_certificate_template_url') || '');
+
+  // Função para Gerar e Baixar Certificado via Canvas 2D
+  const handleDownloadCertificate = (studentName, courseTitle, attendancePercent, workloadHours) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 850;
+    const ctx = canvas.getContext('2d');
+
+    const renderTextAndDownload = () => {
+      // Bordas e Estilo Acadêmico
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 1200, 25);
+      ctx.fillRect(0, 825, 1200, 25);
+
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 5;
+      ctx.strokeRect(35, 35, 1130, 780);
+
+      // Título Institucional
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 36px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('THE OTHER SONG BRASIL', 600, 130);
+
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 22px Arial, sans-serif';
+      ctx.fillText('CERTIFICADO DE CONCLUSÃO ACADÊMICA', 600, 175);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '18px Arial, sans-serif';
+      ctx.fillText('A Diretoria de Ensino e Pesquisa da TOSB certifica que', 600, 240);
+
+      // Nome do Aluno
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 42px Georgia, serif';
+      ctx.fillText(studentName || 'Nome do Aluno', 600, 310);
+
+      // Texto do Curso
+      ctx.fillStyle = '#334155';
+      ctx.font = '20px Arial, sans-serif';
+      ctx.fillText('concluiu com êxito as atividades pedagógicas e disciplinas do curso', 600, 370);
+
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 28px Georgia, serif';
+      ctx.fillText(courseTitle || 'Curso de Homeopatia Clássica', 600, 430);
+
+      // Métricas (Carga Horária & Frequência)
+      ctx.fillStyle = '#475569';
+      ctx.font = '18px Arial, sans-serif';
+      ctx.fillText(`Carga Horária: ${workloadHours || 180}h Didáticas   |   Frequência Final: ${attendancePercent}%`, 600, 490);
+
+      ctx.fillText(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 600, 530);
+
+      // Assinaturas
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.moveTo(250, 680);
+      ctx.lineTo(500, 680);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(700, 680);
+      ctx.lineTo(950, 680);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText('Dr. Carlos Eduardo Leitão', 375, 705);
+      ctx.font = '14px Arial, sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('Diretor Acadêmico - TOSB', 375, 725);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText('Dr. Rajan Sankaran', 825, 705);
+      ctx.font = '14px Arial, sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('The Other Song International', 825, 725);
+
+      // Disparar Download da Imagem PNG
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `Certificado_TOSB_${(studentName || 'Aluno').replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+      link.href = dataUrl;
+      link.click();
+    };
+
+    if (certificateTemplateUrl) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, 1200, 850);
+        renderTextAndDownload();
+      };
+      img.onerror = () => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 1200, 850);
+        renderTextAndDownload();
+      };
+      img.src = certificateTemplateUrl;
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 1200, 850);
+      renderTextAndDownload();
+    }
+  };
   const [showWhatsappText, setShowWhatsappText] = useState(true);
 
   // Ocultar texto do WhatsApp após 3 segundos
@@ -4960,6 +4856,7 @@ function App() {
 
   // Estado de Faturas e Checkout
   const [myInvoices, setMyInvoices] = useState([]);
+  const [showOverdueModal, setShowOverdueModal] = useState(false);
   const [checkoutCourse, setCheckoutCourse] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [installments, setInstallments] = useState(12);
@@ -5567,6 +5464,7 @@ function App() {
     const banner_url = e.target.banner_url?.value || courseBannerPreview || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800';
     const finishing_message = e.target.finishing_message?.value || '';
     const teacher_id = e.target.teacher_id.value;
+    const teacher_currency = e.target.teacher_currency?.value || 'BRL';
 
     const targetCourseId = id || ('course-' + Date.now());
 
@@ -5584,7 +5482,8 @@ function App() {
               workload_hours,
               banner_url,
               finishing_message,
-              teacher_id
+              teacher_id,
+              teacher_currency
             };
           }
           return c;
@@ -5600,6 +5499,7 @@ function App() {
           banner_url,
           finishing_message,
           teacher_id,
+          teacher_currency,
           active: true
         };
         updatedCourses = [...prev.courses, newCourse];
@@ -5613,17 +5513,19 @@ function App() {
       teachers.forEach(t => {
         const typeInput = e.target[`payment_type_${t.id}`];
         const rateInput = e.target[`payment_rate_${t.id}`];
+        const currencyInput = e.target[`payment_currency_${t.id}`];
 
         if (typeInput && rateInput) {
           const newType = typeInput.value;
           const newRate = parseFloat(rateInput.value) || 0;
+          const newCurrency = currencyInput ? currencyInput.value : teacher_currency;
 
           // Verificar configuração atual
           const existingConfigIndex = updatedTeacherCourses.findIndex(tc => tc.teacher_id === t.id && tc.course_id === targetCourseId);
           const currentConfig = existingConfigIndex > -1 ? updatedTeacherCourses[existingConfigIndex] : null;
 
           // Se mudou ou é novo, adiciona ao histórico permanentemente para consulta
-          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate) {
+          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate || currentConfig.payment_currency !== newCurrency) {
             const historyEntry = {
               id: 'tph-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
               course_id: targetCourseId,
@@ -5631,8 +5533,9 @@ function App() {
               teacher_name: t.name,
               payment_type: newType,
               payment_rate: newRate,
+              payment_currency: newCurrency,
               created_at: new Date().toISOString(),
-              notes: id ? 'Atualização de valor na Gestão de Cursos' : 'Valores definidos na criação do curso'
+              notes: id ? 'Atualização de valor/moeda na Gestão de Cursos' : 'Valores e moeda definidos na criação do curso'
             };
             updatedHistory.unshift(historyEntry);
           }
@@ -5643,6 +5546,7 @@ function App() {
             course_id: targetCourseId,
             payment_type: newType,
             payment_rate: newRate,
+            payment_currency: newCurrency,
             updated_at: new Date().toISOString()
           };
 
@@ -5685,17 +5589,19 @@ function App() {
     const page_count = parseInt(e.target.page_count?.value) || 0;
     const content_table_raw = e.target.content_table?.value || '';
     const content_table = content_table_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const images_raw = e.target.images?.value || '';
+    const images = images_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
     setMockDb(prev => {
       let updatedBooks;
       const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
       if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table } : b);
-        setSuccess('Livro atualizado com sucesso!');
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table, images } : b);
+        setSuccess('Livro atualizado com sucesso com múltiplas fotos!');
       } else {
-        const newBook = { id, title, author, price, desc, page_count, content_table };
+        const newBook = { id, title, author, price, desc, page_count, content_table, images };
         updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
-        setSuccess('Livro adicionado com sucesso!');
+        setSuccess('Livro adicionado com sucesso com galeria de fotos!');
       }
       return { ...prev, books: updatedBooks };
     });
@@ -5712,6 +5618,49 @@ function App() {
         return { ...prev, books: updatedBooks };
       });
       setSuccess('Livro removido com sucesso!');
+    }
+  };
+
+  // ADMIN: SALVAR COMPROMISSO / EVENTO DA AGENDA (COM HORÁRIO)
+  const handleSaveEvent = (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const id = e.target.id?.value || 'event_' + Date.now();
+    const title = e.target.title.value;
+    const type = e.target.type.value;
+    const day = e.target.day.value;
+    const month = e.target.month.value;
+    const time = e.target.time.value; // 🕒 Horário cadastrado no compromisso
+    const location = e.target.location.value;
+    const course_id = e.target.course_id?.value || '';
+
+    setMockDb(prev => {
+      let updatedEvents;
+      const exists = (prev.events || []).some(evt => evt.id === id);
+      const newEvtObj = { id, title, type, day, month, time, location, course_id };
+      if (exists) {
+        updatedEvents = (prev.events || []).map(evt => evt.id === id ? newEvtObj : evt);
+        setSuccess('Compromisso da agenda atualizado com o horário cadastrado com sucesso!');
+      } else {
+        updatedEvents = [...(prev.events || []), newEvtObj];
+        setSuccess('Novo compromisso agendado com horário cadastrado com sucesso!');
+      }
+      return { ...prev, events: updatedEvents };
+    });
+
+    setEditingEvent(null);
+  };
+
+  const handleCreateEvent = handleSaveEvent;
+
+  const handleDeleteEvent = (id) => {
+    clearAlerts();
+    if (confirm('Deseja excluir este compromisso da agenda?')) {
+      setMockDb(prev => ({
+        ...prev,
+        events: (prev.events || []).filter(evt => evt.id !== id)
+      }));
+      setSuccess('Compromisso removido da agenda.');
     }
   };
 
@@ -6659,6 +6608,7 @@ NEWFILEENCODING:NONE
     const bank_agency = e.target.bank_agency ? e.target.bank_agency.value : '';
     const bank_account = e.target.bank_account ? e.target.bank_account.value : '';
     const pix_key = e.target.pix_key ? e.target.pix_key.value : '';
+    const payout_currency = e.target.payout_currency ? e.target.payout_currency.value : 'BRL';
 
     if (role === 'STUDENT') {
       registrationType = e.target.registrationType?.value || '';
@@ -6683,7 +6633,7 @@ NEWFILEENCODING:NONE
               name, email, password, role, status, is_homeopath,
               phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
               registrationType, registrationNumber, crm, rqe, bio,
-              bank_name, bank_agency, bank_account, pix_key,
+              payout_currency, bank_name, bank_agency, bank_account, pix_key,
               billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
               commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
               commercial_phone
@@ -6697,7 +6647,7 @@ NEWFILEENCODING:NONE
           name, email, password, role, status, is_homeopath,
           phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
           registrationType, registrationNumber, crm, rqe, bio,
-          bank_name, bank_agency, bank_account, pix_key,
+          payout_currency, bank_name, bank_agency, bank_account, pix_key,
           billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
           commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
           commercial_phone
@@ -6985,37 +6935,6 @@ NEWFILEENCODING:NONE
       };
     });
     setSuccess('Pagamento confirmado e matrícula liberada / ativada com sucesso.');
-  };
-
-  const handleCreateEvent = (e) => {
-    e.preventDefault();
-    const title = e.target.title.value;
-    const type = e.target.type.value;
-    const day = e.target.day.value;
-    const month = e.target.month.value;
-    const location = e.target.location.value;
-    const time = e.target.time?.value || '';
-
-    const newEvent = {
-      id: 'event-' + Date.now(),
-      title, type, day, month, location, time
-    };
-
-    setMockDb(prev => ({
-      ...prev,
-      events: [...(prev.events || []), newEvent]
-    }));
-
-    setSuccess('Evento acadêmico criado com sucesso!');
-    e.target.reset();
-  };
-
-  const handleDeleteEvent = (eventId) => {
-    setMockDb(prev => ({
-      ...prev,
-      events: (prev.events || []).filter(ev => ev.id !== eventId)
-    }));
-    setSuccess('Evento acadêmico removido.');
   };
 
   // Evitar flicker de renderização enquanto recupera sessão
@@ -7549,7 +7468,7 @@ NEWFILEENCODING:NONE
                   <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="form-group">
                       <label className="form-label">Conselho Regional</label>
-                      <input className="form-input" type="text" name="council_type" value={getCouncilType(regProfession)} readOnly style={{ backgroundColor: 'var(--color-bg-muted, #f1f5f9)', cursor: 'not-allowed' }} />
+                      <input className="form-input" type="text" name="council_type" value={getCouncilType(regProfession)} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
                     </div>
 
                     <div className="form-group">
@@ -7647,7 +7566,7 @@ NEWFILEENCODING:NONE
                 </div>
               </div>
 
-              <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+              <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                 <input type="checkbox" id="receivePromotions" name="receivePromotions" defaultChecked style={{ width: 'auto', margin: 0 }} />
                 <label htmlFor="receivePromotions" className="cursor-pointer" style={{ fontSize: '0.85rem', margin: 0, fontWeight: '500' }}>
                   Desejo receber por e-mail ofertas, lançamentos de novos cursos e oportunidades acadêmicas da TOSB.
@@ -7786,7 +7705,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-free')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: 'var(--color-bg-surface-alt, #eef5f2)', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Aula Aberta (20%)</button>
                       {user ? (
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
@@ -7805,7 +7724,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-sub')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: 'var(--color-bg-surface-alt, #eef5f2)', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Aula Aberta (20%)</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -7820,7 +7739,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-post')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: 'var(--color-bg-surface-alt, #eef5f2)', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Aula Aberta (20%)</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -7861,13 +7780,13 @@ NEWFILEENCODING:NONE
 
                 <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
                   <div className="premium-card-content">
-                    <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-badge-event-bg, #fff7ed)', color: 'var(--color-badge-event-fg, #c2410c)' }}>Presencial Curitiba</span>
+                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
                     <h3 className="premium-card-title mt-2">Seminário Avançado de Homeopatia 2026</h3>
                     <p className="premium-card-text">Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>Local: <strong>Curitiba - PR</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
                         <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
@@ -7879,13 +7798,13 @@ NEWFILEENCODING:NONE
 
                 <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
                   <div className="premium-card-content">
-                    <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-badge-event-bg, #fff7ed)', color: 'var(--color-badge-event-fg, #c2410c)' }}>Encontro Prático</span>
+                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Encontro Prático</span>
                     <h3 className="premium-card-title mt-2">Encontro de Matéria Médica Prática</h3>
                     <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>Data: <strong>05/Dezembro/2026</strong></div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary, #64748b)' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
                         <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
@@ -8010,7 +7929,7 @@ NEWFILEENCODING:NONE
                   </table>
 
                   <div className="mt-5" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button className="btn btn-secondary w-full" style={{ backgroundColor: 'var(--color-bg-surface-alt, #eef5f2)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }} onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
+                    <button className="btn btn-secondary w-full" style={{ backgroundColor: '#eef5f2', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }} onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
                       ▶ Assistir 1ª Aula Aberta (Prévia de 20%)
                     </button>
                     {selectedDetailCourse.type === 'FREE' ? (
@@ -8038,8 +7957,26 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: AGENDA GERAL */}
         {currentPage === 'agenda' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>📅 Agenda Geral Acadêmica</h2>
-            <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h2 className="mb-1 font-serif-title" style={{ fontSize: '2rem', margin: 0 }}>📅 Agenda Geral Acadêmica</h2>
+                <p className="text-muted" style={{ margin: 0 }}>Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
+              </div>
+              {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setEditingEvent({});
+                    if (user.role === 'ADMIN') {
+                      navigateTo('admin-dash');
+                      setAdminActiveTab('events');
+                    }
+                  }}
+                >
+                  ＋ Cadastrar Novo Evento
+                </button>
+              )}
+            </div>
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
               {(mockDb.events || []).map(event => (
@@ -8051,7 +7988,10 @@ NEWFILEENCODING:NONE
                   <div style={{ flex: 1 }}>
                     <span className="badge-modality badge-modality-online" style={{ marginBottom: '0.35rem' }}>{event.type}</span>
                     <h3 style={{ fontSize: '1.15rem', marginBottom: '0.25rem' }}>{event.title}</h3>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                      <span>📍 {event.location}</span>
+                      {event.time && <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>🕒 Horário: {event.time}</span>}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -8092,7 +8032,7 @@ NEWFILEENCODING:NONE
                     </div>
                     <div className="gallery-caption">
                       <div style={{ fontWeight: 'bold' }}>{item.title}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-footer, #e2e8f0)', fontWeight: 'normal' }}>{item.desc}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -8140,7 +8080,7 @@ NEWFILEENCODING:NONE
                   <div key={idx} className="homeopath-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', wordBreak: 'break-word', padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)' }}>
                     <div className="homeopath-info" style={{ flexGrow: 1 }}>
                       <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>{h.name}</h4>
-                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: 'var(--color-bg-muted, #f1f5f9)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
+                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
                       <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
                       <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: '0.85rem' }}>📍 {h.city}</div>
                       {h.phone && <div className="homeopath-contact-item" style={{ fontSize: '0.85rem' }}>📞 {h.phone}</div>}
@@ -8166,7 +8106,7 @@ NEWFILEENCODING:NONE
                   </div>
                   <div className="gallery-caption">
                     <div style={{ fontWeight: 'bold' }}>{item.title}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-footer, #e2e8f0)', fontWeight: 'normal' }}>{item.desc}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
                   </div>
                 </div>
               ))}
@@ -8184,14 +8124,48 @@ NEWFILEENCODING:NONE
               <div className="premium-card-grid">
                 {books.map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px', position: 'relative' }}>
-                      📚
+                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', minHeight: '160px', position: 'relative', overflow: 'hidden' }}>
+                      {Array.isArray(book.images) && book.images.length > 0 ? (
+                        <img
+                          src={book.activeImage || book.images[0]}
+                          alt={book.title}
+                          style={{ width: '100%', height: '160px', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '3rem' }}>📚</span>
+                      )}
                       {book.page_count > 0 && (
                         <span className="badge-paid" style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff' }}>
                           📄 {book.page_count} páginas
                         </span>
                       )}
                     </div>
+
+                    {/* GALERIA DE MÚLTIPLAS FOTOS / MINIATURAS */}
+                    {Array.isArray(book.images) && book.images.length > 1 && (
+                      <div style={{ display: 'flex', gap: '0.35rem', padding: '0.5rem 1rem 0 1rem', overflowX: 'auto' }}>
+                        {book.images.map((imgUrl, imgIdx) => (
+                          <img
+                            key={imgIdx}
+                            src={imgUrl}
+                            alt={`Foto ${imgIdx + 1}`}
+                            style={{
+                              width: '42px',
+                              height: '42px',
+                              objectFit: 'cover',
+                              borderRadius: '4px',
+                              border: (book.activeImage || book.images[0]) === imgUrl ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                              cursor: 'pointer',
+                              opacity: (book.activeImage || book.images[0]) === imgUrl ? 1 : 0.6
+                            }}
+                            onClick={() => {
+                              setBooks(prev => prev.map(b => b.id === book.id ? { ...b, activeImage: imgUrl } : b));
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
                       <h3 className="premium-card-title">{book.title}</h3>
@@ -8210,7 +8184,7 @@ NEWFILEENCODING:NONE
                           </button>
 
                           {expandedBookId === book.id && (
-                            <div style={{ marginTop: '0.5rem', padding: '0.75rem', backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', textAlign: 'left' }}>
+                            <div style={{ marginTop: '0.5rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', textAlign: 'left' }}>
                               <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '0.4rem' }}>Sumário da Obra:</strong>
                               <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--color-text-main)' }}>
                                 {book.content_table.map((chap, cIdx) => (
@@ -8267,6 +8241,27 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
 
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              {/* BANNER DE DESCONTO 50% ALUNOS TOSB */}
+              <div className="alert alert-success animate-fade-in" style={{ backgroundColor: '#ecfdf5', border: '2px solid #059669', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', textAlign: 'center', boxShadow: '0 4px 14px rgba(5, 150, 105, 0.15)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', fontWeight: 'bold', color: '#047857' }}>
+                  <span>🏷️</span>
+                  <span>Condição Especial: Alunos da TOSB possuem 50% de Desconto!</span>
+                </div>
+                <p style={{ margin: 0, color: '#065f46', fontSize: '0.98rem', maxWidth: '650px' }}>
+                  Alunos regularmente matriculados em nossos cursos possuem benefício exclusivo de <strong>50% de desconto</strong> na aquisição e renovação de licenças do software <strong>SHS / Viva</strong>.
+                </p>
+                <a
+                  href="https://wa.me/5541987339734?text=Ol%C3%A1%21%20Sou%20aluno%20da%20TOSB%20e%20gostaria%20de%20solicitar%20meu%20desconto%20de%2050%25%20no%20Software%20SHS%2FViva."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{ backgroundColor: '#25d366', borderColor: '#25d366', color: '#ffffff', fontWeight: 'bold', fontSize: '1rem', padding: '0.75rem 1.75rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)', textDecoration: 'none' }}
+                >
+                  <span>💬</span>
+                  <span>Solicitar 50% de Desconto via WhatsApp (41 98733-9734)</span>
+                </a>
+              </div>
+
               <p className="mb-4">
                 O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
@@ -8447,7 +8442,18 @@ NEWFILEENCODING:NONE
                 <h1 className="font-serif-title">Painel de Estudos Homeopáticos</h1>
                 <p className="text-muted">Olá, <strong>{user?.name}</strong>! Gerencie seu aprendizado, dados cadastrais e financeiro.</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-primary"
+                  style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.25)' }}
+                  onClick={() => setShowOverdueModal(true)}
+                >
+                  💳 Pagar Contas em Atraso {myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date())).length > 0 && (
+                    <span style={{ backgroundColor: '#ffffff', color: '#dc2626', borderRadius: '50%', padding: '0.1rem 0.45rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      {myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date())).length}
+                    </span>
+                  )}
+                </button>
                 {isOfflineMode && (
                   <button className="btn btn-danger btn-quick-login" onClick={handleSimulateDelinquency}>
                     Simular Inadimplência
@@ -8491,9 +8497,65 @@ NEWFILEENCODING:NONE
 
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
+                {/* BANNER DE INADIMPLÊNCIA / PENDÊNCIA FINANCEIRA */}
+                {(user?.status === 'SUSPENDED' || myInvoices.some(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()))) && (
+                  <div className="alert alert-danger mb-4 animate-fade-in" style={{ backgroundColor: '#fef2f2', border: '2px solid #ef4444', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span>⚠️</span> Status Financeiro: Pendência de Pagamento (Inadimplente)
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#7f1d1d', marginTop: '0.25rem' }}>
+                          Identificamos fatura(s) em aberto em seu cadastro. Regularize para manter o acesso às suas aulas sem interrupção.
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-primary"
+                        style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', color: '#ffffff', fontWeight: 'bold', fontSize: '0.95rem', padding: '0.65rem 1.5rem', borderRadius: '8px', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.3)' }}
+                        onClick={() => setStudentActiveTab('payments')}
+                      >
+                        💳 Pague Aqui
+                      </button>
+                    </div>
+                    <div style={{ borderTop: '1px dashed #fca5a5', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 'bold' }}>Ação rápida:</span>
+                      <button
+                        className="btn btn-primary"
+                        style={{ backgroundColor: '#b91c1c', borderColor: '#b91c1c', color: '#ffffff', fontWeight: 'bold', fontSize: '0.82rem', padding: '0.35rem 0.9rem', borderRadius: '6px' }}
+                        onClick={() => setStudentActiveTab('payments')}
+                      >
+                        💳 Pague Aqui (Regularizar Fatura)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {studentActiveTab === 'panel' && (
                   <div className="tosb-panel-card card">
                     <h2 className="tosb-panel-title">Painel Geral</h2>
+
+                    {/* BOTÃO E ALERTA PAGUE AQUI NO PAINEL PRINCIPAL DO ALUNO INADIMPLENTE */}
+                    {(user?.status === 'SUSPENDED' || myInvoices.some(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()))) && (
+                      <div className="card mb-4" style={{ backgroundColor: '#fff5f5', border: '2px solid #ef4444', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.12)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                          <span style={{ fontSize: '2rem' }}>⚠️</span>
+                          <div>
+                            <h3 style={{ margin: 0, color: '#991b1b', fontSize: '1.2rem' }}>Status Financeiro: Usuário Inadimplente</h3>
+                            <p style={{ margin: 0, color: '#7f1d1d', fontSize: '0.88rem' }}>Você possui pendências financeiras. Efetue o pagamento para liberar seu acesso às aulas.</p>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                          <button
+                            className="btn btn-primary"
+                            style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', padding: '0.65rem 1.5rem', fontSize: '0.95rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                            onClick={() => setStudentActiveTab('payments')}
+                          >
+                            💳 Pague Aqui
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.98rem', lineHeight: '1.6', marginBottom: '2rem' }}>
                       A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
@@ -8566,27 +8628,61 @@ NEWFILEENCODING:NONE
                                 const classTeachers = associatedClass ? mockDb.users.filter(u => (associatedClass.teacher_ids || []).includes(u.id)) : [];
                                 const attendanceKey = associatedClass ? `${associatedClass.id}_${user.id}` : null;
                                 const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
-                                return associatedClass ? (
-                                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
-                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                      🏫 <strong>Turma:</strong> {associatedClass.name}
-                                    </div>
-                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                      👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
-                                    </div>
-                                    <div style={{ fontSize: '0.85rem' }}>
-                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
-                                      {attendanceRecords.length > 0 && (
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)', marginTop: '0.25rem' }}>
-                                          Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                
+                                // Frequência do Aluno
+                                const totalLessonsCount = course.modules ? course.modules.reduce((sum, m) => sum + (m.lessons ? m.lessons.length : 0), 0) : 10;
+                                const completedLessonsCount = course.modules ? course.modules.reduce((sum, m) => sum + (m.lessons ? m.lessons.filter(l => l.completed).length : 0), 0) : 0;
+                                const lessonFreq = totalLessonsCount > 0 ? Math.round((completedLessonsCount / totalLessonsCount) * 100) : 0;
+                                const attendanceFreq = attendanceRecords.length > 0 ? Math.min(100, Math.round((attendanceRecords.length / 8) * 100)) : lessonFreq;
+                                const finalFreq = Math.max(lessonFreq, attendanceFreq);
+
+                                return (
+                                  <>
+                                    {associatedClass ? (
+                                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
+                                        <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                          🏫 <strong>Turma:</strong> {associatedClass.name}
                                         </div>
-                                      )}
+                                        <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                          👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
+                                        </div>
+                                        <div style={{ fontSize: '0.85rem' }}>
+                                          📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
+                                          {attendanceRecords.length > 0 && (
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                              Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                        Nenhuma turma alocada para este curso ainda.
+                                      </div>
+                                    )}
+
+                                    {/* EMISSÃO DE CERTIFICADO COM REGRA DE 70% */}
+                                    <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                        <div style={{ fontSize: '0.85rem' }}>
+                                          Frequência Acadêmica: <strong style={{ color: finalFreq > 70 ? '#059669' : '#dc2626' }}>{finalFreq}%</strong>
+                                        </div>
+                                        {finalFreq > 70 ? (
+                                          <button
+                                            className="btn btn-primary"
+                                            style={{ backgroundColor: '#059669', borderColor: '#059669', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                                            onClick={() => handleDownloadCertificate(user.name, course.title, finalFreq, course.duration_days ? course.duration_days * 2 : 180)}
+                                          >
+                                            🎓 Baixar Certificado
+                                          </button>
+                                        ) : (
+                                          <div style={{ fontSize: '0.78rem', color: '#dc2626', backgroundColor: '#fef2f2', padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #fecaca' }}>
+                                            ⚠️ Frequência ≤ 70%. É necessária maior frequência para obter o certificado.
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                ) : (
-                                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary, #64748b)', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                                    Nenhuma turma alocada para este curso ainda.
-                                  </div>
+                                  </>
                                 );
                               })()}
                             </div>
@@ -8633,11 +8729,21 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'agenda' && (
                   <div className="card">
-                    <h3 className="mb-4">Agenda & Eventos Científicos</h3>
-                    <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <h3 style={{ margin: 0 }}>Agenda Pessoal & Eventos dos Meus Cursos</h3>
+                      <span className="badge-paid" style={{ fontSize: '0.75rem' }}>Agenda Pessoal Filtrada</span>
+                    </div>
+                    <p className="text-muted mb-4" style={{ fontSize: '0.88rem' }}>
+                      🔒 Exibindo o cronograma de aulas dos cursos em que você está matriculado. 
+                      <em> Os horários são editáveis exclusivamente pela Administração da TOSB.</em>
+                    </p>
 
                     <div className="agenda-list">
-                      {(mockDb.events || []).map(event => (
+                      {(mockDb.events || []).filter(event => {
+                        if (!event.course_id) return true;
+                        const enrolledIds = courses.filter(c => c.enrollment && c.enrollment.enrolled).map(c => c.id);
+                        return enrolledIds.includes(event.course_id);
+                      }).map(event => (
                         <div key={event.id} className="agenda-card">
                           <div className="agenda-date-box">
                             <span className="agenda-date-day">{event.day}</span>
@@ -8653,8 +8759,12 @@ NEWFILEENCODING:NONE
                           </div>
                         </div>
                       ))}
-                      {(mockDb.events || []).length === 0 && (
-                        <p className="text-muted text-center w-full py-4">Nenhum evento agendado no momento.</p>
+                      {(mockDb.events || []).filter(event => {
+                        if (!event.course_id) return true;
+                        const enrolledIds = courses.filter(c => c.enrollment && c.enrollment.enrolled).map(c => c.id);
+                        return enrolledIds.includes(event.course_id);
+                      }).length === 0 && (
+                        <p className="text-muted text-center w-full py-4">Nenhum evento agendado para seus cursos no momento.</p>
                       )}
                     </div>
                   </div>
@@ -8662,29 +8772,53 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'payments' && (
                   <div className="card">
-                    <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                      <h3 style={{ margin: 0 }}>Histórico Financeiro e Faturas</h3>
+                      <button
+                        className="btn btn-primary"
+                        style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', padding: '0.5rem 1.1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.2)' }}
+                        onClick={() => setShowOverdueModal(true)}
+                      >
+                        💳 Pagar Contas em Atraso
+                      </button>
+                    </div>
                     <div className="invoices-list">
                       {myInvoices.length === 0 ? (
                         <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
                       ) : (
-                        myInvoices.map(inv => (
-                          <div key={inv.id} className="invoice-card">
-                            <div className="invoice-title">{inv.course_title}</div>
-                            <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
-                            <div className="invoice-footer">
-                              <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
-                                {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
-                              </span>
-                              {inv.status === 'PENDING' && (
-                                <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
-                                  Simular Webhook Asaas (Pago)
-                                </button>
-                              )}
+                        myInvoices.map(inv => {
+                          const isDelinquent = inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date());
+                          return (
+                            <div key={inv.id} className="invoice-card" style={{ borderLeft: isDelinquent ? '4px solid #ef4444' : undefined }}>
+                              <div className="invoice-title">{inv.course_title}</div>
+                              <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
+                              <div className="invoice-footer" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <span className={inv.status === 'RECEIVED' ? 'badge-paid' : isDelinquent ? 'badge-overdue' : 'badge-pending'}>
+                                  {inv.status === 'RECEIVED' ? 'PAGO' : isDelinquent ? 'INADIMPLENTE / VENCIDO' : 'PENDENTE'}
+                                </span>
+                                {inv.status !== 'RECEIVED' && (
+                                  <button
+                                    className="btn btn-primary"
+                                    style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontSize: '0.85rem', padding: '0.35rem 0.8rem', fontWeight: 'bold' }}
+                                    onClick={() => {
+                                      const matchingCourse = courses.find(c => c.id === inv.course_id) || { id: inv.course_id, title: inv.course_title, type: 'POSTGRAD', price: inv.amount };
+                                      startCheckout(matchingCourse);
+                                    }}
+                                  >
+                                    💳 Pagar Agora
+                                  </button>
+                                )}
+                                {inv.status === 'PENDING' && (
+                                  <button className="btn btn-secondary btn-quick-login" style={{ fontSize: '0.75rem' }} onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
+                                    Simular Webhook Asaas
+                                  </button>
+                                )}
+                              </div>
+                              <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
+                              <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
                             </div>
-                            <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
-                            <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </div>
@@ -8703,6 +8837,172 @@ NEWFILEENCODING:NONE
                 )}
               </div>
             </div>
+
+            {/* MODAL DE PAGAMENTO DE CONTAS EM ATRASO */}
+            {showOverdueModal && (
+              <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
+                <div className="card p-5 animate-fade-in" style={{ maxWidth: '650px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                    <div>
+                      <h3 className="font-serif-title" style={{ color: '#dc2626', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        💳 Pagar Contas / Faturas em Atraso
+                      </h3>
+                      <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
+                        Regularize suas mensalidades ou assinaturas em atraso para manter o acesso aos cursos sem interrupção.
+                      </p>
+                    </div>
+                    <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setShowOverdueModal(false)}>
+                      ✕ Fechar
+                    </button>
+                  </div>
+
+                  {(() => {
+                    const overdueInvoices = myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()));
+                    const pendingInvoices = myInvoices.filter(inv => inv.status !== 'RECEIVED');
+                    const invoicesToPay = overdueInvoices.length > 0 ? overdueInvoices : pendingInvoices;
+
+                    if (invoicesToPay.length === 0) {
+                      return (
+                        <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
+                          <h4 style={{ color: '#059669', marginBottom: '0.5rem' }}>Você está 100% em dia!</h4>
+                          <p className="text-muted" style={{ fontSize: '0.9rem' }}>Nenhuma conta ou fatura em atraso foi encontrada em seu cadastro.</p>
+                          <button className="btn btn-primary mt-3" onClick={() => setShowOverdueModal(false)}>Fechar Janela</button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div>
+                        <div className="alert alert-warning mb-4" style={{ backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.88rem' }}>
+                          ⚠️ Identificamos <strong>{invoicesToPay.length} fatura(s)</strong> para regularização imediata.
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          {invoicesToPay.map(inv => {
+                            const isOverdue = inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date());
+                            const matchingCourse = courses.find(c => c.id === inv.course_id) || { id: inv.course_id, title: inv.course_title, type: 'POSTGRAD', price: inv.amount };
+
+                            return (
+                              <div key={inv.id} style={{ padding: '1rem', borderRadius: '8px', border: isOverdue ? '2px solid #ef4444' : '1px solid var(--color-border)', backgroundColor: isOverdue ? '#fef2f2' : '#f8fafc' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                  <div>
+                                    <h4 style={{ margin: 0, fontSize: '1rem', color: isOverdue ? '#991b1b' : 'var(--color-text)' }}>{inv.course_title}</h4>
+                                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                      Vencimento: <strong>{new Date(inv.due_date).toLocaleDateString('pt-BR')}</strong> | Ref: <code>{inv.transaction_code || inv.id}</code>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: isOverdue ? '#dc2626' : 'var(--color-primary)' }}>
+                                      R$ {parseFloat(inv.amount).toFixed(2)}
+                                    </div>
+                                    <span className={isOverdue ? 'badge-overdue' : 'badge-pending'} style={{ fontSize: '0.75rem' }}>
+                                      {isOverdue ? 'VENCIDO / INADIMPLENTE' : 'PENDENTE'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--color-border)', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                  <button
+                                    className="btn btn-primary"
+                                    style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', padding: '0.45rem 1.25rem', fontSize: '0.88rem' }}
+                                    onClick={() => {
+                                      setShowOverdueModal(false);
+                                      startCheckout(matchingCourse);
+                                    }}
+                                  >
+                                    💳 Pagar Fatura Agora
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* MODAL DE CADASTRO / EDIÇÃO DE EVENTOS DA AGENDA */}
+            {editingEvent && (
+              <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
+                <div className="card p-5 animate-fade-in" style={{ maxWidth: '650px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                    <div>
+                      <h3 className="font-serif-title" style={{ color: 'var(--color-primary)', margin: 0 }}>
+                        {editingEvent.id ? '✏️ Editar Compromisso da Agenda' : '📅 Agendar / Cadastrar Novo Evento'}
+                      </h3>
+                      <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
+                        Preencha as informações do evento para publicar na agenda acadêmica da TOSB.
+                      </p>
+                    </div>
+                    <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setEditingEvent(null)}>
+                      ✕ Fechar
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveEvent}>
+                    <input type="hidden" name="id" defaultValue={editingEvent.id || ''} />
+
+                    <div className="form-group">
+                      <label className="form-label">Título do Evento / Compromisso <span style={{ color: 'red' }}>*</span></label>
+                      <input className="form-input" name="title" defaultValue={editingEvent.title || ''} required placeholder="ex: Aula Magna: Introdução ao Método Sensação" />
+                    </div>
+
+                    <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">Dia <span style={{ color: 'red' }}>*</span></label>
+                        <input className="form-input" name="day" defaultValue={editingEvent.day || ''} required placeholder="ex: 15" maxLength="5" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Mês <span style={{ color: 'red' }}>*</span></label>
+                        <input className="form-input" name="month" defaultValue={editingEvent.month || ''} required placeholder="ex: Set ou Outubro" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">🕒 Horário <span style={{ color: 'red' }}>*</span></label>
+                        <input className="form-input" name="time" defaultValue={editingEvent.time || ''} required placeholder="ex: 19:30 - 21:00" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }} />
+                      </div>
+                    </div>
+
+                    <div className="grid-2col" style={{ gap: '0.75rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">Tipo do Evento</label>
+                        <select className="form-input" name="type" defaultValue={editingEvent.type || 'Aula ao Vivo'}>
+                          <option value="Aula ao Vivo">🎥 Aula ao Vivo</option>
+                          <option value="Seminário Literário">📚 Seminário Literário</option>
+                          <option value="Grupo de Estudos">🔬 Grupo de Estudos</option>
+                          <option value="Lançamento de Livro">🎉 Lançamento de Livro</option>
+                          <option value="Webinar Internacional">🌐 Webinar Internacional</option>
+                          <option value="Aula Magna">🎓 Aula Magna</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Vincular ao Curso</label>
+                        <select className="form-input" name="course_id" defaultValue={editingEvent.course_id || ''}>
+                          <option value="">Geral (Todos os Alunos)</option>
+                          {(mockDb.courses || []).map(c => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Localização ou Link da Transmissão (Zoom / Auditório)</label>
+                      <input className="form-input" name="location" defaultValue={editingEvent.location || ''} required placeholder="ex: Auditório TOSB Curitiba / Link do Zoom" />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingEvent(null)}>Cancelar</button>
+                      <button className="btn btn-primary flex-1" type="submit">Cadastrar Evento na Agenda</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -9071,7 +9371,7 @@ NEWFILEENCODING:NONE
                                       <tr key={s.id}>
                                         <td>
                                           <strong>{s.name}</strong>
-                                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>Progresso Aulas: {progressStr}</div>
+                                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Progresso Aulas: {progressStr}</div>
                                         </td>
                                         <td>{s.email}</td>
                                         <td className="text-center">
@@ -9079,7 +9379,7 @@ NEWFILEENCODING:NONE
                                         </td>
                                         <td>
                                           {attendanceList.length > 0 ? (
-                                            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary, #64748b)' }}>
+                                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
                                               {attendanceList.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
                                             </span>
                                           ) : (
@@ -9150,7 +9450,7 @@ NEWFILEENCODING:NONE
                                   <td><small><code>{p.transaction_code || p.id}</code></small></td>
                                   <td>
                                     <strong>{student ? student.name : 'Aluno Removido'}</strong>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>{student?.email}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
                                   </td>
                                   <td>{course ? course.title : 'Curso Removido'}</td>
                                   <td><strong>R$ {p.amount.toFixed(2)}</strong></td>
@@ -9181,39 +9481,50 @@ NEWFILEENCODING:NONE
                     <form onSubmit={handleUpdateProfile}>
                       {renderProfileFormFields(user, false, profileProfession, setProfileProfession)}
 
-                      {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR */}
+                      {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR (APENAS VISUALIZAÇÃO) */}
                       <h4 className="mt-5 mb-3 section-title-underlined-thin" style={{ color: 'var(--color-primary)' }}>
-                        🏦 Informações Bancárias para Repasses & Honorários
+                        🏦 Informações Bancárias & Moeda de Pagamento
                       </h4>
-                      <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-                        Mantenha seus dados bancários atualizados para que a administração saiba para onde depositar o dinheiro de suas aulas e comissões.
-                      </p>
+                      <div className="alert alert-warning mb-4" style={{ backgroundColor: '#fffbeb', border: '1px solid #f59e0b', fontSize: '0.88rem' }}>
+                        🔒 <strong>Atenção:</strong> Suas informações bancárias são de apenas visualização nesta tela. A alteração de dados bancários e da moeda de repasse é realizada exclusivamente pelo Administrador da TOSB.
+                      </div>
+
+                      <div className="form-group mb-4">
+                        <label className="form-label" style={{ fontWeight: 'bold' }}>Moeda Definida para Repasses / Honorários</label>
+                        <input
+                          className="form-input"
+                          type="text"
+                          value={user?.payout_currency === 'USD' ? 'US$ - Dólar Americano (USD)' : user?.payout_currency === 'EUR' ? '€ - Euro (EUR)' : user?.payout_currency === 'GBP' ? '£ - Libra Esterlina (GBP)' : 'R$ - Real Brasileiro (BRL)'}
+                          readOnly
+                          style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', fontWeight: 'bold', color: 'var(--color-primary)' }}
+                        />
+                      </div>
 
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Banco (Nome/Código)</label>
-                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} placeholder="ex: 001 - Banco do Brasil ou 341 - Itaú" />
+                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Agência (com dígito)</label>
-                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} placeholder="ex: 1234-5" />
+                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
                         </div>
                       </div>
 
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Conta Corrente / Poupança</label>
-                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} placeholder="ex: 98765-4" />
+                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Chave PIX</label>
-                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" />
+                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                        <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
+                        <button className="btn btn-primary" type="submit">Atualizar Meus Dados Pessoais</button>
                       </div>
                     </form>
                   </div>
@@ -9334,6 +9645,68 @@ NEWFILEENCODING:NONE
                       <button className="btn btn-primary" onClick={() => { setEditingCourse({}); setCourseBannerPreview(''); }}>＋ Criar Novo Curso</button>
                     </div>
 
+                    {/* MODELO DE IMAGEM DO CERTIFICADO PARA O ADM */}
+                    <div className="card p-4 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px solid var(--color-border)', borderRadius: '10px' }}>
+                      <h4 style={{ margin: 0, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>📜</span> Modelo de Imagem do Certificado Oficial
+                      </h4>
+                      <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem', marginBottom: '1rem' }}>
+                        Defina ou faça upload da imagem de fundo do certificado. O sistema sobreporá automaticamente o nome do aluno, título do curso, data, carga horária e taxa de frequência sobre este modelo.
+                      </p>
+
+                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          style={{ flex: 1, minWidth: '260px' }}
+                          placeholder="URL da imagem do modelo de certificado (ou faça upload ao lado)..."
+                          value={certificateTemplateUrl}
+                          onChange={(e) => {
+                            setCertificateTemplateUrl(e.target.value);
+                            localStorage.setItem('tosb_certificate_template_url', e.target.value);
+                          }}
+                        />
+                        <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}>
+                          📁 Upload Modelo de Imagem
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setCertificateTemplateUrl(reader.result);
+                                  localStorage.setItem('tosb_certificate_template_url', reader.result);
+                                  setSuccess('Modelo de imagem do certificado atualizado com sucesso!');
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {certificateTemplateUrl && (
+                          <button
+                            className="btn btn-secondary"
+                            style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                            onClick={() => {
+                              setCertificateTemplateUrl('');
+                              localStorage.removeItem('tosb_certificate_template_url');
+                            }}
+                          >
+                            Limpar Modelo
+                          </button>
+                        )}
+                      </div>
+                      {certificateTemplateUrl && (
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <small className="text-muted" style={{ display: 'block', marginBottom: '0.25rem' }}>Pré-visualização do Modelo Atual:</small>
+                          <img src={certificateTemplateUrl} alt="Modelo de Certificado" style={{ maxHeight: '120px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                        </div>
+                      )}
+                    </div>
+
                     {editingCourse && (
                       <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
                         <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
@@ -9413,22 +9786,35 @@ NEWFILEENCODING:NONE
                           <input className="form-input" name="finishing_message" defaultValue={editingCourse.finishing_message || ''} placeholder="Parabéns pela conclusão..." />
                         </div>
 
-                        <div className="form-group">
-                          <label className="form-label">Professor Responsável Principal</label>
-                          <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
-                            {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
-                              <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
-                            ))}
-                          </select>
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Professor Responsável Principal</label>
+                            <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
+                              {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
+                                <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Moeda Padrão de Remuneração do Professor</label>
+                            <select className="form-input" name="teacher_currency" defaultValue={editingCourse.teacher_currency || 'BRL'} required>
+                              <option value="BRL">R$ - Real Brasileiro (BRL)</option>
+                              <option value="USD">$ - Dólar Americano (USD)</option>
+                              <option value="EUR">€ - Euro (EUR)</option>
+                              <option value="INR">₹ - Rúpia Indiana (INR)</option>
+                              <option value="GBP">£ - Libra Esterlina (GBP)</option>
+                            </select>
+                          </div>
                         </div>
 
                         {/* SEÇÃO: DEFINIÇÃO DE REMUNERAÇÃO DOS PROFESSORES PARA ESTE CURSO */}
-                        <div style={{ marginTop: '2rem', padding: '1.25rem', backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                        <div style={{ marginTop: '2rem', padding: '1.25rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                           <h4 className="mb-2" style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             💰 Valores & Remuneração dos Professores Cadastrados
                           </h4>
                           <p className="text-muted mb-4" style={{ fontSize: '0.85rem' }}>
-                            Defina os honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong>. As alterações são gravadas no histórico para consulta.
+                            Defina a moeda e honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong> e a <strong>Moeda do Repasse</strong>.
                           </p>
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -9437,7 +9823,7 @@ NEWFILEENCODING:NONE
                               const teacherHistoryCount = (mockDb.teacher_payment_history || []).filter(h => h.teacher_id === t.id && h.course_id === editingCourse.id).length;
 
                               return (
-                                <div key={t.id} style={{ padding: '1rem', backgroundColor: 'var(--color-bg-card, #ffffff)', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                                <div key={t.id} style={{ padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                                     <span style={{ fontWeight: '600', color: 'var(--color-text)', fontSize: '0.95rem' }}>
                                       👨‍🏫 {t.name} <span className="text-muted" style={{ fontWeight: 'normal', fontSize: '0.85rem' }}>({t.email})</span>
@@ -9454,7 +9840,7 @@ NEWFILEENCODING:NONE
                                     )}
                                   </div>
 
-                                  <div className="grid-2col" style={{ gap: '0.75rem' }}>
+                                  <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
                                     <div>
                                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Modalidade de Pagamento</label>
                                       <select
@@ -9463,14 +9849,30 @@ NEWFILEENCODING:NONE
                                         defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
                                         style={{ fontSize: '0.85rem' }}
                                       >
-                                        <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
-                                        <option value="valor_fixo">💵 Valor Fixo (R$)</option>
+                                        <option value="hora_aula">⏱️ Hora Aula</option>
+                                        <option value="valor_fixo">💵 Valor Fixo</option>
                                         <option value="percentual">📊 Percentual (%)</option>
                                       </select>
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa (R$ ou %)</label>
+                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Moeda do Repasse</label>
+                                      <select
+                                        className="form-input"
+                                        name={`payment_currency_${t.id}`}
+                                        defaultValue={currentConfig?.payment_currency || editingCourse.teacher_currency || 'BRL'}
+                                        style={{ fontSize: '0.85rem' }}
+                                      >
+                                        <option value="BRL">R$ - Real (BRL)</option>
+                                        <option value="USD">$ - Dólar (USD)</option>
+                                        <option value="EUR">€ - Euro (EUR)</option>
+                                        <option value="INR">₹ - Rúpia (INR)</option>
+                                        <option value="GBP">£ - Libra (GBP)</option>
+                                      </select>
+                                    </div>
+
+                                    <div>
+                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa</label>
                                       <input
                                         className="form-input"
                                         type="number"
@@ -9551,7 +9953,7 @@ NEWFILEENCODING:NONE
                     {/* MODAL DE HISTÓRICO DE VALORES PARA CONSULTA */}
                     {viewingCourseHistory && (
                       <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
-                        <div className="card p-5" style={{ maxWidth: '850px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: 'var(--color-bg-card, #ffffff)', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div className="card p-5" style={{ maxWidth: '850px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
                             <div>
                               <h3 className="font-serif-title" style={{ color: 'var(--color-primary)', margin: 0 }}>
@@ -9673,8 +10075,20 @@ NEWFILEENCODING:NONE
                             name="content_table"
                             defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')}
                             placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados"
-                            rows={5}
+                            rows={4}
                           />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">🖼️ Galeria de Fotos do Livro (Múltiplas Fotos - Digite 1 URL por linha)</label>
+                          <textarea
+                            className="form-input"
+                            name="images"
+                            defaultValue={Array.isArray(editingBook.images) ? editingBook.images.join('\n') : (editingBook.images || '')}
+                            placeholder="https://exemplo.com/foto-capa.jpg&#10;https://exemplo.com/foto-contra-capa.jpg&#10;https://exemplo.com/foto-sumario.jpg"
+                            rows={3}
+                          />
+                          <small className="text-muted">Adicione múltiplos links de fotos da capa, contracapa ou amostra de páginas.</small>
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -9802,8 +10216,24 @@ NEWFILEENCODING:NONE
 
                             {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR PARA ADM */}
                             <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
-                              🏦 Informações Bancárias do Docente (Para Depósito de Honorários)
+                              🏦 Informações Bancárias & Moeda de Pagamento do Docente
                             </h5>
+                            
+                            <div className="form-group mb-3">
+                              <label className="form-label" style={{ fontWeight: 'bold' }}>Moeda de Recebimento de Honorários <span style={{ color: 'red' }}>*</span></label>
+                              <select
+                                className="form-input"
+                                name="payout_currency"
+                                defaultValue={editingUser.payout_currency || 'BRL'}
+                                style={{ fontWeight: 'bold' }}
+                              >
+                                <option value="BRL">R$ - Real Brasileiro (BRL)</option>
+                                <option value="USD">US$ - Dólar Americano (USD)</option>
+                                <option value="EUR">€ - Euro (EUR)</option>
+                                <option value="GBP">£ - Libra Esterlina (GBP)</option>
+                              </select>
+                            </div>
+
                             <div className="grid-2col">
                               <div className="form-group">
                                 <label className="form-label">Banco</label>
@@ -9837,7 +10267,7 @@ NEWFILEENCODING:NONE
                               {(mockDb.courses || []).map(c => {
                                 const currentConfig = (mockDb.teacher_courses || []).find(tc => tc.teacher_id === editingUser.id && tc.course_id === c.id);
                                 return (
-                                  <div key={c.id} style={{ padding: '0.75rem', backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                                  <div key={c.id} style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                                     <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>
                                       🌿 {c.title} ({c.type})
                                     </div>
@@ -9943,7 +10373,115 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
+                {adminActiveTab === 'events' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>📅 Gerenciamento da Agenda & Eventos Acadêmicos</h3>
+                      <button className="btn btn-primary" onClick={() => setEditingEvent({})}>＋ Agendar Novo Compromisso</button>
+                    </div>
 
+                    <p className="text-muted mb-4" style={{ fontSize: '0.88rem' }}>
+                      Os compromissos e horários cadastrados nesta tela alimentam a agenda pessoal filtrada dos alunos e a agenda geral da plataforma.
+                    </p>
+
+                    {editingEvent && (
+                      <form onSubmit={handleSaveEvent} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)', backgroundColor: '#f8fafc' }}>
+                        <h4 className="mb-4">{editingEvent.id ? 'Editar Compromisso da Agenda' : 'Agendar Novo Compromisso'}</h4>
+                        <input type="hidden" name="id" defaultValue={editingEvent.id || ''} />
+
+                        <div className="form-group">
+                          <label className="form-label">Título do Compromisso / Evento <span style={{ color: 'red' }}>*</span></label>
+                          <input className="form-input" name="title" defaultValue={editingEvent.title || ''} required placeholder="ex: Aula Magna: Introdução ao Método Sensação" />
+                        </div>
+
+                        <div className="grid-3col">
+                          <div className="form-group">
+                            <label className="form-label">Dia <span style={{ color: 'red' }}>*</span></label>
+                            <input className="form-input" name="day" defaultValue={editingEvent.day || ''} required placeholder="ex: 15" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Mês <span style={{ color: 'red' }}>*</span></label>
+                            <input className="form-input" name="month" defaultValue={editingEvent.month || ''} required placeholder="ex: Set ou Outubro" />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">🕒 Horário do Compromisso <span style={{ color: 'red' }}>*</span></label>
+                            <input className="form-input" name="time" defaultValue={editingEvent.time || ''} required placeholder="ex: 19:30 - 21:00 ou 14:00h" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }} />
+                          </div>
+                        </div>
+
+                        <div className="grid-2col">
+                          <div className="form-group">
+                            <label className="form-label">Tipo do Evento</label>
+                            <select className="form-input" name="type" defaultValue={editingEvent.type || 'Aula ao Vivo'}>
+                              <option value="Aula ao Vivo">🎥 Aula ao Vivo</option>
+                              <option value="Seminário Literário">📚 Seminário Literário</option>
+                              <option value="Grupo de Estudos">🔬 Grupo de Estudos</option>
+                              <option value="Lançamento de Livro">🎉 Lançamento de Livro</option>
+                              <option value="Webinar Internacional">🌐 Webinar Internacional</option>
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Vincular ao Curso</label>
+                            <select className="form-input" name="course_id" defaultValue={editingEvent.course_id || ''}>
+                              <option value="">Geral (Todos os Alunos)</option>
+                              {(mockDb.courses || []).map(c => (
+                                <option key={c.id} value={c.id}>{c.title}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Local ou Link da Transmissão (Zoom / Auditório)</label>
+                          <input className="form-input" name="location" defaultValue={editingEvent.location || ''} required placeholder="ex: Auditório TOSB Curitiba / Link do Zoom" />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingEvent(null)}>Cancelar</button>
+                          <button className="btn btn-primary flex-1" type="submit">Salvar Compromisso na Agenda</button>
+                        </div>
+                      </form>
+                    )}
+
+                    <div className="table-responsive">
+                      <table className="lms-table">
+                        <thead>
+                          <tr>
+                            <th>Data</th>
+                            <th>🕒 Horário</th>
+                            <th>Título do Compromisso</th>
+                            <th>Tipo</th>
+                            <th>Curso Vinculado</th>
+                            <th>Local</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(mockDb.events || []).map(evt => {
+                            const linkedCourse = (mockDb.courses || []).find(c => c.id === evt.course_id);
+                            return (
+                              <tr key={evt.id}>
+                                <td><strong>{evt.day} {evt.month}</strong></td>
+                                <td><strong style={{ color: 'var(--color-primary)' }}>🕒 {evt.time || 'Não definido'}</strong></td>
+                                <td><strong>{evt.title}</strong></td>
+                                <td><span className="course-type-badge">{evt.type}</span></td>
+                                <td>{linkedCourse ? linkedCourse.title : <span className="text-muted">Geral (Todos)</span>}</td>
+                                <td><small>{evt.location}</small></td>
+                                <td>
+                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingEvent(evt)}>Editar</button>
+                                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteEvent(evt.id)}>Excluir</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
                 {adminActiveTab === 'finance' && (
                   <div className="card finance-module">
@@ -9957,7 +10495,7 @@ NEWFILEENCODING:NONE
                       <button className={`btn ${financeTab === 'expenses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFinanceTab('expenses')}>Saídas</button>
                     </div>
 
-                    <div className="finance-filter-bar card p-3 mb-4 mt-4" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px solid var(--color-border)' }}>
+                    <div className="finance-filter-bar card p-3 mb-4 mt-4" style={{ backgroundColor: '#f8fafc', border: '1px solid var(--color-border)' }}>
                       {financeTab === 'overview' ? (
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', maxWidth: '500px' }}>
                           <div style={{ flex: 1 }}>
@@ -10067,15 +10605,15 @@ NEWFILEENCODING:NONE
                                 </div>
                                 <div className="admin-stat-card warning">
                                   <h3 className="stat-title">A Receber</h3>
-                                  <div className="stat-value" style={{ color: 'var(--color-finance-pending, #d97706)' }}>R$ {totalPending.toFixed(2)}</div>
+                                  <div className="stat-value" style={{ color: '#d97706' }}>R$ {totalPending.toFixed(2)}</div>
                                 </div>
                                 <div className="admin-stat-card error">
                                   <h3 className="stat-title">Inadimplência</h3>
                                   <div className="stat-value" style={{ color: 'var(--color-error)' }}>R$ {totalOverdue.toFixed(2)}</div>
                                 </div>
-                                <div className="admin-stat-card error" style={{ borderLeftColor: 'var(--color-finance-expense, #f43f5e)' }}>
+                                <div className="admin-stat-card error" style={{ borderLeftColor: '#f43f5e' }}>
                                   <h3 className="stat-title">Despesas</h3>
-                                  <div className="stat-value" style={{ color: 'var(--color-finance-expense, #f43f5e)' }}>R$ {totalExpenses.toFixed(2)}</div>
+                                  <div className="stat-value" style={{ color: '#f43f5e' }}>R$ {totalExpenses.toFixed(2)}</div>
                                 </div>
                                 <div className="admin-stat-card primary" style={{ borderLeftColor: netResult >= 0 ? '#10b981' : '#f43f5e' }}>
                                   <h3 className="stat-title">Faturamento</h3>
@@ -10093,7 +10631,7 @@ NEWFILEENCODING:NONE
                         <button className="btn btn-secondary mb-4" onClick={() => openEditPayment({})}>＋ Nova Entrada / Fatura</button>
 
                         {editingPayment && (
-                          <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px dashed var(--color-primary)' }}>
+                          <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
                             <h4 className="mb-4" style={{ color: 'var(--color-primary)' }}>{editingPayment.id ? 'Editar Entrada / Fatura' : 'Cadastrar Nova Entrada'}</h4>
                             <input type="hidden" name="id" defaultValue={editingPayment.id || ''} />
 
@@ -10283,17 +10821,17 @@ NEWFILEENCODING:NONE
                                     <tr key={p.id}>
                                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                          <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>V:</strong>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                           <span>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</span>
                                         </div>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                          <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>P:</strong>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
                                           <span>{p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
                                         </div>
                                       </td>
                                       <td>
                                         <strong>{student?.name || 'Aluno Removido'}</strong>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>{student?.email}</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
                                       </td>
                                       <td>
                                         {course ? (
@@ -10306,7 +10844,7 @@ NEWFILEENCODING:NONE
                                       </td>
                                       <td style={{ color: p.status === 'RECEIVED' ? 'var(--color-success)' : 'inherit', fontWeight: 'bold' }}>R$ {p.amount.toFixed(2)}</td>
                                       <td>
-                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: 'var(--color-bg-muted, #f1f5f9)', color: 'var(--color-text-secondary, #64748b)' } : {}}>
+                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
                                           {p.status === 'RECEIVED' ? 'Confirmado' : p.status === 'OVERDUE' ? 'Atrasado' : p.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
                                         </span>
                                       </td>
@@ -10333,7 +10871,7 @@ NEWFILEENCODING:NONE
                         <button className="btn btn-secondary mb-4" onClick={() => setEditingExpense({})}>＋ Lançar Despesa / Saída Avulsa</button>
 
                         {editingExpense && (
-                          <form className="card p-4 mb-4" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px dashed var(--color-border)' }} onSubmit={(e) => {
+                          <form className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }} onSubmit={(e) => {
                             e.preventDefault();
                             if (editingExpense.isPayout) {
                               setMockDb(prev => ({
@@ -10386,21 +10924,21 @@ NEWFILEENCODING:NONE
                                 <div className="grid-3col mb-3">
                                   <div className="form-group">
                                     <label className="form-label">Descrição</label>
-                                    <input className="form-input" value={editingExpense.description || ''} disabled style={{ backgroundColor: 'var(--color-border-soft, #e2e8f0)' }} />
+                                    <input className="form-input" value={editingExpense.description || ''} disabled style={{ backgroundColor: '#e2e8f0' }} />
                                   </div>
                                   <div className="form-group">
                                     <label className="form-label">Tipo de Despesa</label>
-                                    <input className="form-input" value="Honorários" disabled style={{ backgroundColor: 'var(--color-border-soft, #e2e8f0)' }} />
+                                    <input className="form-input" value="Honorários" disabled style={{ backgroundColor: '#e2e8f0' }} />
                                   </div>
                                   <div className="form-group">
                                     <label className="form-label">Valor (R$) - Calculado (Bloqueado)</label>
-                                    <input className="form-input" value={`R$ ${editingExpense.amount.toFixed(2)}`} disabled style={{ backgroundColor: 'var(--color-border-soft, #e2e8f0)', fontWeight: 'bold' }} />
+                                    <input className="form-input" value={`R$ ${editingExpense.amount.toFixed(2)}`} disabled style={{ backgroundColor: '#e2e8f0', fontWeight: 'bold' }} />
                                   </div>
                                 </div>
                                 <div className="grid-3col mb-3">
                                   <div className="form-group">
                                     <label className="form-label">Data de Vencimento</label>
-                                    <input className="form-input" value={editingExpense.date || ''} disabled style={{ backgroundColor: 'var(--color-border-soft, #e2e8f0)' }} />
+                                    <input className="form-input" value={editingExpense.date || ''} disabled style={{ backgroundColor: '#e2e8f0' }} />
                                   </div>
                                   <div className="form-group">
                                     <label className="form-label">Data de Pagamento (Efetiva)</label>
@@ -10502,11 +11040,11 @@ NEWFILEENCODING:NONE
                                   <tr key={e.id}>
                                     <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                                       <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                        <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>V:</strong>
+                                        <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                         <span>{e.date ? new Date(e.date).toLocaleDateString('pt-BR') : '-'}</span>
                                       </div>
                                       <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                        <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>P:</strong>
+                                        <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
                                         <span>{e.paid_at ? new Date(e.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
                                       </div>
                                     </td>
@@ -10514,7 +11052,7 @@ NEWFILEENCODING:NONE
                                     <td style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>R$ {e.amount.toFixed(2)}</td>
                                     <td>{e.category || 'Outros'}</td>
                                     <td>
-                                      <span className={e.status === 'PAID' ? 'badge-paid' : e.status === 'OVERDUE' ? 'badge-overdue' : e.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={e.status === 'CANCELLED' ? { backgroundColor: 'var(--color-bg-muted, #f1f5f9)', color: 'var(--color-text-secondary, #64748b)' } : {}}>
+                                      <span className={e.status === 'PAID' ? 'badge-paid' : e.status === 'OVERDUE' ? 'badge-overdue' : e.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={e.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
                                         {e.status === 'PAID' ? 'Confirmado' : e.status === 'OVERDUE' ? 'Atrasado' : e.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
                                       </span>
                                     </td>
@@ -10544,11 +11082,11 @@ NEWFILEENCODING:NONE
                                     <tr key={p.id}>
                                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                          <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>V:</strong>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                           <span>{p.period_end ? new Date(p.period_end).toLocaleDateString('pt-BR') : '-'}</span>
                                         </div>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                          <strong style={{ color: 'var(--color-text-label, #475569)', minWidth: '20px' }}>P:</strong>
+                                          <strong style={{ color: '#475569', minWidth: '20px' }}>P:</strong>
                                           <span>{p.paid_at ? new Date(p.paid_at).toLocaleDateString('pt-BR') : '-'}</span>
                                         </div>
                                       </td>
@@ -10556,7 +11094,7 @@ NEWFILEENCODING:NONE
                                       <td style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>R$ {p.amount.toFixed(2)}</td>
                                       <td>Honorários</td>
                                       <td>
-                                        <span className={p.status === 'PAID' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: 'var(--color-bg-muted, #f1f5f9)', color: 'var(--color-text-secondary, #64748b)' } : {}}>
+                                        <span className={p.status === 'PAID' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
                                           {p.status === 'PAID' ? 'Confirmado' : p.status === 'OVERDUE' ? 'Atrasado' : p.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
                                         </span>
                                       </td>
@@ -10616,7 +11154,7 @@ NEWFILEENCODING:NONE
 
                     {/* PAINEL DE GERENCIAMENTO RÁPIDO DE INTEGRANTES DE UMA TURMA */}
                     {viewingClassDetails && (
-                      <div className="card p-5 mb-5" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '2px solid var(--color-primary)' }}>
+                      <div className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '2px solid var(--color-primary)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
                           <div>
                             <span className="badge-paid" style={{ fontSize: '0.8rem' }}>Painel de Gestão da Turma</span>
@@ -10635,7 +11173,7 @@ NEWFILEENCODING:NONE
 
                         <div className="grid-2col" style={{ gap: '2rem' }}>
                           {/* SEÇÃO 1: PROFESSORES DA TURMA */}
-                          <div className="card p-4" style={{ backgroundColor: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border)' }}>
+                          <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
                             <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>👨‍🏫 Professores Alocados na Turma</h4>
 
                             {/* Form de Adicionar Professor com 1 Clique */}
@@ -10669,10 +11207,10 @@ NEWFILEENCODING:NONE
                               {mockDb.users
                                 .filter(u => (viewingClassDetails.teacher_ids || []).includes(u.id))
                                 .map(t => (
-                                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-bg-muted, #f1f5f9)', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
                                     <div>
                                       <strong>{t.name}</strong>
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
+                                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
                                     </div>
                                     <button
                                       className="btn btn-danger"
@@ -10690,7 +11228,7 @@ NEWFILEENCODING:NONE
                           </div>
 
                           {/* SEÇÃO 2: ALUNOS DA TURMA */}
-                          <div className="card p-4" style={{ backgroundColor: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border)' }}>
+                          <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
                             <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>🎓 Alunos Matriculados na Turma</h4>
 
                             {/* Form de Adicionar Aluno com 1 Clique */}
@@ -10727,10 +11265,10 @@ NEWFILEENCODING:NONE
                                   const attendanceKey = `${viewingClassDetails.id}_${st.id}`;
                                   const attendanceCount = (mockDb.class_attendance[attendanceKey] || []).length;
                                   return (
-                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-bg-muted, #f1f5f9)', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
                                       <div>
                                         <strong>{st.name}</strong>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>{st.email} | Presenças: {attendanceCount}</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
                                       </div>
                                       <button
                                         className="btn btn-danger"
@@ -10797,7 +11335,7 @@ NEWFILEENCODING:NONE
                                 style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                               />
                             </div>
-                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: 'var(--color-bg-card, #ffffff)' }}>
+                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                               {mockDb.users
                                 .filter(u => u.role === 'TEACHER' && u.name.toLowerCase().includes(classTeacherSearch.toLowerCase()))
                                 .map(u => {
@@ -10823,7 +11361,7 @@ NEWFILEENCODING:NONE
                                 style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                               />
                             </div>
-                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: 'var(--color-bg-card, #ffffff)' }}>
+                            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
                               {mockDb.users
                                 .filter(u => u.role === 'STUDENT' && u.name.toLowerCase().includes(classStudentSearch.toLowerCase()))
                                 .map(u => {
@@ -10929,86 +11467,7 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
-                {adminActiveTab === 'events' && (
-                  <div>
-                    {/* Criar Evento */}
-                    <div className="card mb-6">
-                      <h3 className="mb-4">Adicionar Evento Científico</h3>
-                      <form onSubmit={handleCreateEvent} className="grid-2col" style={{ gap: '1rem' }}>
-                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                          <label className="form-label">Título do Evento</label>
-                          <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Tipo de Evento</label>
-                          <select className="form-input" name="type">
-                            <option value="Lançamento de Livro">Lançamento de Livro</option>
-                            <option value="Grupo de Estudos">Grupo de Estudos</option>
-                            <option value="Seminário Literário">Seminário Literário</option>
-                            <option value="Aula Magna">Aula Magna</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Localização / Link</label>
-                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Dia (ex: 15)</label>
-                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Mês (ex: Set)</label>
-                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" />
-                        </div>
-                        <div style={{ gridColumn: 'span 2', marginTop: '0.5rem' }}>
-                          <button className="btn btn-primary w-full" type="submit">Cadastrar Evento na Agenda</button>
-                        </div>
-                      </form>
-                    </div>
 
-                    {/* Listagem de Eventos */}
-                    <div className="card">
-                      <h3 className="mb-4">Eventos Programados</h3>
-                      <div className="table-responsive">
-                        <table className="lms-table">
-                          <thead>
-                            <tr>
-                              <th>Data</th>
-                              <th>Tipo</th>
-                              <th>Título</th>
-                              <th>Local</th>
-                              <th>Ações</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {(mockDb.events || []).map(event => (
-                              <tr key={event.id}>
-                                <td><strong>{event.day} {event.month}</strong></td>
-                                <td><span className="course-type-badge">{event.type}</span></td>
-                                <td><strong>{event.title}</strong></td>
-                                <td>{event.location}</td>
-                                <td>
-                                  <button
-                                    className="btn btn-danger"
-                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                    onClick={() => handleDeleteEvent(event.id)}
-                                  >
-                                    Excluir
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                            {(mockDb.events || []).length === 0 && (
-                              <tr>
-                                <td colSpan="5" className="text-center text-muted" style={{ padding: '2rem' }}>Nenhum evento agendado.</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {adminActiveTab === 'temp_unlock' && (
                   <div className="card">
@@ -11023,7 +11482,7 @@ NEWFILEENCODING:NONE
                     </p>
 
                     {/* Form de Concessão de Liberação Temporária */}
-                    <form onSubmit={handleGrantTemporaryUnlock} className="card p-5 mb-5" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px dashed var(--color-primary)' }}>
+                    <form onSubmit={handleGrantTemporaryUnlock} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
                       <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Conceder Nova Liberação Temporária</h4>
 
                       <div className="grid-2col mb-3">
@@ -11095,7 +11554,7 @@ NEWFILEENCODING:NONE
                             <tr key={u.id}>
                               <td>
                                 <strong>{u.student_name}</strong>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #64748b)' }}>{u.student_email}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.student_email}</div>
                               </td>
                               <td>{u.course_title}</td>
                               <td><span className="badge-paid">{u.days_valid} dias</span></td>
@@ -11137,7 +11596,7 @@ NEWFILEENCODING:NONE
                     </p>
 
                     {/* Formulário de Disparo da Oferta */}
-                    <form onSubmit={handleSendPromotionalCampaign} className="card p-5 mb-5" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px dashed var(--color-primary)' }}>
+                    <form onSubmit={handleSendPromotionalCampaign} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
                       <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Criar Nova Campanha de E-mail Marketing</h4>
 
                       <div className="grid-2col mb-3">
@@ -11181,7 +11640,7 @@ NEWFILEENCODING:NONE
                     </form>
 
                     {/* Resumo de Alunos Opt-in */}
-                    <div className="card p-4" style={{ backgroundColor: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border)' }}>
+                    <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
                       <h4 className="section-title-underlined-thin mb-3">
                         📊 Estatística de Opt-in de Promoções (Alunos Cadastrados)
                       </h4>
@@ -11216,7 +11675,7 @@ NEWFILEENCODING:NONE
             </div>
 
             {/* Painel de Testes / Ações Rápidas de Simulação */}
-            <div className="card p-4 mb-4" style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', border: '1px dashed var(--color-border)' }}>
+            <div className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }}>
               <strong style={{ fontSize: '0.9rem', color: 'var(--color-secondary)', display: 'block', marginBottom: '0.5rem' }}>
                 🧪 Painel de Simulação Rápida (1 Clique para Testar):
               </strong>
@@ -11257,7 +11716,7 @@ NEWFILEENCODING:NONE
             {/* Listagem de E-mails Registrados */}
             <div className="emails-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {(mockDb.sent_emails || []).map((mail, idx) => (
-                <div key={mail.id || idx} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1rem', backgroundColor: 'var(--color-bg-card, #fff)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <div key={mail.id || idx} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1rem', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                     <div>
                       <span className={`badge-paid ${mail.type === 'COURSE_PURCHASE' ? '' : mail.type === 'TEMP_UNLOCK' ? 'badge-pending' : 'badge-overdue'}`} style={{ fontSize: '0.75rem', display: 'inline-block', marginBottom: '0.25rem' }}>
@@ -11270,7 +11729,7 @@ NEWFILEENCODING:NONE
                   <div style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
                     <strong>Para:</strong> {mail.recipient_name ? `${mail.recipient_name} <${mail.recipient_email}>` : mail.recipient_email}
                   </div>
-                  <div style={{ backgroundColor: 'var(--color-bg-surface-alt, #f8fafc)', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#334155' }}>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#334155' }}>
                     {mail.body}
                   </div>
                 </div>
