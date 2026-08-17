@@ -336,8 +336,6 @@ router.get('/admin-finance-report', authenticateToken, requireRole(['ADMIN']), a
   }
 });
 
-export default router;
-
 // Registrar Despesa
 router.post('/expenses', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
   const { description, category, amount, date, status, receipt_proof_url } = req.body;
@@ -410,11 +408,17 @@ router.put('/:id/confirm-transfer', authenticateToken, requireRole(['ADMIN']), a
     }
     
     await client.query('COMMIT');
-    res.json({ message: 'Pagamento confirmado com sucesso.', payment: localPayment });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error(err);
     res.status(500).json({ message: 'Erro ao confirmar pagamento.' });
+  } finally {
+    client.release();
+  }
+});
+
+// Simular pagamento Asaas no modo sandbox/desenvolvimento
+router.post('/simulate-asaas-payment', authenticateToken, requireRole(['ADMIN']), async (req, res) => {
   const { asaasPaymentId } = req.body;
 
   if (!asaasPaymentId) {
