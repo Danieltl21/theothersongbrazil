@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
   /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
@@ -49,7 +49,7 @@
   --font-multiplier: 1;
 
   /* Tipografia */
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-serif: 'Oswald', Georgia, serif;
   --font-sans: 'Montserrat', Arial, sans-serif;
 
   /* Efeitos */
@@ -1341,7 +1341,7 @@ body.high-contrast .nav-link.active {
 
 .hero-section h1 {
   font-family: var(--font-serif);
-  color: white;
+  color: var(--tosb-gold-300) !important;
   font-size: 2.75rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -1373,6 +1373,7 @@ body.high-contrast .nav-link.active {
   top: 100%;
   left: 0;
   margin-top: 0.5rem;
+  overflow: hidden;
 }
 
 .nav-dropdown-content.open {
@@ -2499,7 +2500,7 @@ body.high-contrast .nav-link.active {
   --color-text-muted: var(--tosb-muted);
 
   /* Tipografia Oficial */
-  --font-display: "Cormorant Garamond";
+  --font-display: "Oswald";
   --font-ui: "Montserrat";
   --font-serif: var(--font-display);
   --font-sans: var(--font-ui);
@@ -2870,20 +2871,6 @@ body.high-contrast .nav-link.active {
   min-height: 480px;
 }
 
-.theme-tosb-v2 .student-sidebar::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 140px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 150' opacity='0.35'%3E%3Cpath fill='none' stroke='%23B68A35' stroke-width='1.5' d='M10,140 Q50,70 120,130 Q160,60 190,140 M30,110 Q60,50 40,30 M90,100 Q120,40 140,20'/%3E%3Ccircle cx='40' cy='30' r='4' fill='%23B68A35'/%3E%3Ccircle cx='140' cy='20' r='4' fill='%23B68A35'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  background-size: contain;
-  pointer-events: none;
-}
-
 .theme-tosb-v2 .student-sidebar-menu {
   list-style: none;
   display: flex;
@@ -2893,8 +2880,7 @@ body.high-contrast .nav-link.active {
   z-index: 2;
 }
 
-.theme-tosb-v2 .student-sidebar-item button,
-.theme-tosb-v2 .student-sidebar-item button span {
+.theme-tosb-v2 .student-sidebar-item button {
   width: 100%;
   text-align: left;
   background: transparent;
@@ -2909,22 +2895,26 @@ body.high-contrast .nav-link.active {
   gap: 0.85rem;
   cursor: pointer;
   transition: all 200ms ease;
-}
-
-.theme-tosb-v2 .student-sidebar-item button {
   padding: 0.85rem 1.1rem;
 }
 
-.theme-tosb-v2 .student-sidebar-item.active button,
-.theme-tosb-v2 .student-sidebar-item.active button span {
+.theme-tosb-v2 .student-sidebar-item button span {
+  width: auto !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.theme-tosb-v2 .student-sidebar-item.active button {
   background: #0B2418 !important;
   border: 1px solid #B68A35 !important;
   color: #FFFDF8 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 0 8px rgba(182, 138, 53, 0.2);
 }
 
-.theme-tosb-v2 .student-sidebar-item button:hover,
-.theme-tosb-v2 .student-sidebar-item button:hover span {
+.theme-tosb-v2 .student-sidebar-item button:hover {
   color: #E8CC8D !important;
   border-color: rgba(182, 138, 53, 0.35);
 }
@@ -3098,4 +3088,87 @@ body.high-contrast .nav-link.active {
   color: var(--tosb-cream-200);
   font-size: 0.85rem;
   opacity: 0.9;
+}
+
+/* ==========================================================================
+   MOBILE SANDWICH NAV DECORATIONS AND RESPONSIVENESS
+   ========================================================================== */
+
+/* Base responsiveness for Desktop vs Mobile nav */
+.mobile-only-nav {
+  display: none !important;
+}
+
+.desktop-only-nav {
+  display: flex !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-nav {
+    display: none !important;
+  }
+  
+  .mobile-only-nav {
+    display: none !important;
+  }
+  
+  .mobile-only-nav.mobile-open {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important; /* Request 6: Decreased spacing */
+  }
+
+  .mobile-only-nav .nav-link {
+    padding: 0.4rem 0.75rem !important; /* Request 6: Decreased spacing */
+    margin-bottom: 0.15rem !important;
+    border-radius: var(--border-radius-sm) !important;
+  }
+
+  /* Request 5: sandwich menu item colors in Design 2 (theme-tosb-v2) */
+  .theme-tosb-v2 .mobile-only-nav {
+    background-color: var(--tosb-green-950) !important;
+    border-bottom: 2px solid var(--tosb-gold-600) !important;
+    padding: 1.25rem 1.5rem !important;
+  }
+
+  .theme-tosb-v2 .mobile-only-nav .nav-link {
+    background-color: var(--tosb-green-900) !important;
+    color: var(--tosb-white) !important;
+    border: 1px solid var(--tosb-gold-600) !important;
+    transition: var(--transition-smooth) !important;
+  }
+
+  .theme-tosb-v2 .mobile-only-nav .nav-link:hover,
+  .theme-tosb-v2 .mobile-only-nav .nav-link.active {
+    background-color: var(--tosb-green-800) !important;
+    color: var(--tosb-gold-300) !important;
+    border-color: var(--tosb-gold-300) !important;
+  }
+
+  /* Dropdown content (like user panel inside mobile menu) in Design 2 */
+  .theme-tosb-v2 .mobile-only-nav .dropdown-item {
+    color: var(--tosb-white) !important;
+    background-color: transparent !important;
+  }
+
+  .theme-tosb-v2 .mobile-only-nav .dropdown-item:hover {
+    color: var(--tosb-gold-300) !important;
+    background-color: var(--tosb-green-800) !important;
+  }
+
+  .theme-tosb-v2 .mobile-only-nav .mobile-only-block {
+    border-top-color: rgba(232, 204, 141, 0.3) !important;
+  }
+
+  /* Request 3: Design 2 style for the sandwich button */
+  .theme-tosb-v2 .hamburger-btn {
+    background-color: var(--tosb-green-950) !important;
+    border: 1px solid var(--tosb-gold-600) !important;
+    color: var(--tosb-gold-300) !important; /* Bege / Dourado */
+    border-radius: var(--border-radius-md) !important;
+    padding: 0.5rem 0.75rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 }

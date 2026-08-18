@@ -472,22 +472,22 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
             <label className="form-label">Telefone {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
             <input className="form-input" type="text" name="commercial_phone" defaultValue={targetUser?.commercial_phone || ''} required={isReq('commercial_phone')} placeholder="ex: (11) 5555-5555" />
           </div>
-        </>
-      )}
 
-      {targetUser?.id && (
-        <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderTop: '1px dashed var(--color-border)', paddingTop: '1rem' }}>
-          <input
-            type="checkbox"
-            id="is_homeopath"
-            name="is_homeopath"
-            defaultChecked={targetUser?.is_homeopath || false}
-            style={{ width: 'auto', margin: 0 }}
-          />
-          <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500', color: 'var(--color-primary)' }}>
-            🌿 Quero participar da Lista Pública de Homeopatas da TOSB (Diretório Oficial)
-          </label>
-        </div>
+          {targetUser?.id && (
+            <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                type="checkbox"
+                id="is_homeopath"
+                name="is_homeopath"
+                defaultChecked={targetUser?.is_homeopath || false}
+                style={{ width: 'auto', margin: 0 }}
+              />
+              <label htmlFor="is_homeopath" className="cursor-pointer" style={{ fontWeight: '500' }}>
+                Quero participar da lista de Homeopatas indicados
+              </label>
+            </div>
+          )}
+        </>
       )}
     </>
   );
@@ -530,9 +530,9 @@ export default function App() {
         }
         if (!parsed.events) {
           parsed.events = [
-            { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom", time: "19:30 - 21:00" },
-            { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra", time: "20:00" },
-            { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial", time: "09:00 - 17:00" }
+            { id: 'event-1', title: "Lançamento Oficial: Superclasses em Homeopatia", type: "Lançamento de Livro", day: "15", month: "Set", location: "Sede da TOSB Curitiba / Transmissão ao vivo via Zoom" },
+            { id: 'event-2', title: "Discussão Científica do Livro 'Esquema de Reinos'", type: "Grupo de Estudos", day: "10", month: "Out", location: "Online Zoom exclusivo para alunos e portadores da obra" },
+            { id: 'event-3', title: "Seminário Avançado com base nas 'Oito Caixas'", type: "Seminário Literário", day: "24", month: "Out", location: "Auditório TOSB Curitiba / Evento Presencial" }
           ];
           changed = true;
         }
@@ -728,115 +728,6 @@ export default function App() {
 
   // Estados de Responsividade e Dropdowns
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [certificateTemplateUrl, setCertificateTemplateUrl] = useState(() => localStorage.getItem('tosb_certificate_template_url') || '');
-
-  // Função para Gerar e Baixar Certificado via Canvas 2D
-  const handleDownloadCertificate = (studentName, courseTitle, attendancePercent, workloadHours) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1200;
-    canvas.height = 850;
-    const ctx = canvas.getContext('2d');
-
-    const renderTextAndDownload = () => {
-      // Bordas e Estilo Acadêmico
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, 1200, 25);
-      ctx.fillRect(0, 825, 1200, 25);
-
-      ctx.strokeStyle = '#d97706';
-      ctx.lineWidth = 5;
-      ctx.strokeRect(35, 35, 1130, 780);
-
-      // Título Institucional
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = 'bold 36px Georgia, serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('THE OTHER SONG BRASIL', 600, 130);
-
-      ctx.fillStyle = '#059669';
-      ctx.font = 'bold 22px Arial, sans-serif';
-      ctx.fillText('CERTIFICADO DE CONCLUSÃO ACADÊMICA', 600, 175);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = '18px Arial, sans-serif';
-      ctx.fillText('A Diretoria de Ensino e Pesquisa da TOSB certifica que', 600, 240);
-
-      // Nome do Aluno
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 42px Georgia, serif';
-      ctx.fillText(studentName || 'Nome do Aluno', 600, 310);
-
-      // Texto do Curso
-      ctx.fillStyle = '#334155';
-      ctx.font = '20px Arial, sans-serif';
-      ctx.fillText('concluiu com êxito as atividades pedagógicas e disciplinas do curso', 600, 370);
-
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = 'bold 28px Georgia, serif';
-      ctx.fillText(courseTitle || 'Curso de Homeopatia Clássica', 600, 430);
-
-      // Métricas (Carga Horária & Frequência)
-      ctx.fillStyle = '#475569';
-      ctx.font = '18px Arial, sans-serif';
-      ctx.fillText(`Carga Horária: ${workloadHours || 180}h Didáticas   |   Frequência Final: ${attendancePercent}%`, 600, 490);
-
-      ctx.fillText(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 600, 530);
-
-      // Assinaturas
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 1;
-
-      ctx.beginPath();
-      ctx.moveTo(250, 680);
-      ctx.lineTo(500, 680);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(700, 680);
-      ctx.lineTo(950, 680);
-      ctx.stroke();
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 16px Arial, sans-serif';
-      ctx.fillText('Dr. Carlos Eduardo Leitão', 375, 705);
-      ctx.font = '14px Arial, sans-serif';
-      ctx.fillStyle = '#64748b';
-      ctx.fillText('Diretor Acadêmico - TOSB', 375, 725);
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 16px Arial, sans-serif';
-      ctx.fillText('Dr. Rajan Sankaran', 825, 705);
-      ctx.font = '14px Arial, sans-serif';
-      ctx.fillStyle = '#64748b';
-      ctx.fillText('The Other Song International', 825, 725);
-
-      // Disparar Download da Imagem PNG
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `Certificado_TOSB_${(studentName || 'Aluno').replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-      link.href = dataUrl;
-      link.click();
-    };
-
-    if (certificateTemplateUrl) {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, 1200, 850);
-        renderTextAndDownload();
-      };
-      img.onerror = () => {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, 1200, 850);
-        renderTextAndDownload();
-      };
-      img.src = certificateTemplateUrl;
-    } else {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 1200, 850);
-      renderTextAndDownload();
-    }
-  };
   const [showWhatsappText, setShowWhatsappText] = useState(true);
 
   // Ocultar texto do WhatsApp após 3 segundos
@@ -1729,7 +1620,6 @@ export default function App() {
 
   // Estado de Faturas e Checkout
   const [myInvoices, setMyInvoices] = useState([]);
-  const [showOverdueModal, setShowOverdueModal] = useState(false);
   const [checkoutCourse, setCheckoutCourse] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [installments, setInstallments] = useState(12);
@@ -2337,7 +2227,6 @@ export default function App() {
     const banner_url = e.target.banner_url?.value || courseBannerPreview || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800';
     const finishing_message = e.target.finishing_message?.value || '';
     const teacher_id = e.target.teacher_id.value;
-    const teacher_currency = e.target.teacher_currency?.value || 'BRL';
 
     const targetCourseId = id || ('course-' + Date.now());
 
@@ -2355,8 +2244,7 @@ export default function App() {
               workload_hours,
               banner_url,
               finishing_message,
-              teacher_id,
-              teacher_currency
+              teacher_id
             };
           }
           return c;
@@ -2372,7 +2260,6 @@ export default function App() {
           banner_url,
           finishing_message,
           teacher_id,
-          teacher_currency,
           active: true
         };
         updatedCourses = [...prev.courses, newCourse];
@@ -2386,19 +2273,17 @@ export default function App() {
       teachers.forEach(t => {
         const typeInput = e.target[`payment_type_${t.id}`];
         const rateInput = e.target[`payment_rate_${t.id}`];
-        const currencyInput = e.target[`payment_currency_${t.id}`];
 
         if (typeInput && rateInput) {
           const newType = typeInput.value;
           const newRate = parseFloat(rateInput.value) || 0;
-          const newCurrency = currencyInput ? currencyInput.value : teacher_currency;
 
           // Verificar configuração atual
           const existingConfigIndex = updatedTeacherCourses.findIndex(tc => tc.teacher_id === t.id && tc.course_id === targetCourseId);
           const currentConfig = existingConfigIndex > -1 ? updatedTeacherCourses[existingConfigIndex] : null;
 
           // Se mudou ou é novo, adiciona ao histórico permanentemente para consulta
-          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate || currentConfig.payment_currency !== newCurrency) {
+          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate) {
             const historyEntry = {
               id: 'tph-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
               course_id: targetCourseId,
@@ -2406,9 +2291,8 @@ export default function App() {
               teacher_name: t.name,
               payment_type: newType,
               payment_rate: newRate,
-              payment_currency: newCurrency,
               created_at: new Date().toISOString(),
-              notes: id ? 'Atualização de valor/moeda na Gestão de Cursos' : 'Valores e moeda definidos na criação do curso'
+              notes: id ? 'Atualização de valor na Gestão de Cursos' : 'Valores definidos na criação do curso'
             };
             updatedHistory.unshift(historyEntry);
           }
@@ -2419,7 +2303,6 @@ export default function App() {
             course_id: targetCourseId,
             payment_type: newType,
             payment_rate: newRate,
-            payment_currency: newCurrency,
             updated_at: new Date().toISOString()
           };
 
@@ -2462,19 +2345,17 @@ export default function App() {
     const page_count = parseInt(e.target.page_count?.value) || 0;
     const content_table_raw = e.target.content_table?.value || '';
     const content_table = content_table_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    const images_raw = e.target.images?.value || '';
-    const images = images_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
     setMockDb(prev => {
       let updatedBooks;
       const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
       if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table, images } : b);
-        setSuccess('Livro atualizado com sucesso com múltiplas fotos!');
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table } : b);
+        setSuccess('Livro atualizado com sucesso!');
       } else {
-        const newBook = { id, title, author, price, desc, page_count, content_table, images };
+        const newBook = { id, title, author, price, desc, page_count, content_table };
         updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
-        setSuccess('Livro adicionado com sucesso com galeria de fotos!');
+        setSuccess('Livro adicionado com sucesso!');
       }
       return { ...prev, books: updatedBooks };
     });
@@ -2491,49 +2372,6 @@ export default function App() {
         return { ...prev, books: updatedBooks };
       });
       setSuccess('Livro removido com sucesso!');
-    }
-  };
-
-  // ADMIN: SALVAR COMPROMISSO / EVENTO DA AGENDA (COM HORÁRIO)
-  const handleSaveEvent = (e) => {
-    e.preventDefault();
-    clearAlerts();
-    const id = e.target.id?.value || 'event_' + Date.now();
-    const title = e.target.title.value;
-    const type = e.target.type.value;
-    const day = e.target.day.value;
-    const month = e.target.month.value;
-    const time = e.target.time.value; // 🕒 Horário cadastrado no compromisso
-    const location = e.target.location.value;
-    const course_id = e.target.course_id?.value || '';
-
-    setMockDb(prev => {
-      let updatedEvents;
-      const exists = (prev.events || []).some(evt => evt.id === id);
-      const newEvtObj = { id, title, type, day, month, time, location, course_id };
-      if (exists) {
-        updatedEvents = (prev.events || []).map(evt => evt.id === id ? newEvtObj : evt);
-        setSuccess('Compromisso da agenda atualizado com o horário cadastrado com sucesso!');
-      } else {
-        updatedEvents = [...(prev.events || []), newEvtObj];
-        setSuccess('Novo compromisso agendado com horário cadastrado com sucesso!');
-      }
-      return { ...prev, events: updatedEvents };
-    });
-
-    setEditingEvent(null);
-  };
-
-  const handleCreateEvent = handleSaveEvent;
-
-  const handleDeleteEvent = (id) => {
-    clearAlerts();
-    if (confirm('Deseja excluir este compromisso da agenda?')) {
-      setMockDb(prev => ({
-        ...prev,
-        events: (prev.events || []).filter(evt => evt.id !== id)
-      }));
-      setSuccess('Compromisso removido da agenda.');
     }
   };
 
@@ -3481,7 +3319,6 @@ NEWFILEENCODING:NONE
     const bank_agency = e.target.bank_agency ? e.target.bank_agency.value : '';
     const bank_account = e.target.bank_account ? e.target.bank_account.value : '';
     const pix_key = e.target.pix_key ? e.target.pix_key.value : '';
-    const payout_currency = e.target.payout_currency ? e.target.payout_currency.value : 'BRL';
 
     if (role === 'STUDENT') {
       registrationType = e.target.registrationType?.value || '';
@@ -3506,7 +3343,7 @@ NEWFILEENCODING:NONE
               name, email, password, role, status, is_homeopath,
               phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
               registrationType, registrationNumber, crm, rqe, bio,
-              payout_currency, bank_name, bank_agency, bank_account, pix_key,
+              bank_name, bank_agency, bank_account, pix_key,
               billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
               commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
               commercial_phone
@@ -3520,7 +3357,7 @@ NEWFILEENCODING:NONE
           name, email, password, role, status, is_homeopath,
           phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
           registrationType, registrationNumber, crm, rqe, bio,
-          payout_currency, bank_name, bank_agency, bank_account, pix_key,
+          bank_name, bank_agency, bank_account, pix_key,
           billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
           commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
           commercial_phone
@@ -3810,6 +3647,37 @@ NEWFILEENCODING:NONE
     setSuccess('Pagamento confirmado e matrícula liberada / ativada com sucesso.');
   };
 
+  const handleCreateEvent = (e) => {
+    e.preventDefault();
+    const title = e.target.title.value;
+    const type = e.target.type.value;
+    const day = e.target.day.value;
+    const month = e.target.month.value;
+    const location = e.target.location.value;
+    const time = e.target.time?.value || '';
+
+    const newEvent = {
+      id: 'event-' + Date.now(),
+      title, type, day, month, location, time
+    };
+
+    setMockDb(prev => ({
+      ...prev,
+      events: [...(prev.events || []), newEvent]
+    }));
+
+    setSuccess('Evento acadêmico criado com sucesso!');
+    e.target.reset();
+  };
+
+  const handleDeleteEvent = (eventId) => {
+    setMockDb(prev => ({
+      ...prev,
+      events: (prev.events || []).filter(ev => ev.id !== eventId)
+    }));
+    setSuccess('Evento acadêmico removido.');
+  };
+
   // Evitar flicker de renderização enquanto recupera sessão
   if (token && !user) {
     return (
@@ -3831,14 +3699,11 @@ NEWFILEENCODING:NONE
           <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
             {layoutMode === 'tosb-v2' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="50" cy="50" r="46" stroke="#B68A35" strokeWidth="2.5" fill="#07180F"/>
-                  <circle cx="50" cy="50" r="41" stroke="#D0A54E" strokeWidth="1" strokeDasharray="2 2" fill="none"/>
-                  <path d="M50 78 V48 M50 56 Q35 45 28 32 Q42 32 50 48 M50 52 Q65 42 72 28 Q58 28 50 44 M50 42 Q30 28 25 15 Q40 18 50 35 M50 38 Q70 24 75 12 Q60 15 50 32 M50 28 Q40 15 50 8 Q60 15 50 28" stroke="#D0A54E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                  <circle cx="50" cy="8" r="2.5" fill="#E8CC8D"/>
-                  <circle cx="25" cy="15" r="2" fill="#E8CC8D"/>
-                  <circle cx="75" cy="12" r="2" fill="#E8CC8D"/>
-                </svg>
+                <img
+                  src={window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:' ? 'client/public/images/logo.png' : '/images/logo.png'}
+                  alt="TOSB"
+                  style={{ height: '48px', objectFit: 'contain', display: 'block' }}
+                />
                 <div className="logo-text">
                   <span className="logo-title" style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
                   <span style={{ fontSize: '0.7rem', color: '#FFFDF8', fontWeight: '500', letterSpacing: '0.05em' }}>The Other Song Brasil</span>
@@ -3868,13 +3733,14 @@ NEWFILEENCODING:NONE
           ☰
         </button>
 
-        {/* Menu Principal */}
-        <nav className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ gap: '0.75rem' }}>
+        {/* Menu Principal (Desktop Apenas) */}
+        <nav className="nav-links desktop-only-nav" style={{ gap: '0.75rem' }}>
           <a href={getLinkHref('home')} className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'home')}>Início</a>
 
           <div className="nav-dropdown">
             <button
               className={`nav-link ${['about', 'homeopaths'].includes(currentPage) ? 'active' : ''}`}
+              style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveDropdown(activeDropdown === 'about' ? null : 'about');
@@ -3891,6 +3757,7 @@ NEWFILEENCODING:NONE
           <div className="nav-dropdown">
             <button
               className="nav-link"
+              style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveDropdown(activeDropdown === 'courses' ? null : 'courses');
@@ -3899,7 +3766,7 @@ NEWFILEENCODING:NONE
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
-              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'agenda')}>📅 Agenda Geral</a>
+              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'agenda')}>Agenda Geral</a>
               <a href={getLinkHref('home') + '#online-courses'} className="dropdown-item" onClick={(e) => {
                 const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
                 if (isDemo) {
@@ -3932,6 +3799,36 @@ NEWFILEENCODING:NONE
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'books')}>Livros</a>
           <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'synergy')}>Synergy Software</a>
           <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'contact')}>Contato</a>
+        </nav>
+
+        {/* Menu Principal (Mobile/Sanduíche Apenas) */}
+        <nav className={`nav-links mobile-only-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          <a href={getLinkHref('home')} className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'home'); }}>Início</a>
+
+          {/* Quem Somos Submenu achatado */}
+          <a href={getLinkHref('about')} className={`nav-link ${currentPage === 'about' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'about'); }}>Sobre Nós & Galeria</a>
+          <a href={getLinkHref('homeopaths')} className={`nav-link ${currentPage === 'homeopaths' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'homeopaths'); }}>Lista de Homeopatas</a>
+
+          {/* Cursos Submenu achatado */}
+          <a href={getLinkHref('agenda')} className={`nav-link ${currentPage === 'agenda' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
+          <a href={getLinkHref('home') + '#online-courses'} className="nav-link" onClick={(e) => {
+            e.preventDefault();
+            clearAlerts();
+            setMobileMenuOpen(false);
+            navigateTo('home');
+            setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
+          }}>Cursos Online</a>
+          <a href={getLinkHref('home') + '#inperson-courses'} className="nav-link" onClick={(e) => {
+            e.preventDefault();
+            clearAlerts();
+            setMobileMenuOpen(false);
+            navigateTo('home');
+            setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
+          }}>Presenciais & Híbridos</a>
+
+          <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'books'); }}>Livros</a>
+          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy Software</a>
+          <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'contact'); }}>Contato</a>
 
           {/* Bloco de Usuário exclusivo para mobile */}
           <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
@@ -3945,48 +3842,48 @@ NEWFILEENCODING:NONE
                     setActiveDropdown(activeDropdown === 'panel-hamburger' ? null : 'panel-hamburger');
                   }}
                 >
-                  <span>👤 Painel de {user.name}</span>
+                  <span>Painel de {user.name}</span>
                   <span>▾</span>
                 </button>
                 <div className={`nav-dropdown-content ${activeDropdown === 'panel-hamburger' ? 'open' : ''}`} style={{ display: activeDropdown === 'panel-hamburger' ? 'block' : 'none', position: 'static', boxShadow: 'none', paddingLeft: '1rem' }}>
                   {user.role === 'STUDENT' && (
                     <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'panel')}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'courses')}>📚 Meus Cursos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'payments')}>💳 Financeiro / Faturas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'account')}>👤 Meus Dados</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'agenda')}>📅 Calendário Acadêmico</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'panel'); }}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'courses'); }}>📚 Meus Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'payments'); }}>💳 Financeiro / Faturas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'account'); }}>👤 Meus Dados</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'agenda'); }}>📅 Calendário Acadêmico</a>
                     </>
                   )}
                   {user.role === 'TEACHER' && (
                     <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'panel')}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'students')}>👥 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'payments')}>💳 Financeiro</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'account')}>⚙️ Detalhes da Conta</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'panel'); }}>📊 Painel Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'students'); }}>👥 Gerenciar Turmas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'payments'); }}>💳 Financeiro</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'account'); }}>⚙️ Detalhes da Conta</a>
                     </>
                   )}
                   {user.role === 'ADMIN' && (
                     <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'panel')}>📊 Dashboard Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'reports')}>📈 Relatório Financeiro</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🎓 Gerenciar Cursos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'classes')}>🎓 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'panel'); }}>📊 Dashboard Geral</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'reports'); }}>📈 Relatório Financeiro</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'courses'); }}>🎓 Gerenciar Cursos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'books'); }}>📚 Gerenciar Livros</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'students'); }}>👥 Gerenciar Usuários</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'payments'); }}>💳 Gerenciar Faturas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'classes'); }}>🎓 Gerenciar Turmas</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'events'); }}>📅 Agenda / Eventos</a>
+                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'logs'); }}>🔒 Logs de Segurança</a>
                     </>
                   )}
                   <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }}></div>
-                  <a href="#" className="dropdown-item text-danger" style={{ padding: '0.5rem 0' }} onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
+                  <a href="#" className="dropdown-item text-danger" style={{ padding: '0.5rem 0' }} onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); handleLogout(); }}>Sair da Conta</a>
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <a href={getLinkHref('login')} className="btn btn-secondary w-full" onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
-                <a href={getLinkHref('register')} className="btn btn-primary w-full" onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
+                <a href={getLinkHref('login')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} w-full`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'login'); }}>Entrar</a>
+                <a href={getLinkHref('register')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} w-full`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'register'); }}>Cadastrar</a>
               </div>
             )}
           </div>
@@ -3998,12 +3895,16 @@ NEWFILEENCODING:NONE
           {/* Seletor de Layout / Identidade Visual (Design 1 vs Design 2) */}
           <button
             type="button"
-            className="layout-switcher-pill"
+            className={layoutMode === 'tosb-v2' ? 'layout-switcher-pill' : 'btn btn-secondary'}
             onClick={toggleLayoutMode}
             title="Alternar entre o Design Clássico e o Novo Guia de Identidade Visual TOSB"
-            style={{ marginLeft: '0.25rem', marginRight: '0.25rem' }}
+            style={{
+              marginLeft: '0.25rem',
+              marginRight: '0.25rem',
+              ...(layoutMode === 'tosb-v2' ? {} : { padding: '0.5rem 0.75rem', fontSize: '0.85rem' })
+            }}
           >
-            <span>🎨 Layout:</span>
+            <span>Layout:</span>
             <span className="layout-badge">
               {layoutMode === 'tosb-v2' ? 'Design 2 (Guia TOSB)' : 'Design 1 (Clássico)'}
             </span>
@@ -4029,7 +3930,13 @@ NEWFILEENCODING:NONE
           </div>
 
           {/* Carrinho de Compras */}
-          <a href={getLinkHref('cart')} className="btn btn-secondary cart-badge-nav" onClick={(e) => handleLinkClick(e, 'cart')} aria-label="Carrinho de Compras" style={{ padding: '0.5rem' }}>
+          <a
+            href={getLinkHref('cart')}
+            className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} cart-badge-nav`}
+            onClick={(e) => handleLinkClick(e, 'cart')}
+            aria-label="Carrinho de Compras"
+            style={{ padding: '0.5rem' }}
+          >
             <span style={{ fontSize: '1.2rem' }}>🛒</span>
             {cartItems.length > 0 && (
               <span className="cart-count">
@@ -4040,12 +3947,11 @@ NEWFILEENCODING:NONE
 
           {/* Botão de Caixa de Entrada / Simulador de E-mails */}
           <button
-            className="btn btn-secondary"
+            className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setEmailModalOpen(true)}
             title="Caixa de E-mails e Notificações Enviadas pelo Sistema"
             style={{ padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
           >
-            <span>📧</span>
             <span className="desktop-only-inline">E-mails</span>
             <span className="badge-paid" style={{ fontSize: '0.7rem', padding: '0.1rem 0.35rem', borderRadius: '10px' }}>
               {(mockDb.sent_emails || []).length}
@@ -4057,7 +3963,7 @@ NEWFILEENCODING:NONE
             {user ? (
               <div className="nav-dropdown">
                 <button
-                  className="btn btn-primary"
+                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -4104,7 +4010,7 @@ NEWFILEENCODING:NONE
               <>
                 <a
                   href={getLinkHref('login')}
-                  className="btn btn-secondary"
+                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => handleLinkClick(e, 'login')}
                 >
@@ -4112,7 +4018,7 @@ NEWFILEENCODING:NONE
                 </a>
                 <a
                   href={getLinkHref('register')}
-                  className="btn btn-primary"
+                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
                   onClick={(e) => handleLinkClick(e, 'register')}
                 >
@@ -4127,14 +4033,14 @@ NEWFILEENCODING:NONE
             {user ? (
               <div className="nav-dropdown">
                 <button
-                  className="btn btn-primary"
-                  style={{ padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-primary)' }}
+                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ padding: '0.5rem 0.75rem', ...(layoutMode === 'tosb-v2' ? { backgroundColor: 'var(--color-primary)' } : {}) }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveDropdown(activeDropdown === 'panel' ? null : 'panel');
                   }}
                 >
-                  👤 Painel ▾
+                  Painel ▾
                 </button>
                 <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`} style={{ right: 0, left: 'auto' }}>
                   <a href={getLinkHref(user.role === 'STUDENT' ? 'student-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'admin-dash')} className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
@@ -4143,8 +4049,8 @@ NEWFILEENCODING:NONE
               </div>
             ) : (
               <>
-                <a href={getLinkHref('login')} className="btn btn-secondary" style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
-                <a href={getLinkHref('register')} className="btn btn-primary" style={{ padding: '0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
+                <a href={getLinkHref('login')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
+                <a href={getLinkHref('register')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
               </>
             )}
           </div>
@@ -4578,7 +4484,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-free')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Prévia</button>
                       {user ? (
                         <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
                       ) : (
@@ -4597,7 +4503,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-sub')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Prévia</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -4612,7 +4518,7 @@ NEWFILEENCODING:NONE
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
                     <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
                       <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-post')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Aula Aberta (20%)</button>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Prévia</button>
                       <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
                     </div>
                   </div>
@@ -4715,7 +4621,7 @@ NEWFILEENCODING:NONE
             </section>
 
             {/* Synergy Software Section */}
-            <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-primary-light)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
+            <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-bg-card)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
               <span className="premium-card-tag" style={{ margin: '0 auto' }}>Parceria Tecnológica</span>
               <h3 className="font-serif-title" style={{ fontSize: '1.75rem', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS)</h3>
               <p className="text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -4803,7 +4709,7 @@ NEWFILEENCODING:NONE
 
                   <div className="mt-5" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <button className="btn btn-secondary w-full" style={{ backgroundColor: '#eef5f2', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }} onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
-                      ▶ Assistir 1ª Aula Aberta (Prévia de 20%)
+                      ▶ Assistir Prévia
                     </button>
                     {selectedDetailCourse.type === 'FREE' ? (
                       user ? (
@@ -4830,26 +4736,8 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: AGENDA GERAL */}
         {currentPage === 'agenda' && (
           <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div>
-                <h2 className="mb-1 font-serif-title" style={{ fontSize: '2rem', margin: 0 }}>📅 Agenda Geral Acadêmica</h2>
-                <p className="text-muted" style={{ margin: 0 }}>Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
-              </div>
-              {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setEditingEvent({});
-                    if (user.role === 'ADMIN') {
-                      navigateTo('admin-dash');
-                      setAdminActiveTab('events');
-                    }
-                  }}
-                >
-                  ＋ Cadastrar Novo Evento
-                </button>
-              )}
-            </div>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>📅 Agenda Geral Acadêmica</h2>
+            <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
               {(mockDb.events || []).map(event => (
@@ -4861,10 +4749,7 @@ NEWFILEENCODING:NONE
                   <div style={{ flex: 1 }}>
                     <span className="badge-modality badge-modality-online" style={{ marginBottom: '0.35rem' }}>{event.type}</span>
                     <h3 style={{ fontSize: '1.15rem', marginBottom: '0.25rem' }}>{event.title}</h3>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-                      <span>📍 {event.location}</span>
-                      {event.time && <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>🕒 Horário: {event.time}</span>}
-                    </p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
                   </div>
                 </div>
               ))}
@@ -4997,48 +4882,14 @@ NEWFILEENCODING:NONE
               <div className="premium-card-grid">
                 {books.map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', minHeight: '160px', position: 'relative', overflow: 'hidden' }}>
-                      {Array.isArray(book.images) && book.images.length > 0 ? (
-                        <img
-                          src={book.activeImage || book.images[0]}
-                          alt={book.title}
-                          style={{ width: '100%', height: '160px', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '3rem' }}>📚</span>
-                      )}
+                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px', position: 'relative' }}>
+                      📚
                       {book.page_count > 0 && (
                         <span className="badge-paid" style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff' }}>
                           📄 {book.page_count} páginas
                         </span>
                       )}
                     </div>
-
-                    {/* GALERIA DE MÚLTIPLAS FOTOS / MINIATURAS */}
-                    {Array.isArray(book.images) && book.images.length > 1 && (
-                      <div style={{ display: 'flex', gap: '0.35rem', padding: '0.5rem 1rem 0 1rem', overflowX: 'auto' }}>
-                        {book.images.map((imgUrl, imgIdx) => (
-                          <img
-                            key={imgIdx}
-                            src={imgUrl}
-                            alt={`Foto ${imgIdx + 1}`}
-                            style={{
-                              width: '42px',
-                              height: '42px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              border: (book.activeImage || book.images[0]) === imgUrl ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                              cursor: 'pointer',
-                              opacity: (book.activeImage || book.images[0]) === imgUrl ? 1 : 0.6
-                            }}
-                            onClick={() => {
-                              setBooks(prev => prev.map(b => b.id === book.id ? { ...b, activeImage: imgUrl } : b));
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
-
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
                       <h3 className="premium-card-title">{book.title}</h3>
@@ -5114,27 +4965,6 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
 
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.05rem', lineHeight: '1.8' }}>
-              {/* BANNER DE DESCONTO 50% ALUNOS TOSB */}
-              <div className="alert alert-success animate-fade-in" style={{ backgroundColor: '#ecfdf5', border: '2px solid #059669', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', textAlign: 'center', boxShadow: '0 4px 14px rgba(5, 150, 105, 0.15)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', fontWeight: 'bold', color: '#047857' }}>
-                  <span>🏷️</span>
-                  <span>Condição Especial: Alunos da TOSB possuem 50% de Desconto!</span>
-                </div>
-                <p style={{ margin: 0, color: '#065f46', fontSize: '0.98rem', maxWidth: '650px' }}>
-                  Alunos regularmente matriculados em nossos cursos possuem benefício exclusivo de <strong>50% de desconto</strong> na aquisição e renovação de licenças do software <strong>SHS / Viva</strong>.
-                </p>
-                <a
-                  href="https://wa.me/5541987339734?text=Ol%C3%A1%21%20Sou%20aluno%20da%20TOSB%20e%20gostaria%20de%20solicitar%20meu%20desconto%20de%2050%25%20no%20Software%20SHS%2FViva."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary"
-                  style={{ backgroundColor: '#25d366', borderColor: '#25d366', color: '#ffffff', fontWeight: 'bold', fontSize: '1rem', padding: '0.75rem 1.75rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)', textDecoration: 'none' }}
-                >
-                  <span>💬</span>
-                  <span>Solicitar 50% de Desconto via WhatsApp (41 98733-9734)</span>
-                </a>
-              </div>
-
               <p className="mb-4">
                 O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
@@ -5315,18 +5145,7 @@ NEWFILEENCODING:NONE
                 <h1 className="font-serif-title">Painel de Estudos Homeopáticos</h1>
                 <p className="text-muted">Olá, <strong>{user?.name}</strong>! Gerencie seu aprendizado, dados cadastrais e financeiro.</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-primary"
-                  style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.25)' }}
-                  onClick={() => setShowOverdueModal(true)}
-                >
-                  💳 Pagar Contas em Atraso {myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date())).length > 0 && (
-                    <span style={{ backgroundColor: '#ffffff', color: '#dc2626', borderRadius: '50%', padding: '0.1rem 0.45rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                      {myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date())).length}
-                    </span>
-                  )}
-                </button>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
                 {isOfflineMode && (
                   <button className="btn btn-danger btn-quick-login" onClick={handleSimulateDelinquency}>
                     Simular Inadimplência
@@ -5370,65 +5189,9 @@ NEWFILEENCODING:NONE
 
               {/* Conteúdo da Aba Ativa */}
               <div className="student-panel-content">
-                {/* BANNER DE INADIMPLÊNCIA / PENDÊNCIA FINANCEIRA */}
-                {(user?.status === 'SUSPENDED' || myInvoices.some(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()))) && (
-                  <div className="alert alert-danger mb-4 animate-fade-in" style={{ backgroundColor: '#fef2f2', border: '2px solid #ef4444', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                      <div>
-                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span>⚠️</span> Status Financeiro: Pendência de Pagamento (Inadimplente)
-                        </div>
-                        <div style={{ fontSize: '0.9rem', color: '#7f1d1d', marginTop: '0.25rem' }}>
-                          Identificamos fatura(s) em aberto em seu cadastro. Regularize para manter o acesso às suas aulas sem interrupção.
-                        </div>
-                      </div>
-                      <button
-                        className="btn btn-primary"
-                        style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', color: '#ffffff', fontWeight: 'bold', fontSize: '0.95rem', padding: '0.65rem 1.5rem', borderRadius: '8px', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.3)' }}
-                        onClick={() => setStudentActiveTab('payments')}
-                      >
-                        💳 Pague Aqui
-                      </button>
-                    </div>
-                    <div style={{ borderTop: '1px dashed #fca5a5', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 'bold' }}>Ação rápida:</span>
-                      <button
-                        className="btn btn-primary"
-                        style={{ backgroundColor: '#b91c1c', borderColor: '#b91c1c', color: '#ffffff', fontWeight: 'bold', fontSize: '0.82rem', padding: '0.35rem 0.9rem', borderRadius: '6px' }}
-                        onClick={() => setStudentActiveTab('payments')}
-                      >
-                        💳 Pague Aqui (Regularizar Fatura)
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {studentActiveTab === 'panel' && (
                   <div className="tosb-panel-card card">
                     <h2 className="tosb-panel-title">Painel Geral</h2>
-
-                    {/* BOTÃO E ALERTA PAGUE AQUI NO PAINEL PRINCIPAL DO ALUNO INADIMPLENTE */}
-                    {(user?.status === 'SUSPENDED' || myInvoices.some(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()))) && (
-                      <div className="card mb-4" style={{ backgroundColor: '#fff5f5', border: '2px solid #ef4444', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.12)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                          <span style={{ fontSize: '2rem' }}>⚠️</span>
-                          <div>
-                            <h3 style={{ margin: 0, color: '#991b1b', fontSize: '1.2rem' }}>Status Financeiro: Usuário Inadimplente</h3>
-                            <p style={{ margin: 0, color: '#7f1d1d', fontSize: '0.88rem' }}>Você possui pendências financeiras. Efetue o pagamento para liberar seu acesso às aulas.</p>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                          <button
-                            className="btn btn-primary"
-                            style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', padding: '0.65rem 1.5rem', fontSize: '0.95rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-                            onClick={() => setStudentActiveTab('payments')}
-                          >
-                            💳 Pague Aqui
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.98rem', lineHeight: '1.6', marginBottom: '2rem' }}>
                       A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
@@ -5501,61 +5264,27 @@ NEWFILEENCODING:NONE
                                 const classTeachers = associatedClass ? mockDb.users.filter(u => (associatedClass.teacher_ids || []).includes(u.id)) : [];
                                 const attendanceKey = associatedClass ? `${associatedClass.id}_${user.id}` : null;
                                 const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
-                                
-                                // Frequência do Aluno
-                                const totalLessonsCount = course.modules ? course.modules.reduce((sum, m) => sum + (m.lessons ? m.lessons.length : 0), 0) : 10;
-                                const completedLessonsCount = course.modules ? course.modules.reduce((sum, m) => sum + (m.lessons ? m.lessons.filter(l => l.completed).length : 0), 0) : 0;
-                                const lessonFreq = totalLessonsCount > 0 ? Math.round((completedLessonsCount / totalLessonsCount) * 100) : 0;
-                                const attendanceFreq = attendanceRecords.length > 0 ? Math.min(100, Math.round((attendanceRecords.length / 8) * 100)) : lessonFreq;
-                                const finalFreq = Math.max(lessonFreq, attendanceFreq);
-
-                                return (
-                                  <>
-                                    {associatedClass ? (
-                                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
-                                        <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                          🏫 <strong>Turma:</strong> {associatedClass.name}
-                                        </div>
-                                        <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                                          👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
-                                        </div>
-                                        <div style={{ fontSize: '0.85rem' }}>
-                                          📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
-                                          {attendanceRecords.length > 0 && (
-                                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
-                                              Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                                        Nenhuma turma alocada para este curso ainda.
-                                      </div>
-                                    )}
-
-                                    {/* EMISSÃO DE CERTIFICADO COM REGRA DE 70% */}
-                                    <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                        <div style={{ fontSize: '0.85rem' }}>
-                                          Frequência Acadêmica: <strong style={{ color: finalFreq > 70 ? '#059669' : '#dc2626' }}>{finalFreq}%</strong>
-                                        </div>
-                                        {finalFreq > 70 ? (
-                                          <button
-                                            className="btn btn-primary"
-                                            style={{ backgroundColor: '#059669', borderColor: '#059669', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
-                                            onClick={() => handleDownloadCertificate(user.name, course.title, finalFreq, course.duration_days ? course.duration_days * 2 : 180)}
-                                          >
-                                            🎓 Baixar Certificado
-                                          </button>
-                                        ) : (
-                                          <div style={{ fontSize: '0.78rem', color: '#dc2626', backgroundColor: '#fef2f2', padding: '0.3rem 0.6rem', borderRadius: '4px', border: '1px solid #fecaca' }}>
-                                            ⚠️ Frequência ≤ 70%. É necessária maior frequência para obter o certificado.
-                                          </div>
-                                        )}
-                                      </div>
+                                return associatedClass ? (
+                                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
+                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                      🏫 <strong>Turma:</strong> {associatedClass.name}
                                     </div>
-                                  </>
+                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                      👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem' }}>
+                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
+                                      {attendanceRecords.length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                          Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                    Nenhuma turma alocada para este curso ainda.
+                                  </div>
                                 );
                               })()}
                             </div>
@@ -5602,21 +5331,11 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'agenda' && (
                   <div className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <h3 style={{ margin: 0 }}>Agenda Pessoal & Eventos dos Meus Cursos</h3>
-                      <span className="badge-paid" style={{ fontSize: '0.75rem' }}>Agenda Pessoal Filtrada</span>
-                    </div>
-                    <p className="text-muted mb-4" style={{ fontSize: '0.88rem' }}>
-                      🔒 Exibindo o cronograma de aulas dos cursos em que você está matriculado. 
-                      <em> Os horários são editáveis exclusivamente pela Administração da TOSB.</em>
-                    </p>
+                    <h3 className="mb-4">Agenda & Eventos Científicos</h3>
+                    <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
 
                     <div className="agenda-list">
-                      {(mockDb.events || []).filter(event => {
-                        if (!event.course_id) return true;
-                        const enrolledIds = courses.filter(c => c.enrollment && c.enrollment.enrolled).map(c => c.id);
-                        return enrolledIds.includes(event.course_id);
-                      }).map(event => (
+                      {(mockDb.events || []).map(event => (
                         <div key={event.id} className="agenda-card">
                           <div className="agenda-date-box">
                             <span className="agenda-date-day">{event.day}</span>
@@ -5632,12 +5351,8 @@ NEWFILEENCODING:NONE
                           </div>
                         </div>
                       ))}
-                      {(mockDb.events || []).filter(event => {
-                        if (!event.course_id) return true;
-                        const enrolledIds = courses.filter(c => c.enrollment && c.enrollment.enrolled).map(c => c.id);
-                        return enrolledIds.includes(event.course_id);
-                      }).length === 0 && (
-                        <p className="text-muted text-center w-full py-4">Nenhum evento agendado para seus cursos no momento.</p>
+                      {(mockDb.events || []).length === 0 && (
+                        <p className="text-muted text-center w-full py-4">Nenhum evento agendado no momento.</p>
                       )}
                     </div>
                   </div>
@@ -5645,53 +5360,29 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'payments' && (
                   <div className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                      <h3 style={{ margin: 0 }}>Histórico Financeiro e Faturas</h3>
-                      <button
-                        className="btn btn-primary"
-                        style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', padding: '0.5rem 1.1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 10px rgba(220, 38, 38, 0.2)' }}
-                        onClick={() => setShowOverdueModal(true)}
-                      >
-                        💳 Pagar Contas em Atraso
-                      </button>
-                    </div>
+                    <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
                     <div className="invoices-list">
                       {myInvoices.length === 0 ? (
                         <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
                       ) : (
-                        myInvoices.map(inv => {
-                          const isDelinquent = inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date());
-                          return (
-                            <div key={inv.id} className="invoice-card" style={{ borderLeft: isDelinquent ? '4px solid #ef4444' : undefined }}>
-                              <div className="invoice-title">{inv.course_title}</div>
-                              <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
-                              <div className="invoice-footer" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
-                                <span className={inv.status === 'RECEIVED' ? 'badge-paid' : isDelinquent ? 'badge-overdue' : 'badge-pending'}>
-                                  {inv.status === 'RECEIVED' ? 'PAGO' : isDelinquent ? 'INADIMPLENTE / VENCIDO' : 'PENDENTE'}
-                                </span>
-                                {inv.status !== 'RECEIVED' && (
-                                  <button
-                                    className="btn btn-primary"
-                                    style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontSize: '0.85rem', padding: '0.35rem 0.8rem', fontWeight: 'bold' }}
-                                    onClick={() => {
-                                      const matchingCourse = courses.find(c => c.id === inv.course_id) || { id: inv.course_id, title: inv.course_title, type: 'POSTGRAD', price: inv.amount };
-                                      startCheckout(matchingCourse);
-                                    }}
-                                  >
-                                    💳 Pagar Agora
-                                  </button>
-                                )}
-                                {inv.status === 'PENDING' && (
-                                  <button className="btn btn-secondary btn-quick-login" style={{ fontSize: '0.75rem' }} onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
-                                    Simular Webhook Asaas
-                                  </button>
-                                )}
-                              </div>
-                              <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
-                              <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
+                        myInvoices.map(inv => (
+                          <div key={inv.id} className="invoice-card">
+                            <div className="invoice-title">{inv.course_title}</div>
+                            <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
+                            <div className="invoice-footer">
+                              <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
+                                {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
+                              </span>
+                              {inv.status === 'PENDING' && (
+                                <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
+                                  Simular Webhook Asaas (Pago)
+                                </button>
+                              )}
                             </div>
-                          );
-                        })
+                            <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
+                            <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
@@ -5710,172 +5401,6 @@ NEWFILEENCODING:NONE
                 )}
               </div>
             </div>
-
-            {/* MODAL DE PAGAMENTO DE CONTAS EM ATRASO */}
-            {showOverdueModal && (
-              <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
-                <div className="card p-5 animate-fade-in" style={{ maxWidth: '650px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
-                    <div>
-                      <h3 className="font-serif-title" style={{ color: '#dc2626', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        💳 Pagar Contas / Faturas em Atraso
-                      </h3>
-                      <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
-                        Regularize suas mensalidades ou assinaturas em atraso para manter o acesso aos cursos sem interrupção.
-                      </p>
-                    </div>
-                    <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setShowOverdueModal(false)}>
-                      ✕ Fechar
-                    </button>
-                  </div>
-
-                  {(() => {
-                    const overdueInvoices = myInvoices.filter(inv => inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date()));
-                    const pendingInvoices = myInvoices.filter(inv => inv.status !== 'RECEIVED');
-                    const invoicesToPay = overdueInvoices.length > 0 ? overdueInvoices : pendingInvoices;
-
-                    if (invoicesToPay.length === 0) {
-                      return (
-                        <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
-                          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '0.5rem' }}>🎉</span>
-                          <h4 style={{ color: '#059669', marginBottom: '0.5rem' }}>Você está 100% em dia!</h4>
-                          <p className="text-muted" style={{ fontSize: '0.9rem' }}>Nenhuma conta ou fatura em atraso foi encontrada em seu cadastro.</p>
-                          <button className="btn btn-primary mt-3" onClick={() => setShowOverdueModal(false)}>Fechar Janela</button>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div>
-                        <div className="alert alert-warning mb-4" style={{ backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.88rem' }}>
-                          ⚠️ Identificamos <strong>{invoicesToPay.length} fatura(s)</strong> para regularização imediata.
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                          {invoicesToPay.map(inv => {
-                            const isOverdue = inv.status === 'OVERDUE' || (inv.status === 'PENDING' && new Date(inv.due_date) < new Date());
-                            const matchingCourse = courses.find(c => c.id === inv.course_id) || { id: inv.course_id, title: inv.course_title, type: 'POSTGRAD', price: inv.amount };
-
-                            return (
-                              <div key={inv.id} style={{ padding: '1rem', borderRadius: '8px', border: isOverdue ? '2px solid #ef4444' : '1px solid var(--color-border)', backgroundColor: isOverdue ? '#fef2f2' : '#f8fafc' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                  <div>
-                                    <h4 style={{ margin: 0, fontSize: '1rem', color: isOverdue ? '#991b1b' : 'var(--color-text)' }}>{inv.course_title}</h4>
-                                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>
-                                      Vencimento: <strong>{new Date(inv.due_date).toLocaleDateString('pt-BR')}</strong> | Ref: <code>{inv.transaction_code || inv.id}</code>
-                                    </div>
-                                  </div>
-                                  <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: isOverdue ? '#dc2626' : 'var(--color-primary)' }}>
-                                      R$ {parseFloat(inv.amount).toFixed(2)}
-                                    </div>
-                                    <span className={isOverdue ? 'badge-overdue' : 'badge-pending'} style={{ fontSize: '0.75rem' }}>
-                                      {isOverdue ? 'VENCIDO / INADIMPLENTE' : 'PENDENTE'}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--color-border)', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                                  <button
-                                    className="btn btn-primary"
-                                    style={{ backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 'bold', padding: '0.45rem 1.25rem', fontSize: '0.88rem' }}
-                                    onClick={() => {
-                                      setShowOverdueModal(false);
-                                      startCheckout(matchingCourse);
-                                    }}
-                                  >
-                                    💳 Pagar Fatura Agora
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-            )}
-
-            {/* MODAL DE CADASTRO / EDIÇÃO DE EVENTOS DA AGENDA */}
-            {editingEvent && (
-              <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '1rem' }}>
-                <div className="card p-5 animate-fade-in" style={{ maxWidth: '650px', width: '100%', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
-                    <div>
-                      <h3 className="font-serif-title" style={{ color: 'var(--color-primary)', margin: 0 }}>
-                        {editingEvent.id ? '✏️ Editar Compromisso da Agenda' : '📅 Agendar / Cadastrar Novo Evento'}
-                      </h3>
-                      <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
-                        Preencha as informações do evento para publicar na agenda acadêmica da TOSB.
-                      </p>
-                    </div>
-                    <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setEditingEvent(null)}>
-                      ✕ Fechar
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleSaveEvent}>
-                    <input type="hidden" name="id" defaultValue={editingEvent.id || ''} />
-
-                    <div className="form-group">
-                      <label className="form-label">Título do Evento / Compromisso <span style={{ color: 'red' }}>*</span></label>
-                      <input className="form-input" name="title" defaultValue={editingEvent.title || ''} required placeholder="ex: Aula Magna: Introdução ao Método Sensação" />
-                    </div>
-
-                    <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
-                      <div className="form-group">
-                        <label className="form-label">Dia <span style={{ color: 'red' }}>*</span></label>
-                        <input className="form-input" name="day" defaultValue={editingEvent.day || ''} required placeholder="ex: 15" maxLength="5" />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Mês <span style={{ color: 'red' }}>*</span></label>
-                        <input className="form-input" name="month" defaultValue={editingEvent.month || ''} required placeholder="ex: Set ou Outubro" />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">🕒 Horário <span style={{ color: 'red' }}>*</span></label>
-                        <input className="form-input" name="time" defaultValue={editingEvent.time || ''} required placeholder="ex: 19:30 - 21:00" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }} />
-                      </div>
-                    </div>
-
-                    <div className="grid-2col" style={{ gap: '0.75rem' }}>
-                      <div className="form-group">
-                        <label className="form-label">Tipo do Evento</label>
-                        <select className="form-input" name="type" defaultValue={editingEvent.type || 'Aula ao Vivo'}>
-                          <option value="Aula ao Vivo">🎥 Aula ao Vivo</option>
-                          <option value="Seminário Literário">📚 Seminário Literário</option>
-                          <option value="Grupo de Estudos">🔬 Grupo de Estudos</option>
-                          <option value="Lançamento de Livro">🎉 Lançamento de Livro</option>
-                          <option value="Webinar Internacional">🌐 Webinar Internacional</option>
-                          <option value="Aula Magna">🎓 Aula Magna</option>
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Vincular ao Curso</label>
-                        <select className="form-input" name="course_id" defaultValue={editingEvent.course_id || ''}>
-                          <option value="">Geral (Todos os Alunos)</option>
-                          {(mockDb.courses || []).map(c => (
-                            <option key={c.id} value={c.id}>{c.title}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Localização ou Link da Transmissão (Zoom / Auditório)</label>
-                      <input className="form-input" name="location" defaultValue={editingEvent.location || ''} required placeholder="ex: Auditório TOSB Curitiba / Link do Zoom" />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                      <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingEvent(null)}>Cancelar</button>
-                      <button className="btn btn-primary flex-1" type="submit">Cadastrar Evento na Agenda</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -6354,50 +5879,39 @@ NEWFILEENCODING:NONE
                     <form onSubmit={handleUpdateProfile}>
                       {renderProfileFormFields(user, false, profileProfession, setProfileProfession)}
 
-                      {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR (APENAS VISUALIZAÇÃO) */}
+                      {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR */}
                       <h4 className="mt-5 mb-3 section-title-underlined-thin" style={{ color: 'var(--color-primary)' }}>
-                        🏦 Informações Bancárias & Moeda de Pagamento
+                        🏦 Informações Bancárias para Repasses & Honorários
                       </h4>
-                      <div className="alert alert-warning mb-4" style={{ backgroundColor: '#fffbeb', border: '1px solid #f59e0b', fontSize: '0.88rem' }}>
-                        🔒 <strong>Atenção:</strong> Suas informações bancárias são de apenas visualização nesta tela. A alteração de dados bancários e da moeda de repasse é realizada exclusivamente pelo Administrador da TOSB.
-                      </div>
-
-                      <div className="form-group mb-4">
-                        <label className="form-label" style={{ fontWeight: 'bold' }}>Moeda Definida para Repasses / Honorários</label>
-                        <input
-                          className="form-input"
-                          type="text"
-                          value={user?.payout_currency === 'USD' ? 'US$ - Dólar Americano (USD)' : user?.payout_currency === 'EUR' ? '€ - Euro (EUR)' : user?.payout_currency === 'GBP' ? '£ - Libra Esterlina (GBP)' : 'R$ - Real Brasileiro (BRL)'}
-                          readOnly
-                          style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', fontWeight: 'bold', color: 'var(--color-primary)' }}
-                        />
-                      </div>
+                      <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        Mantenha seus dados bancários atualizados para que a administração saiba para onde depositar o dinheiro de suas aulas e comissões.
+                      </p>
 
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Banco (Nome/Código)</label>
-                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} placeholder="ex: 001 - Banco do Brasil ou 341 - Itaú" />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Agência (com dígito)</label>
-                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} placeholder="ex: 1234-5" />
                         </div>
                       </div>
 
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Conta Corrente / Poupança</label>
-                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} placeholder="ex: 98765-4" />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Chave PIX</label>
-                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} readOnly style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }} />
+                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" />
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                        <button className="btn btn-primary" type="submit">Atualizar Meus Dados Pessoais</button>
+                        <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
                       </div>
                     </form>
                   </div>
@@ -6518,68 +6032,6 @@ NEWFILEENCODING:NONE
                       <button className="btn btn-primary" onClick={() => { setEditingCourse({}); setCourseBannerPreview(''); }}>＋ Criar Novo Curso</button>
                     </div>
 
-                    {/* MODELO DE IMAGEM DO CERTIFICADO PARA O ADM */}
-                    <div className="card p-4 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px solid var(--color-border)', borderRadius: '10px' }}>
-                      <h4 style={{ margin: 0, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>📜</span> Modelo de Imagem do Certificado Oficial
-                      </h4>
-                      <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem', marginBottom: '1rem' }}>
-                        Defina ou faça upload da imagem de fundo do certificado. O sistema sobreporá automaticamente o nome do aluno, título do curso, data, carga horária e taxa de frequência sobre este modelo.
-                      </p>
-
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          style={{ flex: 1, minWidth: '260px' }}
-                          placeholder="URL da imagem do modelo de certificado (ou faça upload ao lado)..."
-                          value={certificateTemplateUrl}
-                          onChange={(e) => {
-                            setCertificateTemplateUrl(e.target.value);
-                            localStorage.setItem('tosb_certificate_template_url', e.target.value);
-                          }}
-                        />
-                        <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}>
-                          📁 Upload Modelo de Imagem
-                          <input
-                            type="file"
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setCertificateTemplateUrl(reader.result);
-                                  localStorage.setItem('tosb_certificate_template_url', reader.result);
-                                  setSuccess('Modelo de imagem do certificado atualizado com sucesso!');
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        {certificateTemplateUrl && (
-                          <button
-                            className="btn btn-secondary"
-                            style={{ color: '#dc2626', borderColor: '#fca5a5' }}
-                            onClick={() => {
-                              setCertificateTemplateUrl('');
-                              localStorage.removeItem('tosb_certificate_template_url');
-                            }}
-                          >
-                            Limpar Modelo
-                          </button>
-                        )}
-                      </div>
-                      {certificateTemplateUrl && (
-                        <div style={{ marginTop: '0.75rem' }}>
-                          <small className="text-muted" style={{ display: 'block', marginBottom: '0.25rem' }}>Pré-visualização do Modelo Atual:</small>
-                          <img src={certificateTemplateUrl} alt="Modelo de Certificado" style={{ maxHeight: '120px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
-                        </div>
-                      )}
-                    </div>
-
                     {editingCourse && (
                       <form onSubmit={handleSaveCourse} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)' }}>
                         <h4 className="mb-4">{editingCourse.id ? 'Editar Detalhes do Curso' : 'Cadastrar Novo Curso'}</h4>
@@ -6659,26 +6111,13 @@ NEWFILEENCODING:NONE
                           <input className="form-input" name="finishing_message" defaultValue={editingCourse.finishing_message || ''} placeholder="Parabéns pela conclusão..." />
                         </div>
 
-                        <div className="grid-2col">
-                          <div className="form-group">
-                            <label className="form-label">Professor Responsável Principal</label>
-                            <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
-                              {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
-                                <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Moeda Padrão de Remuneração do Professor</label>
-                            <select className="form-input" name="teacher_currency" defaultValue={editingCourse.teacher_currency || 'BRL'} required>
-                              <option value="BRL">R$ - Real Brasileiro (BRL)</option>
-                              <option value="USD">$ - Dólar Americano (USD)</option>
-                              <option value="EUR">€ - Euro (EUR)</option>
-                              <option value="INR">₹ - Rúpia Indiana (INR)</option>
-                              <option value="GBP">£ - Libra Esterlina (GBP)</option>
-                            </select>
-                          </div>
+                        <div className="form-group">
+                          <label className="form-label">Professor Responsável Principal</label>
+                          <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
+                            {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
+                              <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
+                            ))}
+                          </select>
                         </div>
 
                         {/* SEÇÃO: DEFINIÇÃO DE REMUNERAÇÃO DOS PROFESSORES PARA ESTE CURSO */}
@@ -6687,7 +6126,7 @@ NEWFILEENCODING:NONE
                             💰 Valores & Remuneração dos Professores Cadastrados
                           </h4>
                           <p className="text-muted mb-4" style={{ fontSize: '0.85rem' }}>
-                            Defina a moeda e honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong> e a <strong>Moeda do Repasse</strong>.
+                            Defina os honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong>. As alterações são gravadas no histórico para consulta.
                           </p>
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -6713,7 +6152,7 @@ NEWFILEENCODING:NONE
                                     )}
                                   </div>
 
-                                  <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+                                  <div className="grid-2col" style={{ gap: '0.75rem' }}>
                                     <div>
                                       <label className="form-label" style={{ fontSize: '0.8rem' }}>Modalidade de Pagamento</label>
                                       <select
@@ -6722,30 +6161,14 @@ NEWFILEENCODING:NONE
                                         defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
                                         style={{ fontSize: '0.85rem' }}
                                       >
-                                        <option value="hora_aula">⏱️ Hora Aula</option>
-                                        <option value="valor_fixo">💵 Valor Fixo</option>
+                                        <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
+                                        <option value="valor_fixo">💵 Valor Fixo (R$)</option>
                                         <option value="percentual">📊 Percentual (%)</option>
                                       </select>
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Moeda do Repasse</label>
-                                      <select
-                                        className="form-input"
-                                        name={`payment_currency_${t.id}`}
-                                        defaultValue={currentConfig?.payment_currency || editingCourse.teacher_currency || 'BRL'}
-                                        style={{ fontSize: '0.85rem' }}
-                                      >
-                                        <option value="BRL">R$ - Real (BRL)</option>
-                                        <option value="USD">$ - Dólar (USD)</option>
-                                        <option value="EUR">€ - Euro (EUR)</option>
-                                        <option value="INR">₹ - Rúpia (INR)</option>
-                                        <option value="GBP">£ - Libra (GBP)</option>
-                                      </select>
-                                    </div>
-
-                                    <div>
-                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa</label>
+                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa (R$ ou %)</label>
                                       <input
                                         className="form-input"
                                         type="number"
@@ -6948,20 +6371,8 @@ NEWFILEENCODING:NONE
                             name="content_table"
                             defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')}
                             placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados"
-                            rows={4}
+                            rows={5}
                           />
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">🖼️ Galeria de Fotos do Livro (Múltiplas Fotos - Digite 1 URL por linha)</label>
-                          <textarea
-                            className="form-input"
-                            name="images"
-                            defaultValue={Array.isArray(editingBook.images) ? editingBook.images.join('\n') : (editingBook.images || '')}
-                            placeholder="https://exemplo.com/foto-capa.jpg&#10;https://exemplo.com/foto-contra-capa.jpg&#10;https://exemplo.com/foto-sumario.jpg"
-                            rows={3}
-                          />
-                          <small className="text-muted">Adicione múltiplos links de fotos da capa, contracapa ou amostra de páginas.</small>
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -7089,24 +6500,8 @@ NEWFILEENCODING:NONE
 
                             {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR PARA ADM */}
                             <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
-                              🏦 Informações Bancárias & Moeda de Pagamento do Docente
+                              🏦 Informações Bancárias do Docente (Para Depósito de Honorários)
                             </h5>
-                            
-                            <div className="form-group mb-3">
-                              <label className="form-label" style={{ fontWeight: 'bold' }}>Moeda de Recebimento de Honorários <span style={{ color: 'red' }}>*</span></label>
-                              <select
-                                className="form-input"
-                                name="payout_currency"
-                                defaultValue={editingUser.payout_currency || 'BRL'}
-                                style={{ fontWeight: 'bold' }}
-                              >
-                                <option value="BRL">R$ - Real Brasileiro (BRL)</option>
-                                <option value="USD">US$ - Dólar Americano (USD)</option>
-                                <option value="EUR">€ - Euro (EUR)</option>
-                                <option value="GBP">£ - Libra Esterlina (GBP)</option>
-                              </select>
-                            </div>
-
                             <div className="grid-2col">
                               <div className="form-group">
                                 <label className="form-label">Banco</label>
@@ -7246,115 +6641,7 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
-                {adminActiveTab === 'events' && (
-                  <div className="card">
-                    <div className="quiz-header mb-4">
-                      <h3>📅 Gerenciamento da Agenda & Eventos Acadêmicos</h3>
-                      <button className="btn btn-primary" onClick={() => setEditingEvent({})}>＋ Agendar Novo Compromisso</button>
-                    </div>
 
-                    <p className="text-muted mb-4" style={{ fontSize: '0.88rem' }}>
-                      Os compromissos e horários cadastrados nesta tela alimentam a agenda pessoal filtrada dos alunos e a agenda geral da plataforma.
-                    </p>
-
-                    {editingEvent && (
-                      <form onSubmit={handleSaveEvent} className="card p-5 mb-5" style={{ border: '1px solid var(--color-border)', backgroundColor: '#f8fafc' }}>
-                        <h4 className="mb-4">{editingEvent.id ? 'Editar Compromisso da Agenda' : 'Agendar Novo Compromisso'}</h4>
-                        <input type="hidden" name="id" defaultValue={editingEvent.id || ''} />
-
-                        <div className="form-group">
-                          <label className="form-label">Título do Compromisso / Evento <span style={{ color: 'red' }}>*</span></label>
-                          <input className="form-input" name="title" defaultValue={editingEvent.title || ''} required placeholder="ex: Aula Magna: Introdução ao Método Sensação" />
-                        </div>
-
-                        <div className="grid-3col">
-                          <div className="form-group">
-                            <label className="form-label">Dia <span style={{ color: 'red' }}>*</span></label>
-                            <input className="form-input" name="day" defaultValue={editingEvent.day || ''} required placeholder="ex: 15" />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Mês <span style={{ color: 'red' }}>*</span></label>
-                            <input className="form-input" name="month" defaultValue={editingEvent.month || ''} required placeholder="ex: Set ou Outubro" />
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">🕒 Horário do Compromisso <span style={{ color: 'red' }}>*</span></label>
-                            <input className="form-input" name="time" defaultValue={editingEvent.time || ''} required placeholder="ex: 19:30 - 21:00 ou 14:00h" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }} />
-                          </div>
-                        </div>
-
-                        <div className="grid-2col">
-                          <div className="form-group">
-                            <label className="form-label">Tipo do Evento</label>
-                            <select className="form-input" name="type" defaultValue={editingEvent.type || 'Aula ao Vivo'}>
-                              <option value="Aula ao Vivo">🎥 Aula ao Vivo</option>
-                              <option value="Seminário Literário">📚 Seminário Literário</option>
-                              <option value="Grupo de Estudos">🔬 Grupo de Estudos</option>
-                              <option value="Lançamento de Livro">🎉 Lançamento de Livro</option>
-                              <option value="Webinar Internacional">🌐 Webinar Internacional</option>
-                            </select>
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Vincular ao Curso</label>
-                            <select className="form-input" name="course_id" defaultValue={editingEvent.course_id || ''}>
-                              <option value="">Geral (Todos os Alunos)</option>
-                              {(mockDb.courses || []).map(c => (
-                                <option key={c.id} value={c.id}>{c.title}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">Local ou Link da Transmissão (Zoom / Auditório)</label>
-                          <input className="form-input" name="location" defaultValue={editingEvent.location || ''} required placeholder="ex: Auditório TOSB Curitiba / Link do Zoom" />
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingEvent(null)}>Cancelar</button>
-                          <button className="btn btn-primary flex-1" type="submit">Salvar Compromisso na Agenda</button>
-                        </div>
-                      </form>
-                    )}
-
-                    <div className="table-responsive">
-                      <table className="lms-table">
-                        <thead>
-                          <tr>
-                            <th>Data</th>
-                            <th>🕒 Horário</th>
-                            <th>Título do Compromisso</th>
-                            <th>Tipo</th>
-                            <th>Curso Vinculado</th>
-                            <th>Local</th>
-                            <th>Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(mockDb.events || []).map(evt => {
-                            const linkedCourse = (mockDb.courses || []).find(c => c.id === evt.course_id);
-                            return (
-                              <tr key={evt.id}>
-                                <td><strong>{evt.day} {evt.month}</strong></td>
-                                <td><strong style={{ color: 'var(--color-primary)' }}>🕒 {evt.time || 'Não definido'}</strong></td>
-                                <td><strong>{evt.title}</strong></td>
-                                <td><span className="course-type-badge">{evt.type}</span></td>
-                                <td>{linkedCourse ? linkedCourse.title : <span className="text-muted">Geral (Todos)</span>}</td>
-                                <td><small>{evt.location}</small></td>
-                                <td>
-                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingEvent(evt)}>Editar</button>
-                                    <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteEvent(evt.id)}>Excluir</button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
 
                 {adminActiveTab === 'finance' && (
                   <div className="card finance-module">
@@ -8340,7 +7627,86 @@ NEWFILEENCODING:NONE
                   </div>
                 )}
 
+                {adminActiveTab === 'events' && (
+                  <div>
+                    {/* Criar Evento */}
+                    <div className="card mb-6">
+                      <h3 className="mb-4">Adicionar Evento Científico</h3>
+                      <form onSubmit={handleCreateEvent} className="grid-2col" style={{ gap: '1rem' }}>
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                          <label className="form-label">Título do Evento</label>
+                          <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Tipo de Evento</label>
+                          <select className="form-input" name="type">
+                            <option value="Lançamento de Livro">Lançamento de Livro</option>
+                            <option value="Grupo de Estudos">Grupo de Estudos</option>
+                            <option value="Seminário Literário">Seminário Literário</option>
+                            <option value="Aula Magna">Aula Magna</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Localização / Link</label>
+                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Dia (ex: 15)</label>
+                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Mês (ex: Set)</label>
+                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" />
+                        </div>
+                        <div style={{ gridColumn: 'span 2', marginTop: '0.5rem' }}>
+                          <button className="btn btn-primary w-full" type="submit">Cadastrar Evento na Agenda</button>
+                        </div>
+                      </form>
+                    </div>
 
+                    {/* Listagem de Eventos */}
+                    <div className="card">
+                      <h3 className="mb-4">Eventos Programados</h3>
+                      <div className="table-responsive">
+                        <table className="lms-table">
+                          <thead>
+                            <tr>
+                              <th>Data</th>
+                              <th>Tipo</th>
+                              <th>Título</th>
+                              <th>Local</th>
+                              <th>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(mockDb.events || []).map(event => (
+                              <tr key={event.id}>
+                                <td><strong>{event.day} {event.month}</strong></td>
+                                <td><span className="course-type-badge">{event.type}</span></td>
+                                <td><strong>{event.title}</strong></td>
+                                <td>{event.location}</td>
+                                <td>
+                                  <button
+                                    className="btn btn-danger"
+                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                    onClick={() => handleDeleteEvent(event.id)}
+                                  >
+                                    Excluir
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {(mockDb.events || []).length === 0 && (
+                              <tr>
+                                <td colSpan="5" className="text-center text-muted" style={{ padding: '2rem' }}>Nenhum evento agendado.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {adminActiveTab === 'temp_unlock' && (
                   <div className="card">
