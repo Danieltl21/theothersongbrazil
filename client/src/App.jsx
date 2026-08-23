@@ -500,10 +500,36 @@ export default function App() {
   });
 
   const toggleLayoutMode = () => {
-    const nextMode = layoutMode === 'tosb-v2' ? 'classic' : 'tosb-v2';
+    const nextMode = layoutMode === 'tosb-v2' ? 'tosb-v3' : layoutMode === 'tosb-v3' ? 'classic' : 'tosb-v2';
     setLayoutMode(nextMode);
     localStorage.setItem('tosb_layout_mode', nextMode);
   };
+
+  const [headerOffset, setHeaderOffset] = useState(0);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const diff = currentScrollY - lastScrollY;
+
+      const headerEl = document.querySelector('.tosb-header');
+      const maxOffset = headerEl ? headerEl.offsetHeight : 100;
+
+      setHeaderOffset(prev => {
+        if (currentScrollY <= 0) return 0;
+        let newOffset = prev - diff;
+        if (newOffset > 0) newOffset = 0;
+        if (newOffset < -maxOffset) newOffset = -maxOffset;
+        return newOffset;
+      });
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Controle de Estado Geral
   const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
@@ -3647,8 +3673,9 @@ NEWFILEENCODING:NONE
     setSuccess('Pagamento confirmado e matrícula liberada / ativada com sucesso.');
   };
 
-  const handleCreateEvent = (e) => {
+  const handleSaveEvent = (e) => {
     e.preventDefault();
+    const id = e.target.id?.value;
     const title = e.target.title.value;
     const type = e.target.type.value;
     const day = e.target.day.value;
@@ -3656,17 +3683,27 @@ NEWFILEENCODING:NONE
     const location = e.target.location.value;
     const time = e.target.time?.value || '';
 
-    const newEvent = {
-      id: 'event-' + Date.now(),
-      title, type, day, month, location, time
-    };
+    setMockDb(prev => {
+      const events = prev.events || [];
+      if (id) {
+        return {
+          ...prev,
+          events: events.map(ev => ev.id === id ? { ...ev, title, type, day, month, location, time } : ev)
+        };
+      } else {
+        const newEvent = {
+          id: 'event-' + Date.now(),
+          title, type, day, month, location, time
+        };
+        return {
+          ...prev,
+          events: [...events, newEvent]
+        };
+      }
+    });
 
-    setMockDb(prev => ({
-      ...prev,
-      events: [...(prev.events || []), newEvent]
-    }));
-
-    setSuccess('Evento acadêmico criado com sucesso!');
+    setSuccess(id ? 'Evento acadêmico atualizado com sucesso!' : 'Evento acadêmico criado com sucesso!');
+    setEditingEvent(null);
     e.target.reset();
   };
 
@@ -3692,33 +3729,206 @@ NEWFILEENCODING:NONE
   }
 
   return (
-    <div className={`app-container ${layoutMode === 'tosb-v2' ? 'theme-tosb-v2' : ''}`}>
+    <div className={`app-container ${layoutMode !== 'classic' ? 'theme-tosb-v2 theme-' + layoutMode : ''}`}>
       {/* Cabeçalho */}
-      <header className="tosb-header">
+      <header className="tosb-header" style={{ top: `${headerOffset}px` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
-            {layoutMode === 'tosb-v2' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <img
-                  src={window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:' ? 'client/public/images/logo.png' : '/images/logo.png'}
-                  alt="TOSB"
-                  style={{ height: '48px', objectFit: 'contain', display: 'block' }}
-                />
-                <div className="logo-text">
-                  <span className="logo-title" style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
-                  <span style={{ fontSize: '0.7rem', color: '#FFFDF8', fontWeight: '500', letterSpacing: '0.05em' }}>The Other Song Brasil</span>
-                  <span style={{ fontSize: '0.55rem', color: '#E8CC8D', textTransform: 'uppercase', letterSpacing: '0.12em', opacity: 0.85 }}>ENSINO INTERNACIONAL EM HOMEOPATIA</span>
+            {layoutMode === 'tosb-v3' || layoutMode === 'classic' ? (
+              <svg version="1.1" width="160" height="70" viewBox="0 0 1200 456" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" style={{ enableBackground: 'new 0 0 1157.06 481.06' }} xmlSpace="preserve">
+                <style>{`.st0{fill:#FFFFFF;}`}</style>
+                <g>
+                  <g>
+                    <path className="st0" d="M978.06,144.64c-13.69-12.19-12.44-36.83-6.72-49.77c5.72-12.94,15.93-14.43,22.89-34.09
+                      c6.01-16.95-1.86-40.37-4.14-46.5c-7.7-1.13-15.57-1.73-23.58-1.73c-8.19,0-16.24,0.62-24.11,1.8
+                      c-2.31,6.24-10.1,29.53-4.11,46.42c6.97,19.66,17.17,21.15,22.89,34.09c5.72,12.94,6.97,37.58-6.72,49.77
+                      c-13.69,12.19-1.99,31.11-1.99,31.11s12.37,19.66,12.78,32.6l0.66,2.89l1.36-2.89c0.41-12.94,12.78-32.6,12.78-32.6
+                      S991.75,156.83,978.06,144.64z M970.04,44.39c2.32-3.08,6.36-7.25,11.61-7.93c0,0-0.16,10.91-4.19,16.15
+                      c-0.55,0.71-1.24,1.31-2.07,1.66c-2.73,1.15-5.77-0.35-6.58-3.11C968.14,48.83,968.59,46.32,970.04,44.39z M959.63,78.45
+                      c-26.07-16.88-10.62-44.61-10.62-44.61c2.23,6.72,6.2,11.15,9.45,13.85c5.71,4.73,8.74,12.05,7.55,19.37
+                      C964.73,75,959.63,78.45,959.63,78.45z M966.77,182.84c-5.85-4.85-9.32-14.36-3.7-21.41c5.62-7.05,2.24-14.62,2.24-14.62
+                      C980.5,160.98,966.77,182.84,966.77,182.84z M898.23,75.96c0,0-4.23-6.97-17.92-31.11c0,0-1.2-2.71-0.84-6.64
+                      c-28.35,18.36-50.53,45.42-62.77,77.4c7.09,2.27,46.82,16.13,55.65,44.2c9.7,30.86,19.16,36.59,28.12,37.58
+                      c8.96,0.99,28.12,20.15,28.12,20.15s-2.74-17.42-13.69-31.6c-10.95-14.18,3.98-38.57-2.99-49.27c0,0,6.97,3.26,5.72,37.83
+                      c0,0,1.24,10.44,16.67,30.1c15.43,19.66,20.16,34.09,20.16,34.09s0.5-46.04-31.11-92.07C891.77,100.59,907.19,104.07,898.23,75.96
+                      z M834.89,96.06c7.98-8.66,2.97-17.61,2.97-17.61c22.15,16.37,2.74,43.12,2.74,43.12C832.08,115.99,826.91,104.72,834.89,96.06z
+                      M856.75,124.57c-4.47,3.05-9.92,0.51-10.92-4.13c-0.73-3.39,0.19-6.91,2.48-9.52c3.62-4.12,9.77-9.57,17.25-10
+                      C865.56,100.92,864.02,118.32,856.75,124.57z M871.9,88.86c-0.38-3.27-0.78-6.51-1.52-9.73c-0.1-0.45,0.51-0.88,0.87-0.56
+                      c2.06,1.84,4.16,3.69,6.72,4.76c2.5,1.06,5.2,1.54,7.74,2.49c2.38,0.88,4.64,2.09,6.46,3.88c0.55,0.53,1.05,1.11,1.51,1.74
+                      c0.1,0.05,0.2,0.13,0.25,0.24c0.09,0.16,0.17,0.32,0.25,0.49c0.69,1.06,1.25,2.21,1.65,3.4c0.52,1.52,0.8,3.11,0.84,4.71
+                      c0.09,0.76,0.18,1.55,0.01,2.31c-0.06,0.29-0.15,0.55-0.29,0.8c0,0.01-0.01,0.02-0.01,0.05c-0.05,0.21-0.17,0.34-0.33,0.41
+                      c-0.16,0.17-0.37,0.32-0.6,0.43c-0.82,0.38-1.9,0.26-2.77,0.24c-1.9-0.03-3.79-0.24-5.65-0.64c-1.65-0.37-3.29-0.91-4.72-1.82
+                      c-0.34-0.14-0.69-0.29-1.03-0.44c-2.25-1.02-4.61-2.32-6.3-4.17C872.88,95.11,872.25,91.89,871.9,88.86z M906.96,158.04
+                      c-0.01,0.18-0.1,0.36-0.29,0.48c-0.01,0.01-0.02,0.02-0.04,0.02c-0.19,0.23-0.42,0.43-0.67,0.59c-0.68,0.45-1.5,0.66-2.28,0.85
+                      c-1.57,0.57-3.24,0.88-4.93,0.95c-1.32,0.05-2.65-0.07-3.96-0.35c-0.18-0.02-0.37-0.04-0.57-0.06c-0.14-0.02-0.26-0.08-0.34-0.16
+                      c-0.77-0.21-1.53-0.48-2.26-0.82c-2.44-1.11-4.48-2.88-6.23-4.87c-1.88-2.14-3.37-4.6-5.34-6.66c-2.02-2.11-4.62-3.49-7.19-4.81
+                      c-0.45-0.24-0.25-1,0.22-1.07c3.44-0.49,6.76-1.3,10.11-2.17c3.11-0.8,6.5-1.39,9.59-0.18c2.44,0.95,4.59,2.78,6.44,4.61
+                      c0.28,0.27,0.55,0.56,0.83,0.85c1.43,1.07,2.57,2.46,3.54,3.96c1.09,1.67,2.01,3.45,2.76,5.29c0.35,0.85,0.86,1.87,0.8,2.82
+                      C907.13,157.56,907.07,157.81,906.96,158.04z M908.77,142.4c-0.21,2.03-2.01,3.5-4.04,3.3c-0.66-0.07-1.3-0.3-1.83-0.71
+                      c-3.98-3.11-5.73-11.73-5.73-11.73c3.97-0.22,7.54,2.28,9.71,4.25C908.25,138.75,908.96,140.56,908.77,142.4z M850.71,185.69
+                      c0,0,20.65,2.99,26.63,5.72c0,0-10.95-15.18-16.17-35.34c-4.73-18.25-38.24-36.91-44.52-40.28c-3.79,9.95-6.63,20.38-8.38,31.17
+                      C814.63,163.54,826.93,180.54,850.71,185.69z M850.92,149.98c2.63,0.48,4.06,3.17,3.16,5.55c-0.73,1.92-2.32,3.39-4.29,3.95
+                      c-3.15,0.89-8.03,1.64-11.94-0.59c0,0,5.73-7.32,11.15-8.79C849.62,149.93,850.28,149.86,850.92,149.98z M813.05,142.57
+                      c16.51-13.84,37.29,3.08,37.29,3.08c-5.74,5.41-15.98,7.77-22.52,1.09C821.28,140.05,813.05,142.57,813.05,142.57z M910.68,86.41
+                      c0,0,13.69-13.93,16.42-22.89c2.64-8.65,2.04-32.62,14.55-49.04c-21.23,3.31-41.08,10.78-58.7,21.55
+                      c-0.04,4.45,1.34,9.93,6.57,15.05C900.97,62.27,910.68,86.41,910.68,86.41z M916.36,59.67c1.49-2.92,4.26-7.01,8.55-8.35
+                      c0,0,1.48,9.18-1.13,14.15c-0.3,0.58-0.7,1.11-1.22,1.5c-2.14,1.6-5.08,0.82-6.21-1.46v0C915.42,63.66,915.42,61.5,916.36,59.67z
+                      M904.81,49.4c5.02-7.89,0.7-15.33,0.7-15.33C922.75,47,911,71.09,911,71.09C904.42,66.73,899.79,57.29,904.81,49.4z
+                      M1014.89,174.51c-1.24-34.58,5.72-37.83,5.72-37.83c-6.97,10.7,7.96,35.09-2.99,49.27c-10.95,14.18-13.69,31.6-13.69,31.6
+                      s19.16-19.16,28.12-20.15c8.96-0.99,18.41-6.73,28.12-37.58c9.04-28.73,50.43-42.57,56.09-44.34
+                      c-12.33-32.12-34.68-59.28-63.25-77.61c0.47,4.12-0.8,6.99-0.8,6.99c-13.69,24.14-17.92,31.11-17.92,31.11
+                      c-8.96,28.12,6.47,24.64-25.13,70.67c-31.6,46.04-31.11,92.07-31.11,92.07s4.73-14.43,20.16-34.09
+                      C1013.65,184.95,1014.89,174.51,1014.89,174.51z M1060.17,143.19c-2.57,1.32-5.17,2.7-7.19,4.81c-1.97,2.07-3.46,4.52-5.34,6.66
+                      c-1.75,1.99-3.8,3.76-6.23,4.87c-0.72,0.34-1.49,0.61-2.26,0.82c-0.08,0.08-0.2,0.14-0.34,0.16c-0.19,0.02-0.39,0.04-0.57,0.06
+                      c-1.31,0.28-2.64,0.4-3.96,0.35c-1.69-0.06-3.36-0.38-4.93-0.95c-0.78-0.19-1.6-0.41-2.28-0.85c-0.26-0.16-0.49-0.36-0.67-0.59
+                      c-0.02,0-0.03-0.01-0.04-0.02c-0.19-0.12-0.28-0.3-0.29-0.48c-0.11-0.22-0.17-0.48-0.19-0.74c-0.06-0.95,0.45-1.97,0.8-2.82
+                      c0.75-1.84,1.67-3.62,2.76-5.29c0.97-1.49,2.12-2.89,3.54-3.96c0.27-0.29,0.54-0.58,0.83-0.85c1.85-1.83,4-3.66,6.44-4.61
+                      c3.09-1.2,6.48-0.62,9.59,0.18c3.36,0.87,6.68,1.68,10.11,2.17C1060.42,142.19,1060.63,142.95,1060.17,143.19z M1095.17,78.45
+                      c0,0-5.01,8.94,2.97,17.61c7.98,8.66,2.81,19.93-5.71,25.51C1092.43,121.57,1073.02,94.83,1095.17,78.45z M1084.73,110.92
+                      c2.29,2.6,3.21,6.13,2.48,9.52c-1,4.64-6.45,7.18-10.92,4.13c-7.28-6.25-8.81-23.64-8.81-23.64
+                      C1074.96,101.35,1081.11,106.8,1084.73,110.92z M1035.25,100.28c0.03-1.6,0.32-3.19,0.84-4.71c0.4-1.2,0.97-2.34,1.65-3.4
+                      c0.08-0.17,0.16-0.33,0.25-0.49c0.06-0.11,0.15-0.2,0.25-0.24c0.46-0.62,0.95-1.21,1.51-1.74c1.82-1.79,4.08-3,6.46-3.88
+                      c2.54-0.95,5.24-1.44,7.74-2.49c2.56-1.07,4.66-2.92,6.72-4.76c0.37-0.32,0.98,0.11,0.87,0.56c-0.74,3.22-1.14,6.46-1.52,9.73
+                      c-0.34,3.03-0.98,6.25-3.09,8.59c-1.69,1.85-4.04,3.15-6.3,4.17c-0.34,0.15-0.69,0.3-1.03,0.44c-1.44,0.91-3.07,1.45-4.72,1.82
+                      c-1.86,0.4-3.76,0.61-5.65,0.64c-0.87,0.02-1.95,0.14-2.77-0.24c-0.23-0.1-0.44-0.25-0.6-0.43c-0.16-0.07-0.29-0.21-0.33-0.41
+                      c0-0.02-0.01-0.03-0.01-0.05c-0.14-0.25-0.23-0.52-0.29-0.8C1035.06,101.83,1035.16,101.04,1035.25,100.28z M1026.15,137.5
+                      c2.16-1.96,5.73-4.47,9.71-4.25c0,0-1.75,8.62-5.73,11.73c-0.52,0.41-1.17,0.64-1.83,0.71c-2.03,0.21-3.83-1.27-4.04-3.3
+                      C1024.07,140.56,1024.78,138.75,1026.15,137.5z M1071.38,156.08c-5.23,20.16-16.17,35.34-16.17,35.34
+                      c5.97-2.74,26.63-5.72,26.63-5.72c24.21-5.25,36.53-22.78,42.79-39.62c-1.78-10.55-4.58-20.74-8.31-30.48
+                      C1111.29,118.24,1076.23,137.38,1071.38,156.08z M1119.97,142.57c0,0-8.23-2.52-14.77,4.17c-6.54,6.68-16.78,4.32-22.52-1.09
+                      C1082.68,145.65,1103.46,128.73,1119.97,142.57z M1084.04,150.1c5.42,1.46,11.15,8.79,11.15,8.79c-3.9,2.23-8.78,1.49-11.94,0.59
+                      c-1.98-0.56-3.56-2.03-4.29-3.95c-0.9-2.38,0.53-5.06,3.16-5.55C1082.75,149.86,1083.41,149.93,1084.04,150.1z M1090.91,207.41
+                      c-15.68-10.82-24.48-10.01-24.48-10.01c-56.4,6.23-74.99,62.83-74.99,62.83s-8.96,21.09,4.11,2.61
+                      c13.06-18.48,33.78-22.77,51.32-21.28c17.54,1.49,35.27,0,35.27,0c15.82-3,27.61-9.62,36.34-17.32c1.47-4.35,2.74-8.78,3.84-13.29
+                      C1116.73,215.63,1103.7,216.24,1090.91,207.41z M1049.53,234l-0.96,1.35c-1.89,2.66-5.58,3.29-8.24,1.4
+                      c-0.87-0.62-1.58-1.45-1.99-2.43c-3.09-7.49,1.29-20.9,1.29-20.9c6.69,3.32,9.66,11.4,10.8,15.69
+                      C1050.88,230.78,1050.54,232.58,1049.53,234z M1054.5,237.62c0,0-8.45-24.62,9.71-35.03c0,0-5.06,6.65-1.16,14.86
+                      C1066.94,225.66,1061.36,234.2,1054.5,237.62z M1074.42,236.11c-0.79,1.03-2.01,1.64-3.31,1.69l-1.23,0.05
+                      c-3.02,0.11-5.44-2.85-4.26-6.08c2.71-5.47,13.19-9.15,13.19-9.15C1079.87,228.07,1076.43,233.49,1074.42,236.11z M1114.54,234.65
+                      c-3.57,8.55-7.86,16.73-12.79,24.45c-0.19-0.07-0.39-0.11-0.58-0.18c-20.72-7.65-31.73-10.82-31.73-10.82
+                      S1093.74,248.92,1114.54,234.65z M1126.87,172.91c0,12.39-1.41,24.45-4.07,36.04c-3.08,2.02-9.67,4.62-20.32,0.52
+                      c-15.49-5.97-13.62-11.2-24.26-15.68c0,0,33.5-4.2,47.93-36.09C1126.62,162.7,1126.87,167.77,1126.87,172.91z M1021.86,86.41
+                      c0,0,9.7-24.14,21.15-35.34c5.35-5.24,6.68-10.86,6.57-15.36c-17.64-10.71-37.52-18.1-58.76-21.33
+                      c12.58,16.43,11.96,40.46,14.61,49.13C1008.17,72.47,1021.86,86.41,1021.86,86.41z M1027.35,34.07c0,0-4.32,7.44,0.7,15.33
+                      c5.02,7.89,0.4,17.32-6.18,21.68C1021.86,71.09,1010.11,47,1027.35,34.07z M1007.95,51.31c4.29,1.35,7.06,5.43,8.55,8.35
+                      c0.93,1.83,0.93,3.99,0.02,5.83v0c-1.13,2.28-4.07,3.05-6.21,1.46c-0.52-0.39-0.92-0.92-1.22-1.5
+                      C1006.48,60.49,1007.95,51.31,1007.95,51.31z M810.31,209.3c-2.71-11.69-4.15-23.87-4.15-36.39c0-4.83,0.23-9.61,0.64-14.33
+                      c14.65,31.08,47.51,35.21,47.51,35.21c-10.64,4.48-8.77,9.7-24.26,15.68C820.02,213.33,813.6,211.25,810.31,209.3z M941.57,331.33
+                      c-44.3-6.92-82.58-31.97-107.03-67.33c1.32-0.42,2.67-0.93,4.04-1.54c31.67-14,53.99-9.52,53.99-9.52
+                      C951.25,269.53,947.92,310.1,941.57,331.33z M1093.95,262.46c1.51,0.67,2.99,1.22,4.45,1.67
+                      c-24.54,35.41-62.96,60.47-107.41,67.28c-6.37-21.2-9.78-61.85,48.97-78.46C1039.96,252.94,1062.28,248.46,1093.95,262.46z
+                      M863.09,248.09c0,0-11.01,3.17-31.73,10.82c-0.06,0.02-0.11,0.03-0.17,0.05c-4.81-7.55-9.01-15.52-12.52-23.86
+                      C839.33,248.9,863.09,248.09,863.09,248.09z M885.67,241.56c17.54-1.49,38.26,2.8,51.32,21.28c13.06,18.48,4.11-2.61,4.11-2.61
+                      s-18.59-56.6-74.99-62.83c0,0-8.81-0.82-24.48,10.01c-12.34,8.52-24.92,8.25-30.8,4.01c1.12,4.56,2.44,9.04,3.94,13.44
+                      c8.66,7.44,20.23,13.78,35.63,16.7C850.4,241.56,868.13,243.05,885.67,241.56z M882.6,229.1c1.14-4.28,4.11-12.37,10.8-15.69
+                      c0,0,4.38,13.41,1.29,20.9c-0.41,0.99-1.12,1.81-1.99,2.43c-2.66,1.89-6.35,1.26-8.24-1.4L883.5,234
+                      C882.49,232.58,882.15,230.78,882.6,229.1z M868.82,202.59c18.16,10.4,9.71,35.03,9.71,35.03c-6.86-3.42-12.45-11.96-8.55-20.16
+                      C873.88,209.25,868.82,202.59,868.82,202.59z M854.22,222.61c0,0,10.48,3.68,13.19,9.15c1.18,3.24-1.24,6.19-4.26,6.08l-1.23-0.05
+                      c-1.3-0.05-2.51-0.66-3.31-1.69C856.59,233.49,853.15,228.07,854.22,222.61z M998.22,62.52c0,0-5.72,12.94-20.9,32.35
+                      c-15.18,19.41-1.99,40.81,3.98,46.04c5.97,5.23,8.96,16.17,8.96,16.17s4.73-4.48,20.4-29.36c15.68-24.88,2.49-44.04-3.73-48.77
+                      C1000.71,74.21,998.22,62.52,998.22,62.52z M988.15,116.77c0,0-7.7-10.51-4.53-20.68c3.17-10.17,10.51-7.7,13.5-19.8
+                      c0,0,6.57,8.21,2.49,20.06C995.52,108.2,990.5,104.62,988.15,116.77z M1009.94,101c10.47,19.63-11.05,37.01-11.05,37.01
+                      c-4.25-6.95-4.45-17.8,3.7-22.98C1010.73,109.85,1009.94,101,1009.94,101z M924.11,78.94c-6.22,4.73-19.41,23.89-3.73,48.77
+                      c15.68,24.88,20.4,29.36,20.4,29.36s2.99-10.95,8.96-16.17c5.97-5.23,19.16-26.63,3.98-46.04c-15.18-19.41-20.9-32.35-20.9-32.35
+                      S930.34,74.21,924.11,78.94z M935.46,76.29c2.99,12.1,10.33,9.63,13.5,19.8c3.17,10.17-4.53,20.68-4.53,20.68
+                      c-2.36-12.15-7.37-8.57-11.46-20.42C928.88,84.5,935.46,76.29,935.46,76.29z M930.71,114.96c8.14,5.19,7.94,16.03,3.7,22.98
+                      c0,0-21.52-17.39-11.05-37.01C923.36,100.92,922.57,109.77,930.71,114.96z"></path>
+                  </g>
+                  <g>
+                    <path className="st0" d="M78.75,406.67v6.5H58.28v54.29h-6.76v-54.29H31.05v-6.5H78.75z"></path>
+                    <path className="st0" d="M133.21,433.99v-27.32h6.76v60.79h-6.76V440.4H95.44v27.06h-6.76v-60.79h6.76v27.32H133.21z"></path>
+                    <path className="st0" d="M194.61,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H194.61z"></path>
+                    <path className="st0" d="M257.24,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
+                      c-18.71,0-30.92-12.74-30.92-31.45v-0.09c0-18.62,12.21-31.36,30.92-31.36H257.24z M257.24,462.19c14.49,0,24.07-10.1,24.07-25.12
+                      v-0.09c0-14.93-9.58-25.04-24.07-25.04h-0.09c-14.58,0-24.16,10.1-24.16,25.04v0.09c0,15.02,9.58,25.12,24.16,25.12H257.24z"></path>
+                    <path className="st0" d="M338.76,406.67v6.5h-20.47v54.29h-6.76v-54.29h-20.47v-6.5H338.76z"></path>
+                    <path className="st0" d="M393.22,433.99v-27.32h6.76v60.79h-6.76V440.4h-37.77v27.06h-6.76v-60.79h6.76v27.32H393.22z"></path>
+                    <path className="st0" d="M454.62,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H454.62z"></path>
+                    <path className="st0" d="M513.92,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
+                      v0.09c0,9.31-5.09,15.99-14.58,18.36L513.92,467.46z M472.89,412.82v27.32h16.69c10.45,0,16.16-5.09,16.16-13.44v-0.09
+                      c0-8.61-5.71-13.79-16.16-13.79H472.89z"></path>
+                    <path className="st0" d="M586.56,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.02,0-15.64,3.95-15.64,9.84
+                      c0,4.13,2.46,7.99,10.37,10.01l14.23,3.51c10.98,2.64,13.97,9.75,13.97,16.95c0,9.93-8.52,16.51-22.66,16.51h-0.09
+                      c-12.47,0-21.17-5.1-24.77-14.23l5.62-3.87c3.25,8.17,9.84,12.03,19.33,12.03h0.09c10.19,0,15.64-4.3,15.64-10.54
+                      c0-4.83-2.64-8.96-9.93-10.81l-15.02-3.87c-10.01-2.64-13.62-8.7-13.62-15.55c0-10.01,8.43-16.08,22.75-16.08h0.09
+                      c10.89,0,18.45,4.57,21.7,11.77L586.56,422.13z"></path>
+                    <path className="st0" d="M630.22,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
+                      c-18.71,0-30.92-12.74-30.92-31.45v-0.09c0-18.62,12.21-31.36,30.92-31.36H630.22z M630.22,462.19c14.5,0,24.07-10.1,24.07-25.12
+                      v-0.09c0-14.93-9.58-25.04-24.07-25.04h-0.09c-14.58,0-24.16,10.1-24.16,25.04v0.09c0,15.02,9.58,25.12,24.16,25.12H630.22z"></path>
+                    <path className="st0" d="M717.09,406.67h6.68v60.79h-6.59l-38.04-49.81v49.81h-6.68v-60.79h6.59l38.04,49.81V406.67z"></path>
+                    <path className="st0" d="M784.12,417.3c-4.39-3.6-10.63-5.36-17.04-5.36h-0.09c-15.29,0-25.04,10.37-25.04,25.04v0.09
+                      c0,14.58,9.75,25.12,23.98,25.12h0.09c10.37,0,17.22-4.83,17.74-11.95v-7.38h-15.11v-5.62h20.91v30.22h-4.39l-0.35-8.35
+                      c-2.99,6.06-9.84,9.4-19.33,9.4h-0.09c-18.18,0-30.22-12.83-30.22-31.45v-0.09c0-18.45,12.21-31.36,31.8-31.36h0.09
+                      c7.64,0,15.11,1.84,20.82,6.59L784.12,417.3z"></path>
+                    <path className="st0" d="M871.78,451.12c0,11.77-8.17,16.34-21.35,16.34h-24.86v-60.79h22.75c14.14,0,21.26,4.48,21.26,15.81
+                      c0,8.35-3.95,12.47-11.33,13.97C867.21,437.94,871.78,442.68,871.78,451.12z M832.34,412.64v20.99h15.81
+                      c9.84,0,14.76-2.81,14.76-10.28c0-8.26-5.01-10.72-14.58-10.72H832.34z M832.34,461.48h18.1c9.66,0,14.58-2.99,14.58-11.07
+                      c0-7.2-4.39-11.33-15.02-11.33h-17.66V461.48z"></path>
+                    <path className="st0" d="M931.16,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
+                      v0.09c0,9.31-5.1,15.99-14.58,18.36L931.16,467.46z M890.14,412.82v27.32h16.69c10.45,0,16.16-5.09,16.16-13.44v-0.09
+                      c0-8.61-5.71-13.79-16.16-13.79H890.14z"></path>
+                    <path className="st0" d="M996.34,467.46h-7.2l-6.68-15.64h-32.41l-6.68,15.64h-7.2l26.53-60.79h7.2L996.34,467.46z M966.3,413.78
+                      l-13.97,31.98h27.85L966.3,413.78z"></path>
+                    <path className="st0" d="M1044.22,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.01,0-15.64,3.95-15.64,9.84
+                      c0,4.13,2.46,7.99,10.37,10.01l14.23,3.51c10.98,2.64,13.97,9.75,13.97,16.95c0,9.93-8.52,16.51-22.66,16.51h-0.09
+                      c-12.47,0-21.17-5.1-24.77-14.23l5.62-3.87c3.25,8.17,9.84,12.03,19.33,12.03h0.09c10.19,0,15.64-4.3,15.64-10.54
+                      c0-4.83-2.64-8.96-9.93-10.81l-15.02-3.87c-10.01-2.64-13.62-8.7-13.62-15.55c0-10.01,8.43-16.08,22.75-16.08h0.09
+                      c10.89,0,18.45,4.57,21.7,11.77L1044.22,422.13z"></path>
+                    <path className="st0" d="M1060.38,467.46v-60.79h6.76v60.79H1060.38z"></path>
+                    <path className="st0" d="M1088.84,406.67v54.29h35.58v6.5h-42.34v-60.79H1088.84z"></path>
+                  </g>
+                  <g>
+                    <g>
+                      <path className="st0" d="M169.77,279.41l0.32,0.32c-6.18,9.8-14.64,17.68-25.39,23.64c-10.76,5.96-23.05,8.94-36.89,8.94
+                        c-18.53,0-32-5.32-40.41-15.97c-8.41-10.65-12.62-26.62-12.62-47.91v-90.71H30.19v-0.32l88.48-69.63v64.84h45.04v5.11h-45.04
+                        v74.42c0,18.53,2.45,31.62,7.35,39.29c4.9,7.67,13.2,11.5,24.91,11.5C157.74,282.93,164.02,281.76,169.77,279.41z"></path>
+                    </g>
+                    <g>
+                      <path className="st0" d="M263.04,312.31c-11.29,0-22.31-1.97-33.06-5.91c-10.76-3.94-20.23-9.63-28.43-17.09
+                        c-8.2-7.45-14.69-16.4-19.48-26.83c-4.79-10.43-7.19-21.82-7.19-34.18c0-11.07,2.13-21.67,6.39-31.78
+                        c4.26-10.11,10.33-18.9,18.21-26.35c7.88-7.45,17.25-13.31,28.11-17.57c10.86-4.26,22.57-6.39,35.14-6.39
+                        c12.99,0,25.07,1.92,36.25,5.75c11.18,3.83,20.81,9.37,28.91,16.61c8.09,7.24,14.37,15.97,18.85,26.19
+                        c4.47,10.22,6.71,21.4,6.71,33.54c0,11.71-1.92,22.68-5.75,32.9c-3.83,10.22-9.53,19.16-17.09,26.83
+                        c-7.56,7.67-17.09,13.63-28.59,17.89C290.51,310.18,277.51,312.31,263.04,312.31z M298.81,300.81c8.73,0,13.1-5.43,13.1-16.29
+                        c0-6.6-2.93-16.87-8.78-30.82c-5.86-13.94-13.21-28.37-22.04-43.28c-8.84-14.9-17.89-27.41-27.15-37.53
+                        c-9.26-10.11-17.2-15.17-23.8-15.17c-4.05,0-7.19,1.39-9.42,4.15c-2.24,2.77-3.35,6.6-3.35,11.5c0,7.46,2.98,18.32,8.94,32.58
+                        c5.96,14.27,13.42,28.7,22.36,43.28c8.94,14.59,17.99,26.83,27.15,36.73C284.97,295.86,292.63,300.81,298.81,300.81z"></path>
+                    </g>
+                    <g>
+                      <path className="st0" d="M429.46,312.31c-20.44,0-39.93-2.77-58.45-8.3l9.9-52.07h0.32l39.61,53.02c3.83,1.07,7.35,1.6,10.54,1.6
+                        c7.03,0,12.72-1.81,17.09-5.43c4.36-3.62,6.55-8.62,6.55-15.01c0-3.4-1.07-6.81-3.19-10.22c-2.13-3.4-7.46-7.35-15.97-11.82
+                        l-21.08-11.18c-13.42-7.03-23.32-14.74-29.71-23.16c-6.39-8.41-9.58-18.47-9.58-30.19c0-16.18,6.17-29.12,18.53-38.81
+                        c12.35-9.69,29.07-14.53,50.15-14.53c18.53,0,36.2,3.09,53.02,9.26l-12.46,50.47h-0.32l-37.05-52.7
+                        c-1.49-0.64-3.3-0.96-5.43-0.96c-6.6,0-11.77,1.65-15.49,4.95c-3.73,3.3-5.59,7.3-5.59,11.98c0,5.75,1.76,10.86,5.27,15.33
+                        s9.74,9.05,18.69,13.74l23.96,12.78c10.86,5.75,19.17,12.67,24.91,20.76c5.75,8.1,8.62,17.04,8.62,26.83
+                        c0,7.88-1.92,15.17-5.75,21.88c-3.83,6.71-9.1,12.46-15.81,17.25c-6.71,4.79-14.53,8.41-23.48,10.86S439.04,312.31,429.46,312.31
+                        z"></path>
+                    </g>
+                    <g>
+                      <path className="st0" d="M645.38,146.22c16.61,0,30.24,6.66,40.89,19.96c10.65,13.31,15.97,31.89,15.97,55.74
+                        c0,28.96-8.31,51.27-24.91,66.92c-16.61,15.65-40.78,23.48-72.51,23.48c-11.5,0-24.71-1.12-39.61-3.35
+                        c-14.91-2.24-28-5.16-39.29-8.78V113.95L507.71,98.3l82.09-28.75v105.09c8.51-8.73,17.67-15.65,27.47-20.76
+                        C627.06,148.77,636.43,146.22,645.38,146.22z M605.45,305.92c8.73,0,15.65-5.48,20.76-16.45c5.11-10.96,7.67-27.41,7.67-49.35
+                        c0-21.51-2.51-37.58-7.51-48.23c-5.01-10.65-12.73-15.97-23.16-15.97c-4.05,0-8.52,1.07-13.42,3.19v122.02
+                        C594.27,304.33,599.49,305.92,605.45,305.92z"></path>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            ) : layoutMode === 'tosb-v2' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <span className="logo-title" style={{ fontSize: '2rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
+                  <img
+                    src={window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:' ? 'client/public/images/logo.png' : '/images/logo.png'}
+                    alt="TOSB"
+                    style={{ height: '48px', objectFit: 'contain', display: 'block' }}
+                  />
                 </div>
+                <span className="logo-subtitle">The Other Song Brasil</span>
               </div>
-            ) : (
-              <>
-                <span className="logo-symbol" style={{ fontSize: '2rem' }}>🌿</span>
-                <div className="logo-text">
-                  <span className="logo-title" style={{ fontSize: '1.25rem' }}>The Other Song</span>
-                  <span className="logo-subtitle">Brasil | Homeopatia</span>
-                </div>
-              </>
-            )}
+            ) : null}
+
           </a>
 
 
@@ -3734,7 +3944,7 @@ NEWFILEENCODING:NONE
         </button>
 
         {/* Menu Principal (Desktop Apenas) */}
-        <nav className="nav-links desktop-only-nav" style={{ gap: '0.75rem' }}>
+        <nav className="nav-links desktop-only-nav" style={{ gap: '0.5rem' }}>
           <a href={getLinkHref('home')} className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'home')}>Início</a>
 
           <div className="nav-dropdown">
@@ -3830,83 +4040,43 @@ NEWFILEENCODING:NONE
           <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy Software</a>
           <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'contact'); }}>Contato</a>
 
-          {/* Bloco de Usuário exclusivo para mobile */}
-          <div className="mobile-only-block" style={{ marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
-            {user ? (
-              <div className="nav-dropdown">
-                <button
-                  className="nav-link w-full text-left"
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveDropdown(activeDropdown === 'panel-hamburger' ? null : 'panel-hamburger');
-                  }}
-                >
-                  <span>Painel de {user.name}</span>
-                  <span>▾</span>
-                </button>
-                <div className={`nav-dropdown-content ${activeDropdown === 'panel-hamburger' ? 'open' : ''}`} style={{ display: activeDropdown === 'panel-hamburger' ? 'block' : 'none', position: 'static', boxShadow: 'none', paddingLeft: '1rem' }}>
-                  {user.role === 'STUDENT' && (
-                    <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'panel'); }}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'courses'); }}>📚 Meus Cursos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'payments'); }}>💳 Financeiro / Faturas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'account'); }}>👤 Meus Dados</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'student-dash', 'agenda'); }}>📅 Calendário Acadêmico</a>
-                    </>
-                  )}
-                  {user.role === 'TEACHER' && (
-                    <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'panel'); }}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'students'); }}>👥 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'payments'); }}>💳 Financeiro</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'teacher-dash', 'account'); }}>⚙️ Detalhes da Conta</a>
-                    </>
-                  )}
-                  {user.role === 'ADMIN' && (
-                    <>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'panel'); }}>📊 Dashboard Geral</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'reports'); }}>📈 Relatório Financeiro</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'courses'); }}>🎓 Gerenciar Cursos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'books'); }}>📚 Gerenciar Livros</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'students'); }}>👥 Gerenciar Usuários</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'payments'); }}>💳 Gerenciar Faturas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'classes'); }}>🎓 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'events'); }}>📅 Agenda / Eventos</a>
-                      <a href="#" className="dropdown-item" style={{ padding: '0.5rem 0' }} onClick={(e) => { setMobileMenuOpen(false); handleDashboardTabClick(e, 'admin-dash', 'logs'); }}>🔒 Logs de Segurança</a>
-                    </>
-                  )}
-                  <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }}></div>
-                  <a href="#" className="dropdown-item text-danger" style={{ padding: '0.5rem 0' }} onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); handleLogout(); }}>Sair da Conta</a>
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <a href={getLinkHref('login')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} w-full`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'login'); }}>Entrar</a>
-                <a href={getLinkHref('register')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} w-full`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'register'); }}>Cadastrar</a>
-              </div>
-            )}
-          </div>
+          {/* Botões de Ações */}
+          <a
+            href={getLinkHref('cart')}
+            className="nav-link w-full text-left"
+            onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'cart'); }}
+          >
+            Carrinho {cartItems.length > 0 && `(${cartItems.reduce((acc, item) => acc + item.quantity, 0)})`}
+          </a>
+          <a
+            href={getLinkHref(user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
+            className="nav-link w-full text-left"
+            onClick={(e) => {
+              setMobileMenuOpen(false);
+              handleLinkClick(e, user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login');
+            }}
+          >
+            Conta
+          </a>
         </nav>
 
         {/* Painel do Usuário, Carrinho, Alternador de Layout e Acessibilidade */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="desktop-only-block" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
 
           {/* Seletor de Layout / Identidade Visual (Design 1 vs Design 2) */}
           <button
             type="button"
-            className={layoutMode === 'tosb-v2' ? 'layout-switcher-pill' : 'btn btn-secondary'}
+            className={layoutMode !== 'classic' ? 'layout-switcher-pill' : 'btn btn-secondary'}
             onClick={toggleLayoutMode}
             title="Alternar entre o Design Clássico e o Novo Guia de Identidade Visual TOSB"
             style={{
               marginLeft: '0.25rem',
-              marginRight: '0.25rem',
-              ...(layoutMode === 'tosb-v2' ? {} : { padding: '0.5rem 0.75rem', fontSize: '0.85rem' })
+              marginRight: '0.25rem'
             }}
           >
             <span>Layout:</span>
             <span className="layout-badge">
-              {layoutMode === 'tosb-v2' ? 'Design 2 (Guia TOSB)' : 'Design 1 (Clássico)'}
+              {layoutMode === 'tosb-v3' ? 'Design 3' : layoutMode === 'tosb-v2' ? 'Design 2' : 'Design 1'}
             </span>
           </button>
 
@@ -3932,7 +4102,7 @@ NEWFILEENCODING:NONE
           {/* Carrinho de Compras */}
           <a
             href={getLinkHref('cart')}
-            className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'} cart-badge-nav`}
+            className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'} cart-badge-nav`}
             onClick={(e) => handleLinkClick(e, 'cart')}
             aria-label="Carrinho de Compras"
             style={{ padding: '0.5rem' }}
@@ -3945,114 +4115,28 @@ NEWFILEENCODING:NONE
             )}
           </a>
 
-          {/* Botão de Caixa de Entrada / Simulador de E-mails */}
-          <button
-            className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setEmailModalOpen(true)}
-            title="Caixa de E-mails e Notificações Enviadas pelo Sistema"
-            style={{ padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
-          >
-            <span className="desktop-only-inline">E-mails</span>
-            <span className="badge-paid" style={{ fontSize: '0.7rem', padding: '0.1rem 0.35rem', borderRadius: '10px' }}>
-              {(mockDb.sent_emails || []).length}
-            </span>
-          </button>
-
           {/* Ações Rápidas Mobile (Sempre Visíveis no Mobile Sticky Header) */}
           <div className="mobile-only-flex header-mobile-actions" style={{ alignItems: 'center', gap: '0.35rem' }}>
-            {user ? (
-              <div className="nav-dropdown">
-                <button
-                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveDropdown(activeDropdown === 'panel-mobile' ? null : 'panel-mobile');
-                  }}
-                >
-                  Painel ▾
-                </button>
-                <div className={`nav-dropdown-content ${activeDropdown === 'panel-mobile' ? 'open' : ''}`} style={{ right: 0, left: 'auto', minWidth: '220px' }}>
-                  {user.role === 'STUDENT' && (
-                    <>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'panel')}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'courses')}>📚 Meus Cursos</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'payments')}>💳 Financeiro / Faturas</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'account')}>👤 Meus Dados</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'student-dash', 'agenda')}>📅 Calendário Acadêmico</a>
-                    </>
-                  )}
-                  {user.role === 'TEACHER' && (
-                    <>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'panel')}>📊 Painel Geral</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'students')}>👥 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'payments')}>💳 Financeiro</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'teacher-dash', 'account')}>⚙️ Detalhes da Conta</a>
-                    </>
-                  )}
-                  {user.role === 'ADMIN' && (
-                    <>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'stats')}>📊 Estatísticas / OFX</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'courses')}>🌿 Gerenciar Cursos</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'books')}>📚 Gerenciar Livros</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'students')}>👥 Gerenciar Usuários</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'payments')}>💳 Gerenciar Faturas</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'classes')}>🎓 Gerenciar Turmas</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'events')}>📅 Agenda / Eventos</a>
-                      <a href="#" className="dropdown-item" onClick={(e) => handleDashboardTabClick(e, 'admin-dash', 'logs')}>🔒 Logs de Segurança</a>
-                    </>
-                  )}
-                  <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.25rem 0' }}></div>
-                  <a href="#" className="dropdown-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair da Conta</a>
-                </div>
-              </div>
-            ) : (
-              <>
-                <a
-                  href={getLinkHref('login')}
-                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
-                  onClick={(e) => handleLinkClick(e, 'login')}
-                >
-                  Entrar
-                </a>
-                <a
-                  href={getLinkHref('register')}
-                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
-                  onClick={(e) => handleLinkClick(e, 'register')}
-                >
-                  Inscrever
-                </a>
-              </>
-            )}
+            <a
+              href={getLinkHref(user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
+              className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.35rem 0.6rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
+              onClick={(e) => handleLinkClick(e, user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
+            >
+              Conta
+            </a>
           </div>
 
           {/* Ações do Usuário (Desktop Apenas) */}
           <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
-            {user ? (
-              <div className="nav-dropdown">
-                <button
-                  className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.5rem 0.75rem', ...(layoutMode === 'tosb-v2' ? { backgroundColor: 'var(--color-primary)' } : {}) }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveDropdown(activeDropdown === 'panel' ? null : 'panel');
-                  }}
-                >
-                  Painel ▾
-                </button>
-                <div className={`nav-dropdown-content ${activeDropdown === 'panel' ? 'open' : ''}`} style={{ right: 0, left: 'auto' }}>
-                  <a href={getLinkHref(user.role === 'STUDENT' ? 'student-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'admin-dash')} className="dropdown-item" onClick={(e) => { e.preventDefault(); clearAlerts(); redirectToDashboard(user.role); }}>Acessar Dashboard</a>
-                  <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Sair</a>
-                </div>
-              </div>
-            ) : (
-              <>
-                <a href={getLinkHref('login')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => handleLinkClick(e, 'login')}>Entrar</a>
-                <a href={getLinkHref('register')} className={`btn ${layoutMode === 'tosb-v2' ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.75rem' }} onClick={(e) => handleLinkClick(e, 'register')}>Cadastrar</a>
-              </>
-            )}
+            <a
+              href={getLinkHref(user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
+              className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '0.5rem 0.75rem' }}
+              onClick={(e) => handleLinkClick(e, user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
+            >
+              Conta
+            </a>
           </div>
         </div>
       </header>
@@ -4465,9 +4549,9 @@ NEWFILEENCODING:NONE
           <div>
             {/* Hero Section */}
             <section className="hero-section">
-              <h1>Conheça nossos cursos online</h1>
+              <h1 className="hero-title">Conheça nossos cursos online</h1>
               <p className="hero-subtitle">🌿 A escola oficial do Método Sensação da The Other Song no Brasil. Ensino homeopático de elevado rigor científico e clínico.</p>
-              <button className="btn btn-primary" onClick={() => { clearAlerts(); navigateTo('register'); }} style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
+              <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('register'); }} style={{ padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
             </section>
 
             {/* Cursos Online Catalog */}
@@ -4482,14 +4566,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Gratuito</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>Introdução à Homeopatia e Sensação Vital</h3>
                     <p className="premium-card-text">Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-free')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', type: 'FREE' })}>▶ Prévia</button>
-                      {user ? (
-                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => enrollFreeCourse('course-free')}>Matricular</button>
-                      ) : (
-                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => { clearAlerts(); navigateTo('login'); }}>Entrar</button>
-                      )}
+                    <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <span className="premium-card-price">Gratuito</span>
+                      <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-free')}>Inscrição</button>
                     </div>
                   </div>
                 </div>
@@ -4501,10 +4580,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Assinatura</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>Clube TOSB: Estudos de Matéria Médica</h3>
                     <p className="premium-card-text">Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-sub')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION' })}>▶ Prévia</button>
-                      <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-sub', title: 'Clube TOSB: Estudos de Matéria Médica', type: 'SUBSCRIPTION', price: 99.00 }, 'course')}>Comprar</button>
+                    <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <span className="premium-card-price">R$ 99,00</span>
+                      <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-sub')}>Inscrição</button>
                     </div>
                   </div>
                 </div>
@@ -4516,10 +4594,9 @@ NEWFILEENCODING:NONE
                     <span className="premium-card-tag">Especialização</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>Pós-Graduação em Homeopatia Avançada</h3>
                     <p className="premium-card-text">Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.</p>
-                    <div className="premium-card-footer" style={{ gap: '0.25rem', flexWrap: 'wrap' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateTo('course-detail', 'id=course-post')}>Ementa</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#eef5f2', color: 'var(--color-primary)' }} onClick={() => handleWatchOpenLesson({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD' })}>▶ Prévia</button>
-                      <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => addToCart({ id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada', type: 'POSTGRAD', price: 3600.00 }, 'course')}>Comprar</button>
+                    <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <span className="premium-card-price">R$ 3.600,00</span>
+                      <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-post')}>Inscrição</button>
                     </div>
                   </div>
                 </div>
@@ -4531,7 +4608,7 @@ NEWFILEENCODING:NONE
             <section className="video-section-home">
               <div className="video-section-grid">
                 <div className="video-section-content">
-                  <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>Apresentação</span>
+                  <span className="premium-card-tag">Apresentação</span>
                   <h3 className="font-serif-title mt-2">O Método de Sankaran e Níveis de Experiência</h3>
                   <p>Assista a esta aula explicativa do Dr. Carlos Eduardo Leitão sobre como funciona o Método Sensação, aprofundando o diagnóstico homeopático além da abordagem convencional.</p>
                   <div style={{ display: 'flex', gap: '1rem' }}>
@@ -4557,37 +4634,39 @@ NEWFILEENCODING:NONE
               <h2 className="home-section-title">Seminários e Cursos Presenciais</h2>
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
 
-                <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                <div className="premium-card">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}>🎥</div>
                   <div className="premium-card-content">
-                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Presencial Curitiba</span>
-                    <h3 className="premium-card-title mt-2">Seminário Avançado de Homeopatia 2026</h3>
+                    <span className="premium-card-tag">Presencial Curitiba</span>
+                    <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}>Seminário Avançado de Homeopatia 2026</h3>
                     <p className="premium-card-text">Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
-                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
-                        <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', price: 1200.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                        <span className="premium-card-price">R$ 1.200,00</span>
+                        <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}>Inscrição</button>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="premium-card" style={{ borderTop: '4px solid var(--color-accent)' }}>
+                <div className="premium-card">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}>🎥</div>
                   <div className="premium-card-content">
-                    <span className="premium-card-tag" style={{ backgroundColor: '#fff7ed', color: '#c2410c' }}>Encontro Prático</span>
-                    <h3 className="premium-card-title mt-2">Encontro de Matéria Médica Prática</h3>
+                    <span className="premium-card-tag">Encontro Prático</span>
+                    <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}>Encontro de Matéria Médica Prática</h3>
                     <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
                         <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.25rem', width: '100%', marginTop: '0.5rem' }}>
-                        <button className="btn btn-secondary flex-1" style={{ padding: '0.4rem' }} onClick={() => { clearAlerts(); navigateTo('contact'); }}>Mais Detalhes</button>
-                        <button className="btn btn-primary flex-1" style={{ padding: '0.4rem' }} onClick={() => addToCart({ id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', price: 600.00, type: 'INPERSON' }, 'course')}>Comprar Vaga</button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                        <span className="premium-card-price">R$ 600,00</span>
+                        <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}>Inscrição</button>
                       </div>
                     </div>
                   </div>
@@ -4602,7 +4681,7 @@ NEWFILEENCODING:NONE
               <div className="premium-card-grid">
                 {books.slice(0, 3).map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '140px' }}>📚</div>
+                    <div className="premium-card-img-placeholder">📚</div>
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
                       <h3 className="premium-card-title">{book.title}</h3>
@@ -4642,18 +4721,18 @@ NEWFILEENCODING:NONE
             </button>
 
             <div className="course-detail-hero">
-              <span className="premium-card-tag" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
-                {selectedDetailCourse.type === 'FREE' ? 'Curso Livre (Gratuito)' : selectedDetailCourse.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
-              </span>
               <h1 className="mt-2">{selectedDetailCourse.title}</h1>
               <p className="hero-subtitle mb-0" style={{ fontSize: '1.1rem', margin: '0.5rem 0 0' }}>
                 {selectedDetailCourse.description}
+              </p>
+              <p className="hero-subtitle mb-0" style={{ fontSize: '0.85rem', margin: '0.75rem 0 0' }}>
+                Realize sua inscrição ao final da seção <span onClick={() => document.getElementById('ficha-tecnica-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ color: 'white', textDecoration: 'underline', cursor: 'pointer' }}>Ficha Técnica</span>
               </p>
             </div>
 
             <div className="course-detail-grid">
               <div>
-                <h3 className="section-title-underlined mb-4">Ementa e Módulos do Curso</h3>
+                <h3 className="section-title-underlined mb-4">Descrição</h3>
 
                 {COURSES_DETAILS_DATA[selectedDetailCourse.id]?.modules.map((mod, idx) => (
                   <div key={idx} className="syllabus-module-card">
@@ -4684,8 +4763,8 @@ NEWFILEENCODING:NONE
               </div>
 
               <div>
+                <h3 id="ficha-tecnica-section" className="section-title-underlined mb-4">Ficha Técnica</h3>
                 <div className="card" style={{ position: 'sticky', top: '100px' }}>
-                  <h3 className="section-title-underlined-thin mb-4">Ficha Técnica</h3>
                   <table className="course-specs-table">
                     <tbody>
                       <tr>
@@ -4708,24 +4787,20 @@ NEWFILEENCODING:NONE
                   </table>
 
                   <div className="mt-5" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button className="btn btn-secondary w-full" style={{ backgroundColor: '#eef5f2', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }} onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
+                    <button id="buy-button" className="btn btn-primary w-full" onClick={() => {
+                      addToCart({
+                        id: selectedDetailCourse.id,
+                        title: selectedDetailCourse.title,
+                        type: selectedDetailCourse.type,
+                        price: selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : (selectedDetailCourse.type === 'FREE' ? 0 : (selectedDetailCourse.type === 'INPERSON' ? 1200 : 3600))
+                      }, 'course');
+                      navigateTo('cart');
+                    }}>
+                      Adicionar ao Carrinho
+                    </button>
+                    <button className="btn btn-secondary w-full" onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
                       ▶ Assistir Prévia
                     </button>
-                    {selectedDetailCourse.type === 'FREE' ? (
-                      user ? (
-                        <button className="btn btn-primary w-full" onClick={() => { enrollFreeCourse(selectedDetailCourse.id); navigateTo('student-dash'); }}>
-                          Matricular-se Grátis
-                        </button>
-                      ) : (
-                        <button className="btn btn-primary w-full" onClick={() => { clearAlerts(); navigateTo('login'); }}>
-                          Entrar para Matricular
-                        </button>
-                      )
-                    ) : (
-                      <button className="btn btn-primary w-full" onClick={() => { addToCart({ id: selectedDetailCourse.id, title: selectedDetailCourse.title, type: selectedDetailCourse.type, price: selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : 3600 }, 'course'); }}>
-                        Adicionar ao Carrinho
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -4741,8 +4816,8 @@ NEWFILEENCODING:NONE
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
               {(mockDb.events || []).map(event => (
-                <div key={event.id} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', padding: '1.25rem', borderLeft: '4px solid var(--color-primary)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-primary-light)', padding: '0.75rem 1.25rem', borderRadius: 'var(--border-radius-md)', minWidth: '80px' }}>
+                <div key={event.id} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', padding: '1.25rem', borderLeft: '4px solid var(--color-accent)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-base)', padding: '0.75rem 1.25rem', borderRadius: 'var(--border-radius-md)', minWidth: '80px' }}>
                     <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>{event.day}</span>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{event.month}</span>
                   </div>
@@ -4879,10 +4954,10 @@ NEWFILEENCODING:NONE
               <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
               <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
 
-              <div className="premium-card-grid">
+              <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
                 {books.map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', height: '160px', position: 'relative' }}>
+                    <div className="premium-card-img-placeholder" style={{ position: 'relative' }}>
                       📚
                       {book.page_count > 0 && (
                         <span className="badge-paid" style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff' }}>
@@ -4900,7 +4975,7 @@ NEWFILEENCODING:NONE
                         <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
                           <button
                             className="btn btn-secondary w-full"
-                            style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            style={{ padding: '0.35rem 0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                             onClick={() => setExpandedBookId(expandedBookId === book.id ? null : book.id)}
                           >
                             <span>📖 Relação de Conteúdo ({book.content_table.length} capítulos)</span>
@@ -4971,28 +5046,28 @@ NEWFILEENCODING:NONE
 
               <h3 className="font-serif-title mb-3 mt-5">Tutoriais Exclusivos da Filial Brasil:</h3>
               <div className="invoices-list" style={{ gap: '1rem' }}>
-                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <strong>Tutorial 1: Como realizar a busca rápida de famílias botânicas</strong>
                     <div className="helper-text">Assista ao vídeo explicativo passo-a-passo no SHS (15 min)</div>
                   </div>
-                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                  <a href="#video" className="btn btn-primary" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
                 </div>
 
-                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <strong>Tutorial 2: Repertorização combinada com níveis de experiência</strong>
                     <div className="helper-text">Estratégia para cruzar sintomas locais com o reino do paciente (22 min)</div>
                   </div>
-                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                  <a href="#video" className="btn btn-primary" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
                 </div>
 
-                <div className="invoice-card" style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
+                <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <strong>Tutorial 3: Cadastrar e importar novos dados de matéria médica</strong>
                     <div className="helper-text">Saiba como customizar suas anotações no SHS (10 min)</div>
                   </div>
-                  <a href="#video" className="btn btn-primary btn-quick-login" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
+                  <a href="#video" className="btn btn-primary" onClick={(e) => { e.preventDefault(); alert('Vídeo do tutorial abrindo no player...'); }}>Assistir</a>
                 </div>
               </div>
             </div>
@@ -5140,20 +5215,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO ALUNO */}
         {currentPage === 'student-dash' && (
           <div>
-            <div className="dashboard-header">
-              <div>
-                <h1 className="font-serif-title">Painel de Estudos Homeopáticos</h1>
-                <p className="text-muted">Olá, <strong>{user?.name}</strong>! Gerencie seu aprendizado, dados cadastrais e financeiro.</p>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                {isOfflineMode && (
-                  <button className="btn btn-danger btn-quick-login" onClick={handleSimulateDelinquency}>
-                    Simular Inadimplência
-                  </button>
-                )}
-                <button className="btn btn-secondary" onClick={() => { clearAlerts(); handleLogout(); }}>Sair da Conta</button>
-              </div>
-            </div>
+
 
             <div className="student-panel-container">
               {/* Menu Lateral de Abas */}
@@ -5182,6 +5244,11 @@ NEWFILEENCODING:NONE
                   <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('account')}>
                       <span style={{ fontSize: '1.1rem' }}>⚙️</span> Detalhes da Conta
+                    </button>
+                  </li>
+                  <li className="student-sidebar-item">
+                    <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
+                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
                     </button>
                   </li>
                 </ul>
@@ -5642,14 +5709,6 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO PROFESSOR */}
         {currentPage === 'teacher-dash' && user && (
           <div>
-            <div className="teacher-dash-header">
-              <div>
-                <h1 className="font-serif-title">Portal do Docente</h1>
-                <p className="text-muted">Seja bem-vindo, <strong>{user.name}</strong>! Gerencie suas turmas e acompanhe a receita de seus cursos.</p>
-              </div>
-              <button className="btn btn-secondary" onClick={loadTeacherReport}>Atualizar Painel</button>
-            </div>
-
             <div className="student-panel-container">
               {/* Menu Lateral do Professor */}
               <aside className="student-sidebar">
@@ -5665,6 +5724,11 @@ NEWFILEENCODING:NONE
                   </li>
                   <li className={`student-sidebar-item ${teacherActiveTab === 'account' ? 'active' : ''}`}>
                     <button onClick={() => setTeacherActiveTab('account')}>⚙️ Detalhes da Conta</button>
+                  </li>
+                  <li className="student-sidebar-item">
+                    <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
+                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
+                    </button>
                   </li>
                 </ul>
               </aside>
@@ -5786,11 +5850,11 @@ NEWFILEENCODING:NONE
                                         </td>
                                         <td className="text-center">
                                           <button
-                                            className="btn btn-primary"
-                                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                            className="btn btn-secondary"
+                                            style={{ padding: '0.25rem 0.5rem' }}
                                             onClick={() => registerAttendance(c.id, s.id)}
                                           >
-                                            ➕ Registrar Presença Hoje
+                                            Frequência
                                           </button>
                                         </td>
                                       </tr>
@@ -5924,8 +5988,6 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: DASHBOARD DO ADMINISTRADOR */}
         {currentPage === 'admin-dash' && (
           <div>
-            <h1 className="font-serif-title mb-5">Painel Administrativo da Homeopatia EAD</h1>
-
             <div className="student-panel-container">
               {/* Menu Lateral do Administrador */}
               <aside className="student-sidebar">
@@ -5959,6 +6021,11 @@ NEWFILEENCODING:NONE
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'promotions' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('promotions')}>📢 Disparo de Ofertas</button>
+                  </li>
+                  <li className="student-sidebar-item">
+                    <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
+                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
+                    </button>
                   </li>
                 </ul>
               </aside>
@@ -6054,7 +6121,7 @@ NEWFILEENCODING:NONE
                               placeholder="URL da imagem de capa..."
                             />
                             <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0, padding: '0.5rem 1rem' }}>
-                              📁 Upload Imagem
+                              Upload Imagem
                               <input
                                 type="file"
                                 accept="image/*"
@@ -6144,10 +6211,10 @@ NEWFILEENCODING:NONE
                                       <button
                                         type="button"
                                         className="btn btn-secondary"
-                                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                                        style={{ padding: '0.2rem 0.6rem' }}
                                         onClick={() => setViewingCourseHistory({ courseId: editingCourse.id, teacherId: t.id, teacherName: t.name, courseTitle: editingCourse.title })}
                                       >
-                                        📜 Consultar Histórico ({teacherHistoryCount})
+                                        Consultar Histórico ({teacherHistoryCount})
                                       </button>
                                     )}
                                   </div>
@@ -6201,7 +6268,7 @@ NEWFILEENCODING:NONE
                                 }
                               }}
                             >
-                              🗑️ Excluir Curso
+                              Excluir Curso
                             </button>
                           )}
                           <button className="btn btn-primary flex-1" type="submit">Gravar Curso no LMS</button>
@@ -6235,8 +6302,8 @@ NEWFILEENCODING:NONE
                                 <td>{c.duration_days} dias</td>
                                 <td><span className="badge-paid">⏱️ {cargaHoraria}h Didáticas</span></td>
                                 <td>
-                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }} onClick={() => { setEditingCourse(c); setCourseBannerPreview(c.banner_url || ''); }}>
-                                    ✏️ Editar
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.6rem' }} onClick={() => { setEditingCourse(c); setCourseBannerPreview(c.banner_url || ''); }}>
+                                    Editar
                                   </button>
                                 </td>
                               </tr>
@@ -6377,6 +6444,13 @@ NEWFILEENCODING:NONE
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                           <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingBook(null)}>Cancelar</button>
+                          {editingBook.id && (
+                            <button className="btn btn-danger flex-1" type="button" onClick={() => {
+                              if (window.confirm('Tem certeza que deseja remover este livro da livraria?')) {
+                                handleDeleteBook(editingBook.id);
+                              }
+                            }}>Excluir Livro</button>
+                          )}
                           <button className="btn btn-primary flex-1" type="submit">Gravar Livro</button>
                         </div>
                       </form>
@@ -6412,8 +6486,7 @@ NEWFILEENCODING:NONE
                               <td><strong>R$ {b.price.toFixed(2)}</strong></td>
                               <td>
                                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setEditingBook(b)}>Editar</button>
-                                  <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteBook(b.id)}>Excluir</button>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => setEditingBook(b)}>Editar</button>
                                 </div>
                               </td>
                             </tr>
@@ -6629,7 +6702,7 @@ NEWFILEENCODING:NONE
                                     </span>
                                   </td>
                                   <td>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => startEditUser(s)}>Editar</button>
                                   </td>
                                 </tr>
                               ))}
@@ -7011,7 +7084,7 @@ NEWFILEENCODING:NONE
                                       <td>
                                         <button
                                           className="btn btn-secondary"
-                                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                          style={{ padding: '0.25rem 0.5rem' }}
                                           onClick={() => openEditPayment(p)}
                                         >
                                           Editar
@@ -7219,7 +7292,7 @@ NEWFILEENCODING:NONE
                                     <td>
                                       <button
                                         className="btn btn-secondary"
-                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                        style={{ padding: '0.25rem 0.5rem' }}
                                         onClick={() => setEditingExpense(e)}
                                       >
                                         Editar
@@ -7261,7 +7334,7 @@ NEWFILEENCODING:NONE
                                       <td>
                                         <button
                                           className="btn btn-secondary"
-                                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                          style={{ padding: '0.25rem 0.5rem' }}
                                           onClick={() => setEditingExpense({
                                             ...p,
                                             isPayout: true,
@@ -7357,7 +7430,7 @@ NEWFILEENCODING:NONE
                                     <option key={t.id} value={t.id}>{t.name} ({t.crm || t.email})</option>
                                   ))}
                               </select>
-                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', whiteSpace: 'nowrap' }}>
                                 ＋ Alocar
                               </button>
                             </form>
@@ -7374,7 +7447,7 @@ NEWFILEENCODING:NONE
                                     </div>
                                     <button
                                       className="btn btn-danger"
-                                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                      style={{ padding: '0.2rem 0.5rem' }}
                                       onClick={() => handleRemoveTeacherFromClass(viewingClassDetails.id, t.id)}
                                     >
                                       Remover
@@ -7412,7 +7485,7 @@ NEWFILEENCODING:NONE
                                     <option key={st.id} value={st.id}>{st.name} ({st.email})</option>
                                   ))}
                               </select>
-                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                              <button className="btn btn-primary" type="submit" style={{ padding: '0.35rem 0.75rem', whiteSpace: 'nowrap' }}>
                                 ＋ Matricular
                               </button>
                             </form>
@@ -7432,7 +7505,7 @@ NEWFILEENCODING:NONE
                                       </div>
                                       <button
                                         className="btn btn-danger"
-                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                        style={{ padding: '0.2rem 0.5rem' }}
                                         onClick={() => handleRemoveStudentFromClass(viewingClassDetails.id, st.id)}
                                       >
                                         Remover
@@ -7551,7 +7624,7 @@ NEWFILEENCODING:NONE
                                 }
                               }}
                             >
-                              🗑️ Excluir Turma
+                              Excluir Turma
                             </button>
                           )}
                           <button className="btn btn-primary flex-1" type="submit">Gravar Turma</button>
@@ -7594,20 +7667,12 @@ NEWFILEENCODING:NONE
                                 <td>
                                   <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                                     <button
-                                      className="btn btn-primary"
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                      onClick={() => setViewingClassDetails(c)}
-                                      title="Ver e Gerenciar Integrantes da Turma"
-                                    >
-                                      👥 Integrantes
-                                    </button>
-                                    <button
                                       className="btn btn-secondary"
-                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                      style={{ padding: '0.25rem 0.5rem' }}
                                       onClick={() => setEditingClass(c)}
                                       title="Editar Dados da Turma"
                                     >
-                                      ✏️ Editar
+                                      Editar
                                     </button>
                                   </div>
                                 </td>
@@ -7631,15 +7696,21 @@ NEWFILEENCODING:NONE
                   <div>
                     {/* Criar Evento */}
                     <div className="card mb-6">
-                      <h3 className="mb-4">Adicionar Evento Científico</h3>
-                      <form onSubmit={handleCreateEvent} className="grid-2col" style={{ gap: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h3 className="m-0">{editingEvent ? 'Editar Evento Científico' : 'Adicionar Evento Científico'}</h3>
+                        {editingEvent && (
+                          <button className="btn btn-secondary" onClick={() => setEditingEvent(null)} style={{ padding: '0.25rem 0.5rem' }}>Cancelar Edição</button>
+                        )}
+                      </div>
+                      <form onSubmit={handleSaveEvent} className="grid-2col" style={{ gap: '1rem' }}>
+                        <input type="hidden" name="id" defaultValue={editingEvent?.id || ''} key={`id-${editingEvent?.id || 'new'}`} />
                         <div className="form-group" style={{ gridColumn: 'span 2' }}>
                           <label className="form-label">Título do Evento</label>
-                          <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" />
+                          <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" defaultValue={editingEvent?.title || ''} key={`title-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Tipo de Evento</label>
-                          <select className="form-input" name="type">
+                          <select className="form-input" name="type" defaultValue={editingEvent?.type || 'Lançamento de Livro'} key={`type-${editingEvent?.id || 'new'}`}>
                             <option value="Lançamento de Livro">Lançamento de Livro</option>
                             <option value="Grupo de Estudos">Grupo de Estudos</option>
                             <option value="Seminário Literário">Seminário Literário</option>
@@ -7648,18 +7719,26 @@ NEWFILEENCODING:NONE
                         </div>
                         <div className="form-group">
                           <label className="form-label">Localização / Link</label>
-                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" />
+                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" defaultValue={editingEvent?.location || ''} key={`location-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Dia (ex: 15)</label>
-                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" />
+                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" defaultValue={editingEvent?.day || ''} key={`day-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div className="form-group">
                           <label className="form-label">Mês (ex: Set)</label>
-                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" />
+                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" defaultValue={editingEvent?.month || ''} key={`month-${editingEvent?.id || 'new'}`} />
                         </div>
-                        <div style={{ gridColumn: 'span 2', marginTop: '0.5rem' }}>
-                          <button className="btn btn-primary w-full" type="submit">Cadastrar Evento na Agenda</button>
+                        <div style={{ gridColumn: 'span 2', marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                          {editingEvent && (
+                            <button type="button" className="btn btn-danger flex-1" onClick={() => {
+                              if (window.confirm('Tem certeza que deseja remover este evento da agenda?')) {
+                                handleDeleteEvent(editingEvent.id);
+                                setEditingEvent(null);
+                              }
+                            }}>Excluir Evento</button>
+                          )}
+                          <button className="btn btn-primary flex-1" type="submit">{editingEvent ? 'Salvar Alterações' : 'Cadastrar Evento na Agenda'}</button>
                         </div>
                       </form>
                     </div>
@@ -7687,11 +7766,11 @@ NEWFILEENCODING:NONE
                                 <td>{event.location}</td>
                                 <td>
                                   <button
-                                    className="btn btn-danger"
-                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                                    onClick={() => handleDeleteEvent(event.id)}
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.5rem' }}
+                                    onClick={() => setEditingEvent(event)}
                                   >
-                                    Excluir
+                                    Editar
                                   </button>
                                 </td>
                               </tr>
@@ -7712,8 +7791,7 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <div className="quiz-header mb-4">
                       <h3>🔓 Gestão de Liberações Temporárias (Alunos Inadimplentes)</h3>
-                      <button className="btn btn-secondary btn-quick-login" onClick={checkCourseExpirations}>
-                        🔔 Executar Varredura de Vencimentos (2 Dias Antes)
+                      <button>Executar Varredura de Vencimentos (2 Dias Antes)
                       </button>
                     </div>
                     <p className="course-card-description mb-4">
@@ -7802,7 +7880,7 @@ NEWFILEENCODING:NONE
                               <td>
                                 <button
                                   className="btn btn-danger"
-                                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                  style={{ padding: '0.25rem 0.5rem' }}
                                   onClick={() => handleRevokeTemporaryUnlock(u.id, u.student_id, u.course_id)}
                                 >
                                   Revogar Acesso
@@ -7921,7 +7999,7 @@ NEWFILEENCODING:NONE
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <button
                   className="btn btn-primary"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
+                  style={{ padding: '0.4rem 0.75rem' }}
                   onClick={() => {
                     sendPurchaseConfirmationEmail('ana@lms.com', 'Dra. Ana Paula', 'Pós-Graduação em Homeopatia Avançada', 3600.00, 'ASAAS_TEST_PURCHASE_100');
                     setSuccess('Teste executado! E-mail de confirmação de compra enviado para Dra. Ana Paula.');
@@ -7931,7 +8009,7 @@ NEWFILEENCODING:NONE
                 </button>
                 <button
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
+                  style={{ padding: '0.4rem 0.75rem' }}
                   onClick={() => {
                     checkCourseExpirations();
                   }}
@@ -7940,7 +8018,7 @@ NEWFILEENCODING:NONE
                 </button>
                 <button
                   className="btn btn-accent"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff' }}
+                  style={{ padding: '0.4rem 0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff' }}
                   onClick={() => {
                     const delinquent = mockDb.users.find(u => u.id === 'student-delinquent-id') || { email: 'lucas.inadimplente@lms.com', name: 'Dr. Lucas Mendes' };
                     sendTempUnlockEmail(delinquent, 'Pós-Graduação em Homeopatia Avançada', 7, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), 'Liberação temporária de teste');

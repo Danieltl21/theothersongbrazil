@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oranienbaum&display=swap');
 
 :root {
   /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
@@ -21,24 +22,18 @@
   --tosb-white: #FFFFFF;
 
   /* Mapeamento de Variáveis Globais (Usando Apenas Cores da Tabela) */
-  --color-primary: var(--tosb-green-900);
-  /* #0B2418 */
-  --color-primary-light: var(--tosb-cream-200);
-  /* #F3EADA */
-  --color-secondary: var(--tosb-green-950);
-  /* #07180F */
-  --color-accent: var(--tosb-gold-600);
-  /* #B68A35 */
-  --color-bg-base: var(--tosb-cream-100);
-  /* #FAF2E6 */
-  --color-bg-card: var(--tosb-cream-50);
-  /* #FFFDF8 */
-  --color-text-main: var(--tosb-ink);
-  /* #121913 */
-  --color-text-muted: var(--tosb-muted);
-  /* #625E54 */
-  --color-border: var(--tosb-cream-300);
-  /* #DDD2BD */
+  --gradient-brand: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-sidebar-bg) 100%);
+  --gradient-placeholder: linear-gradient(135deg, #B3B6A8 0%, #82A591 100%);
+  --color-primary: #1C5F20;
+  --color-primary-light: #39733C;
+  --color-secondary: #0B2B18;
+  --color-accent: #D3702C;
+  --color-sidebar-bg: #26402B;
+  --color-bg-base: #F1EDE6;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #383838;
+  --color-text-muted: #383838;
+  --color-border: #e2e8f0;
 
   /* Mensagens de Sucesso, Erro e Aviso (Exceções autorizadas pelo usuário) */
   --color-success: #166534;
@@ -51,6 +46,7 @@
   /* Tipografia */
   --font-serif: 'Oswald', Georgia, serif;
   --font-sans: 'Montserrat', Arial, sans-serif;
+  --font-menu: 'Bebas Neue', sans-serif;
 
   /* Efeitos */
   --shadow-sm: 0 2px 8px rgba(7, 24, 15, 0.06);
@@ -78,6 +74,7 @@ body {
   background-color: var(--color-bg-base);
   color: var(--color-text-main);
   font-size: 1.05rem;
+  font-weight: 500;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -91,6 +88,65 @@ h4 {
   font-weight: 600;
 }
 
+/* Regras de Tipografia base para temas v2 e v3 (TOSB) */
+.theme-tosb-v2 h1,
+.theme-tosb-v2 h2,
+.theme-tosb-v2 h3,
+.theme-tosb-v2 .section-title,
+.theme-tosb-v2 .hero-title {
+  font-family: var(--font-display);
+  color: var(--tosb-green-950);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.theme-tosb-v2 h4,
+.theme-tosb-v2 h5,
+.theme-tosb-v2 h6 {
+  font-family: var(--font-ui);
+  color: var(--tosb-green-900);
+  font-weight: 600;
+}
+
+.theme-tosb-v2 p,
+.theme-tosb-v2 span,
+.theme-tosb-v2 div,
+.theme-tosb-v2 li {
+  font-family: var(--font-ui);
+}
+
+.theme-tosb-v3 p,
+.theme-tosb-v3 span:not(.logo-title):not(.layout-badge),
+.theme-tosb-v3 li {
+  font-family: 'Oranienbaum', serif !important;
+}
+
+.theme-tosb-v3 .nav-link,
+.theme-tosb-v3 .btn,
+.theme-tosb-v3 h1,
+.theme-tosb-v3 h2,
+.theme-tosb-v3 h3,
+.theme-tosb-v3 h4,
+.theme-tosb-v3 h5,
+.theme-tosb-v3 h6,
+.theme-tosb-v3 .badge-paid,
+.theme-tosb-v3 .badge-pending,
+.theme-tosb-v3 .badge-overdue {
+  font-family: var(--font-display) !important;
+  letter-spacing: 0.05em;
+}
+
+.theme-tosb-v3 h1,
+.theme-tosb-v3 h2,
+.theme-tosb-v3 h3,
+.theme-tosb-v3 h4,
+.theme-tosb-v3 h5,
+.theme-tosb-v3 h6,
+.theme-tosb-v3 .form-label,
+.theme-tosb-v3 label {
+  color: #795738;
+}
+
 /* Layout Geral */
 .app-container {
   display: flex;
@@ -100,9 +156,9 @@ h4 {
 
 /* Cabeçalho TOSB Premium */
 .tosb-header {
-  background-color: var(--color-bg-card);
-  border-bottom: 1px solid var(--color-border);
-  padding: 1.25rem 2rem;
+  background-color: var(--color-primary);
+  border-bottom: 2px solid var(--color-sidebar-bg);
+  padding: 0.5rem 2rem 0.5rem 0rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -112,11 +168,30 @@ h4 {
   box-shadow: var(--shadow-sm);
 }
 
+.tosb-header .btn-secondary,
+.tosb-header .layout-switcher-pill,
+.tosb-header .btn-primary,
+.tosb-header .btn {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: white !important;
+}
+
+.tosb-header .btn-secondary:hover,
+.tosb-header .layout-switcher-pill:hover,
+.tosb-header .btn:hover {
+  background-color: var(--color-primary-light) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+
 .logo-container {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
+  padding: 0 3rem;
 }
 
 .logo-symbol {
@@ -132,7 +207,7 @@ h4 {
   font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: bold;
-  color: var(--color-primary);
+  color: white;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -140,7 +215,7 @@ h4 {
 .logo-subtitle {
   font-size: 0.7rem;
   letter-spacing: 0.15em;
-  color: var(--color-text-muted);
+  color: white;
   text-transform: uppercase;
 }
 
@@ -153,17 +228,21 @@ h4 {
 
 .nav-link {
   text-decoration: none;
-  color: var(--color-text-main);
+  color: white;
+  background-color: transparent;
+  border: none;
+  font-family: var(--font-menu);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   transition: var(--transition-smooth);
   padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-sm);
+  cursor: pointer;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: var(--color-primary);
+  color: white;
   background-color: var(--color-primary-light);
 }
 
@@ -173,9 +252,9 @@ h4 {
   align-items: center;
   justify-content: center;
   padding: 0.6rem 1.25rem;
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-family: var(--font-menu);
+  font-size: 1.05rem;
+  font-weight: 500;
   border-radius: var(--border-radius-md);
   border: none;
   cursor: pointer;
@@ -190,22 +269,55 @@ h4 {
 }
 
 .btn-primary:hover {
-  background-color: #043a2c;
+  background-color: var(--color-primary-light);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
 }
 
+/* ==================== BUTTON SECONDARY ==================== */
+
+/* Design 1 (Clássico) */
 .btn-secondary {
-  background-color: transparent;
+  background-color: white;
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  background-color: var(--color-bg-base);
+  border-color: transparent;
 }
+
+/* Design 2 (Guia TOSB) */
+.theme-tosb-v2 .btn-secondary {
+  background-color: white;
+  color: var(--tosb-green-950);
+  border-radius: var(--radius-md);
+  font-family: var(--font-menu);
+  font-weight: 500;
+  transition: all 220ms ease;
+}
+
+.theme-tosb-v2 .btn-secondary:hover {
+  background-color: var(--tosb-cream-200);
+  color: var(--tosb-green-900);
+}
+
+/* Design 3 (Novo) */
+.theme-tosb-v3 .btn-secondary,
+.theme-tosb-v3 .layout-switcher-pill {
+  background-color: #FFFFFF !important;
+  border: 2px solid #9BB19B !important;
+  color: #91AD61 !important;
+}
+
+.theme-tosb-v3 .btn-secondary:hover,
+.theme-tosb-v3 .layout-switcher-pill:hover {
+  background-color: #9BB19B !important;
+  color: #394D25 !important;
+}
+
+/* ========================================================== */
 
 .btn-danger {
   background-color: var(--color-error);
@@ -243,7 +355,6 @@ h4 {
 .main-content {
   flex: 1;
   padding: 2.5rem 2rem;
-  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
 }
@@ -251,10 +362,10 @@ h4 {
 /* Rodapé Sophisticated */
 .tosb-footer {
   background-color: var(--color-secondary);
-  color: #94a3b8;
+  color: white;
   padding: 3rem 2rem 1.5rem;
   margin-top: auto;
-  border-top: 4px solid var(--color-primary);
+  border-top: 4px solid var(--color-sidebar-bg);
 }
 
 .footer-grid {
@@ -264,7 +375,7 @@ h4 {
   max-width: 1200px;
   margin: 0 auto;
   padding-bottom: 2rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--color-primary);
 }
 
 .footer-section h4 {
@@ -278,7 +389,7 @@ h4 {
 }
 
 .footer-link {
-  color: #94a3b8;
+  color: white;
   text-decoration: none;
   font-size: 0.9rem;
   display: block;
@@ -287,7 +398,6 @@ h4 {
 }
 
 .footer-link:hover {
-  color: var(--color-accent);
   padding-left: 4px;
 }
 
@@ -642,7 +752,7 @@ h4 {
 
 .btn-quick-login {
   padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .helper-text {
@@ -1136,10 +1246,10 @@ h4 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: white;
+  background-color: var(--color-primary);
   padding: 0.5rem 0.75rem;
   border-radius: 24px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-secondary);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   z-index: 1000;
   white-space: nowrap;
@@ -1156,8 +1266,8 @@ h4 {
 }
 
 .btn-acc {
-  background: white;
-  border: 1px solid var(--color-border);
+  background: transparent;
+  border: 0;
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -1168,7 +1278,7 @@ h4 {
   justify-content: center;
   font-size: 0.9rem;
   transition: var(--transition-smooth);
-  color: var(--color-primary);
+  color: white;
 }
 
 .btn-acc:hover {
@@ -1243,7 +1353,7 @@ body.high-contrast .nav-link.active {
 
 .student-sidebar {
   width: 260px;
-  background-color: var(--color-bg-card);
+  background: var(--color-sidebar-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-lg);
   padding: 1rem;
@@ -1252,9 +1362,15 @@ body.high-contrast .nav-link.active {
 }
 
 .student-sidebar-menu {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.student-sidebar-item {
   list-style: none;
 }
 
@@ -1264,12 +1380,14 @@ body.high-contrast .nav-link.active {
   background: transparent;
   border: none;
   padding: 0.8rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text-main);
+  font-family: var(--font-menu);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: white;
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1277,11 +1395,11 @@ body.high-contrast .nav-link.active {
 
 .student-sidebar-item button:hover {
   background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  color: white;
 }
 
 .student-sidebar-item.active button {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-light);
   color: white;
 }
 
@@ -1306,9 +1424,19 @@ body.high-contrast .nav-link.active {
   }
 
   .student-sidebar-menu {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .student-sidebar-menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 440px) {
+  .student-sidebar-menu {
+    grid-template-columns: 1fr;
   }
 
   .student-sidebar-item button {
@@ -1325,9 +1453,11 @@ body.high-contrast .nav-link.active {
    PÁGINAS INSTITUCIONAIS E LAYOUTS
    ========================================================================== */
 
-/* Hero Section */
+/* ==================== HERO SECTION ==================== */
+
+/* Design 1 (Clássico) */
 .hero-section {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #06231b 100%);
+  background: var(--gradient-brand);
   color: white;
   border-radius: var(--border-radius-lg);
   padding: 4rem 3rem;
@@ -1336,24 +1466,50 @@ body.high-contrast .nav-link.active {
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   margin-bottom: 3rem;
-  border-bottom: 5px solid var(--color-accent);
+  border-bottom: 4px solid var(--color-accent);
 }
 
-.hero-section h1 {
+.hero-section h1,
+.hero-section .hero-title {
   font-family: var(--font-serif);
-  color: var(--tosb-gold-300) !important;
+  color: white !important;
   font-size: 2.75rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
-.hero-subtitle {
+.hero-section .hero-subtitle {
   font-size: 1.25rem;
-  color: #d1fae5;
+  color: var(--color-bg-base);
   max-width: 700px;
   margin: 0 auto 2rem;
-  font-weight: 300;
 }
+
+/* Design 2 (Guia TOSB) */
+.theme-tosb-v2 .hero-section {
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(7, 24, 15, 0.15);
+  border-bottom: 4px solid var(--tosb-gold-500);
+}
+
+.theme-tosb-v2 .hero-section .hero-subtitle {
+  color: var(--tosb-cream-200);
+}
+
+/* Design 3 (Novo) */
+.theme-tosb-v3 .hero-section {
+  border-radius: var(--border-radius-lg);
+  box-shadow: none;
+  border-bottom: 5px solid #91AD61;
+}
+
+.theme-tosb-v3 .hero-section h1,
+.theme-tosb-v3 .hero-section .hero-title {
+  font-family: 'Oranienbaum', serif !important;
+  color: #FFFFFF !important;
+}
+
+/* ====================================================== */
 
 /* Dropdown Menu para Cursos/Quem Somos */
 .nav-dropdown {
@@ -1364,11 +1520,11 @@ body.high-contrast .nav-link.active {
 .nav-dropdown-content {
   display: none;
   position: absolute;
-  background-color: var(--color-bg-card);
+  background-color: var(--color-sidebar-bg);
   min-width: 200px;
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  border: 2px solid var(--color-sidebar-bg);
+  border-top: 0;
   z-index: 200;
   top: 100%;
   left: 0;
@@ -1381,14 +1537,14 @@ body.high-contrast .nav-link.active {
 }
 
 .dropdown-item {
-  color: var(--color-text-main);
+  color: white;
   padding: 0.75rem 1rem;
   text-decoration: none;
   display: block;
-  font-size: 0.9rem;
+  font-family: var(--font-menu);
+  font-size: 1.05rem;
   font-weight: 500;
   transition: var(--transition-smooth);
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .dropdown-item:last-child {
@@ -1397,7 +1553,7 @@ body.high-contrast .nav-link.active {
 
 .dropdown-item:hover {
   background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  color: white;
 }
 
 /* Cursos Grid (Página Inicial e Loja) */
@@ -1438,12 +1594,11 @@ body.high-contrast .nav-link.active {
 .premium-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--color-accent);
 }
 
 .premium-card-img-placeholder {
-  height: 180px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  height: 300px;
+  background: var(--gradient-placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1460,8 +1615,8 @@ body.high-contrast .nav-link.active {
 
 .premium-card-tag {
   align-self: flex-start;
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.25rem 0.6rem;
@@ -1495,6 +1650,9 @@ body.high-contrast .nav-link.active {
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 0.1em;
 }
 
 /* Vídeo Institucional */
@@ -1537,7 +1695,6 @@ body.high-contrast .nav-link.active {
   height: 0;
   overflow: hidden;
   border-radius: var(--border-radius-md);
-  border: 2px solid var(--color-accent);
   box-shadow: var(--shadow-md);
 }
 
@@ -1624,7 +1781,7 @@ body.high-contrast .nav-link.active {
   position: relative;
   border-radius: var(--border-radius-md);
   overflow: hidden;
-  height: 200px;
+  height: 300px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -1632,7 +1789,7 @@ body.high-contrast .nav-link.active {
 .gallery-placeholder-img {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #eef2f6 0%, #cbd5e1 100%);
+  background: var(--gradient-placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1650,7 +1807,7 @@ body.high-contrast .nav-link.active {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(11, 60, 46, 0.9);
+  background: var(--gradient-brand);
   color: white;
   padding: 0.75rem;
   font-size: 0.85rem;
@@ -1791,7 +1948,7 @@ body.high-contrast .nav-link.active {
   border: none;
   font-size: 1.6rem;
   cursor: pointer;
-  color: var(--color-primary);
+  color: var(--color-accent);
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
@@ -1812,7 +1969,7 @@ body.high-contrast .nav-link.active {
 }
 
 .testimonial-card {
-  background-color: var(--color-primary-light);
+  background-color: white;
   border-radius: var(--border-radius-md);
   padding: 1.5rem;
   border: 1px solid var(--color-border);
@@ -1908,7 +2065,7 @@ body.high-contrast .nav-link.active {
 
 /* Página de Detalhes do Curso */
 .course-detail-hero {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #06231b 100%);
+  background: var(--gradient-brand);
   color: white;
   border-radius: var(--border-radius-lg);
   padding: 3rem 2rem;
@@ -1939,10 +2096,10 @@ body.high-contrast .nav-link.active {
 }
 
 .syllabus-module-header {
-  background-color: var(--color-primary-light);
+  background-color: var(--color-sidebar-bg);
   padding: 1rem;
   font-weight: bold;
-  color: var(--color-primary);
+  color: white;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -1989,7 +2146,7 @@ body.high-contrast .nav-link.active {
   gap: 1rem;
   align-items: flex-start;
   margin-top: 1.5rem;
-  background-color: var(--color-primary-light);
+  background-color: var(--color-bg-card);
   padding: 1rem;
   border-radius: var(--border-radius-md);
 }
@@ -1997,9 +2154,10 @@ body.high-contrast .nav-link.active {
 .teacher-bio-avatar {
   width: 60px;
   height: 60px;
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
-  background-color: var(--color-accent);
-  color: var(--color-primary);
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2023,6 +2181,10 @@ body.high-contrast .nav-link.active {
     position: relative;
     padding: 1rem 1.5rem;
     flex-wrap: wrap;
+  }
+
+  .logo-container {
+    padding: 0 1rem;
   }
 
   .nav-links {
@@ -2193,8 +2355,6 @@ body.high-contrast .nav-link.active {
     justify-content: space-between !important;
     align-items: center !important;
     padding: 0.5rem 1rem !important;
-    background-color: var(--color-bg-card) !important;
-    border-bottom: 1px solid var(--color-border) !important;
     box-shadow: var(--shadow-sm) !important;
   }
 
@@ -2459,6 +2619,8 @@ body.high-contrast .nav-link.active {
 
 .theme-tosb-v2 {
   /* Design Tokens de Cores Oficiais */
+  --gradient-brand: linear-gradient(135deg, var(--tosb-green-800) 0%, var(--tosb-green-900) 100%);
+  --gradient-placeholder: linear-gradient(135deg, var(--tosb-cream-300) 0%, var(--tosb-muted) 100%);
   --tosb-green-950: #07180F;
   --tosb-green-900: #0B2418;
   --tosb-green-800: #123523;
@@ -2494,6 +2656,7 @@ body.high-contrast .nav-link.active {
   --color-primary: var(--tosb-green-900);
   --color-primary-light: var(--tosb-cream-200);
   --color-secondary: var(--tosb-green-950);
+  --color-sidebar-bg: var(--tosb-green-900);
   --color-bg-base: var(--tosb-cream-100);
   --color-bg-card: var(--tosb-cream-50);
   --color-text-main: var(--tosb-ink);
@@ -2530,40 +2693,13 @@ body.high-contrast .nav-link.active {
   font-family: var(--font-ui);
 }
 
-/* Regras de Tipografia para TOSB v2 */
-.theme-tosb-v2 h1,
-.theme-tosb-v2 h2,
-.theme-tosb-v2 h3,
-.theme-tosb-v2 .section-title,
-.theme-tosb-v2 .hero-title {
-  font-family: var(--font-display);
-  color: var(--tosb-green-950);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.theme-tosb-v2 h4,
-.theme-tosb-v2 h5,
-.theme-tosb-v2 h6 {
-  font-family: var(--font-ui);
-  color: var(--tosb-green-900);
-  font-weight: 600;
-}
-
-.theme-tosb-v2 p,
-.theme-tosb-v2 span,
-.theme-tosb-v2 div,
-.theme-tosb-v2 li {
-  font-family: var(--font-ui);
-}
 
 /* Cabeçalho Institucional - Design 2 TOSB */
 .theme-tosb-v2 .tosb-header {
-  background: var(--gradient-brand);
-  border-bottom: 1px solid var(--tosb-gold-600);
+  background: var(--color-primary);
+  border-bottom: 2px solid var(--tosb-gold-600);
   box-shadow: var(--shadow-brand);
-  padding: 1rem 2rem;
-  position: relative;
+  padding: 0.5rem 2rem 0.5rem 0rem;
 }
 
 .theme-tosb-v2 .tosb-header::after {
@@ -2587,16 +2723,42 @@ body.high-contrast .nav-link.active {
 
 .theme-tosb-v2 .logo-subtitle {
   font-family: var(--font-ui);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--tosb-cream-200);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.05em;
   opacity: 0.9;
+}
+
+.theme-tosb-v2 .nav-link,
+.theme-tosb-v2 .nav-dropdown-content .dropdown-item,
+.theme-tosb-v2 .tosb-header .btn,
+.theme-tosb-v2 .tosb-header .btn-primary,
+.theme-tosb-v2 .tosb-header .btn-secondary,
+.theme-tosb-v2 .tosb-header .layout-switcher-pill {
+  font-family: var(--font-menu) !important;
+  font-size: 1.05rem !important;
+}
+
+.theme-tosb-v2 .tosb-header .btn span,
+.theme-tosb-v2 .tosb-header .layout-switcher-pill span {
+  font-family: var(--font-menu) !important;
+  font-size: inherit !important;
+}
+
+.theme-tosb-v2 .tosb-header .btn:hover,
+.theme-tosb-v2 .tosb-header .btn-acc:hover,
+.theme-tosb-v2 .tosb-header .layout-switcher-pill:hover {
+  background-color: var(--tosb-green-800) !important;
+  color: var(--tosb-gold-300) !important;
+}
+
+.theme-tosb-v2 .tosb-header .btn:hover span:not(.badge-paid):not(.cart-count),
+.theme-tosb-v2 .tosb-header .layout-switcher-pill:hover span {
+  color: var(--tosb-gold-300) !important;
 }
 
 .theme-tosb-v2 .nav-link {
   color: var(--tosb-cream-100);
-  font-family: var(--font-ui);
-  font-size: 0.92rem;
   font-weight: 500;
   border-radius: var(--radius-sm);
   transition: all var(--duration-normal, 220ms) ease;
@@ -2609,14 +2771,23 @@ body.high-contrast .nav-link.active {
   border-bottom: 2px solid var(--tosb-gold-500);
 }
 
+.theme-tosb-v2 .nav-dropdown-content {
+  background-color: var(--tosb-green-800) !important;
+  border-color: var(--tosb-gold-600);
+}
+
+.theme-tosb-v2 .nav-dropdown-content .dropdown-item:hover {
+  color: var(--tosb-gold-300) !important;
+  background-color: var(--color-primary) !important;
+}
+
 /* Botões do Sistema - TOSB v2 */
 .theme-tosb-v2 .btn-primary {
   background: var(--tosb-green-900);
   color: var(--tosb-cream-50);
-  border: 1px solid var(--tosb-gold-600);
   border-radius: var(--radius-md);
-  font-family: var(--font-ui);
-  font-weight: 600;
+  font-family: var(--font-menu);
+  font-weight: 500;
   box-shadow: var(--shadow-brand);
   transition: background-color 220ms ease, box-shadow 220ms ease, transform 160ms ease;
 }
@@ -2628,29 +2799,15 @@ body.high-contrast .nav-link.active {
   transform: translateY(-1px);
 }
 
-.theme-tosb-v2 .btn-secondary {
-  background: transparent;
-  color: var(--tosb-green-950);
-  border: 1px solid var(--tosb-gold-600);
-  border-radius: var(--radius-md);
-  font-family: var(--font-ui);
-  font-weight: 600;
-  transition: all 220ms ease;
-}
-
-.theme-tosb-v2 .btn-secondary:hover {
-  background: var(--tosb-cream-200);
-  color: var(--tosb-green-900);
-  border-color: var(--tosb-gold-700);
-}
+/* .btn-secondary transferido para o bloco unificado */
 
 .theme-tosb-v2 .btn-accent {
   background: var(--tosb-gold-600);
   color: var(--tosb-green-950);
   border: 1px solid var(--tosb-gold-300);
   border-radius: var(--radius-md);
-  font-family: var(--font-ui);
-  font-weight: 600;
+  font-family: var(--font-menu);
+  font-weight: 500;
 }
 
 .theme-tosb-v2 .btn-accent:hover {
@@ -2682,7 +2839,7 @@ body.high-contrast .nav-link.active {
 /* Menu Lateral / Painel do Aluno - TOSB v2 */
 .theme-tosb-v2 .student-sidebar,
 .theme-tosb-v2 .sidebar {
-  background: var(--gradient-brand);
+  background: var(--color-sidebar-bg);
   border-right: 1px solid rgba(182, 138, 53, 0.35);
   color: var(--tosb-cream-100);
   border-radius: var(--radius-lg);
@@ -2758,7 +2915,7 @@ body.high-contrast .nav-link.active {
 /* Rodapé Institucional - TOSB v2 */
 .theme-tosb-v2 .tosb-footer {
   background: var(--tosb-green-950);
-  border-top: 3px solid var(--tosb-gold-600);
+  border-top: 2px solid var(--tosb-gold-600);
   color: var(--tosb-cream-200);
   position: relative;
   overflow: hidden;
@@ -2808,8 +2965,7 @@ body.high-contrast .nav-link.active {
   border-radius: 999px;
   color: var(--tosb-gold-300);
   font-family: var(--font-ui);
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
@@ -2824,12 +2980,11 @@ body.high-contrast .nav-link.active {
 }
 
 .layout-badge {
-  background: var(--tosb-gold-600);
+  background: white;
   color: var(--tosb-green-950);
   padding: 0.15rem 0.45rem;
   border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -2861,7 +3016,6 @@ body.high-contrast .nav-link.active {
 }
 
 .theme-tosb-v2 .student-sidebar {
-  background: var(--gradient-brand);
   border: 1px solid rgba(182, 138, 53, 0.45);
   border-radius: 22px;
   padding: 1.5rem 1rem 4rem 1rem;
@@ -2873,8 +3027,6 @@ body.high-contrast .nav-link.active {
 
 .theme-tosb-v2 .student-sidebar-menu {
   list-style: none;
-  display: flex;
-  flex-direction: column;
   gap: 0.6rem;
   position: relative;
   z-index: 2;
@@ -2888,7 +3040,7 @@ body.high-contrast .nav-link.active {
   color: #FAF2E6 !important;
   font-family: var(--font-display);
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 500;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -2941,7 +3093,7 @@ body.high-contrast .nav-link.active {
   box-shadow: 0 6px 24px rgba(7, 24, 15, 0.08);
 }
 
-.theme-tosb-v2 .tosb-panel-title {
+.tosb-panel-title {
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
@@ -2949,7 +3101,7 @@ body.high-contrast .nav-link.active {
   margin-bottom: 0.75rem;
 }
 
-.theme-tosb-v2 .tosb-action-cards-grid {
+.tosb-action-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
@@ -2957,16 +3109,16 @@ body.high-contrast .nav-link.active {
 }
 
 @media (max-width: 992px) {
-  .theme-tosb-v2 .tosb-action-cards-grid {
+  .tosb-action-cards-grid {
     grid-template-columns: 1fr;
   }
 
-  .theme-tosb-v2 .student-panel-container {
+  .student-panel-container {
     grid-template-columns: 1fr;
   }
 }
 
-.theme-tosb-v2 .tosb-action-card {
+.tosb-action-card {
   background: linear-gradient(180deg, #FFFDF8 0%, #FAF2E6 100%);
   border: 1.5px solid var(--tosb-gold-600);
   border-radius: 22px;
@@ -2979,12 +3131,12 @@ body.high-contrast .nav-link.active {
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
-.theme-tosb-v2 .tosb-action-card:hover {
+.tosb-action-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 14px 32px rgba(182, 138, 53, 0.25);
 }
 
-.theme-tosb-v2 .tosb-card-category-label {
+.tosb-card-category-label {
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 700;
@@ -2994,7 +3146,7 @@ body.high-contrast .nav-link.active {
   margin-bottom: 1.25rem;
 }
 
-.theme-tosb-v2 .tosb-circular-icon-box {
+.tosb-circular-icon-box {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -3009,7 +3161,7 @@ body.high-contrast .nav-link.active {
   box-shadow: 0 4px 12px rgba(7, 24, 15, 0.25);
 }
 
-.theme-tosb-v2 .tosb-action-card-title {
+.tosb-action-card-title {
   font-family: var(--font-display);
   font-size: 1.55rem;
   font-weight: 700;
@@ -3017,7 +3169,7 @@ body.high-contrast .nav-link.active {
   margin-bottom: 0.5rem;
 }
 
-.theme-tosb-v2 .tosb-diamond-divider {
+.tosb-diamond-divider {
   color: var(--tosb-gold-500);
   font-size: 0.85rem;
   margin: 0.5rem 0 1.25rem 0;
@@ -3028,15 +3180,15 @@ body.high-contrast .nav-link.active {
   width: 100%;
 }
 
-.theme-tosb-v2 .tosb-diamond-divider::before,
-.theme-tosb-v2 .tosb-diamond-divider::after {
+.tosb-diamond-divider::before,
+.tosb-diamond-divider::after {
   content: '';
   height: 1px;
   flex: 1;
   background: linear-gradient(90deg, transparent, var(--tosb-gold-500), transparent);
 }
 
-.theme-tosb-v2 .tosb-btn-pill-dark {
+.tosb-btn-pill-dark {
   background: #0B2418 !important;
   color: #FFFDF8 !important;
   border: 1px solid #B68A35 !important;
@@ -3054,7 +3206,7 @@ body.high-contrast .nav-link.active {
   gap: 0.5rem !important;
 }
 
-.theme-tosb-v2 .tosb-btn-pill-dark:hover {
+.tosb-btn-pill-dark:hover {
   background: #123523 !important;
   color: #FFFDF8 !important;
   box-shadow: 0 0 16px rgba(182, 138, 53, 0.55) !important;
@@ -3107,47 +3259,85 @@ body.high-contrast .nav-link.active {
   .desktop-only-nav {
     display: none !important;
   }
-  
+
   .mobile-only-nav {
     display: none !important;
   }
-  
+
   .mobile-only-nav.mobile-open {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.25rem !important; /* Request 6: Decreased spacing */
+    flex-wrap: nowrap !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 80px) !important;
+    gap: 0.25rem !important;
+    /* Request 6: Decreased spacing */
   }
 
   .mobile-only-nav .nav-link {
-    padding: 0.4rem 0.75rem !important; /* Request 6: Decreased spacing */
+    padding: 0.4rem 0.75rem !important;
+    /* Request 6: Decreased spacing */
     margin-bottom: 0.15rem !important;
     border-radius: var(--border-radius-sm) !important;
   }
 
-  /* Request 5: sandwich menu item colors in Design 2 (theme-tosb-v2) */
+  /* ================== Mobile Menu Colors (Match Desktop) ================== */
+
+  /* Design 1 (Base Classic) */
+  .mobile-only-nav {
+    background-color: var(--color-primary) !important;
+    border-bottom: 2px solid var(--color-secondary) !important;
+  }
+
+  .mobile-only-nav .nav-link {
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    border: none !important;
+  }
+
+  .mobile-only-nav .nav-link:hover,
+  .mobile-only-nav .nav-link.active {
+    background-color: var(--color-primary-light) !important;
+    color: #FFFFFF !important;
+  }
+
+  .mobile-only-nav .dropdown-item {
+    color: #FFFFFF !important;
+    background-color: transparent !important;
+  }
+
+  .mobile-only-nav .dropdown-item:hover {
+    background-color: var(--color-primary-light) !important;
+    color: #FFFFFF !important;
+  }
+
+  .mobile-only-nav .mobile-only-block {
+    border-top-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Design 2 (theme-tosb-v2) */
   .theme-tosb-v2 .mobile-only-nav {
-    background-color: var(--tosb-green-950) !important;
+    background: var(--gradient-brand) !important;
     border-bottom: 2px solid var(--tosb-gold-600) !important;
     padding: 1.25rem 1.5rem !important;
   }
 
   .theme-tosb-v2 .mobile-only-nav .nav-link {
-    background-color: var(--tosb-green-900) !important;
-    color: var(--tosb-white) !important;
-    border: 1px solid var(--tosb-gold-600) !important;
-    transition: var(--transition-smooth) !important;
+    background-color: transparent !important;
+    color: var(--tosb-cream-100) !important;
+    border: none !important;
   }
 
   .theme-tosb-v2 .mobile-only-nav .nav-link:hover,
   .theme-tosb-v2 .mobile-only-nav .nav-link.active {
     background-color: var(--tosb-green-800) !important;
     color: var(--tosb-gold-300) !important;
-    border-color: var(--tosb-gold-300) !important;
+    border-bottom: 2px solid var(--tosb-gold-500) !important;
   }
 
-  /* Dropdown content (like user panel inside mobile menu) in Design 2 */
   .theme-tosb-v2 .mobile-only-nav .dropdown-item {
-    color: var(--tosb-white) !important;
+    color: var(--tosb-cream-100) !important;
     background-color: transparent !important;
   }
 
@@ -3160,15 +3350,312 @@ body.high-contrast .nav-link.active {
     border-top-color: rgba(232, 204, 141, 0.3) !important;
   }
 
-  /* Request 3: Design 2 style for the sandwich button */
-  .theme-tosb-v2 .hamburger-btn {
-    background-color: var(--tosb-green-950) !important;
-    border: 1px solid var(--tosb-gold-600) !important;
-    color: var(--tosb-gold-300) !important; /* Bege / Dourado */
-    border-radius: var(--border-radius-md) !important;
-    padding: 0.5rem 0.75rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  /* Design 3 (theme-tosb-v3) */
+  .theme-tosb-v3 .mobile-only-nav {
+    background: #394D25 !important;
+    border-bottom: 2px solid #91AD61 !important;
+    padding: 1.25rem 1.5rem !important;
   }
+
+  .theme-tosb-v3 .mobile-only-nav .nav-link {
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    border: none !important;
+  }
+
+  .theme-tosb-v3 .mobile-only-nav .nav-link:hover,
+  .theme-tosb-v3 .mobile-only-nav .nav-link.active {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    color: #9BB19B !important;
+  }
+
+  .theme-tosb-v3 .mobile-only-nav .dropdown-item {
+    color: #FFFFFF !important;
+    background-color: transparent !important;
+  }
+
+  .theme-tosb-v3 .mobile-only-nav .dropdown-item:hover {
+    color: #9BB19B !important;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .theme-tosb-v3 .mobile-only-nav .mobile-only-block {
+    border-top-color: rgba(145, 173, 97, 0.3) !important;
+  }
+
+}
+
+.theme-tosb-v3 {
+  /* Design Tokens - Design 3 */
+  --gradient-brand: linear-gradient(135deg, var(--tosb-green-light) 0%, var(--tosb-green-dark) 100%);
+  --gradient-placeholder: linear-gradient(135deg, #F3EADA 0%, #9D8978 100%);
+  --tosb-green-dark: #394D25;
+  --tosb-green-light: #91AD61;
+  --tosb-green-pale: #9BB19B;
+  --tosb-brown-dark: #503A25;
+  --tosb-brown-light: #9D8978;
+
+  --tosb-bg-light: #F6F4F0;
+  --tosb-white: #FFFFFF;
+
+  /* Mapeamento para Legado e V2 */
+  --color-bg-base: var(--tosb-bg-light);
+  --color-bg-card: var(--tosb-white);
+  --color-bg-brand: var(--tosb-brown-dark);
+  --color-primary: var(--tosb-green-dark);
+  --color-primary-light: var(--tosb-green-pale);
+  --color-secondary: var(--tosb-brown-dark);
+  --color-sidebar-bg: var(--color-primary);
+  --color-accent: var(--tosb-green-light);
+  --color-text-main: var(--tosb-ink);
+  --color-text-muted: var(--tosb-muted);
+  --color-border: rgba(121, 87, 56, 0.3);
+
+  /* Fontes - Design 3 */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-ui: 'Bebas Neue', sans-serif;
+  --font-serif: 'Oranienbaum', serif;
+  --font-sans: 'Oranienbaum', serif;
+  font-family: 'Oranienbaum', serif !important;
+}
+
+
+.theme-tosb-v3 .nav-link {
+  font-size: 1.05rem !important;
+}
+
+.theme-tosb-v3 .btn {
+  font-size: 1.15rem !important;
+  text-transform: uppercase;
+}
+
+/* Menu: fundo sólido #394D25, borda inferior #91AD61 */
+.theme-tosb-v3 .tosb-header {
+  background: #394D25 !important;
+  border-bottom: 2px solid #91AD61 !important;
+}
+
+.theme-tosb-v3 .tosb-header .btn {
+  font-size: 1.05rem !important;
+}
+
+.theme-tosb-v3 .nav-link {
+  color: #FFFFFF !important;
+}
+
+.theme-tosb-v3 .nav-dropdown>button.nav-link {
+  color: #FFFFFF !important;
+  background-color: transparent !important;
+  border-bottom: none !important;
+}
+
+.theme-tosb-v3 .nav-link:hover,
+.theme-tosb-v3 .nav-link.active,
+.theme-tosb-v3 .nav-dropdown>button.nav-link:hover,
+.theme-tosb-v3 .nav-dropdown>button.nav-link.active {
+  color: #9BB19B !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-bottom: none !important;
+}
+
+.theme-tosb-v3 .logo-title,
+.theme-tosb-v3 .tosb-header span {
+  color: #FFFFFF !important;
+}
+
+/* Correção: Botões no cabeçalho sem fundo e com texto branco (como os links) */
+.theme-tosb-v3 .tosb-header .btn,
+.theme-tosb-v3 .tosb-header .btn-acc,
+.theme-tosb-v3 .tosb-header .layout-switcher-pill {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-display) !important;
+}
+
+.theme-tosb-v3 .tosb-header .layout-badge {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-family: var(--font-display) !important;
+}
+
+/* Força herança de fonte e cor para spans dentro dos botões (ex: E-mails e Layout) */
+.theme-tosb-v3 .tosb-header .btn span:not(.badge-paid):not(.cart-count),
+.theme-tosb-v3 .tosb-header .layout-switcher-pill span {
+  font-family: var(--font-display) !important;
+  color: inherit !important;
+}
+
+/* Ajustes da letra Aa (Acessibilidade) */
+.theme-tosb-v3 .tosb-header .btn-acc {
+  font-family: 'Oranienbaum', serif !important;
+}
+
+.theme-tosb-v3 .tosb-header .btn:hover,
+.theme-tosb-v3 .tosb-header .btn-acc:hover,
+.theme-tosb-v3 .tosb-header .layout-switcher-pill:hover {
+  background: rgba(0, 0, 0, 0.2) !important;
+  color: #9BB19B !important;
+}
+
+.theme-tosb-v3 .tosb-header .btn:hover span:not(.badge-paid):not(.cart-count),
+.theme-tosb-v3 .tosb-header .layout-switcher-pill:hover span {
+  color: #9BB19B !important;
+}
+
+/* Botões paleta escura */
+.theme-tosb-v3 .btn-primary {
+  background-color: #91AD61 !important;
+  border: 2px solid #91AD61 !important;
+  color: #394D25 !important;
+}
+
+.theme-tosb-v3 .btn-primary:hover {
+  background-color: #394D25 !important;
+  border-color: #394D25 !important;
+  color: #FFFFFF !important;
+}
+
+/* .btn-secondary transferido para o bloco unificado */
+
+/* Fundo cards claros e escuros */
+.theme-tosb-v3 .card,
+.theme-tosb-v3 .dashboard-card,
+.theme-tosb-v3 .course-card {
+  background-color: #FFFFFF !important;
+  border: 1px solid #9BB19B !important;
+}
+
+/* Cor da data e local nos cards premium (Seminário) */
+.theme-tosb-v3 .premium-card-footer div {
+  color: #503A25 !important;
+}
+
+.theme-tosb-v3 .stat-card {
+  background-color: #795738 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #394D25 !important;
+}
+
+.theme-tosb-v3 .stat-card h3,
+.theme-tosb-v3 .stat-card p,
+.theme-tosb-v3 .stat-card div {
+  color: #FFFFFF !important;
+}
+
+/* Painel do Usuário (Dropdown) e Popover de Acessibilidade */
+.theme-tosb-v3 .nav-dropdown-content,
+.theme-tosb-v3 .accessibility-popover {
+  background-color: #394D25 !important;
+  border: 1px solid #91AD61 !important;
+}
+
+.theme-tosb-v3 .nav-dropdown-content a,
+.theme-tosb-v3 .nav-dropdown-content button,
+.theme-tosb-v3 .nav-dropdown-content .dropdown-item,
+.theme-tosb-v3 .accessibility-popover .btn-acc {
+  color: #FFFFFF !important;
+  background-color: transparent !important;
+}
+
+.theme-tosb-v3 .nav-dropdown-content a:hover,
+.theme-tosb-v3 .nav-dropdown-content button:hover,
+.theme-tosb-v3 .nav-dropdown-content .dropdown-item:hover,
+.theme-tosb-v3 .accessibility-popover .btn-acc:hover {
+  color: #9BB19B !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Rodapé */
+.theme-tosb-v3 .tosb-footer {
+  background-color: #394D25 !important;
+  border-top: 2px solid #91AD61 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-tosb-v3 .tosb-footer h4,
+.theme-tosb-v3 .tosb-footer p,
+.theme-tosb-v3 .tosb-footer span,
+.theme-tosb-v3 .tosb-footer a {
+  color: #FFFFFF !important;
+}
+
+.theme-tosb-v3 .tosb-footer a:hover {
+  color: #9BB19B !important;
+}
+
+/* Normalização de letter-spacing do menu e botões (Bebas Neue) em todos os designs */
+.nav-link,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-accent,
+.layout-switcher-pill,
+.dropdown-item,
+.nav-dropdown-content .dropdown-item {
+  letter-spacing: 0.05em !important;
+  line-height: normal !important;
+}
+
+/* Normalização de padding dos botões do Design 3 no cabeçalho */
+.theme-tosb-v3 .tosb-header .btn,
+.theme-tosb-v3 .tosb-header .layout-switcher-pill {
+  padding: 0.6rem 1.25rem !important;
+}
+
+.theme-tosb-v3 .nav-link {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Formatação de botões em tabelas de painéis (User Request) */
+.table-responsive .btn-secondary,
+.table-responsive .btn-danger,
+.table-responsive .btn-primary {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.85rem !important;
+}
+
+.table-responsive td>div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem !important;
+}
+
+/* Fix Flex Shrink on Mobile Nav Items */
+.mobile-only-nav>* {
+  flex-shrink: 0 !important;
+}
+
+/* Fix Dropdown and Mobile Menu positions */
+.nav-dropdown {
+  position: static !important;
+}
+
+.nav-dropdown-content {
+  margin-top: 0 !important;
+  top: 100% !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+.nav-dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: transparent;
+}
+
+.mobile-only-nav.mobile-open {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  margin-top: 0 !important;
 }
