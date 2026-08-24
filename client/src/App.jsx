@@ -474,25 +474,26 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
             <input className="form-input" type="text" name="specialty" defaultValue={targetUser?.specialty || ''} placeholder="ex: Homeopatia, Pediatria (Opcional)" />
           </div>
 
+          <div className="grid-2col" style={{ marginTop: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">RQE (Registro de Especialidade) {(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && <span style={{ color: 'red' }}>*</span>}</label>
+              <input
+                className="form-input"
+                type="text"
+                name="rqe"
+                defaultValue={targetUser?.rqe || ''}
+                required={(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && !isAdmin}
+                placeholder="Apenas números (Opcional)"
+                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+              />
+            </div>
+          </div>
+
           {(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && (
             <div style={{ borderTop: '1px dashed var(--color-border)', paddingTop: '1rem', marginTop: '1rem' }}>
-              <div className="grid-2col">
-                <div className="form-group">
-                  <label className="form-label">RQE (Registro de Especialidade) <span style={{ color: 'red' }}>*</span></label>
-                  <input
-                    className="form-input"
-                    type="text"
-                    name="rqe"
-                    defaultValue={targetUser?.rqe || ''}
-                    required={!isAdmin}
-                    placeholder="Apenas números"
-                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Biografia Curta</label>
-                  <textarea className="form-input" name="bio" defaultValue={targetUser?.bio || ''} placeholder="Biografia do docente..." style={{ minHeight: '100px' }} />
-                </div>
+              <div className="form-group">
+                <label className="form-label">Biografia Curta</label>
+                <textarea className="form-input" name="bio" defaultValue={targetUser?.bio || ''} placeholder="Biografia do docente..." style={{ minHeight: '100px' }} />
               </div>
             </div>
           )}
@@ -1661,11 +1662,13 @@ export default function App() {
   const [viewingCourseHistory, setViewingCourseHistory] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [teacherPaymentTypes, setTeacherPaymentTypes] = useState({});
   const [editingPayment, setEditingPayment] = useState(null);
   const [editingClass, setEditingClass] = useState(null);
   const [courseBannerPreview, setCourseBannerPreview] = useState('');
   const [classCourseSearch, setClassCourseSearch] = useState('');
   const [classTeacherSearch, setClassTeacherSearch] = useState('');
+  const [courseTeacherSearch, setCourseTeacherSearch] = useState('');
   const [classStudentSearch, setClassStudentSearch] = useState('');
   const [formUserRole, setFormUserRole] = useState('STUDENT');
   const [adminRegType, setAdminRegType] = useState('CRM');
@@ -1722,10 +1725,20 @@ export default function App() {
 
   const [financeDateRange, setFinanceDateRange] = useState(getCurrentMonthRange());
   const [editingExpense, setEditingExpense] = useState(null);
+  const [expenseUnit, setExpenseUnit] = useState('BRL');
+  const [expenseDolarRate, setExpenseDolarRate] = useState(5.50);
+  const [expenseAmount, setExpenseAmount] = useState(0);
   const [viewingReceipt, setViewingReceipt] = useState(null);
   const [entryProductType, setEntryProductType] = useState('NONE');
   const [entryStudentSearch, setEntryStudentSearch] = useState('');
   const [entryProductSearch, setEntryProductSearch] = useState('');
+
+  const handleOpenExpenseForm = (expenseObj) => {
+    setEditingExpense(expenseObj);
+    setExpenseUnit(expenseObj?.unit || 'BRL');
+    setExpenseDolarRate(expenseObj?.dolar_rate || 5.50);
+    setExpenseAmount(expenseObj?.amount || 0);
+  };
 
   const openEditPayment = (paymentObj = {}) => {
     setEditingPayment(paymentObj);
@@ -1790,6 +1803,7 @@ export default function App() {
           return {
             name: u.name,
             reg: reg.trim(),
+            rqe: u.rqe || '',
             profession: u.profession === 'outro' ? u.custom_profession : (u.profession || (u.role === 'TEACHER' ? 'médico(a)' : 'Aluno')),
             specialty: specialty,
             city: city,
@@ -2301,10 +2315,10 @@ export default function App() {
       rqe: e.target.rqe?.value || user?.rqe || '',
       bio: e.target.bio?.value || user?.bio || '',
       is_homeopath: e.target.is_homeopath?.checked || false,
-      bank_name: e.target.bank_name?.value || user?.bank_name || '',
-      bank_agency: e.target.bank_agency?.value || user?.bank_agency || '',
-      bank_account: e.target.bank_account?.value || user?.bank_account || '',
-      pix_key: e.target.pix_key?.value || user?.pix_key || '',
+      bank_name: user.role === 'TEACHER' ? user?.bank_name || '' : (e.target.bank_name?.value || user?.bank_name || ''),
+      bank_agency: user.role === 'TEACHER' ? user?.bank_agency || '' : (e.target.bank_agency?.value || user?.bank_agency || ''),
+      bank_account: user.role === 'TEACHER' ? user?.bank_account || '' : (e.target.bank_account?.value || user?.bank_account || ''),
+      pix_key: user.role === 'TEACHER' ? user?.pix_key || '' : (e.target.pix_key?.value || user?.pix_key || ''),
       address_zip: e.target.address_zip?.value || e.target.billing_zip?.value || '',
       address_street: e.target.address_street?.value || e.target.billing_street?.value || '',
       address_number: e.target.address_number?.value || e.target.billing_number?.value || '',
@@ -2671,8 +2685,15 @@ export default function App() {
     const duration_days = parseInt(e.target.duration_days.value) || 180;
     const workload_hours = parseInt(e.target.workload_hours?.value) || (duration_days ? duration_days * 2 : 180);
     const banner_url = e.target.banner_url?.value || courseBannerPreview || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800';
-    const finishing_message = e.target.finishing_message?.value || '';
-    const teacher_id = e.target.teacher_id.value;
+    const min_attendance_pct = parseInt(e.target.min_attendance_pct?.value) || 60;
+
+    // Suporte para múltiplos professores
+    const teacher_ids = Array.from(e.target.elements)
+      .filter(el => el.name === 'teacher_ids' && el.checked)
+      .map(el => el.value);
+
+    // Mantendo teacher_id para compatibilidade legada se for apenas um
+    const teacher_id = teacher_ids.length > 0 ? teacher_ids[0] : (e.target.teacher_id?.value || '');
 
     const targetCourseId = id || ('course-' + Date.now());
 
@@ -2689,9 +2710,11 @@ export default function App() {
               type,
               duration_days,
               workload_hours,
+              min_attendance_pct,
               banner_url,
               finishing_message,
-              teacher_id
+              teacher_id,
+              teacher_ids
             };
           }
           return c;
@@ -2705,9 +2728,11 @@ export default function App() {
           type,
           duration_days,
           workload_hours,
+          min_attendance_pct,
           banner_url,
           finishing_message,
           teacher_id,
+          teacher_ids,
           active: true
         };
         updatedCourses = [...prev.courses, newCourse];
@@ -2721,17 +2746,19 @@ export default function App() {
       teachers.forEach(t => {
         const typeInput = e.target[`payment_type_${t.id}`];
         const rateInput = e.target[`payment_rate_${t.id}`];
+        const unitInput = e.target[`payment_unit_${t.id}`];
 
         if (typeInput && rateInput) {
           const newType = typeInput.value;
           const newRate = parseFloat(rateInput.value) || 0;
+          const newUnit = unitInput ? unitInput.value : 'BRL';
 
           // Verificar configuração atual
           const existingConfigIndex = updatedTeacherCourses.findIndex(tc => tc.teacher_id === t.id && tc.course_id === targetCourseId);
           const currentConfig = existingConfigIndex > -1 ? updatedTeacherCourses[existingConfigIndex] : null;
 
           // Se mudou ou é novo, adiciona ao histórico permanentemente para consulta
-          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate) {
+          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate || currentConfig.payment_unit !== newUnit) {
             const historyEntry = {
               id: 'tph-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
               course_id: targetCourseId,
@@ -4124,22 +4151,23 @@ NEWFILEENCODING:NONE
     const id = e.target.id?.value;
     const title = e.target.title.value;
     const type = e.target.type.value;
-    const day = e.target.day.value;
-    const month = e.target.month.value;
+    const date = e.target.date.value;
     const location = e.target.location.value;
-    const time = e.target.time?.value || '';
+    const time_start = e.target.time_start?.value || '';
+    const time_end = e.target.time_end?.value || '';
+    const zoom_link = e.target.zoom_link?.value || '';
 
     setMockDb(prev => {
       const events = prev.events || [];
       if (id) {
         return {
           ...prev,
-          events: events.map(ev => ev.id === id ? { ...ev, title, type, day, month, location, time } : ev)
+          events: events.map(ev => ev.id === id ? { ...ev, title, type, date, location, time_start, time_end, zoom_link } : ev)
         };
       } else {
         const newEvent = {
           id: 'event-' + Date.now(),
-          title, type, day, month, location, time
+          title, type, date, location, time_start, time_end, zoom_link
         };
         return {
           ...prev,
@@ -4485,7 +4513,7 @@ NEWFILEENCODING:NONE
             }}
           >
             <span>Layout:</span>
-            <span className="layout-badge">
+            <span className="layout-badge" style={{ fontSize: 'var(--fs-xs)' }}>
               {layoutMode === 'tosb-v3' ? 'Design 3' : layoutMode === 'tosb-v2' ? 'Design 2' : 'Design 1'}
             </span>
           </button>
@@ -5119,9 +5147,12 @@ NEWFILEENCODING:NONE
             {/* Synergy Software Section */}
             <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-bg-card)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
               <span className="premium-card-tag" style={{ margin: '0 auto' }}>Parceria Tecnológica</span>
-              <h3 className="font-serif-title" style={{ fontSize: 'var(--fs-3xl)', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS)</h3>
+              <h3 className="font-serif-title" style={{ fontSize: 'var(--fs-3xl)', color: 'var(--color-primary)' }}>Synergy Software (SHS/VIVA)</h3>
               <p className="text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 O software definitivo para repertorização de medicamentos homeopáticos e busca rápida do Método Sensação. Aprenda a usar através de nossos tutoriais exclusivos e facilite sua prática de consultório.
+              </p>
+              <p className="mt-3" style={{ maxWidth: '800px', margin: '0 auto', fontWeight: 'bold', color: 'var(--color-accent)' }}>
+                🎓 Alunos da TOSB tem 50% de desconto
               </p>
               <div style={{ marginTop: '1rem' }}>
                 <button className="btn btn-primary" onClick={() => { clearAlerts(); navigateTo('synergy'); }}>Conhecer Software e Tutoriais</button>
@@ -5219,7 +5250,7 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Valor:</td>
-                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                        <td style={{ fontWeight: 'bold' }}>
                           {(() => {
                             const price = selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : (selectedDetailCourse.type === 'FREE' ? 0 : (selectedDetailCourse.type === 'INPERSON' || selectedDetailCourse.type === 'SEMINAR' ? 1200 : 3600));
                             if (price === 0) return 'R$ 0,00';
@@ -5389,7 +5420,7 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Valor:</td>
-                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                        <td style={{ fontWeight: 'bold' }}>
                           {(() => {
                             const price = selectedDetailBook.price;
                             if (detailInstallments === 1) return `R$ ${price.toFixed(2).replace('.', ',')}`;
@@ -5436,19 +5467,37 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-              {(mockDb.events || []).map(event => (
-                <div key={event.id} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', padding: '1.25rem', borderLeft: '4px solid var(--color-accent)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-base)', padding: '0.75rem 1.25rem', borderRadius: 'var(--border-radius-md)', minWidth: '80px' }}>
-                    <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'bold', color: 'var(--color-primary)' }}>{event.day}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{event.month}</span>
+              {(mockDb.events || []).map(event => {
+                const currentYear = new Date().getFullYear().toString();
+                const eventYear = event.date?.includes('-') ? event.date.split('-')[0] : null;
+                const displayYear = (eventYear && eventYear !== currentYear) ? eventYear : null;
+                const displayDate = event.date ? (event.date.includes('-') ? event.date.split('-').reverse().slice(0, 2).join('/') : event.date) : `${event.day || ''}/${event.month || ''}`.replace(/^\/$/, '');
+
+                return (
+                  <div key={event.id} className="agenda-card">
+                    <div className="agenda-date-box" style={{ padding: '1.5rem 1rem' }}>
+                      <span className="agenda-date-day" style={{ fontSize: '1.5rem' }}>{displayDate}</span>
+                      {displayYear && (
+                        <span className="agenda-date-year" style={{ fontSize: 'var(--fs-base)' }}>
+                          ({displayYear})
+                        </span>
+                      )}
+                    </div>
+                    <div className="agenda-details">
+                      <span className="agenda-type">{event.type}</span>
+                      <h3 className="agenda-title">{event.title}</h3>
+                      <p className="agenda-location" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                        <span>📍 {event.location}</span>
+                        {(event.time_start || event.time_end || event.time) && (
+                          <span style={{ fontWeight: '500' }}>
+                            🕒 {event.time_start || event.time}{event.time_end ? ` às ${event.time_end}` : ''}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <span className="badge-modality badge-modality-online" style={{ marginBottom: '0.35rem' }}>{event.type}</span>
-                    <h3 style={{ fontSize: 'var(--fs-lg)', marginBottom: '0.25rem' }}>{event.title}</h3>
-                    <p style={{ fontSize: 'var(--fs-base)', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -5534,7 +5583,10 @@ NEWFILEENCODING:NONE
                   <div key={idx} className="homeopath-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', wordBreak: 'break-word', padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)' }}>
                     <div className="homeopath-info" style={{ flexGrow: 1 }}>
                       <h4 style={{ marginBottom: '0.5rem', fontSize: 'var(--fs-lg)' }}>{h.name}</h4>
-                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                        <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>CRM: {h.reg.replace(/^CRM[-\s]*/i, '')}</span>
+                        {h.rqe && <span className="homeopath-rqe" style={{ display: 'inline-block', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>RQE: {h.rqe}</span>}
+                      </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
                       <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: 'var(--fs-sm)' }}>📍 {h.city}</div>
                       {h.phone && <div className="homeopath-contact-item" style={{ fontSize: 'var(--fs-sm)' }}>📞 {h.phone}</div>}
@@ -5731,15 +5783,18 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: SYNERGY SOFTWARE */}
         {currentPage === 'synergy' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Synergy Homeopathic Software (SHS)</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Synergy Software (SHS/VIVA)</h2>
             <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
 
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-md)', lineHeight: '1.8' }}>
               <p className="mb-4">
                 O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
+              <p className="mb-4" style={{ fontWeight: 'bold', color: 'var(--color-accent)', textAlign: 'center', fontSize: 'var(--fs-lg)' }}>
+                🎓 Alunos da TOSB tem 50% de desconto
+              </p>
 
-              <h3 className="font-serif-title mb-3 mt-5">Tutoriais Exclusivos da Filial Brasil:</h3>
+              <h3 className="font-serif-title mb-3 mt-5">Tutoriais do SHS gratuitos:</h3>
               <div className="invoices-list" style={{ gap: '1rem' }}>
                 <div className="invoice-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
@@ -5960,7 +6015,7 @@ NEWFILEENCODING:NONE
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'agenda' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('agenda')}>
-                      <span style={{ fontSize: 'var(--fs-lg)' }}>📅</span> Agenda & Eventos
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>📅</span> Agenda Pessoal
                     </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
@@ -6038,9 +6093,29 @@ NEWFILEENCODING:NONE
                     <h3 className="mb-4">Meus Cursos e Disciplinas</h3>
                     <div className="courses-list">
                       {courses.filter(course => course.enrollment.enrolled).length > 0 ? (
-                        courses.filter(course => course.enrollment.enrolled).map(course => (
-                          <div key={course.id} className="card course-card-grid">
-                            <div>
+                        courses.filter(course => course.enrollment.enrolled).map(course => {
+                          let showPayNow = false;
+                          let warningMsg = null;
+                          let isExpired = false;
+                          if (course.enrollment.status === 'SUSPENDED') {
+                            showPayNow = true;
+                            warningMsg = '⚠️ Acesso Bloqueado por Inadimplência';
+                          } else if (course.enrollment.status === 'ACTIVE') {
+                            const daysToExpire = (new Date(course.enrollment.expiresAt) - new Date()) / (1000 * 60 * 60 * 24);
+                            if (daysToExpire <= 3 && daysToExpire >= 0) {
+                              showPayNow = true;
+                            }
+                          } else {
+                            isExpired = true;
+                          }
+
+                          const associatedClass = (mockDb.classes || []).find(cl => cl.course_id === course.id && (cl.student_ids || []).includes(user.id));
+                          const classTeachers = associatedClass ? mockDb.users.filter(u => (associatedClass.teacher_ids || []).includes(u.id)) : [];
+                          const attendanceKey = associatedClass ? `${associatedClass.id}_${user.id}` : null;
+                          const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
+
+                          return (
+                            <div key={course.id} className="card">
                               <span className="course-type-badge">
                                 {course.type === 'FREE' ? 'Curso Livre (Gratuito)' : course.type === 'SUBSCRIPTION' ? 'Clube (Assinatura)' : 'Pós-Graduação'}
                               </span>
@@ -6052,59 +6127,50 @@ NEWFILEENCODING:NONE
                                 </div>
                               )}
 
+                              {warningMsg ? (
+                                <div className="error-text-bold" style={{ marginTop: '0.5rem' }}>{warningMsg}</div>
+                              ) : isExpired ? (
+                                <div className="muted-text-bold" style={{ marginTop: '0.5rem' }}>❌ Acesso Expirado (6 Meses)</div>
+                              ) : null}
+
+                              {showPayNow && (
+                                <button className="btn btn-primary" onClick={() => startCheckout(course)} style={{ marginTop: '0.5rem', marginBottom: '0.5rem', padding: '0.25rem 0.75rem', fontSize: 'var(--fs-sm)' }}>
+                                  Pagar Agora
+                                </button>
+                              )}
+
                               {/* Informações de Turma, Professor e Presença do Aluno */}
-                              {(() => {
-                                const associatedClass = (mockDb.classes || []).find(cl => cl.course_id === course.id && (cl.student_ids || []).includes(user.id));
-                                const classTeachers = associatedClass ? mockDb.users.filter(u => (associatedClass.teacher_ids || []).includes(u.id)) : [];
-                                const attendanceKey = associatedClass ? `${associatedClass.id}_${user.id}` : null;
-                                const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
-                                return associatedClass ? (
-                                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
-                                    <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
-                                      🏫 <strong>Turma:</strong> {associatedClass.name}
-                                    </div>
-                                    <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
-                                      👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
-                                    </div>
-                                    <div style={{ fontSize: 'var(--fs-sm)' }}>
-                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: 'var(--fs-xs)' }}>{attendanceRecords.length} registrada(s)</span>
-                                      {attendanceRecords.length > 0 && (
-                                        <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b', marginTop: '0.25rem' }}>
-                                          Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
-                                        </div>
-                                      )}
-                                    </div>
+                              {associatedClass ? (
+                                <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
+                                  <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
+                                    🏫 <strong>Turma:</strong> {associatedClass.name}
                                   </div>
-                                ) : (
-                                  <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                                    Nenhuma turma alocada para este curso ainda.
+                                  <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
+                                    👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
                                   </div>
-                                );
-                              })()}
-                            </div>
-                            <div className="course-card-actions">
-                              {course.enrollment.enrolled ? (
-                                course.enrollment.status === 'ACTIVE' ? (
-                                  <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
-                                ) : course.enrollment.status === 'SUSPENDED' ? (
-                                  <div className="error-text-bold">
-                                    ⚠️ Acesso Bloqueado por Inadimplência
+                                  <div style={{ fontSize: 'var(--fs-sm)' }}>
+                                    📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: 'var(--fs-xs)' }}>{attendanceRecords.length} registrada(s)</span>
+                                    {attendanceRecords.length > 0 && (
+                                      <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b', marginTop: '0.25rem' }}>
+                                        Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
+                                      </div>
+                                    )}
                                   </div>
-                                ) : (
-                                  <div className="muted-text-bold">
-                                    ❌ Acesso Expirado (6 Meses)
-                                  </div>
-                                )
+                                </div>
                               ) : (
-                                course.type === 'FREE' ? (
-                                  <button className="btn btn-secondary" onClick={() => enrollFreeCourse(course.id)}>Matricular Grátis</button>
-                                ) : (
-                                  <button className="btn btn-primary" onClick={() => startCheckout(course)}>Comprar / Assinar</button>
-                                )
+                                <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                  Nenhuma turma alocada para este curso ainda.
+                                </div>
+                              )}
+
+                              {course.enrollment.status === 'ACTIVE' && (
+                                <div style={{ marginTop: '1rem' }}>
+                                  <button className="btn btn-primary" onClick={() => viewCourseDetails(course.id)}>Assistir Aulas</button>
+                                </div>
                               )}
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       ) : (
                         <div className="text-center p-6 text-muted">
                           <p>Você não possui nenhuma matrícula ativa no momento.</p>
@@ -6125,26 +6191,49 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'agenda' && (
                   <div className="card">
-                    <h3 className="mb-4">Agenda & Eventos Científicos</h3>
-                    <p className="text-muted mb-4">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
+                    <h3 className="mb-4">Agenda Pessoal</h3>
+                    <p className="text-muted mb-2">Confira nosso cronograma integrado de aulas magnas, encontros de matéria médica e lançamentos de livros.</p>
+                    <p className="mb-4">
+                      Confira também a <a href={getLinkHref('agenda')} onClick={(e) => handleLinkClick(e, 'agenda')} style={{ color: 'var(--color-text-muted)', textDecoration: 'underline' }}>Agenda Geral Acadêmica</a>
+                    </p>
 
                     <div className="agenda-list">
-                      {(mockDb.events || []).map(event => (
-                        <div key={event.id} className="agenda-card">
-                          <div className="agenda-date-box">
-                            <span className="agenda-date-day">{event.day}</span>
-                            <span className="agenda-date-month">{event.month}</span>
+                      {(mockDb.events || []).map(event => {
+                        const currentYear = new Date().getFullYear().toString();
+                        const eventYear = event.date?.includes('-') ? event.date.split('-')[0] : null;
+                        const displayYear = (eventYear && eventYear !== currentYear) ? eventYear : null;
+                        const displayDate = event.date ? (event.date.includes('-') ? event.date.split('-').reverse().slice(0, 2).join('/') : event.date) : `${event.day || ''}/${event.month || ''}`.replace(/^\/$/, '');
+
+                        return (
+                          <div key={event.id} className="agenda-card">
+                            <div className="agenda-date-box" style={{ padding: '1.5rem 1rem' }}>
+                              <span className="agenda-date-day" style={{ fontSize: '1.5rem' }}>{displayDate}</span>
+                              {displayYear && (
+                                <span className="agenda-date-year" style={{ fontSize: 'var(--fs-base)' }}>
+                                  ({displayYear})
+                                </span>
+                              )}
+                            </div>
+                            <div className="agenda-details">
+                              <span className="agenda-type">{event.type}</span>
+                              <h3 className="agenda-title">{event.title}</h3>
+                              <p className="agenda-location" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                                <span>📍 {event.location}</span>
+                                {(event.time_start || event.time_end || event.time) && (
+                                  <span style={{ fontWeight: '500' }}>
+                                    🕒 {event.time_start || event.time}{event.time_end ? ` às ${event.time_end}` : ''}
+                                  </span>
+                                )}
+                                {event.zoom_link && (
+                                  <a href={event.zoom_link} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)', textDecoration: 'none', marginTop: '0.25rem' }}>
+                                    🔗 Link do Zoom
+                                  </a>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                          <div className="agenda-details">
-                            <span className="agenda-type">{event.type}</span>
-                            <h3 className="agenda-title">{event.title}</h3>
-                            <p className="agenda-location">
-                              📍 {event.location}
-                              {event.time && <span style={{ marginLeft: '1rem', color: 'var(--color-primary)', fontWeight: '500' }}>🕒 {event.time}</span>}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {(mockDb.events || []).length === 0 && (
                         <p className="text-muted text-center w-full py-4">Nenhum evento agendado no momento.</p>
                       )}
@@ -6772,26 +6861,27 @@ NEWFILEENCODING:NONE
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Banco (Nome/Código)</label>
-                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} placeholder="ex: 001 - Banco do Brasil ou 341 - Itaú" />
+                          <input className="form-input" type="text" name="bank_name" defaultValue={user?.bank_name || ''} placeholder="ex: 001 - Banco do Brasil ou 341 - Itaú" disabled readOnly style={{ backgroundColor: '#e2e8f0', cursor: 'not-allowed' }} />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Agência (com dígito)</label>
-                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} placeholder="ex: 1234-5" />
+                          <input className="form-input" type="text" name="bank_agency" defaultValue={user?.bank_agency || ''} placeholder="ex: 1234-5" disabled readOnly style={{ backgroundColor: '#e2e8f0', cursor: 'not-allowed' }} />
                         </div>
                       </div>
 
                       <div className="grid-2col">
                         <div className="form-group">
                           <label className="form-label">Conta Corrente / Poupança</label>
-                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} placeholder="ex: 98765-4" />
+                          <input className="form-input" type="text" name="bank_account" defaultValue={user?.bank_account || ''} placeholder="ex: 98765-4" disabled readOnly style={{ backgroundColor: '#e2e8f0', cursor: 'not-allowed' }} />
                         </div>
 
                         <div className="form-group">
                           <label className="form-label">Chave PIX</label>
-                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" />
+                          <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" disabled readOnly style={{ backgroundColor: '#e2e8f0', cursor: 'not-allowed' }} />
                         </div>
                       </div>
+                      <div className="error-text-bold mb-4" style={{ fontSize: 'var(--fs-sm)' }}>⚠️ Para alterar seus dados bancários, solicite à administração.</div>
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                         <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
                       </div>
@@ -6985,7 +7075,7 @@ NEWFILEENCODING:NONE
                           <input type="hidden" id={'hidden_full_desc_' + (editingCourse.id || 'new')} name="full_description" defaultValue={editingCourse.full_description || ''} />
                         </div>
 
-                        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="grid-2col" style={{ marginBottom: '1rem' }}>
                           <div className="form-group">
                             <label className="form-label">Tipo de Curso</label>
                             <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
@@ -7002,6 +7092,10 @@ NEWFILEENCODING:NONE
                             <label className="form-label">Carga Horária (Horas)</label>
                             <input className="form-input" type="number" name="workload_hours" defaultValue={editingCourse.workload_hours || (editingCourse.duration_days ? editingCourse.duration_days * 2 : 180)} required placeholder="ex: 180" />
                           </div>
+                          <div className="form-group">
+                            <label className="form-label">% Mín. Frequência</label>
+                            <input className="form-input" type="number" name="min_attendance_pct" defaultValue={editingCourse.min_attendance_pct || 60} min="0" max="100" required placeholder="ex: 60" />
+                          </div>
                         </div>
 
                         <div className="form-group">
@@ -7010,12 +7104,31 @@ NEWFILEENCODING:NONE
                         </div>
 
                         <div className="form-group">
-                          <label className="form-label">Professor Responsável Principal</label>
-                          <select className="form-input" name="teacher_id" defaultValue={editingCourse.teacher_id || 'teacher-id'} required>
-                            {mockDb.users.filter(u => u.role === 'TEACHER').map(t => (
-                              <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
-                            ))}
-                          </select>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <label className="form-label" style={{ margin: 0 }}>Professores Associados ao Curso</label>
+                            <input
+                              className="form-input"
+                              placeholder="🔍 Pesquisar professor..."
+                              value={courseTeacherSearch}
+                              onChange={(e) => setCourseTeacherSearch(e.target.value)}
+                              style={{ width: '200px', padding: '0.25rem 0.5rem', fontSize: 'var(--fs-sm)' }}
+                            />
+                          </div>
+                          <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
+                            {mockDb.users
+                              .filter(u => u.role === 'TEACHER' && u.name.toLowerCase().includes(courseTeacherSearch.toLowerCase()))
+                              .map(u => {
+                                const isChecked = editingCourse.teacher_ids
+                                  ? editingCourse.teacher_ids.includes(u.id)
+                                  : (editingCourse.teacher_id === u.id); // Compatibilidade legado
+                                return (
+                                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
+                                    <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
+                                    <span><strong>{u.name}</strong> <span className="text-muted">({u.email})</span></span>
+                                  </label>
+                                );
+                              })}
+                          </div>
                         </div>
 
                         {/* SEÇÃO: DEFINIÇÃO DE REMUNERAÇÃO DOS PROFESSORES PARA ESTE CURSO */}
@@ -7050,30 +7163,54 @@ NEWFILEENCODING:NONE
                                     )}
                                   </div>
 
-                                  <div className="grid-2col" style={{ gap: '0.75rem' }}>
+                                  <div className="grid-3col" style={{ gap: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                                     <div>
-                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Modalidade de Pagamento</label>
+                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Modalidade</label>
                                       <select
                                         className="form-input"
                                         name={`payment_type_${t.id}`}
                                         defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
+                                        onChange={(e) => setTeacherPaymentTypes(prev => ({ ...prev, [t.id]: e.target.value }))}
                                         style={{ fontSize: 'var(--fs-sm)' }}
                                       >
-                                        <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
-                                        <option value="valor_fixo">💵 Valor Fixo (R$)</option>
-                                        <option value="percentual">📊 Percentual (%)</option>
+                                        <option value="hora_aula">⏱️ Hora Aula</option>
+                                        <option value="valor_fixo">💵 Valor Fixo</option>
+                                        <option value="percentual">📊 Percentual</option>
                                       </select>
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor ou Taxa (R$ ou %)</label>
+                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Unidade</label>
+                                      <select
+                                        className="form-input"
+                                        name={`payment_unit_${t.id}`}
+                                        defaultValue={currentConfig?.payment_unit || 'BRL'}
+                                        style={{ fontSize: 'var(--fs-sm)' }}
+                                      >
+                                        {(() => {
+                                          const pType = teacherPaymentTypes[t.id] || currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo');
+                                          if (pType === 'percentual') {
+                                            return <option value="%">%</option>;
+                                          }
+                                          return (
+                                            <>
+                                              <option value="BRL">BRL</option>
+                                              <option value="USD">USD</option>
+                                            </>
+                                          );
+                                        })()}
+                                      </select>
+                                    </div>
+
+                                    <div>
+                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor / Taxa</label>
                                       <input
                                         className="form-input"
                                         type="number"
                                         step="0.01"
                                         name={`payment_rate_${t.id}`}
                                         defaultValue={currentConfig?.payment_rate || (editingCourse.type === 'POSTGRAD' ? 150.00 : editingCourse.type === 'FREE' ? 15.00 : 2500.00)}
-                                        placeholder="ex: 150.00 ou 15.00"
+                                        placeholder="ex: 150.00"
                                         style={{ fontSize: 'var(--fs-sm)' }}
                                       />
                                     </div>
@@ -7910,9 +8047,33 @@ NEWFILEENCODING:NONE
                                       </td>
                                       <td style={{ color: p.status === 'RECEIVED' ? 'var(--color-success)' : 'inherit', fontWeight: 'bold' }}>R$ {p.amount.toFixed(2)}</td>
                                       <td>
-                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : p.status === 'CANCELLED' ? 'badge-pending' : 'badge-pending'} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
-                                          {p.status === 'RECEIVED' ? 'Confirmado' : p.status === 'OVERDUE' ? 'Atrasado' : p.status === 'CANCELLED' ? 'Cancelado' : 'Pendente'}
-                                        </span>
+                                        {(() => {
+                                          let isGracePeriod = false;
+                                          if (p.status === 'OVERDUE' && p.due_date) {
+                                            const daysLate = Math.floor((new Date() - new Date(p.due_date)) / (1000 * 60 * 60 * 24));
+                                            if (daysLate < 3) isGracePeriod = true;
+                                          }
+
+                                          let badgeClass = 'badge-pending';
+                                          let badgeText = 'Pendente';
+
+                                          if (p.status === 'RECEIVED') {
+                                            badgeClass = 'badge-paid';
+                                            badgeText = 'Confirmado';
+                                          } else if (p.status === 'OVERDUE' && !isGracePeriod) {
+                                            badgeClass = 'badge-overdue';
+                                            badgeText = 'Inadimplente';
+                                          } else if (p.status === 'CANCELLED') {
+                                            badgeClass = 'badge-pending';
+                                            badgeText = 'Cancelado';
+                                          }
+
+                                          return (
+                                            <span className={badgeClass} style={p.status === 'CANCELLED' ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}>
+                                              {badgeText}
+                                            </span>
+                                          );
+                                        })()}
                                       </td>
                                       <td>
                                         <button
@@ -7934,7 +8095,7 @@ NEWFILEENCODING:NONE
 
                     {financeTab === 'expenses' && (
                       <div className="finance-expenses">
-                        <button className="btn btn-secondary mb-4" onClick={() => setEditingExpense({})}>＋ Lançar Despesa / Saída Avulsa</button>
+                        <button className="btn btn-secondary mb-4" onClick={() => handleOpenExpenseForm({})}>＋ Lançar Despesa / Saída Avulsa</button>
 
                         {editingExpense && (
                           <form className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }} onSubmit={(e) => {
@@ -7969,11 +8130,14 @@ NEWFILEENCODING:NONE
                               description: e.target.description.value,
                               category: e.target.category.value,
                               amount: parseFloat(e.target.amount.value),
+                              unit: expenseUnit,
+                              dolar_rate: expenseUnit === 'USD' ? parseFloat(e.target.dolar_rate?.value || 5.50) : 1,
                               date: e.target.date.value,
                               paid_at: paid_at,
                               status: e.target.status.value,
                               receipt_proof: e.target.receipt_proof?.files?.[0] ? 'Base64 Placeholder' : editingExpense.receipt_proof || null
                             };
+                            newExp.effective_brl = expenseUnit === 'USD' ? newExp.amount * newExp.dolar_rate : newExp.amount;
                             setMockDb(prev => ({
                               ...prev,
                               expenses: editingExpense.id
@@ -8042,8 +8206,28 @@ NEWFILEENCODING:NONE
                                     </select>
                                   </div>
                                   <div className="form-group">
-                                    <label className="form-label">Valor (R$)</label>
-                                    <input type="number" step="0.01" name="amount" className="form-input" defaultValue={editingExpense.amount || 0.00} required />
+                                    <label className="form-label">Unidade</label>
+                                    <select name="unit" className="form-input" value={expenseUnit} onChange={(e) => setExpenseUnit(e.target.value)}>
+                                      <option value="BRL">BRL (R$)</option>
+                                      <option value="USD">USD ($)</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div className="grid-3col mb-3">
+                                  <div className="form-group">
+                                    <label className="form-label">Valor Original ({expenseUnit})</label>
+                                    <input type="number" step="0.01" name="amount" className="form-input" value={expenseAmount} onChange={(e) => setExpenseAmount(parseFloat(e.target.value) || 0)} required />
+                                  </div>
+                                  {expenseUnit === 'USD' && (
+                                    <div className="form-group">
+                                      <label className="form-label">Cotação Dólar (R$)</label>
+                                      <input type="number" step="0.01" name="dolar_rate" className="form-input" value={expenseDolarRate} onChange={(e) => setExpenseDolarRate(parseFloat(e.target.value) || 0)} required />
+                                    </div>
+                                  )}
+                                  <div className="form-group">
+                                    <label className="form-label">Valor Efetivo (BRL)</label>
+                                    <input className="form-input" value={`R$ ${(expenseUnit === 'USD' ? expenseAmount * expenseDolarRate : expenseAmount).toFixed(2)}`} disabled style={{ backgroundColor: '#e2e8f0', fontWeight: 'bold' }} />
                                   </div>
                                 </div>
                                 <div className="grid-3col mb-3">
@@ -8126,7 +8310,7 @@ NEWFILEENCODING:NONE
                                       <button
                                         className="btn btn-secondary"
                                         style={{ padding: '0.25rem 0.5rem' }}
-                                        onClick={() => setEditingExpense(e)}
+                                        onClick={() => handleOpenExpenseForm(e)}
                                       >
                                         Editar
                                       </button>
@@ -8168,7 +8352,7 @@ NEWFILEENCODING:NONE
                                         <button
                                           className="btn btn-secondary"
                                           style={{ padding: '0.25rem 0.5rem' }}
-                                          onClick={() => setEditingExpense({
+                                          onClick={() => handleOpenExpenseForm({
                                             ...p,
                                             isPayout: true,
                                             description: `Honorários Docentes (${teacher?.name || 'Professor'})`,
@@ -8541,6 +8725,10 @@ NEWFILEENCODING:NONE
                           <label className="form-label">Título do Evento</label>
                           <input className="form-input" name="title" required placeholder="Lançamento do Livro X / Grupo de Estudos" defaultValue={editingEvent?.title || ''} key={`title-${editingEvent?.id || 'new'}`} />
                         </div>
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                          <label className="form-label">Localização</label>
+                          <input className="form-input" name="location" required placeholder="ex: Auditório Central / Online" defaultValue={editingEvent?.location || ''} key={`location-${editingEvent?.id || 'new'}`} />
+                        </div>
                         <div className="form-group">
                           <label className="form-label">Tipo de Evento</label>
                           <select className="form-input" name="type" defaultValue={editingEvent?.type || 'Lançamento de Livro'} key={`type-${editingEvent?.id || 'new'}`}>
@@ -8551,16 +8739,20 @@ NEWFILEENCODING:NONE
                           </select>
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Localização / Link</label>
-                          <input className="form-input" name="location" required placeholder="ex: Online via Zoom / Curitiba - PR" defaultValue={editingEvent?.location || ''} key={`location-${editingEvent?.id || 'new'}`} />
+                          <label className="form-label">Data do Evento</label>
+                          <input type="date" className="form-input" name="date" required defaultValue={editingEvent?.date?.includes('-') ? editingEvent.date : ''} key={`date-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Dia (ex: 15)</label>
-                          <input className="form-input" name="day" required placeholder="ex: 15" maxLength="2" defaultValue={editingEvent?.day || ''} key={`day-${editingEvent?.id || 'new'}`} />
+                          <label className="form-label">Horário Início (Opcional)</label>
+                          <input type="time" className="form-input" name="time_start" defaultValue={editingEvent?.time_start || editingEvent?.time || ''} key={`time_start-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Mês (ex: Set)</label>
-                          <input className="form-input" name="month" required placeholder="ex: Set" maxLength="3" defaultValue={editingEvent?.month || ''} key={`month-${editingEvent?.id || 'new'}`} />
+                          <label className="form-label">Horário Fim (Opcional)</label>
+                          <input type="time" className="form-input" name="time_end" defaultValue={editingEvent?.time_end || ''} key={`time_end-${editingEvent?.id || 'new'}`} />
+                        </div>
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                          <label className="form-label">Link do Zoom (Opcional)</label>
+                          <input className="form-input" name="zoom_link" placeholder="https://zoom.us/j/..." defaultValue={editingEvent?.zoom_link || ''} key={`zoom-${editingEvent?.id || 'new'}`} />
                         </div>
                         <div style={{ gridColumn: 'span 2', marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
                           {editingEvent && (
@@ -8593,7 +8785,7 @@ NEWFILEENCODING:NONE
                           <tbody>
                             {(mockDb.events || []).map(event => (
                               <tr key={event.id}>
-                                <td><strong>{event.day} {event.month}</strong></td>
+                                <td><strong>{event.date ? (event.date.includes('-') ? event.date.split('-').reverse().slice(0, 2).join('/') : event.date) : `${event.day || ''}/${event.month || ''}`.replace(/^\/$/, '')}</strong></td>
                                 <td><span className="course-type-badge">{event.type}</span></td>
                                 <td><strong>{event.title}</strong></td>
                                 <td>{event.location}</td>

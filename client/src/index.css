@@ -2447,6 +2447,8 @@ table.syllabus-module-card tbody tr:last-child td {
     width: 100%;
     min-width: unset;
     padding: 0.75rem;
+    flex-direction: row;
+    gap: 0.5rem;
   }
 }
 
@@ -3842,4 +3844,9 @@ table.syllabus-module-card tbody tr:last-child td {
 
 .cart-table tbody td {
   font-size: var(--fs-sm);
+}
+
+/* Aplicar fonte serifada em todos os badges e tags */
+[class*="badge"], [class*="tag"] {
+  font-family: var(--font-serif) !important;
 }
