@@ -2710,6 +2710,27 @@ table.syllabus-module-card tbody tr:last-child td {
   color: #6b21a8;
 }
 
+/* Badges de Homeopatas */
+.badge-homeopath-reg {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
+}
+
+.badge-homeopath-rqe {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
+}
+
 /* Trava de Prévia do Vídeo (20%) */
 .video-player-container {
   position: relative;
@@ -8335,7 +8356,7 @@ NEWFILEENCODING:NONE
           </div>
 
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'books')}>Livros</a>
-          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'synergy')}>Synergy Software</a>
+          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'synergy')}>Synergy</a>
           <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => handleLinkClick(e, 'contact')}>Contato</a>
         </nav>
 
@@ -8353,7 +8374,7 @@ NEWFILEENCODING:NONE
           <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
 
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'books'); }}>Livros</a>
-          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy Software</a>
+          <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy</a>
           <a href={getLinkHref('contact')} className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'contact'); }}>Contato</a>
 
           {/* Botões de Ações */}
@@ -9025,7 +9046,7 @@ NEWFILEENCODING:NONE
             {/* Synergy Software Section */}
             <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-bg-card)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
               <span className="premium-card-tag" style={{ margin: '0 auto' }}>Parceria Tecnológica</span>
-              <h3 className="font-serif-title" style={{ fontSize: 'var(--fs-3xl)', color: 'var(--color-primary)' }}>Synergy Software (SHS/VIVA)</h3>
+              <h3 className="font-serif-title" style={{ fontSize: 'var(--fs-3xl)', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS/VIVA)</h3>
               <p className="text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 O software definitivo para repertorização de medicamentos homeopáticos e busca rápida do Método Sensação. Aprenda a usar através de nossos tutoriais exclusivos e facilite sua prática de consultório.
               </p>
@@ -9341,7 +9362,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: AGENDA GERAL */}
         {currentPage === 'agenda' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>📅 Agenda Geral Acadêmica</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Agenda Geral Acadêmica</h2>
             <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -9383,26 +9404,39 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: SOBRE NÓS */}
         {currentPage === 'about' && (
           <div className="card">
-            <h2 className="mb-4 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Sobre a The Other Song Brasil</h2>
+            <h2 className="mb-4 font-serif-title text-center home-section-title" style={{ fontSize: 'var(--fs-4xl)' }}>The Other Song Brasil</h2>
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-lg)', lineHeight: '1.8' }}>
               <p className="mb-4">
-                A <strong>The Other Song Brasil (TOSB)</strong> é a filial brasileira autorizada da prestigiosa academia internacional *The Other Song - International Academy of Advanced Homeopathy*, sediada em Mumbai, Índia.
+                A <strong>The Other Song Brasil (TOSB)</strong>, sediada em Curitiba/PR, é a representação brasileira reconhecida da <em>The Other Song</em>, de Mumbai, Índia, instituição internacional dedicada ao ensino, à prática clínica e ao aprofundamento da Homeopatia.
               </p>
               <p className="mb-4">
-                Nossa filial, sediada em <strong>Curitiba - PR</strong>, é liderada pelo renomado médico homeopata <strong>Dr. Carlos Eduardo Leitão</strong>. Temos como missão central difundir o **Método Sensação Vital**, desenvolvido pelo pioneiro **Dr. Rajan Sankaran**, e capacitar profissionais da saúde no Brasil para aplicarem essa metodologia clínica avançada.
+                A TOSB nasceu com o propósito de aproximar os homeopatas brasileiros das mais importantes referências internacionais da Homeopatia contemporânea, promovendo formação continuada, intercâmbio de conhecimento e aprofundamento da prática clínica, com especial dedicação ao estudo e ao ensino do Método da Sensação.
               </p>
-              <blockquote style={{ borderLeft: '4px solid var(--color-accent)', paddingLeft: '1.25rem', color: 'var(--color-primary)', fontStyle: 'italic', margin: '2rem 0', fontWeight: '600' }}>
-                "O Método Sensação nos permite ir além do diagnóstico físico e mental superficial, mergulhando no reino da natureza que expressa o desequilíbrio dinâmico mais profundo de cada indivíduo."
-              </blockquote>
-              <h3 className="font-serif-title mb-3 mt-5">Pilares Científicos da TOSB:</h3>
-              <ul style={{ paddingLeft: '1.5rem', marginBottom: '2rem' }}>
-                <li className="mb-2"><strong>Qualidade Acadêmica:</strong> Corpo docente credenciado internacionalmente e discussões científicas contínuas.</li>
-                <li className="mb-2"><strong>Casos Clínicos Reais:</strong> Ensino baseado em gravações reais de consultas, respeitando o sigilo de dados.</li>
-                <li className="mb-2"><strong>Integração de Tecnologias:</strong> Uso do Synergy Software como base para repertorização rápida.</li>
-              </ul>
-              <div className="text-center mt-6 mb-7">
-                <button className="btn btn-primary" onClick={() => { clearAlerts(); window.location.hash = '#home'; }}>Voltar para Cursos</button>
-              </div>
+              <p className="mb-4">
+                A escola é dirigida pelo <strong>Dr. Carlos Eduardo Leitão</strong>, médico formado pela Universidade Federal do Paraná (UFPR) em 1994, homeopata pela Fundação de Estudos Homeopáticos do Paraná e especialista em Homeopatia desde 1997.
+              </p>
+              <p className="mb-4">
+                Atuante no Método da Sensação desde 2006 e instrutor do método desde 2012, Dr. Carlos é representante da The Other Song no Brasil e tem participado ativamente da aproximação entre a comunidade homeopática brasileira e professores de referência internacional.
+              </p>
+              <p className="mb-4">
+                Ao longo dessa trajetória, a TOSB promoveu no Brasil importantes encontros de formação, entre eles os Seminários Internacionais com Dr. Rajan Sankaran, em Curitiba, em 2017, 2019 e 2024, com Dr. Jayesh Shah, em 2019 e com Dr. Gaurang Gaikwad em 2023 e 2025.
+              </p>
+              <p className="mb-4">
+                Além das atividades educacionais, Dr. Carlos é representante autorizado no Brasil do MacRepertory e ReferenceWorks, ferramentas internacionais utilizadas na prática e no estudo da Homeopatia.
+              </p>
+              <p className="mb-5">
+                Hoje, a TOSB mantém essa ponte entre o Brasil e o cenário internacional por meio de cursos, seminários, encontros clínicos e programas de educação continuada, reunindo professores brasileiros e internacionais e tornando esse conhecimento mais acessível aos profissionais e estudantes de Homeopatia no país através de mais de 1.000 horas de cursos gravados e acessíveis ao estudo em nossa plataforma.
+              </p>
+
+              <hr style={{ borderTop: '1px solid var(--color-border)', margin: '3rem 0' }} />
+
+              <h2 className="mb-4 font-serif-title text-center home-section-title" style={{ fontSize: 'var(--fs-4xl)' }}>The Other Song Mumbai</h2>
+              <p className="mb-4">
+                A <strong>The Other Song</strong>, sediada em Mumbai, Índia, é um centro internacional dedicado ao ensino, à prática clínica e à pesquisa em Homeopatia, sob a direção do <strong>Dr. Rajan Sankaran</strong>, um dos principais nomes da Homeopatia contemporânea e pioneiro do Método da Sensação.
+              </p>
+              
+              <hr style={{ borderTop: '1px solid var(--color-border)', margin: '3rem 0' }} />
+
 
               <h3 className="font-serif-title mb-4 mt-6 text-center" style={{ fontSize: 'var(--fs-3xl)' }}>Galeria de Fotos Institucional</h3>
               <div className="gallery-grid-photos">
@@ -9462,8 +9496,8 @@ NEWFILEENCODING:NONE
                     <div className="homeopath-info" style={{ flexGrow: 1 }}>
                       <h4 style={{ marginBottom: '0.5rem', fontSize: 'var(--fs-lg)' }}>{h.name}</h4>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>CRM: {h.reg.replace(/^CRM[-\s]*/i, '')}</span>
-                        {h.rqe && <span className="homeopath-rqe" style={{ display: 'inline-block', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>RQE: {h.rqe}</span>}
+                        <span className="badge-homeopath-reg">CRM: {h.reg.replace(/^CRM[-\s]*/i, '')}</span>
+                        {h.rqe && <span className="badge-homeopath-rqe">RQE: {h.rqe}</span>}
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
                       <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: 'var(--fs-sm)' }}>📍 {h.city}</div>
@@ -9661,7 +9695,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: SYNERGY SOFTWARE */}
         {currentPage === 'synergy' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Synergy Software (SHS/VIVA)</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Synergy Homeopathic Software (SHS/VIVA)</h2>
             <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
 
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-md)', lineHeight: '1.8' }}>
@@ -11567,7 +11601,7 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'finance' && (
                   <div className="card finance-module">
                     <div className="quiz-header mb-4">
-                      <h3>💰 Gerenciar Contas</h3>
+                      <h3>Gerenciar Contas</h3>
                     </div>
 
                     <div className="finance-sub-tabs">
@@ -12257,7 +12291,7 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'classes' && (
                   <div className="card">
                     <div className="quiz-header mb-4">
-                      <h3>🎓 Painel de Gerenciamento de Turmas</h3>
+                      <h3>Painel de Gerenciamento de Turmas</h3>
                       <button className="btn btn-primary" onClick={() => setEditingClass({})}>＋ Criar Nova Turma</button>
                     </div>
                     <p className="course-card-description mb-4">
@@ -12693,7 +12727,7 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'temp_unlock' && (
                   <div className="card">
                     <div className="quiz-header mb-4">
-                      <h3>🔓 Gestão de Liberações Temporárias (Alunos Inadimplentes)</h3>
+                      <h3>Gestão de Liberações Temporárias (Alunos Inadimplentes)</h3>
                       <button>Executar Varredura de Vencimentos (2 Dias Antes)
                       </button>
                     </div>
@@ -12806,7 +12840,7 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'promotions' && (
                   <div className="card">
                     <div className="quiz-header mb-4">
-                      <h3>📢 Disparo de Ofertas & Comunicações Promocionais por E-mail</h3>
+                      <h3>Disparo de Ofertas & Comunicações Promocionais por E-mail</h3>
                       <button className="btn btn-secondary btn-quick-login" onClick={() => setEmailModalOpen(true)}>
                         📧 Ver Caixa de E-mails Disparados
                       </button>

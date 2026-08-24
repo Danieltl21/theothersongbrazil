@@ -2691,6 +2691,27 @@ table.syllabus-module-card tbody tr:last-child td {
   color: #6b21a8;
 }
 
+/* Badges de Homeopatas */
+.badge-homeopath-reg {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
+}
+
+.badge-homeopath-rqe {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: var(--color-bg-base);
+  color: var(--color-accent);
+}
+
 /* Trava de Prévia do Vídeo (20%) */
 .video-player-container {
   position: relative;
