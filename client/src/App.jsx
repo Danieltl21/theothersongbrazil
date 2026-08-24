@@ -39,6 +39,7 @@ const BOOKS_DATA = [
     id: 'book-esquema',
     title: 'Esquema de Reinos e Subreinos 2.0',
     author: 'Dr. Rajan Sankaran',
+    image: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-760w,f_auto,q_auto:best/rockcms/2025-10/Mixbook-Photobook-471d52.jpg',
     price: 220.00,
     desc: 'A obra clássica do Método Sensação atualizada com tabelas de referência e diferenciação rápida.',
     page_count: 340,
@@ -58,6 +59,7 @@ const BOOKS_DATA = [
     id: 'book-superclasses',
     title: 'Superclasses em Homeopatia',
     author: 'Dr. Rajan Sankaran',
+    image: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-760w,f_auto,q_auto:best/rockcms/2025-10/Mixbook-Photobook-471d52.jpg',
     price: 180.00,
     desc: 'Entenda os caminhos da percepção vital através da divisão revolucionária em seis superclasses.',
     page_count: 280,
@@ -78,6 +80,7 @@ const BOOKS_DATA = [
     id: 'book-oito-caixas',
     title: 'O Método das Oito Caixas',
     author: 'Dr. Rajan Sankaran',
+    image: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-760w,f_auto,q_auto:best/rockcms/2025-10/Mixbook-Photobook-471d52.jpg',
     price: 240.00,
     desc: 'Um guia prático para integrar repertorização, sintomas locais, sensação e caminhos de cura no caso clínico.',
     page_count: 410,
@@ -265,7 +268,9 @@ const PAGE_URLS = {
   'course-detail': 'detalhes-curso',
   'book-detail': 'detalhes-livro',
   'course-view': 'assistir-aula',
-  checkout: 'finalizar-compra'
+  checkout: 'finalizar-compra',
+  'online-courses': 'cursos-online',
+  'inperson-courses': 'cursos-presenciais'
 };
 
 // Helper para gerar slugs legíveis de cursos
@@ -558,6 +563,257 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
   );
 };
 
+const DEFAULT_TABLE_HTML = `
+  <table class="syllabus-module-card" style="width: 100%; margin-bottom: 1rem;">
+    <thead>
+      <tr><th colspan="1">Título</th></tr>
+    </thead>
+    <tbody class="syllabus-lessons-list">
+      <tr class="syllabus-lesson-item"><td>Texto</td></tr>
+    </tbody>
+  </table><p><br></p>
+`;
+
+const FONT_COLORS = [
+  { id: 'c1', val: '#383838' },
+  { id: 'c2', val: '#B3B6A8' },
+  { id: 'c3', val: '#FFFFFF' },
+  { id: 'c4', val: '#9F1239' },
+  { id: 'c5', val: '#D3702C' },
+  { id: 'c6', val: '#0B2B18' },
+  { id: 'c7', val: '#26402B' },
+  { id: 'c8', val: '#1C5F20' },
+  { id: 'c9', val: '#39733C' },
+  { id: 'c10', val: '#82A591' }
+];
+
+const RichTextEditor = ({ value, onChange, placeholder }) => {
+  const editorRef = useRef(null);
+  const [activeCell, setActiveCell] = useState(null);
+  const [canInsertTable, setCanInsertTable] = useState(false);
+  const [isSourceMode, setIsSourceMode] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [currentColor, setCurrentColor] = useState(FONT_COLORS[0]);
+  const [htmlContent, setHtmlContent] = useState(value || '');
+  const lastValueRef = useRef(value);
+
+  useEffect(() => {
+    if (value !== lastValueRef.current) {
+      setHtmlContent(value || '');
+      lastValueRef.current = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (!isSourceMode && editorRef.current && editorRef.current.innerHTML !== htmlContent) {
+      editorRef.current.innerHTML = htmlContent;
+    }
+  }, [htmlContent, isSourceMode]);
+
+  const updateSelection = () => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const node = selection.anchorNode;
+    if (!node) return;
+
+    if (editorRef.current?.contains(node)) {
+      const tableNode = node.nodeType === 3 ? node.parentNode.closest('table') : node.closest?.('table');
+      setCanInsertTable(!tableNode);
+
+      const cell = node.nodeType === 3 ? node.parentNode.closest('td, th') : node.closest?.('td, th');
+      if (cell && cell.closest('tbody')) {
+        setActiveCell(cell);
+      } else {
+        setActiveCell(null);
+      }
+    }
+  };
+
+  const execCommand = (command, val = null) => {
+    document.execCommand(command, false, val);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      const currentHtml = editorRef.current.innerHTML;
+      setHtmlContent(currentHtml);
+      onChange(currentHtml);
+    }
+  };
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      const currentHtml = editorRef.current.innerHTML;
+      setHtmlContent(currentHtml);
+      onChange(currentHtml);
+    }
+  };
+
+  const handleBlur = () => {
+    handleInput();
+    setCanInsertTable(false);
+    setActiveCell(null);
+    setShowColorPicker(false);
+  };
+
+  const replaceTableWithUndo = (table, newTableClone) => {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNode(table);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand('insertHTML', false, newTableClone.outerHTML);
+    handleInput();
+  };
+
+  const addRow = () => {
+    if (!activeCell) return;
+    const tr = activeCell.closest('tr');
+    const table = activeCell.closest('table');
+    if (!tr || !table) return;
+
+    const tableClone = table.cloneNode(true);
+    const trIndex = Array.from(table.rows).indexOf(tr);
+    const cloneTr = tableClone.rows[trIndex];
+
+    const newTr = document.createElement('tr');
+    newTr.className = 'syllabus-lesson-item';
+    const tds = cloneTr.querySelectorAll('td, th');
+    tds.forEach(cell => {
+      const newCell = document.createElement(cell.tagName);
+      newCell.innerHTML = 'Texto';
+      newTr.appendChild(newCell);
+    });
+    cloneTr.parentNode.insertBefore(newTr, cloneTr.nextSibling);
+
+    replaceTableWithUndo(table, tableClone);
+  };
+
+  const addColumn = () => {
+    if (!activeCell) return;
+    const tr = activeCell.closest('tr');
+    const table = activeCell.closest('table');
+    if (!tr || !table) return;
+
+    const tableClone = table.cloneNode(true);
+    const cells = Array.from(tr.children);
+    const cellIndex = cells.indexOf(activeCell);
+
+    const rows = tableClone.querySelectorAll('tr');
+    rows.forEach(row => {
+      const rowCells = Array.from(row.children);
+      const targetCell = rowCells[cellIndex] || rowCells[rowCells.length - 1];
+      if (targetCell) {
+        const newCell = document.createElement(targetCell.tagName);
+        newCell.innerHTML = targetCell.tagName === 'TH' ? 'Título' : 'Texto';
+        row.insertBefore(newCell, targetCell.nextSibling);
+      }
+    });
+
+    replaceTableWithUndo(table, tableClone);
+  };
+
+  const insertTable = () => {
+    const tableId = 'temp_table_' + Date.now();
+    const tableHTML = `
+      <table id="${tableId}" class="syllabus-module-card" style="width: 100%; margin-bottom: 1rem;">
+        <thead>
+          <tr><th colspan="1">Título</th></tr>
+        </thead>
+        <tbody class="syllabus-lessons-list">
+          <tr class="syllabus-lesson-item"><td>Texto</td></tr>
+        </tbody>
+      </table><p><br></p>
+    `;
+    document.execCommand('insertHTML', false, tableHTML);
+    const table = document.getElementById(tableId);
+    if (table) {
+      table.removeAttribute('id');
+      const th = table.querySelector('th');
+      if (th) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(th);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+    handleInput();
+  };
+
+  return (
+    <div className="rich-text-editor-container" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', padding: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm) var(--border-radius-sm) 0 0', borderBottom: 'none' }}>
+        <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} onMouseDown={(e) => e.preventDefault()} onClick={() => setIsSourceMode(!isSourceMode)}>
+          {isSourceMode ? '👁️ Visualizar' : '</> HTML'}
+        </button>
+        {!isSourceMode && (
+          <>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} onMouseDown={(e) => e.preventDefault()} onClick={() => execCommand('bold')}><b>B</b></button>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', fontStyle: 'italic' }} onMouseDown={(e) => e.preventDefault()} onClick={() => execCommand('italic')}>I</button>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} onMouseDown={(e) => e.preventDefault()} onClick={() => {
+              const url = prompt('Inserir URL:');
+              if (url) execCommand('createLink', url);
+            }}>🔗 Link</button>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginLeft: '0.5rem', marginRight: '0.5rem', borderLeft: '1px solid var(--color-border)', paddingLeft: '0.5rem', borderRight: '1px solid var(--color-border)', paddingRight: '0.5rem' }}>
+              <button
+                type="button"
+                title="Cor da Fonte"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                style={{ width: '1.25rem', height: '1.25rem', borderRadius: '50%', backgroundColor: currentColor.val, border: '1px solid var(--color-border)', cursor: 'pointer', padding: 0, display: 'block' }}
+              />
+              {showColorPicker && (
+                <div style={{ position: 'absolute', top: '100%', left: '0.5rem', marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#fff', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.35rem', zIndex: 10, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}>
+                  {FONT_COLORS.map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.val}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        execCommand('foreColor', c.val);
+                        setCurrentColor(c);
+                        setShowColorPicker(false);
+                      }}
+                      style={{ width: '1.25rem', height: '1.25rem', borderRadius: '50%', backgroundColor: c.val, border: '1px solid var(--color-border)', cursor: 'pointer', padding: 0 }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: '#e2e8f0', color: '#0f172a', display: activeCell ? 'inline-block' : 'none' }} onMouseDown={(e) => e.preventDefault()} onClick={addRow}>+ Linha</button>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: '#e2e8f0', color: '#0f172a', display: activeCell ? 'inline-block' : 'none' }} onMouseDown={(e) => e.preventDefault()} onClick={addColumn}>+ Coluna</button>
+            <button type="button" className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', display: canInsertTable ? 'inline-block' : 'none' }} onMouseDown={(e) => e.preventDefault()} onClick={insertTable}>+ Tabela</button>
+          </>
+        )}
+      </div>
+      {isSourceMode ? (
+        <textarea
+          className="rich-text-editor rich-text-content"
+          value={htmlContent}
+          onChange={(e) => {
+            setHtmlContent(e.target.value);
+            onChange(e.target.value);
+          }}
+          style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, width: '100%', resize: 'vertical', fontFamily: 'monospace' }}
+          placeholder={placeholder}
+        />
+      ) : (
+        <div
+          ref={editorRef}
+          className="rich-text-editor rich-text-content"
+          contentEditable
+          onInput={handleInput}
+          onBlur={handleBlur}
+          onMouseUp={updateSelection}
+          onKeyUp={updateSelection}
+          style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+          placeholder={placeholder}
+        ></div>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
   // Controle do Layout / Identidade Visual (Design 1 - Clássico vs Design 2 - Novo Guia TOSB)
   const [layoutMode, setLayoutMode] = useState(() => {
@@ -597,7 +853,9 @@ export default function App() {
   }, []);
 
   // Controle de Estado Geral
-  const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout
+  const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout, online-courses, inperson-courses
+  const [searchOnlineCourses, setSearchOnlineCourses] = useState('');
+  const [searchInpersonCourses, setSearchInpersonCourses] = useState('');
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [error, setError] = useState('');
@@ -636,14 +894,21 @@ export default function App() {
           // Patch para garantir que os livros tenham a propriedade images
           let booksChanged = false;
           parsed.books = parsed.books.map(b => {
-            if (!b.images) {
-              const originalBook = BOOKS_DATA.find(ob => ob.id === b.id);
-              if (originalBook && originalBook.images) {
-                booksChanged = true;
-                return { ...b, images: originalBook.images };
+            let updated = false;
+            let newB = { ...b };
+            const originalBook = BOOKS_DATA.find(ob => ob.id === b.id);
+            if (originalBook) {
+              if (!b.images && originalBook.images) {
+                newB.images = originalBook.images;
+                updated = true;
+              }
+              if (!b.image && originalBook.image) {
+                newB.image = originalBook.image;
+                updated = true;
               }
             }
-            return b;
+            if (updated) booksChanged = true;
+            return newB;
           });
           if (booksChanged) changed = true;
         }
@@ -1589,6 +1854,8 @@ export default function App() {
       if (page === 'book-detail') return `#livro/${queryParams.replace('id=', '')}`;
       if (page === 'course-view') return `#aula/${queryParams.replace('id=', '')}`;
       if (page === 'checkout') return '#finalizar-compra';
+      if (page === 'online-courses') return '#cursos-online';
+      if (page === 'inperson-courses') return '#cursos-presenciais';
       return `#${page}`;
     }
     const urlSegment = PAGE_URLS[page] || page;
@@ -2399,6 +2666,7 @@ export default function App() {
     const id = e.target.id?.value;
     const title = e.target.title.value;
     const description = e.target.description.value;
+    const full_description = e.target.full_description?.value || '';
     const type = e.target.type.value;
     const duration_days = parseInt(e.target.duration_days.value) || 180;
     const workload_hours = parseInt(e.target.workload_hours?.value) || (duration_days ? duration_days * 2 : 180);
@@ -2417,6 +2685,7 @@ export default function App() {
               ...c,
               title,
               description,
+              full_description,
               type,
               duration_days,
               workload_hours,
@@ -2432,6 +2701,7 @@ export default function App() {
           id: targetCourseId,
           title,
           description,
+          full_description,
           type,
           duration_days,
           workload_hours,
@@ -2520,18 +2790,17 @@ export default function App() {
     const author = e.target.author.value;
     const price = parseFloat(e.target.price.value);
     const desc = e.target.desc.value;
+    const full_description = e.target['hidden_full_desc_book_' + (e.target.id.value || 'new')]?.value || '';
     const page_count = parseInt(e.target.page_count?.value) || 0;
-    const content_table_raw = e.target.content_table?.value || '';
-    const content_table = content_table_raw.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
     setMockDb(prev => {
       let updatedBooks;
       const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
       if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, page_count, content_table } : b);
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, full_description, page_count } : b);
         setSuccess('Livro atualizado com sucesso!');
       } else {
-        const newBook = { id, title, author, price, desc, page_count, content_table };
+        const newBook = { id, title, author, price, desc, full_description, page_count };
         updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
         setSuccess('Livro adicionado com sucesso!');
       }
@@ -3897,7 +4166,7 @@ NEWFILEENCODING:NONE
     return (
       <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--color-bg)' }}>
         <div style={{ textAlign: 'center' }}>
-          <span style={{ fontSize: '3rem', animation: 'spin 2s linear infinite', display: 'inline-block' }}>🌿</span>
+          <span style={{ fontSize: 'var(--fs-6xl)', animation: 'spin 2s linear infinite', display: 'inline-block' }}>🌿</span>
           <h2 className="font-serif-title mt-4" style={{ color: 'var(--color-primary)' }}>Carregando Portal...</h2>
           <p className="text-muted">Verificando credenciais acadêmicas de segurança.</p>
         </div>
@@ -4095,7 +4364,7 @@ NEWFILEENCODING:NONE
             ) : layoutMode === 'tosb-v2' ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <span className="logo-title" style={{ fontSize: '2rem', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
+                  <span className="logo-title" style={{ fontSize: 'var(--fs-4xl)', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
                   <img
                     src={window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:' ? 'client/public/images/logo.png' : '/images/logo.png'}
                     alt="TOSB"
@@ -4154,32 +4423,8 @@ NEWFILEENCODING:NONE
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
               <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'agenda')}>Agenda Geral</a>
-              <a href={getLinkHref('home') + '#online-courses'} className="dropdown-item" onClick={(e) => {
-                const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
-                if (isDemo) {
-                  e.preventDefault();
-                  clearAlerts();
-                  setMobileMenuOpen(false);
-                  setActiveDropdown(null);
-                  navigateTo('home');
-                  setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
-                } else {
-                  clearAlerts();
-                }
-              }}>Online</a>
-              <a href={getLinkHref('home') + '#inperson-courses'} className="dropdown-item" onClick={(e) => {
-                const isDemo = window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:';
-                if (isDemo) {
-                  e.preventDefault();
-                  clearAlerts();
-                  setMobileMenuOpen(false);
-                  setActiveDropdown(null);
-                  navigateTo('home');
-                  setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
-                } else {
-                  clearAlerts();
-                }
-              }}>Presenciais & Híbridos</a>
+              <a href={getLinkHref('online-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'online-courses'); }}>Online</a>
+              <a href={getLinkHref('inperson-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
             </div>
           </div>
 
@@ -4198,20 +4443,8 @@ NEWFILEENCODING:NONE
 
           {/* Cursos Submenu achatado */}
           <a href={getLinkHref('agenda')} className={`nav-link ${currentPage === 'agenda' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
-          <a href={getLinkHref('home') + '#online-courses'} className="nav-link" onClick={(e) => {
-            e.preventDefault();
-            clearAlerts();
-            setMobileMenuOpen(false);
-            navigateTo('home');
-            setTimeout(() => document.getElementById('online-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
-          }}>Cursos Online</a>
-          <a href={getLinkHref('home') + '#inperson-courses'} className="nav-link" onClick={(e) => {
-            e.preventDefault();
-            clearAlerts();
-            setMobileMenuOpen(false);
-            navigateTo('home');
-            setTimeout(() => document.getElementById('inperson-courses')?.scrollIntoView({ behavior: 'smooth' }), 100);
-          }}>Presenciais & Híbridos</a>
+          <a href={getLinkHref('online-courses')} className={`nav-link ${currentPage === 'online-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
+          <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
 
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'books'); }}>Livros</a>
           <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy Software</a>
@@ -4284,7 +4517,7 @@ NEWFILEENCODING:NONE
             aria-label="Carrinho de Compras"
             style={{ padding: '0.5rem' }}
           >
-            <span style={{ fontSize: '1.2rem' }}>🛒</span>
+            <span style={{ fontSize: 'var(--fs-lg)' }}>🛒</span>
             {cartItems.length > 0 && (
               <span className="cart-count">
                 {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
@@ -4381,7 +4614,7 @@ NEWFILEENCODING:NONE
                   href={getLinkHref('forgot-password')}
                   className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'forgot-password')}
-                  style={{ color: 'var(--color-primary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                  style={{ color: 'var(--color-primary)', textDecoration: 'underline', fontSize: 'var(--fs-base)' }}
                 >
                   🔑 Esqueceu sua senha? Clique aqui para redefinir via e-mail
                 </a>
@@ -4397,7 +4630,7 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-1">
               Preencha os campos abaixo para criar sua conta.
             </p>
-            <p className="text-muted text-center mb-5" style={{ fontSize: '0.85rem' }}>
+            <p className="text-muted text-center mb-5" style={{ fontSize: 'var(--fs-sm)' }}>
               Campos com <span style={{ color: 'red', fontWeight: 'bold' }}>*</span> são de preenchimento obrigatório.
             </p>
 
@@ -4608,7 +4841,7 @@ NEWFILEENCODING:NONE
 
               <div className="form-group mt-3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                 <input type="checkbox" id="receivePromotions" name="receivePromotions" defaultChecked style={{ width: 'auto', margin: 0 }} />
-                <label htmlFor="receivePromotions" className="cursor-pointer" style={{ fontSize: '0.85rem', margin: 0, fontWeight: '500' }}>
+                <label htmlFor="receivePromotions" className="cursor-pointer" style={{ fontSize: 'var(--fs-sm)', margin: 0, fontWeight: '500' }}>
                   Desejo receber por e-mail ofertas, lançamentos de novos cursos e oportunidades acadêmicas da TOSB.
                 </label>
               </div>
@@ -4670,7 +4903,7 @@ NEWFILEENCODING:NONE
                   href={getLinkHref('login')}
                   className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'login')}
-                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: 'var(--fs-base)' }}
                 >
                   ← Voltar para a tela de Login
                 </a>
@@ -4712,7 +4945,7 @@ NEWFILEENCODING:NONE
                   href={getLinkHref('login')}
                   className="btn-link"
                   onClick={(e) => handleLinkClick(e, 'login')}
-                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: '0.9rem' }}
+                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: 'var(--fs-base)' }}
                 >
                   ← Voltar para a tela de Login
                 </a>
@@ -4728,17 +4961,19 @@ NEWFILEENCODING:NONE
             <section className="hero-section">
               <h1 className="hero-title">Conheça nossos cursos online</h1>
               <p className="hero-subtitle">🌿 A escola oficial do Método Sensação da The Other Song no Brasil. Ensino homeopático de elevado rigor científico e clínico.</p>
-              <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('register'); }} style={{ padding: '0.8rem 2rem' }}>Inscreva-se Agora</button>
             </section>
 
             {/* Cursos Online Catalog */}
             <section id="online-courses" className="mb-7">
-              <h2 className="home-section-title">Cursos de Homeopatia Online</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 className="home-section-title" style={{ margin: 0, marginBottom: '0.5rem' }}>Cursos de Homeopatia Online</h2>
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('online-courses'); }}>Ver todos</button>
+              </div>
               <div className="premium-card-grid">
 
                 {/* Curso Livre */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>🌿</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}><img src="https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Gratuito</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-free')}>Introdução à Homeopatia e Sensação Vital</h3>
@@ -4752,7 +4987,7 @@ NEWFILEENCODING:NONE
 
                 {/* Assinatura Clube */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>📖</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}><img src="https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Assinatura</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-sub')}>Clube TOSB: Estudos de Matéria Médica</h3>
@@ -4766,7 +5001,7 @@ NEWFILEENCODING:NONE
 
                 {/* Pós-Graduação */}
                 <div className="premium-card animate-fade-in">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>🎓</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}><img src="https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Especialização</span>
                     <h3 className="premium-card-title cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-post')}>Pós-Graduação em Homeopatia Avançada</h3>
@@ -4808,19 +5043,22 @@ NEWFILEENCODING:NONE
 
             {/* Cursos Presenciais */}
             <section id="inperson-courses" className="mb-7">
-              <h2 className="home-section-title">Seminários e Cursos Presenciais</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 className="home-section-title" style={{ margin: 0, marginBottom: '0.5rem' }}>Seminários e Cursos Presenciais</h2>
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('inperson-courses'); }}>Ver todos</button>
+              </div>
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
 
                 <div className="premium-card">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}>🎥</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}><img src="https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Presencial Curitiba</span>
                     <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=course-inperson-seminar')}>Seminário Avançado de Homeopatia 2026</h3>
                     <p className="premium-card-text">Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Data: <strong>23 a 25/Outubro/2026</strong></div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Local: <strong>Curitiba - PR</strong></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
                         <span className="premium-card-price">R$ 1.200,00</span>
@@ -4831,15 +5069,15 @@ NEWFILEENCODING:NONE
                 </div>
 
                 <div className="premium-card">
-                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}>🎥</div>
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}><img src="https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="premium-card-content">
                     <span className="premium-card-tag">Encontro Prático</span>
                     <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=course-inperson-meeting')}>Encontro de Matéria Médica Prática</h3>
                     <p className="premium-card-text">Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.</p>
                     <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Data: <strong>05/Dezembro/2026</strong></div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Local: <strong>Sede TOSB Curitiba</strong></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
                         <span className="premium-card-price">R$ 600,00</span>
@@ -4854,14 +5092,19 @@ NEWFILEENCODING:NONE
 
             {/* Livros em Destaque */}
             <section className="mb-7">
-              <h2 className="home-section-title">Livros Científicos Recomendados</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 className="home-section-title" style={{ margin: 0, marginBottom: '0.5rem' }}>Livros Científicos Recomendados</h2>
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('books'); }}>Ver todos</button>
+              </div>
               <div className="premium-card-grid">
                 {books.slice(0, 3).map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder">📚</div>
+                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>
+                      {book.image && <img src={book.image} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </div>
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
-                      <h3 className="premium-card-title">{book.title}</h3>
+                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
                       <div className="premium-card-footer">
                         <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
@@ -4871,15 +5114,12 @@ NEWFILEENCODING:NONE
                   </div>
                 ))}
               </div>
-              <div className="text-center">
-                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('books'); }}>Ver Todos os Livros</button>
-              </div>
             </section>
 
             {/* Synergy Software Section */}
             <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--color-bg-card)', padding: '2.5rem', textAlign: 'center', marginBottom: '2rem' }}>
               <span className="premium-card-tag" style={{ margin: '0 auto' }}>Parceria Tecnológica</span>
-              <h3 className="font-serif-title" style={{ fontSize: '1.75rem', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS)</h3>
+              <h3 className="font-serif-title" style={{ fontSize: 'var(--fs-3xl)', color: 'var(--color-primary)' }}>Synergy Homeopathic Software (SHS)</h3>
               <p className="text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 O software definitivo para repertorização de medicamentos homeopáticos e busca rápida do Método Sensação. Aprenda a usar através de nossos tutoriais exclusivos e facilite sua prática de consultório.
               </p>
@@ -4899,10 +5139,10 @@ NEWFILEENCODING:NONE
 
             <div className="course-detail-hero">
               <h1 className="mt-2">{selectedDetailCourse.title}</h1>
-              <p className="hero-subtitle mb-0" style={{ fontSize: '1.1rem', margin: '0.5rem 0 0' }}>
+              <p className="hero-subtitle mb-0" style={{ fontSize: 'var(--fs-lg)', margin: '0.5rem 0 0' }}>
                 {selectedDetailCourse.description}
               </p>
-              <p className="hero-subtitle mb-0" style={{ fontSize: '0.85rem', margin: '0.75rem 0 0' }}>
+              <p className="hero-subtitle mb-0" style={{ fontSize: 'var(--fs-sm)', margin: '0.75rem 0 0' }}>
                 Realize sua inscrição ao final da seção <span onClick={() => document.getElementById('ficha-tecnica-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ color: 'white', textDecoration: 'underline', cursor: 'pointer' }}>Ficha Técnica</span>
               </p>
             </div>
@@ -4911,28 +5151,32 @@ NEWFILEENCODING:NONE
               <div>
                 <h3 className="section-title-underlined mb-4">Descrição</h3>
 
-                {COURSES_DETAILS_DATA[selectedDetailCourse.id]?.modules.map((mod, idx) => (
-                  <div key={idx} className="syllabus-module-card">
-                    <div className="syllabus-module-header">{mod.title}</div>
-                    <ul className="syllabus-lessons-list">
-                      {mod.lessons.map((les, lIdx) => (
-                        <li key={lIdx} className="syllabus-lesson-item">
-                          <span>📖</span> {les}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )) || (
+                {selectedDetailCourse.full_description ? (
+                  <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: selectedDetailCourse.full_description }} />
+                ) : (
+                  COURSES_DETAILS_DATA[selectedDetailCourse.id]?.modules.map((mod, idx) => (
+                    <div key={idx} className="syllabus-module-card">
+                      <div className="syllabus-module-header">{mod.title}</div>
+                      <ul className="syllabus-lessons-list">
+                        {mod.lessons.map((les, lIdx) => (
+                          <li key={lIdx} className="syllabus-lesson-item">
+                            <span>📖</span> {les}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )) || (
                     <p className="text-muted">A ementa detalhada estará disponível em breve.</p>
-                  )}
+                  )
+                )}
 
                 <h3 className="section-title-underlined mt-6 mb-4">Corpo Docente</h3>
                 <div className="teacher-bio-card">
                   <div className="teacher-bio-avatar">C</div>
                   <div>
                     <h4>Dr. Carlos Eduardo Leitão (TOSB)</h4>
-                    <p className="helper-text" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>CRM-PR 12345 | RQE 6789</p>
-                    <p className="mt-2 text-muted" style={{ fontSize: '0.92rem' }}>
+                    <p className="helper-text" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>CRM-PR 12345 | RQE 6789</p>
+                    <p className="mt-2 text-muted" style={{ fontSize: 'var(--fs-base)' }}>
                       Médico Homeopata com mais de 20 anos de experiência clínica. Diretor científico e principal responsável pela difusão do Método Sensação Vital no Brasil.
                     </p>
                   </div>
@@ -4971,7 +5215,7 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Público-Alvo:</td>
-                        <td style={{ fontSize: '0.85rem' }}>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.target || 'Profissionais de saúde'}</td>
+                        <td style={{ fontSize: 'var(--fs-sm)' }}>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.target || 'Profissionais de saúde'}</td>
                       </tr>
                       <tr>
                         <td>Valor:</td>
@@ -4986,13 +5230,13 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Pagamento:</td>
-                        <td style={{ fontSize: '0.85rem' }}>
+                        <td style={{ fontSize: 'var(--fs-sm)' }}>
                           {selectedDetailCourse.type === 'FREE' ? (
                             <span>Gratuito</span>
                           ) : (
                             <select
                               className="form-input"
-                              style={{ padding: '4px', fontSize: '0.85rem' }}
+                              style={{ padding: '4px', fontSize: 'var(--fs-sm)' }}
                               value={detailInstallments}
                               onChange={(e) => setDetailInstallments(parseInt(e.target.value))}
                             >
@@ -5045,31 +5289,20 @@ NEWFILEENCODING:NONE
 
             <div className="course-detail-hero">
               <h1 className="mt-2">{selectedDetailBook.title}</h1>
-              <p className="hero-subtitle mb-0" style={{ fontSize: '1.1rem', margin: '0.5rem 0 0' }}>
+              <p className="hero-subtitle mb-0" style={{ fontSize: 'var(--fs-lg)', margin: '0.5rem 0 0' }}>
                 {selectedDetailBook.desc}
               </p>
-              <p className="hero-subtitle mb-0" style={{ fontSize: '0.85rem', margin: '0.75rem 0 0' }}>
+              <p className="hero-subtitle mb-0" style={{ fontSize: 'var(--fs-sm)', margin: '0.75rem 0 0' }}>
                 Adquira sua cópia na <span onClick={() => document.getElementById('ficha-tecnica-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ color: 'white', textDecoration: 'underline', cursor: 'pointer' }}>Ficha Técnica</span>
               </p>
             </div>
             <div className="course-detail-grid">
               <div>
-                <h3 className="section-title-underlined mb-4">Relação de Conteúdo</h3>
+                <h3 className="section-title-underlined mb-4">Descrição</h3>
 
-                <div className="syllabus-module-card">
-                  <div className="syllabus-module-header">Sumário da Obra</div>
-                  <ul className="syllabus-lessons-list">
-                    {Array.isArray(selectedDetailBook.content_table) && selectedDetailBook.content_table.length > 0 ? (
-                      selectedDetailBook.content_table.map((chap, idx) => (
-                        <li key={idx} className="syllabus-lesson-item">
-                          <span>📖</span> {chap}
-                        </li>
-                      ))
-                    ) : (
-                      <p className="text-muted" style={{ padding: '1rem' }}>O sumário detalhado estará disponível em breve.</p>
-                    )}
-                  </ul>
-                </div>
+                {selectedDetailBook.full_description && (
+                  <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: selectedDetailBook.full_description }} />
+                )}
 
                 {Array.isArray(selectedDetailBook.images) && selectedDetailBook.images.length > 0 && (
                   <div className="mt-5">
@@ -5077,7 +5310,8 @@ NEWFILEENCODING:NONE
                     <div className="card" style={{ textAlign: 'center', backgroundColor: '#ffffff' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
                         <button
-                          className="btn btn-secondary"
+                          className="btn btn-secondary hide-on-small-mobile"
+                          style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                           onClick={() => setBookGalleryIndex((prev) => (prev === 0 ? selectedDetailBook.images.length - 1 : prev - 1))}
                         >
                           ◀
@@ -5085,17 +5319,18 @@ NEWFILEENCODING:NONE
                         <img
                           src={selectedDetailBook.images[bookGalleryIndex]}
                           alt={`Imagem ${bookGalleryIndex + 1}`}
-                          style={{ maxHeight: '300px', cursor: 'pointer', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                          style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain', cursor: 'pointer', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
                           onClick={() => setIsBookGalleryModalOpen(true)}
                         />
                         <button
-                          className="btn btn-secondary"
+                          className="btn btn-secondary hide-on-small-mobile"
+                          style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                           onClick={() => setBookGalleryIndex((prev) => (prev === selectedDetailBook.images.length - 1 ? 0 : prev + 1))}
                         >
                           ▶
                         </button>
                       </div>
-                      <p className="text-muted mt-2" style={{ fontSize: '0.85rem' }}>{bookGalleryIndex + 1} / {selectedDetailBook.images.length} (Clique para ampliar)</p>
+                      <p className="text-muted mt-2" style={{ fontSize: 'var(--fs-sm)' }}>{bookGalleryIndex + 1} / {selectedDetailBook.images.length} (Clique para ampliar)</p>
                     </div>
                   </div>
                 )}
@@ -5105,7 +5340,7 @@ NEWFILEENCODING:NONE
                     <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
                       <button
                         onClick={() => setIsBookGalleryModalOpen(false)}
-                        style={{ position: 'absolute', top: '-40px', right: '0', background: 'transparent', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}
+                        style={{ position: 'absolute', top: '-40px', right: '0', background: 'transparent', border: 'none', color: 'white', fontSize: 'var(--fs-4xl)', cursor: 'pointer' }}
                       >
                         ×
                       </button>
@@ -5114,15 +5349,17 @@ NEWFILEENCODING:NONE
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                       <button
                         className="btn btn-primary"
+                        style={{ borderRadius: '50%', width: '50px', height: '50px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}
                         onClick={() => setBookGalleryIndex((prev) => (prev === 0 ? selectedDetailBook.images.length - 1 : prev - 1))}
                       >
-                        ◀ Anterior
+                        ◀
                       </button>
                       <button
                         className="btn btn-primary"
+                        style={{ borderRadius: '50%', width: '50px', height: '50px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', flexShrink: 0 }}
                         onClick={() => setBookGalleryIndex((prev) => (prev === selectedDetailBook.images.length - 1 ? 0 : prev + 1))}
                       >
-                        Próxima ▶
+                        ▶
                       </button>
                     </div>
                   </div>
@@ -5148,7 +5385,7 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Formato:</td>
-                        <td style={{ fontSize: '0.85rem' }}>Livro Físico / Impresso</td>
+                        <td style={{ fontSize: 'var(--fs-sm)' }}>Livro Físico / Impresso</td>
                       </tr>
                       <tr>
                         <td>Valor:</td>
@@ -5162,10 +5399,10 @@ NEWFILEENCODING:NONE
                       </tr>
                       <tr>
                         <td>Pagamento:</td>
-                        <td style={{ fontSize: '0.85rem' }}>
+                        <td style={{ fontSize: 'var(--fs-sm)' }}>
                           <select
                             className="form-input"
-                            style={{ padding: '4px', fontSize: '0.85rem' }}
+                            style={{ padding: '4px', fontSize: 'var(--fs-sm)' }}
                             value={detailInstallments}
                             onChange={(e) => setDetailInstallments(parseInt(e.target.value))}
                           >
@@ -5195,20 +5432,20 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: AGENDA GERAL */}
         {currentPage === 'agenda' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>📅 Agenda Geral Acadêmica</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>📅 Agenda Geral Acadêmica</h2>
             <p className="text-muted text-center mb-5">Confira o cronograma completo de aulas magnas, seminários internacionais e encontros científicos da TOSB.</p>
 
             <div className="agenda-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
               {(mockDb.events || []).map(event => (
                 <div key={event.id} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', padding: '1.25rem', borderLeft: '4px solid var(--color-accent)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-base)', padding: '0.75rem 1.25rem', borderRadius: 'var(--border-radius-md)', minWidth: '80px' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>{event.day}</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{event.month}</span>
+                    <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'bold', color: 'var(--color-primary)' }}>{event.day}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>{event.month}</span>
                   </div>
                   <div style={{ flex: 1 }}>
                     <span className="badge-modality badge-modality-online" style={{ marginBottom: '0.35rem' }}>{event.type}</span>
-                    <h3 style={{ fontSize: '1.15rem', marginBottom: '0.25rem' }}>{event.title}</h3>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
+                    <h3 style={{ fontSize: 'var(--fs-lg)', marginBottom: '0.25rem' }}>{event.title}</h3>
+                    <p style={{ fontSize: 'var(--fs-base)', color: 'var(--color-text-muted)' }}>📍 {event.location}</p>
                   </div>
                 </div>
               ))}
@@ -5219,8 +5456,8 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: SOBRE NÓS */}
         {currentPage === 'about' && (
           <div className="card">
-            <h2 className="mb-4 font-serif-title text-center" style={{ fontSize: '2rem' }}>Sobre a The Other Song Brasil</h2>
-            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8' }}>
+            <h2 className="mb-4 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Sobre a The Other Song Brasil</h2>
+            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-lg)', lineHeight: '1.8' }}>
               <p className="mb-4">
                 A <strong>The Other Song Brasil (TOSB)</strong> é a filial brasileira autorizada da prestigiosa academia internacional *The Other Song - International Academy of Advanced Homeopathy*, sediada em Mumbai, Índia.
               </p>
@@ -5240,7 +5477,7 @@ NEWFILEENCODING:NONE
                 <button className="btn btn-primary" onClick={() => { clearAlerts(); window.location.hash = '#home'; }}>Voltar para Cursos</button>
               </div>
 
-              <h3 className="font-serif-title mb-4 mt-6 text-center" style={{ fontSize: '1.75rem' }}>Galeria de Fotos Institucional</h3>
+              <h3 className="font-serif-title mb-4 mt-6 text-center" style={{ fontSize: 'var(--fs-3xl)' }}>Galeria de Fotos Institucional</h3>
               <div className="gallery-grid-photos">
                 {GALLERY_DATA.map((item, idx) => (
                   <div key={idx} className="gallery-item">
@@ -5249,7 +5486,7 @@ NEWFILEENCODING:NONE
                     </div>
                     <div className="gallery-caption">
                       <div style={{ fontWeight: 'bold' }}>{item.title}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -5261,7 +5498,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: LISTA DE HOMEOPATAS */}
         {currentPage === 'homeopaths' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Lista de Homeopatas Indicados</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Lista de Homeopatas Indicados</h2>
             <p className="text-muted text-center mb-5">Encontre profissionais qualificados e reconhecidos pela TOSB</p>
 
             <div className="directory-search-box">
@@ -5296,11 +5533,11 @@ NEWFILEENCODING:NONE
                 return (
                   <div key={idx} className="homeopath-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', wordBreak: 'break-word', padding: '1.5rem', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)' }}>
                     <div className="homeopath-info" style={{ flexGrow: 1 }}>
-                      <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>{h.name}</h4>
-                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
-                      <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: '0.85rem' }}>📍 {h.city}</div>
-                      {h.phone && <div className="homeopath-contact-item" style={{ fontSize: '0.85rem' }}>📞 {h.phone}</div>}
+                      <h4 style={{ marginBottom: '0.5rem', fontSize: 'var(--fs-lg)' }}>{h.name}</h4>
+                      <span className="homeopath-reg" style={{ display: 'inline-block', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: 'var(--fs-sm)', fontWeight: 'bold', marginBottom: '0.5rem' }}>{h.reg}</span>
+                      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
+                      <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: 'var(--fs-sm)' }}>📍 {h.city}</div>
+                      {h.phone && <div className="homeopath-contact-item" style={{ fontSize: 'var(--fs-sm)' }}>📞 {h.phone}</div>}
                     </div>
                   </div>
                 );
@@ -5312,7 +5549,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: GALERIA DE FOTOS */}
         {currentPage === 'gallery' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Galeria de Fotos Institucional</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Galeria de Fotos Institucional</h2>
             <p className="text-muted text-center mb-5">Veja registros de nossos seminários científicos, encontros de alunos e nossa sede em Curitiba.</p>
 
             <div className="gallery-grid-photos">
@@ -5323,10 +5560,114 @@ NEWFILEENCODING:NONE
                   </div>
                   <div className="gallery-caption">
                     <div style={{ fontWeight: 'bold' }}>{item.title}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: '#e2e8f0', fontWeight: 'normal' }}>{item.desc}</div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'online-courses' && (
+          <div>
+            <div className="card">
+              <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Cursos de Homeopatia Online</h2>
+              <p className="text-muted text-center mb-4">Explore nossa seleção de cursos online e aprimore seus conhecimentos.</p>
+
+              <div style={{ maxWidth: '600px', margin: '0 auto 2.5rem auto' }}>
+                <input
+                  type="text"
+                  placeholder="Pesquisar cursos por nome..."
+                  value={searchOnlineCourses}
+                  onChange={(e) => setSearchOnlineCourses(e.target.value)}
+                  className="form-input"
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+
+              <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
+                {[
+                  { id: 'course-free', tag: 'Gratuito', title: 'Introdução à Homeopatia e Sensação Vital', desc: 'Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.', price: 'Gratuito', icon: '🌿', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
+                  { id: 'course-sub', tag: 'Assinatura', title: 'Clube TOSB: Estudos de Matéria Médica', desc: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.', price: 'R$ 99,00', icon: '📖', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
+                  { id: 'course-post', tag: 'Especialização', title: 'Pós-Graduação em Homeopatia Avançada', desc: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.', price: 'R$ 3.600,00', icon: '🎓', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' }
+                ].filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).map((course, idx) => (
+                  <div key={idx} className="premium-card animate-fade-in">
+                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
+                      {course.image && <img src={course.image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </div>
+                    <div className="premium-card-content">
+                      <span className="premium-card-tag">{course.tag}</span>
+                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
+                      <p className="premium-card-text">{course.desc}</p>
+                      <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                        <span className="premium-card-price">{course.price}</span>
+                        <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {[
+                  { id: 'course-free', tag: 'Gratuito', title: 'Introdução à Homeopatia e Sensação Vital', desc: 'Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.', price: 'Gratuito', icon: '🌿', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
+                  { id: 'course-sub', tag: 'Assinatura', title: 'Clube TOSB: Estudos de Matéria Médica', desc: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.', price: 'R$ 99,00', icon: '📖', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
+                  { id: 'course-post', tag: 'Especialização', title: 'Pós-Graduação em Homeopatia Avançada', desc: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.', price: 'R$ 3.600,00', icon: '🎓', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' }
+                ].filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum curso online encontrado.</div>
+                  )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'inperson-courses' && (
+          <div>
+            <div className="card">
+              <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Seminários e Cursos Presenciais</h2>
+              <p className="text-muted text-center mb-4">Participe de nossos encontros presenciais e estude com grandes nomes da homeopatia.</p>
+
+              <div style={{ maxWidth: '600px', margin: '0 auto 2.5rem auto' }}>
+                <input
+                  type="text"
+                  placeholder="Pesquisar seminários por nome..."
+                  value={searchInpersonCourses}
+                  onChange={(e) => setSearchInpersonCourses(e.target.value)}
+                  className="form-input"
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+
+              <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
+                {[
+                  { id: 'course-inperson-seminar', tag: 'Presencial Curitiba', title: 'Seminário Avançado de Homeopatia 2026', desc: 'Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.', price: 'R$ 1.200,00', date: '23 a 25/Outubro/2026', loc: 'Curitiba - PR', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' },
+                  { id: 'course-inperson-meeting', tag: 'Encontro Prático', title: 'Encontro de Matéria Médica Prática', desc: 'Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.', price: 'R$ 600,00', date: '05/Dezembro/2026', loc: 'Sede TOSB Curitiba', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' }
+                ].filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase())).map((course, idx) => (
+                  <div key={idx} className="premium-card animate-fade-in">
+                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
+                      {course.image && <img src={course.image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </div>
+                    <div className="premium-card-content">
+                      <span className="premium-card-tag">{course.tag}</span>
+                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
+                      <p className="premium-card-text">{course.desc}</p>
+                      <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        <div>
+                          <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Data: <strong>{course.date}</strong></div>
+                          <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Local: <strong>{course.loc}</strong></div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                          <span className="premium-card-price">{course.price}</span>
+                          <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {[
+                  { id: 'course-inperson-seminar', tag: 'Presencial Curitiba', title: 'Seminário Avançado de Homeopatia 2026', desc: 'Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.', price: 'R$ 1.200,00', date: '23 a 25/Outubro/2026', loc: 'Curitiba - PR', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' },
+                  { id: 'course-inperson-meeting', tag: 'Encontro Prático', title: 'Encontro de Matéria Médica Prática', desc: 'Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.', price: 'R$ 600,00', date: '05/Dezembro/2026', loc: 'Sede TOSB Curitiba', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' }
+                ].filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase())).length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum seminário encontrado.</div>
+                  )}
+              </div>
             </div>
           </div>
         )}
@@ -5335,23 +5676,18 @@ NEWFILEENCODING:NONE
         {currentPage === 'books' && (
           <div>
             <div className="card">
-              <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Livraria Científica TOSB</h2>
+              <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Livraria Científica TOSB</h2>
               <p className="text-muted text-center mb-5">Adquira as obras traduzidas oficiais do Dr. Rajan Sankaran e Dr. Gaurang Gaikwad.</p>
 
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
                 {books.map(book => (
                   <div key={book.id} className="premium-card">
-                    <div className="premium-card-img-placeholder" style={{ position: 'relative' }}>
-                      📚
-                      {book.page_count > 0 && (
-                        <span className="badge-paid" style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff' }}>
-                          📄 {book.page_count} páginas
-                        </span>
-                      )}
+                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('book-detail', 'id=' + book.id)} style={{ position: 'relative' }}>
+                      {book.image && <img src={book.image} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                     </div>
                     <div className="premium-card-content">
                       <span className="premium-card-tag">{book.author}</span>
-                      <h3 className="premium-card-title">{book.title}</h3>
+                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
 
                       <div className="premium-card-footer">
@@ -5395,10 +5731,10 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: SYNERGY SOFTWARE */}
         {currentPage === 'synergy' && (
           <div className="card">
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Synergy Homeopathic Software (SHS)</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Synergy Homeopathic Software (SHS)</h2>
             <p className="text-muted text-center mb-5">Conheça o software oficial de repertorização de medicamentos e suporte ao Método Sensação.</p>
 
-            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1.05rem', lineHeight: '1.8' }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-md)', lineHeight: '1.8' }}>
               <p className="mb-4">
                 O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
@@ -5436,13 +5772,13 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: CONTATO */}
         {currentPage === 'contact' && (
           <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: '2rem' }}>Contato e Suporte Acadêmico</h2>
+            <h2 className="mb-2 font-serif-title text-center" style={{ fontSize: 'var(--fs-4xl)' }}>Contato e Suporte Acadêmico</h2>
             <p className="text-muted text-center mb-5">Tem dúvidas sobre matrículas, certificados ou sobre o Synergy Software? Entre em contato.</p>
 
             <div className="grid-2col-wide">
               <div>
                 <h4 className="section-title-underlined-thin mb-3">Informações de Contato</h4>
-                <p className="mb-4" style={{ fontSize: '1.05rem' }}>
+                <p className="mb-4" style={{ fontSize: 'var(--fs-md)' }}>
                   <strong>The Other Song Brasil</strong><br />
                   📍 Rua Brigadeiro Franco, 1234 - Batel<br />
                   Curitiba - PR / CEP: 80420-000
@@ -5489,7 +5825,7 @@ NEWFILEENCODING:NONE
 
             {cartItems.length === 0 ? (
               <div className="placeholder-box text-center">
-                <span style={{ fontSize: '3rem' }}>🛒</span>
+                <span style={{ fontSize: 'var(--fs-6xl)' }}>🛒</span>
                 <h3 className="mt-3 mb-3">Seu carrinho está vazio!</h3>
                 <p className="text-muted mb-4">Adicione livros de matéria médica ou cursos acadêmicos à sua sacola para prosseguir.</p>
                 <button className="btn btn-primary" onClick={() => navigateTo('home')}>Ver Cursos e Livros</button>
@@ -5501,29 +5837,29 @@ NEWFILEENCODING:NONE
                   <table className="table cart-table" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', backgroundColor: '#ffffff', borderRadius: 'var(--border-radius-md)', overflow: 'hidden' }}>
                     <thead>
                       <tr>
-                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Nome</th>
-                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Preço</th>
-                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Pagamento</th>
-                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Quantidade</th>
-                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Ação</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>Nome</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>Preço</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>Pagamento</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>Quantidade</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>Ação</th>
                       </tr>
                     </thead>
                     <tbody>
                       {cartItems.map((item, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--color-border)' }}>
                           <td style={{ padding: '16px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{item.product.title}</h4>
+                              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'bold' }}>{item.product.title}</span>
                             </div>
                           </td>
-                          <td style={{ padding: '16px', textAlign: 'center', fontWeight: 'bold' }}>
+                          <td style={{ padding: '16px', textAlign: 'center' }}>
                             {item.product.type === 'FREE' ? 'Gratuito' : `R$ ${(item.product.price || 0).toFixed(2).replace('.', ',')}`}
                           </td>
                           <td style={{ padding: '16px', textAlign: 'center' }}>
                             {item.product.type === 'FREE' ? '-' : (
                               <select
                                 className="form-input"
-                                style={{ padding: '6px', fontSize: '0.9rem', width: 'auto', display: 'inline-block', margin: '0 auto' }}
+                                style={{ padding: '6px', fontSize: 'var(--fs-sm)', borderRadius: 'var(--border-radius-sm)', width: 'auto', display: 'inline-block', margin: '0 auto' }}
                                 value={item.installments || 1}
                                 onChange={(e) => updateCartInstallments(item.product.id, parseInt(e.target.value))}
                               >
@@ -5543,7 +5879,7 @@ NEWFILEENCODING:NONE
                           </td>
                           <td style={{ padding: '16px', textAlign: 'center' }}>
                             {item.type === 'book' ? (
-                              <div className="cart-quantity-selector" style={{ justifyContent: 'center' }}>
+                              <div className="cart-quantity-selector" style={{ justifyContent: 'space-between' }}>
                                 <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
                                 <span className="cart-qty-value" style={{ width: '30px', textAlign: 'center' }}>{item.quantity}</span>
                                 <button className="btn-qty" onClick={() => updateCartQty(item.product.id, 1)}>+</button>
@@ -5559,10 +5895,6 @@ NEWFILEENCODING:NONE
                       ))}
                     </tbody>
                   </table>
-
-                  <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
-                    <button className="btn btn-secondary btn-quick-login" onClick={clearCart}>Esvaziar Carrinho</button>
-                  </div>
                 </div>
 
                 {/* Resumo da Compra */}
@@ -5582,7 +5914,7 @@ NEWFILEENCODING:NONE
                   </div>
 
                   <div className="summary-total">
-                    <span>Total Geral:</span>
+                    <span>Total Geral: </span>
                     <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2).replace('.', ',')}</span>
                   </div>
 
@@ -5618,32 +5950,32 @@ NEWFILEENCODING:NONE
                 <ul className="student-sidebar-menu">
                   <li className={`student-sidebar-item ${studentActiveTab === 'panel' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('panel')}>
-                      <span style={{ fontSize: '1.1rem' }}>🔲</span> Painel Geral
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>🔲</span> Painel Geral
                     </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'courses' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('courses')}>
-                      <span style={{ fontSize: '1.1rem' }}>📖</span> Meus Cursos
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>📖</span> Meus Cursos
                     </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'agenda' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('agenda')}>
-                      <span style={{ fontSize: '1.1rem' }}>📅</span> Agenda & Eventos
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>📅</span> Agenda & Eventos
                     </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'payments' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('payments')}>
-                      <span style={{ fontSize: '1.1rem' }}>💳</span> Pedidos / Financeiro
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>💳</span> Pedidos / Financeiro
                     </button>
                   </li>
                   <li className={`student-sidebar-item ${studentActiveTab === 'account' ? 'active' : ''}`}>
                     <button onClick={() => setStudentActiveTab('account')}>
-                      <span style={{ fontSize: '1.1rem' }}>⚙️</span> Detalhes da Conta
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>⚙️</span> Detalhes da Conta
                     </button>
                   </li>
                   <li className="student-sidebar-item">
                     <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
-                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>🚪</span> Sair da Conta
                     </button>
                   </li>
                 </ul>
@@ -5654,7 +5986,7 @@ NEWFILEENCODING:NONE
                 {studentActiveTab === 'panel' && (
                   <div className="tosb-panel-card card">
                     <h2 className="tosb-panel-title">Painel Geral</h2>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.98rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--fs-base)', lineHeight: '1.6', marginBottom: '2rem' }}>
                       A partir do seu painel de controle, você pode visualizar faturas pendentes, acompanhar datas e locais de seminários integrados, gerenciar seus dados de cadastro e endereços de faturamento e entrega.
                     </p>
 
@@ -5668,7 +6000,7 @@ NEWFILEENCODING:NONE
                         <h3 className="tosb-action-card-title">Cursos Ativos</h3>
                         <div className="tosb-diamond-divider">❖</div>
                         <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('courses')}>
-                          Acessar Aulas <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                          Acessar Aulas <span style={{ fontSize: 'var(--fs-base)', marginLeft: '0.2rem' }}>›</span>
                         </button>
                       </div>
 
@@ -5681,7 +6013,7 @@ NEWFILEENCODING:NONE
                         <h3 className="tosb-action-card-title">Faturas & Cobranças</h3>
                         <div className="tosb-diamond-divider">❖</div>
                         <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('payments')}>
-                          Ver Cobranças <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                          Ver Cobranças <span style={{ fontSize: 'var(--fs-base)', marginLeft: '0.2rem' }}>›</span>
                         </button>
                       </div>
 
@@ -5694,7 +6026,7 @@ NEWFILEENCODING:NONE
                         <h3 className="tosb-action-card-title">Editar Perfil</h3>
                         <div className="tosb-diamond-divider">❖</div>
                         <button className="tosb-btn-pill-dark" onClick={() => setStudentActiveTab('account')}>
-                          Editar Cadastro <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>›</span>
+                          Editar Cadastro <span style={{ fontSize: 'var(--fs-base)', marginLeft: '0.2rem' }}>›</span>
                         </button>
                       </div>
                     </div>
@@ -5728,23 +6060,23 @@ NEWFILEENCODING:NONE
                                 const attendanceRecords = attendanceKey ? (mockDb.class_attendance[attendanceKey] || []) : [];
                                 return associatedClass ? (
                                   <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px dashed var(--color-border)' }}>
-                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                    <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
                                       🏫 <strong>Turma:</strong> {associatedClass.name}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                    <div style={{ fontSize: 'var(--fs-sm)', marginBottom: '0.25rem' }}>
                                       👨‍🏫 <strong>Professores:</strong> {classTeachers.map(t => t.name).join(', ') || 'Nenhum alocado'}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem' }}>
-                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: '0.75rem' }}>{attendanceRecords.length} registrada(s)</span>
+                                    <div style={{ fontSize: 'var(--fs-sm)' }}>
+                                      📅 <strong>Presenças:</strong> <span className="badge-paid" style={{ display: 'inline-block', padding: '0.1rem 0.3rem', fontSize: 'var(--fs-xs)' }}>{attendanceRecords.length} registrada(s)</span>
                                       {attendanceRecords.length > 0 && (
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                                        <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b', marginTop: '0.25rem' }}>
                                           Datas: {attendanceRecords.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
                                         </div>
                                       )}
                                     </div>
                                   </div>
                                 ) : (
-                                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                                  <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b', marginTop: '0.5rem', fontStyle: 'italic' }}>
                                     Nenhuma turma alocada para este curso ainda.
                                   </div>
                                 );
@@ -5842,7 +6174,7 @@ NEWFILEENCODING:NONE
                           onChange={e => setStudentOrderPendingOnly(e.target.checked)}
                           style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                         />
-                        <label htmlFor="pendingOnlyCheckbox" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text-main)', fontWeight: '500', fontSize: '0.95rem' }}>
+                        <label htmlFor="pendingOnlyCheckbox" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text-main)', fontWeight: '500', fontSize: 'var(--fs-base)' }}>
                           Apenas compras em aberto
                         </label>
                       </div>
@@ -5878,7 +6210,7 @@ NEWFILEENCODING:NONE
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                                 <div>
                                   <h4 style={{ margin: '0 0 0.25rem' }}>{order.item_title}</h4>
-                                  <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                                  <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--fs-base)', lineHeight: '1.4' }}>
                                     <strong>Data da Compra:</strong> {new Date(order.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}<br />
                                     <strong>Valor Total:</strong> R$ {parseFloat(order.total_amount).toFixed(2)} | <strong>Pagamento:</strong> {order.payment_method === 'CARNE' ? 'Parcelado' : (order.installments > 1 ? `Parcelado em ${order.installments}x` : 'À vista')}
                                   </p>
@@ -5891,7 +6223,7 @@ NEWFILEENCODING:NONE
                               </div>
 
                               <div style={{ marginTop: '1rem' }}>
-                                <h5 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: '#475569' }}>Programação de Pagamentos</h5>
+                                <h5 style={{ fontSize: 'var(--fs-base)', marginBottom: '0.5rem', color: '#475569' }}>Programação de Pagamentos</h5>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                   {orderPayments.map((p, idx) => (
                                     <div key={p.id} className="installment-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
@@ -5902,16 +6234,16 @@ NEWFILEENCODING:NONE
                                         <span style={{ color: p.status === 'RECEIVED' ? 'var(--color-success)' : p.status === 'OVERDUE' ? 'var(--color-danger)' : 'inherit' }}>
                                           R$ {parseFloat(p.amount).toFixed(2)}
                                         </span>
-                                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                        <span style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>
                                           Venc: {new Date(p.due_date).toLocaleDateString('pt-BR')}
                                         </span>
                                       </div>
                                       <div className="installment-row-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'} style={{ fontSize: '0.75rem' }}>
+                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'} style={{ fontSize: 'var(--fs-xs)' }}>
                                           {p.status === 'RECEIVED' ? 'PAGO' : p.status === 'OVERDUE' ? 'ATRASADO' : 'PENDENTE'}
                                         </span>
                                         {p.status !== 'RECEIVED' && (
-                                          <button className="btn btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }} onClick={() => simulatePaymentWebhook(p.asaas_payment_id)}>
+                                          <button className="btn btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: 'var(--fs-sm)' }} onClick={() => simulatePaymentWebhook(p.asaas_payment_id)}>
                                             Pagar
                                           </button>
                                         )}
@@ -5960,7 +6292,7 @@ NEWFILEENCODING:NONE
                   return (
                     <div key={idx} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', backgroundColor: '#f8fafc' }}>
                       <div>
-                        <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{item.product.title}</h4>
+                        <h4 style={{ margin: 0, fontSize: 'var(--fs-lg)' }}>{item.product.title}</h4>
                         {item.product.type !== 'FREE' && (
                           <p style={{ margin: '0.35rem 0 0', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>
                             {inst > 1
@@ -5988,7 +6320,7 @@ NEWFILEENCODING:NONE
               <h4 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>Prefere pagar via PIX?</h4>
               <p className="mb-3">Escaneie o QR Code ou utilize nossa chave PIX CNPJ:</p>
               <h3 style={{ userSelect: 'all', margin: '1rem 0', padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '4px', display: 'inline-block' }}>12.345.678/0001-90</h3>
-              <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '1rem' }}>A liberação do curso ocorre em até 2 horas após a confirmação do pagamento.</p>
+              <p className="text-muted" style={{ fontSize: 'var(--fs-base)', marginTop: '1rem' }}>A liberação do curso ocorre em até 2 horas após a confirmação do pagamento.</p>
             </div>
 
             <div className="checkout-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
@@ -6043,7 +6375,7 @@ NEWFILEENCODING:NONE
                       {openPreviewLocked && (
                         <div className="video-locked-overlay">
                           <div className="locked-card">
-                            <span style={{ fontSize: '3.5rem' }}>🔒</span>
+                            <span style={{ fontSize: 'var(--fs-6xl)' }}>🔒</span>
                             <h3>Prévia de 20% Concluída</h3>
                             <p>Você assistiu aos primeiros 20% da 1ª aula aberta deste curso. O restante do vídeo e do conteúdo é liberado mediante pagamento/matrícula.</p>
                             <button
@@ -6213,7 +6545,7 @@ NEWFILEENCODING:NONE
                   </li>
                   <li className="student-sidebar-item">
                     <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
-                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>🚪</span> Sair da Conta
                     </button>
                   </li>
                 </ul>
@@ -6287,8 +6619,8 @@ NEWFILEENCODING:NONE
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
                               <div>
                                 <h4 style={{ margin: 0, color: 'var(--color-primary)' }}>🏫 {c.name}</h4>
-                                <div style={{ fontSize: '0.85rem' }} className="text-muted">Curso: <strong>{course ? course.title : 'Curso Removido'}</strong></div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 'bold', marginTop: '0.2rem' }}>
+                                <div style={{ fontSize: 'var(--fs-sm)' }} className="text-muted">Curso: <strong>{course ? course.title : 'Curso Removido'}</strong></div>
+                                <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-primary)', fontWeight: 'bold', marginTop: '0.2rem' }}>
                                   ⏱️ Carga Horária: {course?.duration_days ? course.duration_days * 2 : 180}h Didáticas
                                 </div>
                               </div>
@@ -6296,7 +6628,7 @@ NEWFILEENCODING:NONE
                             </div>
 
                             <div className="table-responsive">
-                              <table className="lms-table" style={{ fontSize: '0.9rem' }}>
+                              <table className="lms-table" style={{ fontSize: 'var(--fs-base)' }}>
                                 <thead>
                                   <tr>
                                     <th>Aluno</th>
@@ -6319,7 +6651,7 @@ NEWFILEENCODING:NONE
                                       <tr key={s.id}>
                                         <td>
                                           <strong>{s.name}</strong>
-                                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Progresso Aulas: {progressStr}</div>
+                                          <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>Progresso Aulas: {progressStr}</div>
                                         </td>
                                         <td>{s.email}</td>
                                         <td className="text-center">
@@ -6327,11 +6659,11 @@ NEWFILEENCODING:NONE
                                         </td>
                                         <td>
                                           {attendanceList.length > 0 ? (
-                                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                            <span style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>
                                               {attendanceList.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')).join(', ')}
                                             </span>
                                           ) : (
-                                            <span className="text-muted" style={{ fontSize: '0.8rem', fontStyle: 'italic' }}>Nenhuma registrada</span>
+                                            <span className="text-muted" style={{ fontSize: 'var(--fs-sm)', fontStyle: 'italic' }}>Nenhuma registrada</span>
                                           )}
                                         </td>
                                         <td className="text-center">
@@ -6398,7 +6730,7 @@ NEWFILEENCODING:NONE
                                   <td><small><code>{p.transaction_code || p.id}</code></small></td>
                                   <td>
                                     <strong>{student ? student.name : 'Aluno Removido'}</strong>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
+                                    <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{student?.email}</div>
                                   </td>
                                   <td>{course ? course.title : 'Curso Removido'}</td>
                                   <td><strong>R$ {p.amount.toFixed(2)}</strong></td>
@@ -6433,7 +6765,7 @@ NEWFILEENCODING:NONE
                       <h4 className="mt-5 mb-3 section-title-underlined-thin" style={{ color: 'var(--color-primary)' }}>
                         🏦 Informações Bancárias para Repasses & Honorários
                       </h4>
-                      <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                      <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '1rem' }}>
                         Mantenha seus dados bancários atualizados para que a administração saiba para onde depositar o dinheiro de suas aulas e comissões.
                       </p>
 
@@ -6510,7 +6842,7 @@ NEWFILEENCODING:NONE
                   </li>
                   <li className="student-sidebar-item">
                     <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
-                      <span style={{ fontSize: '1.1rem' }}>🚪</span> Sair da Conta
+                      <span style={{ fontSize: 'var(--fs-lg)' }}>🚪</span> Sair da Conta
                     </button>
                   </li>
                 </ul>
@@ -6636,8 +6968,21 @@ NEWFILEENCODING:NONE
                         </div>
 
                         <div className="form-group">
-                          <label className="form-label">Descrição</label>
-                          <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Descreva os objetivos do curso..." />
+                          <label className="form-label">Descrição Curta</label>
+                          <textarea className="form-input" name="description" defaultValue={editingCourse.description || ''} required placeholder="Texto breve para o card do curso..." />
+                        </div>
+
+                        <div className="form-group mb-4">
+                          <label className="form-label">Descrição Completa</label>
+                          <RichTextEditor
+                            value={editingCourse.full_description || ''}
+                            onChange={(html) => {
+                              const hiddenInput = document.getElementById('hidden_full_desc_' + (editingCourse.id || 'new'));
+                              if (hiddenInput) hiddenInput.value = html;
+                            }}
+                            placeholder="Descreva o conteúdo programático usando tabelas de módulos..."
+                          />
+                          <input type="hidden" id={'hidden_full_desc_' + (editingCourse.id || 'new')} name="full_description" defaultValue={editingCourse.full_description || ''} />
                         </div>
 
                         <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
@@ -6678,7 +7023,7 @@ NEWFILEENCODING:NONE
                           <h4 className="mb-2" style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             💰 Valores & Remuneração dos Professores Cadastrados
                           </h4>
-                          <p className="text-muted mb-4" style={{ fontSize: '0.85rem' }}>
+                          <p className="text-muted mb-4" style={{ fontSize: 'var(--fs-sm)' }}>
                             Defina os honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong>. As alterações são gravadas no histórico para consulta.
                           </p>
 
@@ -6690,8 +7035,8 @@ NEWFILEENCODING:NONE
                               return (
                                 <div key={t.id} style={{ padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                                    <span style={{ fontWeight: '600', color: 'var(--color-text)', fontSize: '0.95rem' }}>
-                                      👨‍🏫 {t.name} <span className="text-muted" style={{ fontWeight: 'normal', fontSize: '0.85rem' }}>({t.email})</span>
+                                    <span style={{ fontWeight: '600', color: 'var(--color-text)', fontSize: 'var(--fs-base)' }}>
+                                      👨‍🏫 {t.name} <span className="text-muted" style={{ fontWeight: 'normal', fontSize: 'var(--fs-sm)' }}>({t.email})</span>
                                     </span>
                                     {editingCourse.id && (
                                       <button
@@ -6707,12 +7052,12 @@ NEWFILEENCODING:NONE
 
                                   <div className="grid-2col" style={{ gap: '0.75rem' }}>
                                     <div>
-                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Modalidade de Pagamento</label>
+                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Modalidade de Pagamento</label>
                                       <select
                                         className="form-input"
                                         name={`payment_type_${t.id}`}
                                         defaultValue={currentConfig?.payment_type || (editingCourse.type === 'POSTGRAD' ? 'hora_aula' : editingCourse.type === 'FREE' ? 'percentual' : 'valor_fixo')}
-                                        style={{ fontSize: '0.85rem' }}
+                                        style={{ fontSize: 'var(--fs-sm)' }}
                                       >
                                         <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
                                         <option value="valor_fixo">💵 Valor Fixo (R$)</option>
@@ -6721,7 +7066,7 @@ NEWFILEENCODING:NONE
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor ou Taxa (R$ ou %)</label>
+                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor ou Taxa (R$ ou %)</label>
                                       <input
                                         className="form-input"
                                         type="number"
@@ -6729,7 +7074,7 @@ NEWFILEENCODING:NONE
                                         name={`payment_rate_${t.id}`}
                                         defaultValue={currentConfig?.payment_rate || (editingCourse.type === 'POSTGRAD' ? 150.00 : editingCourse.type === 'FREE' ? 15.00 : 2500.00)}
                                         placeholder="ex: 150.00 ou 15.00"
-                                        style={{ fontSize: '0.85rem' }}
+                                        style={{ fontSize: 'var(--fs-sm)' }}
                                       />
                                     </div>
                                   </div>
@@ -6808,7 +7153,7 @@ NEWFILEENCODING:NONE
                               <h3 className="font-serif-title" style={{ color: 'var(--color-primary)', margin: 0 }}>
                                 📜 Histórico de Consulta de Valores Docentes
                               </h3>
-                              <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0, marginTop: '0.25rem' }}>
+                              <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', margin: 0, marginTop: '0.25rem' }}>
                                 Curso: <strong>{viewingCourseHistory.courseTitle}</strong> {viewingCourseHistory.teacherName && `| Professor: ${viewingCourseHistory.teacherName}`}
                               </p>
                             </div>
@@ -6828,7 +7173,7 @@ NEWFILEENCODING:NONE
                             if (historyList.length === 0) {
                               return (
                                 <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--color-text-muted)' }}>
-                                  <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '1rem' }}>📁</span>
+                                  <span style={{ fontSize: 'var(--fs-5xl)', display: 'block', marginBottom: '1rem' }}>📁</span>
                                   <p>Nenhum registro de valor anterior localizado no histórico para este filtro.</p>
                                 </div>
                               );
@@ -6918,13 +7263,15 @@ NEWFILEENCODING:NONE
                         </div>
 
                         <div className="form-group">
-                          <label className="form-label">Relação de Conteúdo / Sumário (Digite 1 capítulo por linha)</label>
-                          <textarea
-                            className="form-input"
-                            name="content_table"
-                            defaultValue={Array.isArray(editingBook.content_table) ? editingBook.content_table.join('\n') : (editingBook.content_table || '')}
-                            placeholder="Capítulo 1: Introdução ao Método Sensação&#10;Capítulo 2: Reinos e Miasmas&#10;Capítulo 3: Casos Clínicos Ilustrados"
-                            rows={5}
+                          <label className="form-label">Descrição Completa</label>
+                          <input type="hidden" id={`hidden_full_desc_book_${editingBook.id || 'new'}`} name={`hidden_full_desc_book_${editingBook.id || 'new'}`} defaultValue={editingBook.id ? (editingBook.full_description || '') : (editingBook.full_description ?? DEFAULT_TABLE_HTML)} />
+                          <RichTextEditor
+                            value={editingBook.id ? (editingBook.full_description || '') : (editingBook.full_description ?? DEFAULT_TABLE_HTML)}
+                            onChange={(html) => {
+                              const hiddenInput = document.getElementById('hidden_full_desc_book_' + (editingBook.id || 'new'));
+                              if (hiddenInput) hiddenInput.value = html;
+                            }}
+                            placeholder="Escreva a descrição detalhada da obra (você pode incluir tabelas de sumário, etc)..."
                           />
                         </div>
 
@@ -7086,7 +7433,7 @@ NEWFILEENCODING:NONE
                             <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
                               💰 Forma de Recebimento do Docente por Curso Vinculado
                             </h5>
-                            <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                            <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '1rem' }}>
                               Defina a forma de remuneração deste docente para cada curso (Hora Aula, Comissão ou Valor Fixo). Ex: Prof. Carlos recebe por hora aula na Pós-Graduação, mas por comissão no curso de Introdução.
                             </p>
 
@@ -7095,17 +7442,17 @@ NEWFILEENCODING:NONE
                                 const currentConfig = (mockDb.teacher_courses || []).find(tc => tc.teacher_id === editingUser.id && tc.course_id === c.id);
                                 return (
                                   <div key={c.id} style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>
+                                    <div style={{ fontWeight: 'bold', fontSize: 'var(--fs-base)', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>
                                       🌿 {c.title} ({c.type})
                                     </div>
                                     <div className="grid-2col" style={{ gap: '0.5rem' }}>
                                       <div>
-                                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Forma de Recebimento</label>
+                                        <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Forma de Recebimento</label>
                                         <select
                                           className="form-input"
                                           name={`payment_type_${c.id}`}
                                           defaultValue={currentConfig?.payment_type || (c.type === 'POSTGRAD' ? 'hora_aula' : c.type === 'FREE' ? 'comissao' : 'valor_fixo')}
-                                          style={{ fontSize: '0.85rem' }}
+                                          style={{ fontSize: 'var(--fs-sm)' }}
                                         >
                                           <option value="hora_aula">⏱️ Hora Aula (R$/h)</option>
                                           <option value="comissao">📊 Comissão por Venda (%)</option>
@@ -7113,7 +7460,7 @@ NEWFILEENCODING:NONE
                                         </select>
                                       </div>
                                       <div>
-                                        <label className="form-label" style={{ fontSize: '0.8rem' }}>Valor da Remuneração / Taxa</label>
+                                        <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor da Remuneração / Taxa</label>
                                         <input
                                           className="form-input"
                                           type="number"
@@ -7121,7 +7468,7 @@ NEWFILEENCODING:NONE
                                           name={`payment_rate_${c.id}`}
                                           defaultValue={currentConfig?.payment_rate || (c.type === 'POSTGRAD' ? 150.00 : c.type === 'FREE' ? 15.00 : 2500.00)}
                                           placeholder="ex: 150.00 ou 15.00"
-                                          style={{ fontSize: '0.85rem' }}
+                                          style={{ fontSize: 'var(--fs-sm)' }}
                                         />
                                       </div>
                                     </div>
@@ -7218,22 +7565,22 @@ NEWFILEENCODING:NONE
                       {financeTab === 'overview' ? (
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', maxWidth: '500px' }}>
                           <div style={{ flex: 1 }}>
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Data Inicial (De)</label>
+                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Data Inicial (De)</label>
                             <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Data Final (Até)</label>
+                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Data Final (Até)</label>
                             <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
                           </div>
                         </div>
                       ) : (
                         <div className="grid-3col">
                           <div className="form-group mb-0">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Pesquisar (Aluno, Transação, Descrição)</label>
+                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Pesquisar (Aluno, Transação, Descrição)</label>
                             <input type="text" className="form-input" style={{ padding: '0.4rem' }} value={financeSearch} onChange={(e) => setFinanceSearch(e.target.value)} placeholder="Ex: ASAAS_123..." />
                           </div>
                           <div className="form-group mb-0">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Status / Tipo</label>
+                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Status / Tipo</label>
                             <select className="form-input" style={{ padding: '0.4rem' }} value={financeFilter} onChange={(e) => setFinanceFilter(e.target.value)}>
                               <option value="ALL">Todos</option>
                               <option value="CONFIRMED">Confirmado</option>
@@ -7244,11 +7591,11 @@ NEWFILEENCODING:NONE
                           </div>
                           <div className="form-group mb-0" style={{ display: 'flex', gap: '0.5rem' }}>
                             <div style={{ flex: 1 }}>
-                              <label className="form-label" style={{ fontSize: '0.8rem' }}>De</label>
+                              <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>De</label>
                               <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
                             </div>
                             <div style={{ flex: 1 }}>
-                              <label className="form-label" style={{ fontSize: '0.8rem' }}>Até</label>
+                              <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Até</label>
                               <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
                             </div>
                           </div>
@@ -7360,7 +7707,7 @@ NEWFILEENCODING:NONE
                                 <input
                                   type="text"
                                   className="form-input mb-1"
-                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: 'var(--fs-sm)' }}
                                   placeholder="🔍 Pesquisar aluno por nome ou e-mail..."
                                   value={entryStudentSearch}
                                   onChange={(e) => setEntryStudentSearch(e.target.value)}
@@ -7414,7 +7761,7 @@ NEWFILEENCODING:NONE
                                 <input
                                   type="text"
                                   className="form-input mb-1"
-                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: 'var(--fs-sm)' }}
                                   placeholder="🔍 Pesquisar curso por nome..."
                                   value={entryProductSearch}
                                   onChange={(e) => setEntryProductSearch(e.target.value)}
@@ -7437,7 +7784,7 @@ NEWFILEENCODING:NONE
                                 <input
                                   type="text"
                                   className="form-input mb-1"
-                                  style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                                  style={{ padding: '0.35rem 0.5rem', fontSize: 'var(--fs-sm)' }}
                                   placeholder="🔍 Pesquisar livro por título ou autor..."
                                   value={entryProductSearch}
                                   onChange={(e) => setEntryProductSearch(e.target.value)}
@@ -7538,7 +7885,7 @@ NEWFILEENCODING:NONE
                                   const book = (mockDb.books || []).find(b => b.id === p.book_id);
                                   return (
                                     <tr key={p.id}>
-                                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                      <td style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-base)' }}>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                           <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                           <span>{p.due_date ? new Date(p.due_date).toLocaleDateString('pt-BR') : '-'}</span>
@@ -7550,7 +7897,7 @@ NEWFILEENCODING:NONE
                                       </td>
                                       <td>
                                         <strong>{student?.name || 'Aluno Removido'}</strong>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{student?.email}</div>
+                                        <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{student?.email}</div>
                                       </td>
                                       <td>
                                         {course ? (
@@ -7757,7 +8104,7 @@ NEWFILEENCODING:NONE
                                 })
                                 .map(e => (
                                   <tr key={e.id}>
-                                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                    <td style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-base)' }}>
                                       <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                         <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                         <span>{e.date ? new Date(e.date).toLocaleDateString('pt-BR') : '-'}</span>
@@ -7799,7 +8146,7 @@ NEWFILEENCODING:NONE
                                   const teacher = mockDb.users.find(u => u.id === p.teacher_id);
                                   return (
                                     <tr key={p.id}>
-                                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                      <td style={{ whiteSpace: 'nowrap', fontSize: 'var(--fs-base)' }}>
                                         <div style={{ lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                           <strong style={{ color: '#475569', minWidth: '20px' }}>V:</strong>
                                           <span>{p.period_end ? new Date(p.period_end).toLocaleDateString('pt-BR') : '-'}</span>
@@ -7876,7 +8223,7 @@ NEWFILEENCODING:NONE
                       <div className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '2px solid var(--color-primary)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
                           <div>
-                            <span className="badge-paid" style={{ fontSize: '0.8rem' }}>Painel de Gestão da Turma</span>
+                            <span className="badge-paid" style={{ fontSize: 'var(--fs-sm)' }}>Painel de Gestão da Turma</span>
                             <h3 style={{ margin: '0.25rem 0 0 0', color: 'var(--color-primary)' }}>🏫 {viewingClassDetails.name}</h3>
                             {(() => {
                               const crs = mockDb.courses.find(c => c.id === viewingClassDetails.course_id);
@@ -7893,7 +8240,7 @@ NEWFILEENCODING:NONE
                         <div className="grid-2col" style={{ gap: '2rem' }}>
                           {/* SEÇÃO 1: PROFESSORES DA TURMA */}
                           <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
-                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>👨‍🏫 Professores Alocados na Turma</h4>
+                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: 'var(--fs-md)' }}>👨‍🏫 Professores Alocados na Turma</h4>
 
                             {/* Form de Adicionar Professor com 1 Clique */}
                             <form
@@ -7908,7 +8255,7 @@ NEWFILEENCODING:NONE
                               className="mb-3"
                               style={{ display: 'flex', gap: '0.5rem' }}
                             >
-                              <select className="form-input" name="new_teacher_id" required style={{ fontSize: '0.85rem' }}>
+                              <select className="form-input" name="new_teacher_id" required style={{ fontSize: 'var(--fs-sm)' }}>
                                 <option value="">-- Escolha um professor para incluir --</option>
                                 {mockDb.users
                                   .filter(u => u.role === 'TEACHER' && !(viewingClassDetails.teacher_ids || []).includes(u.id))
@@ -7926,10 +8273,10 @@ NEWFILEENCODING:NONE
                               {mockDb.users
                                 .filter(u => (viewingClassDetails.teacher_ids || []).includes(u.id))
                                 .map(t => (
-                                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: 'var(--fs-sm)' }}>
                                     <div>
                                       <strong>{t.name}</strong>
-                                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
+                                      <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{t.email} | {t.crm || 'Sem CRM'}</div>
                                     </div>
                                     <button
                                       className="btn btn-danger"
@@ -7941,14 +8288,14 @@ NEWFILEENCODING:NONE
                                   </div>
                                 ))}
                               {!(viewingClassDetails.teacher_ids || []).length && (
-                                <p className="text-muted text-center py-3" style={{ fontSize: '0.85rem' }}>Nenhum professor alocado nesta turma ainda.</p>
+                                <p className="text-muted text-center py-3" style={{ fontSize: 'var(--fs-sm)' }}>Nenhum professor alocado nesta turma ainda.</p>
                               )}
                             </div>
                           </div>
 
                           {/* SEÇÃO 2: ALUNOS DA TURMA */}
                           <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
-                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: '1.05rem' }}>🎓 Alunos Matriculados na Turma</h4>
+                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: 'var(--fs-md)' }}>🎓 Alunos Matriculados na Turma</h4>
 
                             {/* Form de Adicionar Aluno com 1 Clique */}
                             <form
@@ -7963,7 +8310,7 @@ NEWFILEENCODING:NONE
                               className="mb-3"
                               style={{ display: 'flex', gap: '0.5rem' }}
                             >
-                              <select className="form-input" name="new_student_id" required style={{ fontSize: '0.85rem' }}>
+                              <select className="form-input" name="new_student_id" required style={{ fontSize: 'var(--fs-sm)' }}>
                                 <option value="">-- Escolha um aluno para matricular --</option>
                                 {mockDb.users
                                   .filter(u => u.role === 'STUDENT' && !(viewingClassDetails.student_ids || []).includes(u.id))
@@ -7984,10 +8331,10 @@ NEWFILEENCODING:NONE
                                   const attendanceKey = `${viewingClassDetails.id}_${st.id}`;
                                   const attendanceCount = (mockDb.class_attendance[attendanceKey] || []).length;
                                   return (
-                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.85rem' }}>
+                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: 'var(--fs-sm)' }}>
                                       <div>
                                         <strong>{st.name}</strong>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
+                                        <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
                                       </div>
                                       <button
                                         className="btn btn-danger"
@@ -8000,7 +8347,7 @@ NEWFILEENCODING:NONE
                                   );
                                 })}
                               {!(viewingClassDetails.student_ids || []).length && (
-                                <p className="text-muted text-center py-3" style={{ fontSize: '0.85rem' }}>Nenhum aluno matriculado nesta turma ainda.</p>
+                                <p className="text-muted text-center py-3" style={{ fontSize: 'var(--fs-sm)' }}>Nenhum aluno matriculado nesta turma ainda.</p>
                               )}
                             </div>
                           </div>
@@ -8027,7 +8374,7 @@ NEWFILEENCODING:NONE
                                 placeholder="🔍 Pesquisar curso por nome..."
                                 value={classCourseSearch}
                                 onChange={(e) => setClassCourseSearch(e.target.value)}
-                                style={{ width: '220px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                style={{ width: '220px', padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)' }}
                               />
                             </div>
                             <select className="form-input" name="course_id" defaultValue={editingClass.course_id || ''} required>
@@ -8051,7 +8398,7 @@ NEWFILEENCODING:NONE
                                 placeholder="🔍 Pesquisar professor..."
                                 value={classTeacherSearch}
                                 onChange={(e) => setClassTeacherSearch(e.target.value)}
-                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: 'var(--fs-sm)' }}
                               />
                             </div>
                             <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
@@ -8060,7 +8407,7 @@ NEWFILEENCODING:NONE
                                 .map(u => {
                                   const isChecked = (editingClass.teacher_ids || []).includes(u.id);
                                   return (
-                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
                                       <input type="checkbox" name="teacher_ids" value={u.id} defaultChecked={isChecked} />
                                       <span><strong>{u.name}</strong> <span className="text-muted">({u.email})</span></span>
                                     </label>
@@ -8077,7 +8424,7 @@ NEWFILEENCODING:NONE
                                 placeholder="🔍 Pesquisar aluno..."
                                 value={classStudentSearch}
                                 onChange={(e) => setClassStudentSearch(e.target.value)}
-                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                style={{ width: '180px', padding: '0.25rem 0.5rem', fontSize: 'var(--fs-sm)' }}
                               />
                             </div>
                             <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--color-border)', padding: '0.5rem', borderRadius: '4px', backgroundColor: '#ffffff' }}>
@@ -8086,7 +8433,7 @@ NEWFILEENCODING:NONE
                                 .map(u => {
                                   const isChecked = (editingClass.student_ids || []).includes(u.id);
                                   return (
-                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>
                                       <input type="checkbox" name="student_ids" value={u.id} defaultChecked={isChecked} />
                                       <span><strong>{u.name}</strong> <span className="text-muted">({u.email})</span></span>
                                     </label>
@@ -8144,7 +8491,7 @@ NEWFILEENCODING:NONE
                                 </td>
                                 <td>{course ? course.title : 'Curso Removido'}</td>
                                 <td>
-                                  {teachers.map(t => <div key={t.id} style={{ fontSize: '0.85rem' }}>👨‍🏫 {t.name}</div>)}
+                                  {teachers.map(t => <div key={t.id} style={{ fontSize: 'var(--fs-sm)' }}>👨‍🏫 {t.name}</div>)}
                                   {teachers.length === 0 && <span className="text-muted">Nenhum professor</span>}
                                 </td>
                                 <td>
@@ -8357,7 +8704,7 @@ NEWFILEENCODING:NONE
                             <tr key={u.id}>
                               <td>
                                 <strong>{u.student_name}</strong>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.student_email}</div>
+                                <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{u.student_email}</div>
                               </td>
                               <td>{u.course_title}</td>
                               <td><span className="badge-paid">{u.days_valid} dias</span></td>
@@ -8479,7 +8826,7 @@ NEWFILEENCODING:NONE
 
             {/* Painel de Testes / Ações Rápidas de Simulação */}
             <div className="card p-4 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-border)' }}>
-              <strong style={{ fontSize: '0.9rem', color: 'var(--color-secondary)', display: 'block', marginBottom: '0.5rem' }}>
+              <strong style={{ fontSize: 'var(--fs-base)', color: 'var(--color-secondary)', display: 'block', marginBottom: '0.5rem' }}>
                 🧪 Painel de Simulação Rápida (1 Clique para Testar):
               </strong>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -8522,17 +8869,17 @@ NEWFILEENCODING:NONE
                 <div key={mail.id || idx} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1rem', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                     <div>
-                      <span className={`badge-paid ${mail.type === 'COURSE_PURCHASE' ? '' : mail.type === 'TEMP_UNLOCK' ? 'badge-pending' : 'badge-overdue'}`} style={{ fontSize: '0.75rem', display: 'inline-block', marginBottom: '0.25rem' }}>
+                      <span className={`badge-paid ${mail.type === 'COURSE_PURCHASE' ? '' : mail.type === 'TEMP_UNLOCK' ? 'badge-pending' : 'badge-overdue'}`} style={{ fontSize: 'var(--fs-xs)', display: 'inline-block', marginBottom: '0.25rem' }}>
                         {mail.type === 'COURSE_PURCHASE' ? '🎉 COMPRA CONFIRMADA' : mail.type === 'TEMP_UNLOCK' ? '🔓 LIBERAÇÃO TEMPORÁRIA' : '⚠️ LEMBRETE DE VENCIMENTO'}
                       </span>
-                      <h4 style={{ margin: '0.25rem 0 0 0', fontSize: '1rem', color: 'var(--color-primary)' }}>{mail.subject}</h4>
+                      <h4 style={{ margin: '0.25rem 0 0 0', fontSize: 'var(--fs-md)', color: 'var(--color-primary)' }}>{mail.subject}</h4>
                     </div>
                     <small className="text-muted">{new Date(mail.sent_at).toLocaleString('pt-BR')}</small>
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
                     <strong>Para:</strong> {mail.recipient_name ? `${mail.recipient_name} <${mail.recipient_email}>` : mail.recipient_email}
                   </div>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#334155' }}>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', fontSize: 'var(--fs-sm)', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#334155' }}>
                     {mail.body}
                   </div>
                 </div>

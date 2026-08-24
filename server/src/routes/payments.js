@@ -51,6 +51,8 @@ router.get('/my-invoices', authenticateToken, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Erro ao carregar faturas.' });
   }
+});
+
 // Obter histórico de pedidos do Aluno
 router.get('/my-orders', authenticateToken, async (req, res) => {
   const studentId = req.user.id;
