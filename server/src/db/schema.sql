@@ -133,9 +133,24 @@ CREATE TABLE IF NOT EXISTS enrollments (
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'EXPIRED', 'SUSPENDED'))
 );
 
+-- Tabela de Pedidos/Compras (Orders) - Cada item comprado é uma order
+CREATE TABLE IF NOT EXISTS orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    course_id UUID REFERENCES courses(id) ON DELETE SET NULL,
+    book_id VARCHAR(100) REFERENCES books(id) ON DELETE SET NULL,
+    item_type VARCHAR(50) NOT NULL CHECK (item_type IN ('course', 'book', 'other')),
+    total_amount DECIMAL(10, 2) NOT NULL,
+    installments INTEGER NOT NULL DEFAULT 1,
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('CREDIT_CARD', 'PIX', 'BOLETO', 'CARNE', 'TRANSFER')),
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID', 'CANCELED', 'REFUNDED')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela de Pagamentos
 CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
     student_id UUID REFERENCES users(id) ON DELETE CASCADE,
     course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
     asaas_payment_id VARCHAR(255),
@@ -148,6 +163,8 @@ CREATE TABLE IF NOT EXISTS payments (
     receipt_proof_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE CASCADE;
 
 -- Atualizar CHECK constraint se já existir para permitir TRANSFER
 ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_payment_method_check;

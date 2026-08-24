@@ -39,8 +39,9 @@ router.get('/my-invoices', authenticateToken, async (req, res) => {
     await checkDelinquency(studentId);
 
     const invoices = await pool.query(
-      'SELECT p.*, c.title as course_title FROM payments p ' +
-      'JOIN courses c ON c.id = p.course_id ' +
+      'SELECT p.*, COALESCE(c.title, b.title, \'Item\') as course_title FROM payments p ' +
+      'LEFT JOIN courses c ON c.id = p.course_id ' +
+      'LEFT JOIN books b ON b.id = p.book_id ' +
       'WHERE p.student_id = $1 ORDER BY p.due_date DESC',
       [studentId]
     );
@@ -50,74 +51,113 @@ router.get('/my-invoices', authenticateToken, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Erro ao carregar faturas.' });
   }
+// Obter histórico de pedidos do Aluno
+router.get('/my-orders', authenticateToken, async (req, res) => {
+  const studentId = req.user.id;
+  try {
+    const ordersResult = await pool.query(
+      'SELECT o.*, COALESCE(c.title, b.title, \'Item\') as item_title FROM orders o ' +
+      'LEFT JOIN courses c ON c.id = o.course_id ' +
+      'LEFT JOIN books b ON b.id = o.book_id ' +
+      'WHERE o.student_id = $1 ORDER BY o.created_at DESC',
+      [studentId]
+    );
+
+    const paymentsResult = await pool.query(
+      'SELECT * FROM payments WHERE student_id = $1 ORDER BY due_date ASC',
+      [studentId]
+    );
+
+    const orders = ordersResult.rows.map(order => ({
+      ...order,
+      payments: paymentsResult.rows.filter(p => p.order_id === order.id)
+    }));
+
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao carregar pedidos.' });
+  }
 });
 
 // Criar Cobrança (Simulando Integração com Asaas Sandbox)
-// Cria a cobrança no Asaas e registra no banco local com código de transação
+// Cria a cobrança (Order + Payments) no banco local com código de transação
 router.post('/checkout', authenticateToken, async (req, res) => {
-  const { courseId, paymentMethod, installments } = req.body;
+  const { itemType, courseId, bookId, paymentMethod, installments, quantity } = req.body;
   const studentId = req.user.id;
+  
+  const type = itemType || (courseId ? 'course' : 'book');
+  const qty = quantity || 1;
 
-  if (!courseId || !paymentMethod) {
-    return res.status(400).json({ message: 'Curso e método de pagamento são obrigatórios.' });
+  if ((!courseId && !bookId) || !paymentMethod) {
+    return res.status(400).json({ message: 'Item e método de pagamento são obrigatórios.' });
   }
 
   try {
-    // Buscar detalhes do curso
-    const courseResult = await pool.query('SELECT * FROM courses WHERE id = $1', [courseId]);
-    if (courseResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Curso não encontrado.' });
-    }
-    const course = courseResult.rows[0];
-
-    // Definir valores básicos de simulação
     let price = 0.00;
-    if (course.type === 'SUBSCRIPTION') {
-      price = 99.00; // Assinatura mensal
-    } else if (course.type === 'POSTGRAD') {
-      price = 3600.00; // Valor total pós
+    
+    if (type === 'course') {
+      const courseResult = await pool.query('SELECT * FROM courses WHERE id = $1', [courseId]);
+      if (courseResult.rows.length === 0) return res.status(404).json({ message: 'Curso não encontrado.' });
+      const course = courseResult.rows[0];
+      
+      if (course.type === 'SUBSCRIPTION') {
+        price = 99.00;
+      } else if (course.type === 'POSTGRAD') {
+        price = 3600.00;
+      } else if (course.type === 'FREE') {
+        return res.status(400).json({ message: 'Cursos gratuitos não necessitam de checkout.' });
+      } else {
+        price = 1200.00; // Valor fallback para INPERSON/SEMINAR
+      }
     } else {
-      return res.status(400).json({ message: 'Cursos livres grátis não necessitam de checkout.' });
+      const bookResult = await pool.query('SELECT * FROM books WHERE id = $1', [bookId]);
+      if (bookResult.rows.length === 0) return res.status(404).json({ message: 'Livro não encontrado.' });
+      price = parseFloat(bookResult.rows[0].price);
     }
-
+    
+    const totalAmount = price * qty;
     const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
     
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      
+      // 1. Criar a Order (Pedido)
+      const orderResult = await client.query(
+        'INSERT INTO orders (student_id, course_id, book_id, item_type, total_amount, installments, payment_method, status) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+        [studentId, courseId || null, bookId || null, type, totalAmount, installments || 1, paymentMethod, 'PENDING']
+      );
+      const order = orderResult.rows[0];
 
       const invoicesCreated = [];
-
-      if (paymentMethod === 'CARNE' && course.type === 'POSTGRAD') {
-        // Boleto Parcelado (Carnê) - Simular 12 parcelas de R$300,00
-        const numberOfInstallments = installments || 12;
-        const installmentAmount = (price / numberOfInstallments).toFixed(2);
-
+      const numberOfInstallments = installments || 1;
+      
+      if ((paymentMethod === 'CARNE' || paymentMethod === 'CREDIT_CARD') && numberOfInstallments > 1) {
+        const installmentAmount = (totalAmount / numberOfInstallments).toFixed(2);
         for (let i = 1; i <= numberOfInstallments; i++) {
           const installmentCode = `${transactionCode}_PARC${i}`;
           const installmentAsaasId = `${asaasPaymentId}_${i}`;
           const dueDate = new Date();
-          dueDate.setMonth(dueDate.getMonth() + (i - 1)); // Mensalidade consecutiva
+          dueDate.setMonth(dueDate.getMonth() + (i - 1));
 
           const paymentResult = await client.query(
-            'INSERT INTO payments (student_id, course_id, asaas_payment_id, transaction_code, amount, payment_method, status, due_date) ' +
-            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [studentId, courseId, installmentAsaasId, installmentCode, installmentAmount, 'CARNE', 'PENDING', dueDate]
+            'INSERT INTO payments (order_id, student_id, course_id, book_id, asaas_payment_id, transaction_code, amount, payment_method, status, due_date) ' +
+            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            [order.id, studentId, courseId || null, bookId || null, installmentAsaasId, installmentCode, installmentAmount, paymentMethod, 'PENDING', dueDate]
           );
           invoicesCreated.push(paymentResult.rows[0]);
         }
       } else {
-        // Pagamento único: PIX, Cartão ou Boleto único (ou assinatura inicial)
         const dueDate = new Date();
-        if (paymentMethod === 'BOLETO' || paymentMethod === 'BOLETO_PROGRAMADO') {
-          dueDate.setDate(dueDate.getDate() + 3); // 3 dias de vencimento
-        }
+        if (paymentMethod === 'BOLETO' || paymentMethod === 'BOLETO_PROGRAMADO') dueDate.setDate(dueDate.getDate() + 3);
 
         const paymentResult = await client.query(
-          'INSERT INTO payments (student_id, course_id, asaas_payment_id, transaction_code, amount, payment_method, status, due_date) ' +
-          'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-          [studentId, courseId, asaasPaymentId, transactionCode, price, paymentMethod, 'PENDING', dueDate]
+          'INSERT INTO payments (order_id, student_id, course_id, book_id, asaas_payment_id, transaction_code, amount, payment_method, status, due_date) ' +
+          'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+          [order.id, studentId, courseId || null, bookId || null, asaasPaymentId, transactionCode, totalAmount, paymentMethod, 'PENDING', dueDate]
         );
         invoicesCreated.push(paymentResult.rows[0]);
       }
@@ -125,19 +165,18 @@ router.post('/checkout', authenticateToken, async (req, res) => {
       await client.query('COMMIT');
 
       res.status(201).json({
-        message: 'Fatura(s) gerada(s) com sucesso no ambiente Sandbox do Asaas.',
+        message: 'Pedido e Fatura(s) gerados com sucesso.',
         checkoutUrl: 'https://sandbox.asaas.com/checkout/simulado',
+        order,
         invoices: invoicesCreated,
         transactionCode
       });
-
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
     } finally {
       client.release();
     }
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao gerar checkout.' });

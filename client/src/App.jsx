@@ -48,6 +48,10 @@ const BOOKS_DATA = [
       'Capítulo 3: O Reino Mineral, Linhas da Tabela Periódica e Estrutura',
       'Capítulo 4: O Reino Animal, Miasmas e Reações de Sobrevivência',
       'Capítulo 5: Tabelas de Diferenciação Clínica Rápida e Casos Ilustrados'
+    ],
+    images: [
+      'https://placehold.co/600x800/2c3e50/ffffff?text=Capa+1',
+      'https://placehold.co/600x800/e74c3c/ffffff?text=Capa+2'
     ]
   },
   {
@@ -63,6 +67,11 @@ const BOOKS_DATA = [
       'Capítulo 3: Superclasse 2 (Estrutura e Organização)',
       'Capítulo 4: Superclasse 3 (Movimento e Interação)',
       'Capítulo 5: Guia de Prescrição com base nas Seis Divisões'
+    ],
+    images: [
+      'https://placehold.co/600x800/27ae60/ffffff?text=Foto+1',
+      'https://placehold.co/600x800/8e44ad/ffffff?text=Foto+2',
+      'https://placehold.co/600x800/f39c12/ffffff?text=Foto+3'
     ]
   },
   {
@@ -78,6 +87,10 @@ const BOOKS_DATA = [
       'Capítulo 3: Mapeamento da Caixa 5 à Caixa 8: Reino e Genética Vital',
       'Capítulo 4: Como evitar erros de prescrição unilateral',
       'Capítulo 5: 30 Casos Clínicos Resolvidos com o Método das 8 Caixas'
+    ],
+    images: [
+      'https://placehold.co/600x800/2980b9/ffffff?text=Imagem+A',
+      'https://placehold.co/600x800/c0392b/ffffff?text=Imagem+B'
     ]
   },
   {
@@ -93,6 +106,10 @@ const BOOKS_DATA = [
       'Capítulo 3: Quando e Como Alterar a Potência (LM, CH, K)',
       'Capítulo 4: Critérios Precisos para Trocar o Remédio Homeopático',
       'Capítulo 5: Protocolos para Pacientes em Uso de Medicamentos Alopáticos'
+    ],
+    images: [
+      'https://placehold.co/600x800/16a085/ffffff?text=Verso',
+      'https://placehold.co/600x800/d35400/ffffff?text=Lombada'
     ]
   }
 ];
@@ -178,6 +195,52 @@ const COURSES_DETAILS_DATA = {
         ]
       }
     ]
+  },
+  'course-inperson-seminar': {
+    target: 'Médicos e Homeopatas experientes',
+    duration: '15 e 16 de Novembro',
+    location: 'Sede da TOSB Curitiba / Transmissão ao vivo',
+    workload: '20 horas',
+    certificate: 'Certificado de Participação',
+    modules: [
+      {
+        title: 'Dia 1: Casos Clínicos ao Vivo',
+        lessons: [
+          'Tomada de Caso',
+          'Análise de Sensação'
+        ]
+      },
+      {
+        title: 'Dia 2: Discussão e Prática',
+        lessons: [
+          'Matéria Médica de Remédios Raros',
+          'Acompanhamento de Follow-ups'
+        ]
+      }
+    ]
+  },
+  'course-inperson-meeting': {
+    target: 'Todos os profissionais e estudantes',
+    duration: '20 de Outubro',
+    location: 'Auditório TOSB Curitiba',
+    workload: '8 horas',
+    certificate: 'Certificado de Participação',
+    modules: [
+      {
+        title: 'Manhã: Reino Mineral',
+        lessons: [
+          'Introdução à Tabela Periódica na Sensação Vital',
+          'Série Ferrum e Argentum'
+        ]
+      },
+      {
+        title: 'Tarde: Reino Vegetal',
+        lessons: [
+          'Família das Compostas',
+          'Família das Umbelíferas'
+        ]
+      }
+    ]
   }
 };
 
@@ -200,6 +263,7 @@ const PAGE_URLS = {
   'teacher-dash': 'painel-professor',
   'admin-dash': 'painel-administrador',
   'course-detail': 'detalhes-curso',
+  'book-detail': 'detalhes-livro',
   'course-view': 'assistir-aula',
   checkout: 'finalizar-compra'
 };
@@ -230,6 +294,7 @@ const getPageFromPathname = () => {
   if (isDemo) {
     const hash = window.location.hash || '#inicio';
     if (hash.startsWith('#curso/')) return 'course-detail';
+    if (hash.startsWith('#livro/')) return 'book-detail';
     if (hash.startsWith('#aula/')) return 'course-view';
     const pageHash = hash.replace('#', '').split('?')[0];
 
@@ -538,6 +603,9 @@ export default function App() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [bookGalleryIndex, setBookGalleryIndex] = useState(0);
+  const [isBookGalleryModalOpen, setIsBookGalleryModalOpen] = useState(false);
+  const [detailInstallments, setDetailInstallments] = useState(1);
 
   // Backup Local (Mock Database) para funcionamento Offline
   const [mockDb, setMockDb] = useState(() => {
@@ -550,9 +618,34 @@ export default function App() {
         localStorage.removeItem('mock_db');
       } else {
         let changed = false;
+
+        // Patch para garantir que os cursos presenciais estejam no mock_db de usuários antigos
+        if (parsed.courses && !parsed.courses.find(c => c.id === 'course-inperson-seminar')) {
+          parsed.courses.push({ id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', description: 'Evento presencial focado em casos práticos e resolução ao vivo.', type: 'SEMINAR', duration_days: 2, finishing_message: 'Obrigado por participar deste evento.', teacher_id: 'teacher-id', active: true });
+          changed = true;
+        }
+        if (parsed.courses && !parsed.courses.find(c => c.id === 'course-inperson-meeting')) {
+          parsed.courses.push({ id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', description: 'Encontro presencial para profissionais, explorando a fundo os reinos minerais e vegetais.', type: 'INPERSON', duration_days: 1, finishing_message: 'Obrigado por participar!', teacher_id: 'teacher-id', active: true });
+          changed = true;
+        }
+
         if (!parsed.books) {
           parsed.books = BOOKS_DATA;
           changed = true;
+        } else {
+          // Patch para garantir que os livros tenham a propriedade images
+          let booksChanged = false;
+          parsed.books = parsed.books.map(b => {
+            if (!b.images) {
+              const originalBook = BOOKS_DATA.find(ob => ob.id === b.id);
+              if (originalBook && originalBook.images) {
+                booksChanged = true;
+                return { ...b, images: originalBook.images };
+              }
+            }
+            return b;
+          });
+          if (booksChanged) changed = true;
         }
         if (!parsed.events) {
           parsed.events = [
@@ -588,6 +681,32 @@ export default function App() {
         }
         if (!parsed.temporary_unlocks) {
           parsed.temporary_unlocks = [];
+          changed = true;
+        }
+        if (!parsed.orders) {
+          parsed.orders = [];
+          changed = true;
+        }
+
+        // Injetar dados de exemplo da Ana se não existirem
+        if (!parsed.orders.find(o => o.id === 'order-mock-2')) {
+          parsed.orders.push(
+            { id: 'order-mock-1', student_id: 'student-id', course_id: 'course-free', book_id: null, item_type: 'course', total_amount: 0, installments: 1, payment_method: 'PIX', status: 'PAID', created_at: new Date().toISOString() },
+            { id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', book_id: null, item_type: 'course', total_amount: 3600.00, installments: 12, payment_method: 'CARNE', status: 'PENDING', created_at: new Date().toISOString() },
+            { id: 'order-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', book_id: null, item_type: 'course', total_amount: 3600.00, installments: 1, payment_method: 'BOLETO', status: 'PENDING', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() }
+          );
+
+          // Limpar pagamentos antigos de exemplo da Ana
+          parsed.payments = parsed.payments.filter(p => p.student_id !== 'student-id' && p.student_id !== 'student-delinquent-id');
+
+          parsed.payments.push(
+            { id: 'pay-mock-1', order_id: 'order-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
+            { id: 'pay-mock-2-1', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'RECEIVED', transaction_code: 'CARNE_P1', due_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
+            { id: 'pay-mock-2-2', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'PENDING', transaction_code: 'CARNE_P2', due_date: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null },
+            { id: 'pay-mock-2-3', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'PENDING', transaction_code: 'CARNE_P3', due_date: new Date(Date.now() + 50 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null },
+            { id: 'pay-delinquent-1', order_id: 'order-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null }
+          );
+
           changed = true;
         }
         if (!parsed.teacher_courses) {
@@ -640,7 +759,9 @@ export default function App() {
       courses: [
         { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
         { id: 'course-sub', title: 'Clube TOSB: Estudo Continuado de Matéria Médica', description: 'Curso recorrente mensal focado no estudo aprofundado dos reinos animal, vegetal e mineral na clínica homeopática.', type: 'SUBSCRIPTION', duration_days: 30, finishing_message: 'Parabéns por concluir mais um ciclo de estudos continuados em nossa Matéria Médica!', teacher_id: 'teacher-id', active: true },
-        { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true }
+        { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true },
+        { id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', description: 'Evento presencial focado em casos práticos e resolução ao vivo.', type: 'SEMINAR', duration_days: 2, finishing_message: 'Obrigado por participar deste evento.', teacher_id: 'teacher-id', active: true },
+        { id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', description: 'Encontro presencial para profissionais, explorando a fundo os reinos minerais e vegetais.', type: 'INPERSON', duration_days: 1, finishing_message: 'Obrigado por participar!', teacher_id: 'teacher-id', active: true }
       ],
       books: BOOKS_DATA,
       modules: {
@@ -679,9 +800,17 @@ export default function App() {
         { id: 'enroll-due-soon', student_id: 'student-id', course_id: 'course-sub', enrolled_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'ACTIVE' },
         { id: 'enroll-delinquent', student_id: 'student-delinquent-id', course_id: 'course-post', enrolled_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), expires_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'SUSPENDED' }
       ],
+      orders: [
+        { id: 'order-mock-1', student_id: 'student-id', course_id: 'course-free', book_id: null, item_type: 'course', total_amount: 0, installments: 1, payment_method: 'PIX', status: 'PAID', created_at: new Date().toISOString() },
+        { id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', book_id: null, item_type: 'course', total_amount: 3600.00, installments: 12, payment_method: 'CARNE', status: 'PENDING', created_at: new Date().toISOString() },
+        { id: 'order-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', book_id: null, item_type: 'course', total_amount: 3600.00, installments: 1, payment_method: 'BOLETO', status: 'PENDING', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() }
+      ],
       payments: [
-        { id: 'pay-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
-        { id: 'pay-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null }
+        { id: 'pay-mock-1', order_id: 'order-mock-1', student_id: 'student-id', course_id: 'course-free', amount: 0, payment_method: 'PIX', status: 'RECEIVED', transaction_code: 'FREE_100', due_date: new Date().toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
+        { id: 'pay-mock-2-1', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'RECEIVED', transaction_code: 'CARNE_P1', due_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], paid_at: new Date().toISOString(), receipt_proof: null },
+        { id: 'pay-mock-2-2', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'PENDING', transaction_code: 'CARNE_P2', due_date: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null },
+        { id: 'pay-mock-2-3', order_id: 'order-mock-2', student_id: 'student-id', course_id: 'course-post', amount: 300.00, payment_method: 'CARNE', status: 'PENDING', transaction_code: 'CARNE_P3', due_date: new Date(Date.now() + 50 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null },
+        { id: 'pay-delinquent-1', order_id: 'order-delinquent-1', student_id: 'student-delinquent-id', course_id: 'course-post', amount: 3600.00, payment_method: 'BOLETO', status: 'OVERDUE', transaction_code: 'DELINQUENT_999', due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], receipt_proof: null }
       ],
       expenses: [
         { id: 'exp-1', description: 'Servidor AWS Hospedagem', category: 'Infraestrutura', amount: 250.00, date: new Date().toISOString().split('T')[0], status: 'PAID', receipt_proof: null }
@@ -715,6 +844,7 @@ export default function App() {
         }
       ],
       temporary_unlocks: [],
+      orders: [],
       teacher_courses: [
         { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
         { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'percentual', payment_rate: 15.00 },
@@ -775,6 +905,7 @@ export default function App() {
   }, [success, error]);
   const [activeDropdown, setActiveDropdown] = useState(null); // 'about' | 'courses' | 'panel' | null
   const [selectedDetailCourse, setSelectedDetailCourse] = useState(null);
+  const [selectedDetailBook, setSelectedDetailBook] = useState(null);
 
   // Estados de Acessibilidade (público idoso)
   const [fontMultiplier, setFontMultiplier] = useState(() => {
@@ -1455,6 +1586,7 @@ export default function App() {
       if (page === 'teacher-dash') return '#painel-professor';
       if (page === 'admin-dash') return '#painel-administrador';
       if (page === 'course-detail') return `#curso/${queryParams.replace('id=', '')}`;
+      if (page === 'book-detail') return `#livro/${queryParams.replace('id=', '')}`;
       if (page === 'course-view') return `#aula/${queryParams.replace('id=', '')}`;
       if (page === 'checkout') return '#finalizar-compra';
       return `#${page}`;
@@ -1557,19 +1689,11 @@ export default function App() {
       if (isDemo) {
         // Modo Demo (SPA por Hash)
         if (hash.startsWith('#curso/')) {
-          const slug = hash.replace('#curso/', '');
-          const courseList = mockDb?.courses || [];
-          const course = courseList.find(c =>
-            getSlug(c.title) === slug ||
-            c.id === slug ||
-            (c.id === 'course-free' && slug === 'introducao-homeopatia') ||
-            (c.id === 'course-sub' && slug === 'clube-tosb-estudos') ||
-            (c.id === 'course-post' && slug === 'pos-graduacao-homeopatia')
-          );
-          if (course) {
-            setSelectedDetailCourse(course);
-            page = 'course-detail';
-          }
+          page = 'course-detail';
+          courseIdFromQuery = hash.replace('#curso/', '');
+        } else if (hash.startsWith('#livro/')) {
+          page = 'book-detail';
+          courseIdFromQuery = hash.replace('#livro/', '');
         } else if (hash.startsWith('#aula/')) {
           const courseId = hash.replace('#aula/', '');
           courseIdFromQuery = courseId;
@@ -1614,6 +1738,18 @@ export default function App() {
         const course = courseList.find(c => c.id === courseIdFromQuery);
         if (course) {
           setSelectedDetailCourse(course);
+          setDetailInstallments(1);
+        }
+      }
+
+      if (page === 'book-detail' && courseIdFromQuery) {
+        const bookList = mockDb?.books || BOOKS_DATA || [];
+        const book = bookList.find(b => b.id === courseIdFromQuery);
+        if (book) {
+          setSelectedDetailBook(book);
+          setBookGalleryIndex(0);
+          setIsBookGalleryModalOpen(false);
+          setDetailInstallments(1);
         }
       }
 
@@ -1646,6 +1782,9 @@ export default function App() {
 
   // Estado de Faturas e Checkout
   const [myInvoices, setMyInvoices] = useState([]);
+  const [myOrders, setMyOrders] = useState([]);
+  const [studentOrderSearch, setStudentOrderSearch] = useState('');
+  const [studentOrderPendingOnly, setStudentOrderPendingOnly] = useState(false);
   const [checkoutCourse, setCheckoutCourse] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [installments, setInstallments] = useState(12);
@@ -1781,16 +1920,20 @@ export default function App() {
   };
 
   // MANIPULADORES DO CARRINHO DE COMPRAS
-  const addToCart = (product, type = 'book') => {
+  const addToCart = (product, type = 'book', installments = 1) => {
     clearAlerts();
+    if (installments > 1) {
+      setPaymentMethod('CREDIT_CARD');
+      setInstallments(installments);
+    }
     setCartItems(prev => {
       const exists = prev.find(item => item.product.id === product.id);
       if (exists) {
         return prev.map(item =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.product.id === product.id ? { ...item, quantity: type === 'book' ? item.quantity + 1 : 1, installments } : item
         );
       }
-      return [...prev, { product, quantity: 1, type }];
+      return [...prev, { product, quantity: 1, type, installments }];
     });
     setSuccess(`"${product.title}" adicionado ao carrinho!`);
   };
@@ -1803,6 +1946,15 @@ export default function App() {
       }
       return item;
     }).filter(item => item.quantity > 0));
+  };
+
+  const updateCartInstallments = (productId, installments) => {
+    setCartItems(prev => prev.map(item => {
+      if (item.product.id === productId) {
+        return { ...item, installments };
+      }
+      return item;
+    }));
   };
 
   const removeFromCart = (productId) => {
@@ -2721,9 +2873,23 @@ export default function App() {
         .filter(p => p.student_id === user.id)
         .map(p => {
           const c = mockDb.courses.find(course => course.id === p.course_id);
-          return { ...p, course_title: c ? c.title : 'Curso' };
+          const b = (mockDb.books || []).find(book => book.id === p.book_id);
+          return { ...p, course_title: c ? c.title : (b ? b.title : 'Item') };
         });
       setMyInvoices(userInvoices);
+
+      const userOrders = (mockDb.orders || [])
+        .filter(o => o.student_id === user.id)
+        .map(o => {
+          const c = mockDb.courses.find(course => course.id === o.course_id);
+          const b = (mockDb.books || []).find(book => book.id === o.book_id);
+          return {
+            ...o,
+            item_title: c ? c.title : (b ? b.title : 'Item'),
+            payments: mockDb.payments.filter(p => p.order_id === o.id)
+          };
+        });
+      setMyOrders(userOrders);
     } else {
       try {
         const res = await fetch('/api/payments/my-invoices', {
@@ -2732,6 +2898,14 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           setMyInvoices(data);
+        }
+
+        const resOrders = await fetch('/api/payments/my-orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resOrders.ok) {
+          const dataOrders = await resOrders.json();
+          setMyOrders(dataOrders);
         }
       } catch (e) { }
     }
@@ -2742,89 +2916,95 @@ export default function App() {
     navigateTo('checkout');
   };
 
-  const handleProcessCheckout = async (e) => {
-    e.preventDefault();
+  const handleGenerateItemBoleto = async (item) => {
     clearAlerts();
 
-    const itemsToBuy = checkoutCourse ? [{ product: checkoutCourse, quantity: 1, type: 'course' }] : cartItems;
-    if (itemsToBuy.length === 0) {
-      setError('Seu carrinho está vazio.');
-      return;
-    }
+    const basePrice = item.product.price !== undefined ? item.product.price : (item.product.type === 'SUBSCRIPTION' ? 99.00 : (item.product.type === 'FREE' ? 0 : (item.product.type === 'INPERSON' || item.product.type === 'SEMINAR' ? 1200.00 : 3600.00)));
+    const totalAmt = basePrice * (item.quantity || 1);
+    const numberOfInstallments = item.installments || 1;
+
+    // Default method based on UI selection or fallback
+    let method = 'BOLETO';
+    if (numberOfInstallments > 1 && item.product.type === 'POSTGRAD') method = 'CARNE';
+    else if (numberOfInstallments > 1) method = 'CREDIT_CARD';
 
     const transactionCode = 'ASAAS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const asaasPaymentId = 'pay_' + Math.random().toString(36).substr(2, 12);
 
-    // Calcular preço total
-    let totalAmt = 0;
-    itemsToBuy.forEach(item => {
-      if (item.type === 'course') {
-        totalAmt += item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00;
-      } else {
-        totalAmt += item.product.price * item.quantity;
-      }
-    });
-
     if (isOfflineMode) {
+      const orderId = `order-${Date.now()}`;
+      const newOrder = {
+        id: orderId,
+        student_id: user.id,
+        course_id: item.type === 'course' ? item.product.id : null,
+        book_id: item.type === 'book' ? item.product.id : null,
+        item_type: item.type,
+        total_amount: totalAmt,
+        installments: numberOfInstallments,
+        payment_method: method,
+        status: 'PENDING',
+        created_at: new Date().toISOString()
+      };
+
       const newPayments = [];
 
-      // Se for boleto parcelado do curso pós-graduação
-      const hasPostgrad = itemsToBuy.some(item => item.type === 'course' && item.product.type === 'POSTGRAD');
-      if (paymentMethod === 'CARNE' && hasPostgrad) {
-        const count = installments || 12;
-        const partAmt = (totalAmt / count).toFixed(2);
-        for (let i = 1; i <= count; i++) {
+      if ((method === 'CARNE' || method === 'CREDIT_CARD') && numberOfInstallments > 1) {
+        const partAmt = (totalAmt / numberOfInstallments).toFixed(2);
+        for (let i = 1; i <= numberOfInstallments; i++) {
           const dueDate = new Date();
           dueDate.setMonth(dueDate.getMonth() + (i - 1));
           newPayments.push({
             id: `pay-${Date.now()}-${i}`,
+            order_id: orderId,
             student_id: user.id,
-            course_id: itemsToBuy.find(item => item.type === 'course').product.id,
+            course_id: item.type === 'course' ? item.product.id : null,
+            book_id: item.type === 'book' ? item.product.id : null,
             amount: parseFloat(partAmt),
-            payment_method: 'CARNE',
+            payment_method: method,
             status: 'PENDING',
             transaction_code: `${transactionCode}_PARC${i}`,
             due_date: dueDate.toISOString().split('T')[0],
-            asaas_payment_id: `${asaasPaymentId}_${i}`
+            asaas_payment_id: `${asaasPaymentId}_${i}`,
+            created_at: new Date().toISOString()
           });
         }
       } else {
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 3);
-        const firstCourse = itemsToBuy.find(item => item.type === 'course');
-        const courseId = firstCourse ? firstCourse.product.id : null;
 
         newPayments.push({
           id: `pay-${Date.now()}`,
+          order_id: orderId,
           student_id: user.id,
-          course_id: courseId,
+          course_id: item.type === 'course' ? item.product.id : null,
+          book_id: item.type === 'book' ? item.product.id : null,
           amount: totalAmt,
-          payment_method: paymentMethod,
+          payment_method: method,
           status: 'PENDING',
           transaction_code: transactionCode,
           due_date: dueDate.toISOString().split('T')[0],
-          asaas_payment_id: asaasPaymentId
+          asaas_payment_id: asaasPaymentId,
+          created_at: new Date().toISOString()
         });
       }
 
       setMockDb(prev => ({
         ...prev,
+        orders: [...(prev.orders || []), newOrder],
         payments: [...prev.payments, ...newPayments]
       }));
 
-      setSuccess('Faturas geradas em modo Sandbox! Realize a simulação de pagamento na listagem financeira.');
-      clearCart();
-      setCheckoutCourse(null);
-      setStudentActiveTab('payments'); // Ir direto para financeiro
-      navigateTo('student-dash');
+      setSuccess(`Fatura gerada com sucesso para ${item.product.title}!`);
+      removeFromCart(item.product.id);
     } else {
       try {
-        const firstCourse = itemsToBuy.find(item => item.type === 'course');
         const body = {
-          courseId: firstCourse ? firstCourse.product.id : null,
-          paymentMethod,
-          installments: paymentMethod === 'CARNE' ? installments : 1,
-          amount: totalAmt
+          itemType: item.type,
+          courseId: item.type === 'course' ? item.product.id : null,
+          bookId: item.type === 'book' ? item.product.id : null,
+          paymentMethod: method,
+          installments: numberOfInstallments,
+          quantity: item.quantity || 1
         };
 
         const res = await fetch('/api/payments/checkout', {
@@ -2837,11 +3017,8 @@ export default function App() {
         });
         const data = await res.json();
         if (res.ok) {
-          setSuccess(data.message);
-          clearCart();
-          setCheckoutCourse(null);
-          setStudentActiveTab('payments');
-          navigateTo('student-dash');
+          setSuccess(`Fatura gerada com sucesso para ${item.product.title}!`);
+          removeFromCart(item.product.id);
         } else {
           setError(data.message);
         }
@@ -4688,7 +4865,7 @@ NEWFILEENCODING:NONE
                       <p className="premium-card-text">{book.desc}</p>
                       <div className="premium-card-footer">
                         <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
-                        <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar</button>
+                        <button className="btn btn-primary" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>Informações</button>
                       </div>
                     </div>
                   </div>
@@ -4771,10 +4948,23 @@ NEWFILEENCODING:NONE
                         <td>Carga Horária:</td>
                         <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.workload || '30 horas'}</td>
                       </tr>
-                      <tr>
-                        <td>Acesso:</td>
-                        <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.duration || '180 dias'}</td>
-                      </tr>
+                      {['INPERSON', 'SEMINAR'].includes(selectedDetailCourse.type) ? (
+                        <>
+                          <tr>
+                            <td>Data:</td>
+                            <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.duration || 'A definir'}</td>
+                          </tr>
+                          <tr>
+                            <td>Local:</td>
+                            <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.location || 'A definir'}</td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td>Acesso:</td>
+                          <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.duration || '180 dias'}</td>
+                        </tr>
+                      )}
                       <tr>
                         <td>Certificado:</td>
                         <td>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.certificate || 'Disponível'}</td>
@@ -4782,6 +4972,44 @@ NEWFILEENCODING:NONE
                       <tr>
                         <td>Público-Alvo:</td>
                         <td style={{ fontSize: '0.85rem' }}>{COURSES_DETAILS_DATA[selectedDetailCourse.id]?.target || 'Profissionais de saúde'}</td>
+                      </tr>
+                      <tr>
+                        <td>Valor:</td>
+                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                          {(() => {
+                            const price = selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : (selectedDetailCourse.type === 'FREE' ? 0 : (selectedDetailCourse.type === 'INPERSON' || selectedDetailCourse.type === 'SEMINAR' ? 1200 : 3600));
+                            if (price === 0) return 'R$ 0,00';
+                            if (detailInstallments === 1) return `R$ ${price.toFixed(2).replace('.', ',')}`;
+                            return `${detailInstallments}x de R$ ${(price / detailInstallments).toFixed(2).replace('.', ',')}`;
+                          })()}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Pagamento:</td>
+                        <td style={{ fontSize: '0.85rem' }}>
+                          {selectedDetailCourse.type === 'FREE' ? (
+                            <span>Gratuito</span>
+                          ) : (
+                            <select
+                              className="form-input"
+                              style={{ padding: '4px', fontSize: '0.85rem' }}
+                              value={detailInstallments}
+                              onChange={(e) => setDetailInstallments(parseInt(e.target.value))}
+                            >
+                              <option value={1}>À vista</option>
+                              {selectedDetailCourse.type !== 'SUBSCRIPTION' && (
+                                <>
+                                  <option value={2}>Parcelado 2x</option>
+                                  <option value={3}>Parcelado 3x</option>
+                                  <option value={4}>Parcelado 4x</option>
+                                  <option value={5}>Parcelado 5x</option>
+                                  <option value={6}>Parcelado 6x</option>
+                                  <option value={12}>Parcelado 12x</option>
+                                </>
+                              )}
+                            </select>
+                          )}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -4792,14 +5020,170 @@ NEWFILEENCODING:NONE
                         id: selectedDetailCourse.id,
                         title: selectedDetailCourse.title,
                         type: selectedDetailCourse.type,
-                        price: selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : (selectedDetailCourse.type === 'FREE' ? 0 : (selectedDetailCourse.type === 'INPERSON' ? 1200 : 3600))
-                      }, 'course');
+                        price: selectedDetailCourse.type === 'SUBSCRIPTION' ? 99 : (selectedDetailCourse.type === 'FREE' ? 0 : (selectedDetailCourse.type === 'INPERSON' || selectedDetailCourse.type === 'SEMINAR' ? 1200 : 3600))
+                      }, 'course', detailInstallments);
                       navigateTo('cart');
                     }}>
                       Adicionar ao Carrinho
                     </button>
                     <button className="btn btn-secondary w-full" onClick={() => handleWatchOpenLesson(selectedDetailCourse)}>
                       ▶ Assistir Prévia
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PÁGINA: DETALHES DO LIVRO */}
+        {currentPage === 'book-detail' && selectedDetailBook && (
+          <div>
+            <button className="btn btn-secondary mb-5" onClick={() => navigateTo('books')}>
+              ← Voltar para Livraria
+            </button>
+
+            <div className="course-detail-hero">
+              <h1 className="mt-2">{selectedDetailBook.title}</h1>
+              <p className="hero-subtitle mb-0" style={{ fontSize: '1.1rem', margin: '0.5rem 0 0' }}>
+                {selectedDetailBook.desc}
+              </p>
+              <p className="hero-subtitle mb-0" style={{ fontSize: '0.85rem', margin: '0.75rem 0 0' }}>
+                Adquira sua cópia na <span onClick={() => document.getElementById('ficha-tecnica-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ color: 'white', textDecoration: 'underline', cursor: 'pointer' }}>Ficha Técnica</span>
+              </p>
+            </div>
+            <div className="course-detail-grid">
+              <div>
+                <h3 className="section-title-underlined mb-4">Relação de Conteúdo</h3>
+
+                <div className="syllabus-module-card">
+                  <div className="syllabus-module-header">Sumário da Obra</div>
+                  <ul className="syllabus-lessons-list">
+                    {Array.isArray(selectedDetailBook.content_table) && selectedDetailBook.content_table.length > 0 ? (
+                      selectedDetailBook.content_table.map((chap, idx) => (
+                        <li key={idx} className="syllabus-lesson-item">
+                          <span>📖</span> {chap}
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-muted" style={{ padding: '1rem' }}>O sumário detalhado estará disponível em breve.</p>
+                    )}
+                  </ul>
+                </div>
+
+                {Array.isArray(selectedDetailBook.images) && selectedDetailBook.images.length > 0 && (
+                  <div className="mt-5">
+                    <h3 className="section-title-underlined mb-4">Galeria de Fotos</h3>
+                    <div className="card" style={{ textAlign: 'center', backgroundColor: '#ffffff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setBookGalleryIndex((prev) => (prev === 0 ? selectedDetailBook.images.length - 1 : prev - 1))}
+                        >
+                          ◀
+                        </button>
+                        <img
+                          src={selectedDetailBook.images[bookGalleryIndex]}
+                          alt={`Imagem ${bookGalleryIndex + 1}`}
+                          style={{ maxHeight: '300px', cursor: 'pointer', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                          onClick={() => setIsBookGalleryModalOpen(true)}
+                        />
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setBookGalleryIndex((prev) => (prev === selectedDetailBook.images.length - 1 ? 0 : prev + 1))}
+                        >
+                          ▶
+                        </button>
+                      </div>
+                      <p className="text-muted mt-2" style={{ fontSize: '0.85rem' }}>{bookGalleryIndex + 1} / {selectedDetailBook.images.length} (Clique para ampliar)</p>
+                    </div>
+                  </div>
+                )}
+
+                {isBookGalleryModalOpen && (
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                    <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
+                      <button
+                        onClick={() => setIsBookGalleryModalOpen(false)}
+                        style={{ position: 'absolute', top: '-40px', right: '0', background: 'transparent', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}
+                      >
+                        ×
+                      </button>
+                      <img src={selectedDetailBook.images[bookGalleryIndex]} alt="Ampliada" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '4px' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => setBookGalleryIndex((prev) => (prev === 0 ? selectedDetailBook.images.length - 1 : prev - 1))}
+                      >
+                        ◀ Anterior
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => setBookGalleryIndex((prev) => (prev === selectedDetailBook.images.length - 1 ? 0 : prev + 1))}
+                      >
+                        Próxima ▶
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 id="ficha-tecnica-section" className="section-title-underlined mb-4">Ficha Técnica</h3>
+                <div className="card" style={{ position: 'sticky', top: '100px' }}>
+                  <table className="course-specs-table">
+                    <tbody>
+                      <tr>
+                        <td>Autor:</td>
+                        <td>{selectedDetailBook.author}</td>
+                      </tr>
+                      <tr>
+                        <td>Editora:</td>
+                        <td>Organon</td>
+                      </tr>
+                      <tr>
+                        <td>Páginas:</td>
+                        <td>{selectedDetailBook.page_count} páginas</td>
+                      </tr>
+                      <tr>
+                        <td>Formato:</td>
+                        <td style={{ fontSize: '0.85rem' }}>Livro Físico / Impresso</td>
+                      </tr>
+                      <tr>
+                        <td>Valor:</td>
+                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                          {(() => {
+                            const price = selectedDetailBook.price;
+                            if (detailInstallments === 1) return `R$ ${price.toFixed(2).replace('.', ',')}`;
+                            return `${detailInstallments}x de R$ ${(price / detailInstallments).toFixed(2).replace('.', ',')}`;
+                          })()}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Pagamento:</td>
+                        <td style={{ fontSize: '0.85rem' }}>
+                          <select
+                            className="form-input"
+                            style={{ padding: '4px', fontSize: '0.85rem' }}
+                            value={detailInstallments}
+                            onChange={(e) => setDetailInstallments(parseInt(e.target.value))}
+                          >
+                            <option value={1}>À vista</option>
+                            <option value={2}>Parcelado 2x</option>
+                            <option value={3}>Parcelado 3x</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="mt-5" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button id="buy-button" className="btn btn-primary w-full" onClick={() => {
+                      addToCart(selectedDetailBook, 'book', detailInstallments);
+                      navigateTo('cart');
+                    }}>
+                      Adicionar ao Carrinho
                     </button>
                   </div>
                 </div>
@@ -4970,34 +5354,9 @@ NEWFILEENCODING:NONE
                       <h3 className="premium-card-title">{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
 
-                      {/* Botão de Sumário / Relação de Conteúdo */}
-                      {Array.isArray(book.content_table) && book.content_table.length > 0 && (
-                        <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
-                          <button
-                            className="btn btn-secondary w-full"
-                            style={{ padding: '0.35rem 0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                            onClick={() => setExpandedBookId(expandedBookId === book.id ? null : book.id)}
-                          >
-                            <span>📖 Relação de Conteúdo ({book.content_table.length} capítulos)</span>
-                            <span>{expandedBookId === book.id ? '▲' : '▼'}</span>
-                          </button>
-
-                          {expandedBookId === book.id && (
-                            <div style={{ marginTop: '0.5rem', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', textAlign: 'left' }}>
-                              <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '0.4rem' }}>Sumário da Obra:</strong>
-                              <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--color-text-main)' }}>
-                                {book.content_table.map((chap, cIdx) => (
-                                  <li key={cIdx} style={{ marginBottom: '0.25rem' }}>{chap}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
                       <div className="premium-card-footer">
                         <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
-                        <button className="btn btn-primary" onClick={() => addToCart(book, 'book')}>Adicionar ao Carrinho</button>
+                        <button className="btn btn-primary" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>Informações</button>
                       </div>
                     </div>
                   </div>
@@ -5138,32 +5497,68 @@ NEWFILEENCODING:NONE
             ) : (
               <div className="cart-layout">
                 {/* Lista de Itens */}
-                <div className="cart-items-list">
-                  {cartItems.map((item, idx) => (
-                    <div key={idx} className="cart-item-row">
-                      <div className="cart-item-title-section">
-                        <span className="course-type-badge">{item.type === 'course' ? 'Curso / Assinatura' : 'Livro impresso'}</span>
-                        <h4 className="mt-1">{item.product.title}</h4>
-                        <span className="helper-text">{item.type === 'course' ? '' : `Autor: ${item.product.author}`}</span>
-                      </div>
-
-                      <div className="cart-item-actions">
-                        <span style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
-                          R$ {(item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99.00 : 3600.00) : item.product.price * item.quantity).toFixed(2)}
-                        </span>
-
-                        {item.type === 'book' && (
-                          <div className="cart-quantity-selector">
-                            <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
-                            <span className="cart-qty-value">{item.quantity}</span>
-                            <button className="btn-qty" onClick={() => updateCartQty(item.product.id, 1)}>+</button>
-                          </div>
-                        )}
-
-                        <button className="btn-remove-cart" onClick={() => removeFromCart(item.product.id)}>Remover</button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="cart-items-list card" style={{ width: '100%', overflowX: 'auto', padding: '1.5rem', backgroundColor: '#ffffff' }}>
+                  <table className="table cart-table" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', backgroundColor: '#ffffff', borderRadius: 'var(--border-radius-md)', overflow: 'hidden' }}>
+                    <thead>
+                      <tr>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Nome</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Preço</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Pagamento</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Quantidade</th>
+                        <th className="font-serif-title" style={{ textAlign: 'center', padding: '16px', borderBottom: '2px solid var(--border-color)', color: 'var(--color-primary)' }}>Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cartItems.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '16px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{item.product.title}</h4>
+                            </div>
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'center', fontWeight: 'bold' }}>
+                            {item.product.type === 'FREE' ? 'Gratuito' : `R$ ${(item.product.price || 0).toFixed(2).replace('.', ',')}`}
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'center' }}>
+                            {item.product.type === 'FREE' ? '-' : (
+                              <select
+                                className="form-input"
+                                style={{ padding: '6px', fontSize: '0.9rem', width: 'auto', display: 'inline-block', margin: '0 auto' }}
+                                value={item.installments || 1}
+                                onChange={(e) => updateCartInstallments(item.product.id, parseInt(e.target.value))}
+                              >
+                                <option value={1}>À vista</option>
+                                <option value={2}>2x</option>
+                                <option value={3}>3x</option>
+                                {item.type !== 'book' && item.product.type !== 'SUBSCRIPTION' && (
+                                  <>
+                                    <option value={4}>4x</option>
+                                    <option value={5}>5x</option>
+                                    <option value={6}>6x</option>
+                                    <option value={12}>12x</option>
+                                  </>
+                                )}
+                              </select>
+                            )}
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'center' }}>
+                            {item.type === 'book' ? (
+                              <div className="cart-quantity-selector" style={{ justifyContent: 'center' }}>
+                                <button className="btn-qty" onClick={() => updateCartQty(item.product.id, -1)}>-</button>
+                                <span className="cart-qty-value" style={{ width: '30px', textAlign: 'center' }}>{item.quantity}</span>
+                                <button className="btn-qty" onClick={() => updateCartQty(item.product.id, 1)}>+</button>
+                              </div>
+                            ) : (
+                              <span style={{ fontWeight: 'bold' }}>1</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'center' }}>
+                            <button className="btn-remove-cart" style={{ margin: '0 auto' }} onClick={() => removeFromCart(item.product.id)}>Remover</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
                   <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
                     <button className="btn btn-secondary btn-quick-login" onClick={clearCart}>Esvaziar Carrinho</button>
@@ -5175,7 +5570,7 @@ NEWFILEENCODING:NONE
                   <h3 className="section-title-underlined-thin mb-4">Resumo do Pedido</h3>
                   <div className="summary-row">
                     <span>Itens ({cartItems.reduce((acc, item) => acc + item.quantity, 0)}):</span>
-                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2).replace('.', ',')}</span>
                   </div>
                   <div className="summary-row">
                     <span>Envio / Entrega:</span>
@@ -5183,12 +5578,12 @@ NEWFILEENCODING:NONE
                   </div>
                   <div className="summary-row">
                     <span>Descontos:</span>
-                    <span>R$ 0.00</span>
+                    <span>R$ 0,00</span>
                   </div>
 
                   <div className="summary-total">
                     <span>Total Geral:</span>
-                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2)}</span>
+                    <span>R$ {cartItems.reduce((acc, item) => acc + (item.type === 'course' ? (item.product.type === 'SUBSCRIPTION' ? 99 : 3600) : item.product.price * item.quantity), 0).toFixed(2).replace('.', ',')}</span>
                   </div>
 
                   <button
@@ -5427,30 +5822,108 @@ NEWFILEENCODING:NONE
 
                 {studentActiveTab === 'payments' && (
                   <div className="card">
-                    <h3 className="mb-4">Histórico Financeiro e Faturas</h3>
-                    <div className="invoices-list">
-                      {myInvoices.length === 0 ? (
-                        <p className="text-muted text-center mt-3">Nenhuma fatura registrada.</p>
-                      ) : (
-                        myInvoices.map(inv => (
-                          <div key={inv.id} className="invoice-card">
-                            <div className="invoice-title">{inv.course_title}</div>
-                            <div className="invoice-details">Valor: R$ {parseFloat(inv.amount).toFixed(2)} ({inv.payment_method})</div>
-                            <div className="invoice-footer">
-                              <span className={inv.status === 'RECEIVED' ? 'badge-paid' : 'badge-pending'}>
-                                {inv.status === 'RECEIVED' ? 'PAGO' : 'PENDENTE'}
-                              </span>
-                              {inv.status === 'PENDING' && (
-                                <button className="btn btn-primary btn-quick-login" onClick={() => simulatePaymentWebhook(inv.asaas_payment_id)}>
-                                  Simular Webhook Asaas (Pago)
-                                </button>
-                              )}
+                    <h3 className="mb-4">Meus Pedidos e Faturas</h3>
+
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                      <div style={{ flex: '1', minWidth: '250px' }}>
+                        <input
+                          type="text"
+                          placeholder="Buscar por nome do item..."
+                          value={studentOrderSearch}
+                          onChange={e => setStudentOrderSearch(e.target.value)}
+                          className="form-input"
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                          type="checkbox"
+                          id="pendingOnlyCheckbox"
+                          checked={studentOrderPendingOnly}
+                          onChange={e => setStudentOrderPendingOnly(e.target.checked)}
+                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        />
+                        <label htmlFor="pendingOnlyCheckbox" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text-main)', fontWeight: '500', fontSize: '0.95rem' }}>
+                          Apenas compras em aberto
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="invoices-list" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {(() => {
+                        if (myOrders.length === 0) {
+                          return <p className="text-muted text-center mt-3">Nenhum pedido registrado.</p>;
+                        }
+
+                        const filteredOrders = myOrders.filter(order => {
+                          const matchesSearch = !studentOrderSearch || (order.item_title && order.item_title.toLowerCase().includes(studentOrderSearch.toLowerCase()));
+                          if (studentOrderPendingOnly) {
+                            const orderPayments = order.payments || [];
+                            const hasPendingOrOverdue = orderPayments.some(p => p.status === 'PENDING' || p.status === 'OVERDUE');
+                            if (!hasPendingOrOverdue) return false;
+                          }
+                          return matchesSearch;
+                        });
+
+                        if (filteredOrders.length === 0) {
+                          return <p className="text-muted text-center mt-3">Nenhum pedido corresponde aos filtros aplicados.</p>;
+                        }
+
+                        return filteredOrders.map(order => {
+                          const orderPayments = order.payments || [];
+                          const fullyPaid = orderPayments.length > 0 && orderPayments.every(p => p.status === 'RECEIVED');
+                          const hasOverdue = orderPayments.some(p => p.status === 'OVERDUE');
+
+                          return (
+                            <div key={order.id} className="card" style={{ padding: '1.25rem', backgroundColor: '#f8fafc', borderLeft: `4px solid ${fullyPaid ? 'var(--color-success)' : hasOverdue ? 'var(--color-error)' : 'var(--color-accent)'}` }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                <div>
+                                  <h4 style={{ margin: '0 0 0.25rem' }}>{order.item_title}</h4>
+                                  <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                                    <strong>Data da Compra:</strong> {new Date(order.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}<br />
+                                    <strong>Valor Total:</strong> R$ {parseFloat(order.total_amount).toFixed(2)} | <strong>Pagamento:</strong> {order.payment_method === 'CARNE' ? 'Parcelado' : (order.installments > 1 ? `Parcelado em ${order.installments}x` : 'À vista')}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className={fullyPaid ? 'badge-paid' : hasOverdue ? 'badge-overdue' : 'badge-pending'}>
+                                    {fullyPaid ? 'Quitado' : hasOverdue ? 'Em Atraso' : 'Em Andamento'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div style={{ marginTop: '1rem' }}>
+                                <h5 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: '#475569' }}>Programação de Pagamentos</h5>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                  {orderPayments.map((p, idx) => (
+                                    <div key={p.id} className="installment-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
+                                      <div className="installment-row-info" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 'bold', minWidth: '80px' }}>
+                                          {orderPayments.length > 1 ? `Parcela ${idx + 1}` : 'À vista'}
+                                        </span>
+                                        <span style={{ color: p.status === 'RECEIVED' ? 'var(--color-success)' : p.status === 'OVERDUE' ? 'var(--color-danger)' : 'inherit' }}>
+                                          R$ {parseFloat(p.amount).toFixed(2)}
+                                        </span>
+                                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                          Venc: {new Date(p.due_date).toLocaleDateString('pt-BR')}
+                                        </span>
+                                      </div>
+                                      <div className="installment-row-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <span className={p.status === 'RECEIVED' ? 'badge-paid' : p.status === 'OVERDUE' ? 'badge-overdue' : 'badge-pending'} style={{ fontSize: '0.75rem' }}>
+                                          {p.status === 'RECEIVED' ? 'PAGO' : p.status === 'OVERDUE' ? 'ATRASADO' : 'PENDENTE'}
+                                        </span>
+                                        {p.status !== 'RECEIVED' && (
+                                          <button className="btn btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }} onClick={() => simulatePaymentWebhook(p.asaas_payment_id)}>
+                                            Pagar
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
-                            <small className="invoice-ref">Código de Transação: {inv.transaction_code}</small>
-                            <small className="invoice-due">Vencimento: {new Date(inv.due_date).toLocaleDateString('pt-BR')}</small>
-                          </div>
-                        ))
-                      )}
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                 )}
@@ -5472,48 +5945,61 @@ NEWFILEENCODING:NONE
         )}
 
         {/* PÁGINA: CHECKOUT */}
-        {currentPage === 'checkout' && checkoutCourse && (
-          <div className="card auth-box">
-            <h2 className="section-title-underlined-thin">Matrícula & Checkout Asaas</h2>
+        {currentPage === 'checkout' && (
+          <div className="card auth-box" style={{ maxWidth: '800px', width: '100%' }}>
+            <h2 className="section-title-underlined-thin" style={{ color: 'var(--color-danger)' }}>Atenção: A compra só será concluída após a confirmação do pagamento.</h2>
 
-            <div className="mb-5">
-              <span className="course-type-badge">Item Selecionado</span>
-              <h3>{checkoutCourse.title}</h3>
-              <p className="course-card-description">{checkoutCourse.description}</p>
-              <div className="checkout-item-title">
-                {checkoutCourse.type === 'SUBSCRIPTION' ? 'R$ 99,00 / mês' : 'R$ 3.600,00 à vista'}
+            <div className="mb-5 mt-4">
+              <h3 className="mb-4">Itens do Pedido</h3>
+              <div className="checkout-items-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {(checkoutCourse ? [{ product: checkoutCourse, quantity: 1, type: 'course', installments: installments || 1 }] : cartItems).map((item, idx) => {
+                  const basePrice = item.product.price !== undefined ? item.product.price : (item.product.type === 'SUBSCRIPTION' ? 99.00 : (item.product.type === 'FREE' ? 0 : (item.product.type === 'INPERSON' || item.product.type === 'SEMINAR' ? 1200.00 : 3600.00)));
+                  const itemTotalPrice = basePrice * (item.quantity || 1);
+                  const inst = item.installments || 1;
+
+                  return (
+                    <div key={idx} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', backgroundColor: '#f8fafc' }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{item.product.title}</h4>
+                        {item.product.type !== 'FREE' && (
+                          <p style={{ margin: '0.35rem 0 0', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>
+                            {inst > 1
+                              ? `${inst}x R$ ${(itemTotalPrice / inst).toFixed(2).replace('.', ',')}`
+                              : `R$ ${itemTotalPrice.toFixed(2).replace('.', ',')} à vista`}
+                            {item.quantity > 1 && ` (Qtd: ${item.quantity})`}
+                          </p>
+                        )}
+                        {item.product.type === 'FREE' && <p style={{ margin: '0.25rem 0 0', color: 'var(--color-success)', fontWeight: 'bold' }}>Gratuito</p>}
+                      </div>
+                      <div>
+                        {item.product.type !== 'FREE' && (
+                          <button className="btn btn-primary" onClick={() => handleGenerateItemBoleto(item)}>
+                            Gerar Boleto
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <form onSubmit={handleProcessCheckout}>
-              <div className="form-group">
-                <label className="form-label">Forma de Pagamento</label>
-                <select className="form-input" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                  <option value="PIX">Pix Imediato (QR Code)</option>
-                  <option value="CREDIT_CARD">Cartão de Crédito</option>
-                  <option value="BOLETO">Boleto Programado</option>
-                  {checkoutCourse.type === 'POSTGRAD' && (
-                    <option value="CARNE">Boleto Parcelado (Carnê da Pós)</option>
-                  )}
-                </select>
-              </div>
+            <div className="card mb-5" style={{ backgroundColor: '#ffffff', border: '1px dashed var(--color-primary)', textAlign: 'center', padding: '2rem' }}>
+              <h4 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>Prefere pagar via PIX?</h4>
+              <p className="mb-3">Escaneie o QR Code ou utilize nossa chave PIX CNPJ:</p>
+              <h3 style={{ userSelect: 'all', margin: '1rem 0', padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '4px', display: 'inline-block' }}>12.345.678/0001-90</h3>
+              <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '1rem' }}>A liberação do curso ocorre em até 2 horas após a confirmação do pagamento.</p>
+            </div>
 
-              {paymentMethod === 'CARNE' && (
-                <div className="form-group">
-                  <label className="form-label">Parcelas (Carnê)</label>
-                  <select className="form-input" value={installments} onChange={(e) => setInstallments(parseInt(e.target.value))}>
-                    <option value={6}>6x de R$ 600,00</option>
-                    <option value={12}>12x de R$ 300,00</option>
-                    <option value={18}>18x de R$ 200,00</option>
-                  </select>
-                </div>
-              )}
-
-              <div className="checkout-actions">
-                <button className="btn btn-secondary flex-1" type="button" onClick={() => navigateTo('student-dash')}>Cancelar</button>
-                <button className="btn btn-primary flex-2" type="submit">Gerar Fatura no Asaas</button>
-              </div>
-            </form>
+            <div className="checkout-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button className="btn btn-secondary flex-1" type="button" onClick={() => navigateTo('home')}>Voltar para a Loja</button>
+              <button className="btn btn-primary flex-1" type="button" onClick={() => {
+                clearCart();
+                setCheckoutCourse(null);
+                setStudentActiveTab('payments');
+                navigateTo('student-dash');
+              }}>Acessar meu Painel</button>
+            </div>
           </div>
         )}
 
