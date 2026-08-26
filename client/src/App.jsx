@@ -270,7 +270,8 @@ const PAGE_URLS = {
   'course-view': 'assistir-aula',
   checkout: 'finalizar-compra',
   'online-courses': 'cursos-online',
-  'inperson-courses': 'cursos-presenciais'
+  'inperson-courses': 'cursos-presenciais',
+  'hybrid-courses': 'cursos-hibridos'
 };
 
 // Helper para gerar slugs legíveis de cursos
@@ -854,9 +855,13 @@ export default function App() {
   }, []);
 
   // Controle de Estado Geral
-  const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout, online-courses, inperson-courses
+  const [currentPage, setCurrentPage] = useState(getPageFromPathname); // home, about, homeopaths, books, synergy, contact, cart, login, register, unlock, student-dash, course-view, teacher-dash, admin-dash, checkout, online-courses, inperson-courses, hybrid-courses
   const [searchOnlineCourses, setSearchOnlineCourses] = useState('');
   const [searchInpersonCourses, setSearchInpersonCourses] = useState('');
+  const [searchHybridCourses, setSearchHybridCourses] = useState('');
+  const [bookGalleryImages, setBookGalleryImages] = useState([]);
+  const [bookCoverImage, setBookCoverImage] = useState('');
+  const [newGalleryUrl, setNewGalleryUrl] = useState('');
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [error, setError] = useState('');
@@ -865,6 +870,39 @@ export default function App() {
   const [bookGalleryIndex, setBookGalleryIndex] = useState(0);
   const [isBookGalleryModalOpen, setIsBookGalleryModalOpen] = useState(false);
   const [detailInstallments, setDetailInstallments] = useState(1);
+
+  // Estados de Filtros e Relatórios no ADM
+  const [searchUserText, setSearchUserText] = useState('');
+  const [searchUserRole, setSearchUserRole] = useState('ALL');
+  const [searchUserStatus, setSearchUserStatus] = useState('ALL');
+  const [searchFinanceText, setSearchFinanceText] = useState('');
+  const [searchFinanceMethod, setSearchFinanceMethod] = useState('ALL');
+  const [searchFinanceStatus, setSearchFinanceStatus] = useState('ALL');
+
+  // Estados para Certificados e Impressão
+  const [previewingCertificate, setPreviewingCertificate] = useState(null);
+  const [printingReport, setPrintingReport] = useState(null);
+  const [selectedAttendanceDate, setSelectedAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Configuração do Template do Certificado
+  const [certTemplate, setCertTemplate] = useState(() => {
+    const saved = localStorage.getItem('cert_template_config');
+    return saved ? JSON.parse(saved) : {
+      bg_url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1200',
+      title_text: 'CERTIFICADO DE CONCLUSÃO ACADÊMICA',
+      body_text: 'Certificamos para os devidos fins que o(a) aluno(a) {NOME_ALUNO}, registro {REGISTRO}, concluiu com êxito a formação no curso {NOME_CURSO}, com carga horária total de {CARGA_HORARIA} horas didáticas.',
+      director_name: 'Dr. Carlos Eduardo Leitão',
+      director_role: 'Diretor Científico da The Other Song Brasil',
+      font_family: 'Playfair Display, serif',
+      font_color: '#1e293b',
+      title_top: 22,
+      student_top: 40,
+      body_top: 55,
+      date_top: 72,
+      signatures_top: 82,
+      validation_top: 92
+    };
+  });
 
   // Backup Local (Mock Database) para funcionamento Offline
   const [mockDb, setMockDb] = useState(() => {
@@ -949,6 +987,25 @@ export default function App() {
           parsed.temporary_unlocks = [];
           changed = true;
         }
+        if (!parsed.certificates) {
+          parsed.certificates = [
+            {
+              id: 'cert-mock-1',
+              code: 'TOSB-2026-A1B2',
+              student_id: 'student-id',
+              student_name: 'Dra. Ana Paula (Aluna)',
+              student_registration: 'CRM-SP 98765',
+              course_id: 'course-free',
+              course_title: 'Introdução à Homeopatia e Sensação Vital',
+              workload_hours: 180,
+              class_id: 'class-1',
+              class_name: 'Turma Alfa - Sensação Vital 2026',
+              issued_at: new Date().toISOString(),
+              status: 'ISSUED'
+            }
+          ];
+          changed = true;
+        }
         if (!parsed.orders) {
           parsed.orders = [];
           changed = true;
@@ -1023,11 +1080,12 @@ export default function App() {
         { id: 'student-delinquent-id', name: 'Dr. Lucas Mendes (Inadimplente)', email: 'lucas.inadimplente@lms.com', role: 'STUDENT', status: 'SUSPENDED', password: 'senha123', profession: 'médico(a)', council_type: 'CRM', council_state: 'RJ', council_number: '44556', registrationType: 'CRM', registrationNumber: 'CRM-RJ 44556', is_homeopath: false, receive_promotions: true }
       ],
       courses: [
-        { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
-        { id: 'course-sub', title: 'Clube TOSB: Estudo Continuado de Matéria Médica', description: 'Curso recorrente mensal focado no estudo aprofundado dos reinos animal, vegetal e mineral na clínica homeopática.', type: 'SUBSCRIPTION', duration_days: 30, finishing_message: 'Parabéns por concluir mais um ciclo de estudos continuados em nossa Matéria Médica!', teacher_id: 'teacher-id', active: true },
-        { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true },
-        { id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', description: 'Evento presencial focado em casos práticos e resolução ao vivo.', type: 'SEMINAR', duration_days: 2, finishing_message: 'Obrigado por participar deste evento.', teacher_id: 'teacher-id', active: true },
-        { id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', description: 'Encontro presencial para profissionais, explorando a fundo os reinos minerais e vegetais.', type: 'INPERSON', duration_days: 1, finishing_message: 'Obrigado por participar!', teacher_id: 'teacher-id', active: true }
+        { id: 'course-free', title: 'Introdução à Homeopatia e Sensação Vital', description: 'Princípios básicos da homeopatia clássica e as bases do Método Sensação da The Other Song.', type: 'FREE', modality: 'ONLINE', duration_days: 180, finishing_message: 'Parabéns pela conclusão! Que os ensinamentos da Homeopatia e a busca pela sensação vital enriqueçam a sua prática clínica cotidiana.', teacher_id: 'teacher-id', active: true },
+        { id: 'course-sub', title: 'Clube TOSB: Estudo Continuado de Matéria Médica', description: 'Curso recorrente mensal focado no estudo aprofundado dos reinos animal, vegetal e mineral na clínica homeopática.', type: 'SUBSCRIPTION', modality: 'ONLINE', duration_days: 30, finishing_message: 'Parabéns por concluir mais um ciclo de estudos continuados em nossa Matéria Médica!', teacher_id: 'teacher-id', active: true },
+        { id: 'course-post', title: 'Pós-Graduação em Homeopatia Avançada - Método Sensação', description: 'Especialização acadêmica stricto/lato sensu voltada para médicos, dentistas e profissionais da saúde com controle estrito de presença e quizzes.', type: 'POSTGRAD', modality: 'ONLINE', duration_days: 180, finishing_message: 'Parabéns pela conquista do título de Especialista em Homeopatia Avançada! Sua dedicação científica eleva o nível da nossa prática médica.', teacher_id: 'teacher-id', active: true },
+        { id: 'course-inperson-seminar', title: 'Seminário Avançado de Homeopatia 2026', description: 'Evento presencial focado em casos práticos e resolução ao vivo.', type: 'SEMINAR', modality: 'INPERSON', duration_days: 2, finishing_message: 'Obrigado por participar deste evento.', teacher_id: 'teacher-id', active: true },
+        { id: 'course-inperson-meeting', title: 'Encontro de Matéria Médica Prática', description: 'Encontro presencial para profissionais, explorando a fundo os reinos minerais e vegetais.', type: 'INPERSON', modality: 'INPERSON', duration_days: 1, finishing_message: 'Obrigado por participar!', teacher_id: 'teacher-id', active: true },
+        { id: 'course-hybrid-masterclass', title: 'Imersão Híbrida: Clínica e Prática Homeopática', description: 'Curso combinado com módulos EAD teóricos e encontros presenciais de supervisão de casos clínicos.', type: 'POSTGRAD', modality: 'HYBRID', duration_days: 120, workload_hours: 120, banner_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800', finishing_message: 'Parabéns pela conclusão da Imersão Híbrida!', teacher_id: 'teacher-id', active: true }
       ],
       books: BOOKS_DATA,
       modules: {
@@ -1870,6 +1928,7 @@ export default function App() {
       if (page === 'checkout') return '#finalizar-compra';
       if (page === 'online-courses') return '#cursos-online';
       if (page === 'inperson-courses') return '#cursos-presenciais';
+      if (page === 'hybrid-courses') return '#cursos-hibridos';
       return `#${page}`;
     }
     const urlSegment = PAGE_URLS[page] || page;
@@ -2682,10 +2741,12 @@ export default function App() {
     const description = e.target.description.value;
     const full_description = e.target.full_description?.value || '';
     const type = e.target.type.value;
+    const modality = e.target.modality?.value || (['INPERSON', 'SEMINAR'].includes(type) ? 'INPERSON' : 'ONLINE');
     const duration_days = parseInt(e.target.duration_days.value) || 180;
     const workload_hours = parseInt(e.target.workload_hours?.value) || (duration_days ? duration_days * 2 : 180);
     const banner_url = e.target.banner_url?.value || courseBannerPreview || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800';
     const min_attendance_pct = parseInt(e.target.min_attendance_pct?.value) || 60;
+    const finishing_message = e.target.finishing_message?.value || '';
 
     // Suporte para múltiplos professores
     const teacher_ids = Array.from(e.target.elements)
@@ -2708,6 +2769,7 @@ export default function App() {
               description,
               full_description,
               type,
+              modality,
               duration_days,
               workload_hours,
               min_attendance_pct,
@@ -2726,6 +2788,7 @@ export default function App() {
           description,
           full_description,
           type,
+          modality,
           duration_days,
           workload_hours,
           min_attendance_pct,
@@ -2819,15 +2882,17 @@ export default function App() {
     const desc = e.target.desc.value;
     const full_description = e.target['hidden_full_desc_book_' + (e.target.id.value || 'new')]?.value || '';
     const page_count = parseInt(e.target.page_count?.value) || 0;
+    const image = e.target.image?.value || bookCoverImage || '';
+    const images = bookGalleryImages && bookGalleryImages.length > 0 ? bookGalleryImages : (image ? [image] : []);
 
     setMockDb(prev => {
       let updatedBooks;
       const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
       if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, full_description, page_count } : b);
+        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, full_description, page_count, image, images } : b);
         setSuccess('Livro atualizado com sucesso!');
       } else {
-        const newBook = { id, title, author, price, desc, full_description, page_count };
+        const newBook = { id, title, author, price, desc, full_description, page_count, image, images };
         updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
         setSuccess('Livro adicionado com sucesso!');
       }
@@ -2835,6 +2900,9 @@ export default function App() {
     });
 
     setEditingBook(null);
+    setBookGalleryImages([]);
+    setBookCoverImage('');
+    setNewGalleryUrl('');
     e.target.reset();
   };
 
@@ -4450,9 +4518,10 @@ NEWFILEENCODING:NONE
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
-              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'agenda')}>Agenda Geral</a>
-              <a href={getLinkHref('online-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'online-courses'); }}>Online</a>
-              <a href={getLinkHref('inperson-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
+              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
+              <a href={getLinkHref('online-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
+              <a href={getLinkHref('inperson-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'inperson-courses'); }}>Cursos Presenciais</a>
+              <a href={getLinkHref('hybrid-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'hybrid-courses'); }}>Cursos Híbridos</a>
             </div>
           </div>
 
@@ -4472,7 +4541,8 @@ NEWFILEENCODING:NONE
           {/* Cursos Submenu achatado */}
           <a href={getLinkHref('agenda')} className={`nav-link ${currentPage === 'agenda' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
           <a href={getLinkHref('online-courses')} className={`nav-link ${currentPage === 'online-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
-          <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
+          <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Cursos Presenciais</a>
+          <a href={getLinkHref('hybrid-courses')} className={`nav-link ${currentPage === 'hybrid-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'hybrid-courses'); }}>Cursos Híbridos</a>
 
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'books'); }}>Livros</a>
           <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy</a>
@@ -5118,6 +5188,32 @@ NEWFILEENCODING:NONE
               </div>
             </section>
 
+            {/* Cursos Híbridos */}
+            <section id="hybrid-courses" className="mb-7">
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 className="home-section-title" style={{ margin: 0, marginBottom: '0.5rem' }}>Cursos e Imersões Híbridas (Presencial + EAD)</h2>
+                <button className="btn btn-secondary" onClick={() => { clearAlerts(); navigateTo('hybrid-courses'); }}>Ver todos</button>
+              </div>
+              <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+
+                <div className="premium-card animate-fade-in">
+                  <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=course-hybrid-masterclass')}>
+                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div className="premium-card-content">
+                    <span className="premium-card-tag" style={{ backgroundColor: '#8b5cf6', color: '#fff' }}>🔄 Híbrido</span>
+                    <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=course-hybrid-masterclass')}>Imersão Híbrida: Clínica e Prática Homeopática</h3>
+                    <p className="premium-card-text">Curso combinado com módulos EAD teóricos e encontros presenciais de supervisão de casos clínicos.</p>
+                    <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                      <span className="premium-card-price">R$ 2.400,00</span>
+                      <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=course-hybrid-masterclass')}>Inscrição</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
             {/* Livros em Destaque */}
             <section className="mb-7">
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -5651,31 +5747,26 @@ NEWFILEENCODING:NONE
               </div>
 
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
-                {[
-                  { id: 'course-free', tag: 'Gratuito', title: 'Introdução à Homeopatia e Sensação Vital', desc: 'Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.', price: 'Gratuito', icon: '🌿', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
-                  { id: 'course-sub', tag: 'Assinatura', title: 'Clube TOSB: Estudos de Matéria Médica', desc: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.', price: 'R$ 99,00', icon: '📖', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
-                  { id: 'course-post', tag: 'Especialização', title: 'Pós-Graduação em Homeopatia Avançada', desc: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.', price: 'R$ 3.600,00', icon: '🎓', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' }
-                ].filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).map((course, idx) => (
-                  <div key={idx} className="premium-card animate-fade-in">
-                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
-                      {course.image && <img src={course.image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                    </div>
-                    <div className="premium-card-content">
-                      <span className="premium-card-tag">{course.tag}</span>
-                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
-                      <p className="premium-card-text">{course.desc}</p>
-                      <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
-                        <span className="premium-card-price">{course.price}</span>
-                        <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
+                {mockDb.courses
+                  .filter(c => c.modality === 'ONLINE')
+                  .filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase()))
+                  .map((course) => (
+                    <div key={course.id} className="premium-card animate-fade-in">
+                      <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
+                        <img src={course.banner_url || 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg'} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag">Online</span>
+                        <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
+                        <p className="premium-card-text">{course.description}</p>
+                        <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                          <span className="premium-card-price">{course.type === 'FREE' ? 'Gratuito' : course.price ? `R$ ${course.price.toFixed(2)}` : (course.type === 'SUBSCRIPTION' ? 'R$ 99,00/mês' : 'R$ 3.600,00')}</span>
+                          <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {[
-                  { id: 'course-free', tag: 'Gratuito', title: 'Introdução à Homeopatia e Sensação Vital', desc: 'Entenda as bases históricas da homeopatia clássica e conheça a teoria fundamental da sensação vital do Dr. Rajan Sankaran.', price: 'Gratuito', icon: '🌿', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
-                  { id: 'course-sub', tag: 'Assinatura', title: 'Clube TOSB: Estudos de Matéria Médica', desc: 'Estudo mensal continuado dos reinos animal, vegetal e mineral, focado na clínica homeopática contemporânea.', price: 'R$ 99,00', icon: '📖', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' },
-                  { id: 'course-post', tag: 'Especialização', title: 'Pós-Graduação em Homeopatia Avançada', desc: 'Especialização completa Lato Sensu voltada para médicos e profissionais de saúde. Aulas com controle de presença e avaliações.', price: 'R$ 3.600,00', icon: '🎓', image: 'https://scontent.fpgz1-1.fna.fbcdn.net/v/t51.75761-15/470944047_18120663160408696_557629490553331838_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFJ3IKGqnzrgO9CxNH6cPCWzfDcE25EG8jN8NwTbkQbyNr6okXIcTPyXKZh50tpIP0VHf9rwAmEHLF_6XcfM1Kb&_nc_ohc=odNPFnXt11UQ7kNvwF61r8Q&_nc_oc=Adr_y9fKCyJtOp-FHMrCoRg_ue9osxPxYWagzPAQN4VpZhYC_M_lRN211W4bOl-Nyx8&_nc_zt=23&_nc_ht=scontent.fpgz1-1.fna&_nc_gid=YGSfNzP12iyM0SEI4ZxPhw&_nc_ss=7b2a8&oh=00_AQFP1tK-qOfdTps7Ems43tBO4efUvfa6DdX-ujfu2u0GaQ&oe=6A91EAD6' }
-                ].filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).length === 0 && (
+                  ))}
+                  {mockDb.courses.filter(c => c.modality === 'ONLINE').filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).length === 0 && (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum curso online encontrado.</div>
                   )}
               </div>
@@ -5701,37 +5792,28 @@ NEWFILEENCODING:NONE
               </div>
 
               <div className="premium-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(max(320px, calc(33.333% - 2rem)), 1fr))' }}>
-                {[
-                  { id: 'course-inperson-seminar', tag: 'Presencial Curitiba', title: 'Seminário Avançado de Homeopatia 2026', desc: 'Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.', price: 'R$ 1.200,00', date: '23 a 25/Outubro/2026', loc: 'Curitiba - PR', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' },
-                  { id: 'course-inperson-meeting', tag: 'Encontro Prático', title: 'Encontro de Matéria Médica Prática', desc: 'Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.', price: 'R$ 600,00', date: '05/Dezembro/2026', loc: 'Sede TOSB Curitiba', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' }
-                ].filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase())).map((course, idx) => (
-                  <div key={idx} className="premium-card animate-fade-in">
-                    <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
-                      {course.image && <img src={course.image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                    </div>
-                    <div className="premium-card-content">
-                      <span className="premium-card-tag">{course.tag}</span>
-                      <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
-                      <p className="premium-card-text">{course.desc}</p>
-                      <div className="premium-card-footer" style={{ flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-                        <div>
-                          <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Data: <strong>{course.date}</strong></div>
-                          <div style={{ fontSize: 'var(--fs-sm)', color: '#64748b' }}>Local: <strong>{course.loc}</strong></div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
-                          <span className="premium-card-price">{course.price}</span>
+                {mockDb.courses
+                  .filter(c => c.modality === 'INPERSON' || ['INPERSON', 'SEMINAR'].includes(c.type))
+                  .filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase()))
+                  .map((course) => (
+                    <div key={course.id} className="premium-card animate-fade-in">
+                      <div className="premium-card-img-placeholder cursor-pointer" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>
+                        <img src={course.banner_url || 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg='} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div className="premium-card-content">
+                        <span className="premium-card-tag" style={{ backgroundColor: '#059669', color: '#fff' }}>🏫 Presencial</span>
+                        <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
+                        <p className="premium-card-text">{course.description}</p>
+                        <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+                          <span className="premium-card-price">R$ {course.price ? course.price.toFixed(2) : '1.200,00'}</span>
                           <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {[
-                  { id: 'course-inperson-seminar', tag: 'Presencial Curitiba', title: 'Seminário Avançado de Homeopatia 2026', desc: 'Um encontro presencial na sede de Curitiba - PR focando no diagnóstico clínico de casos do reino animal e reações de hipersensibilidade.', price: 'R$ 1.200,00', date: '23 a 25/Outubro/2026', loc: 'Curitiba - PR', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' },
-                  { id: 'course-inperson-meeting', tag: 'Encontro Prático', title: 'Encontro de Matéria Médica Prática', desc: 'Estudos práticos presenciais voltados à repertorização e discussão de casos complexos trazidos pelos próprios alunos homeopatas.', price: 'R$ 600,00', date: '05/Dezembro/2026', loc: 'Sede TOSB Curitiba', icon: '🎥', image: 'https://media.istockphoto.com/id/2157823172/photo/speaker-at-business-workshop-and-presentation-audience-at-the-conference-room.webp?a=1&b=1&s=612x612&w=0&k=20&c=rmq-kAxly3zFolnPd_L7TBY8ipdkje6QedtQpsoN_fg=' }
-                ].filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase())).length === 0 && (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum seminário encontrado.</div>
-                  )}
+                  ))}
+                {mockDb.courses.filter(c => c.modality === 'INPERSON' || ['INPERSON', 'SEMINAR'].includes(c.type)).filter(course => !searchInpersonCourses || course.title.toLowerCase().includes(searchInpersonCourses.toLowerCase())).length === 0 && (
+                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum seminário presencial localizado.</div>
+                )}
               </div>
             </div>
           </div>
@@ -5801,9 +5883,9 @@ NEWFILEENCODING:NONE
 
             <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 'var(--fs-md)', lineHeight: '1.8' }}>
               <p className="mb-4">
-                O **Synergy Homeopathic Software (SHS)** é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
+                O <strong>Synergy Homeopathic Software (SHS)</strong> é a ferramenta de tecnologia médica mais utilizada por homeopatas no mundo inteiro. Com sua interface voltada para repertorização rápida e cruzamento de sintomas, o software se torna um parceiro indispensável no consultório.
               </p>
-              <p className="mb-4" style={{ fontWeight: 'bold', color: 'var(--color-accent)', textAlign: 'center', fontSize: 'var(--fs-lg)' }}>
+              <p className="mb-4" style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 'var(--fs-lg)' }}>
                 🎓 Alunos da TOSB tem 50% de desconto
               </p>
 
@@ -6925,6 +7007,9 @@ NEWFILEENCODING:NONE
                   <li className={`student-sidebar-item ${adminActiveTab === 'classes' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('classes')}>🎓 Gerenciar Turmas</button>
                   </li>
+                  <li className={`student-sidebar-item ${adminActiveTab === 'certificates' ? 'active' : ''}`}>
+                    <button onClick={() => setAdminActiveTab('certificates')}>📜 Certificados & Templates</button>
+                  </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Usuários</button>
                   </li>
@@ -7090,11 +7175,21 @@ NEWFILEENCODING:NONE
 
                         <div className="grid-2col" style={{ marginBottom: '1rem' }}>
                           <div className="form-group">
-                            <label className="form-label">Tipo de Curso</label>
+                            <label className="form-label">Tipo de Curso (Pagamento/Modelo)</label>
                             <select className="form-input" name="type" defaultValue={editingCourse.type || 'FREE'}>
                               <option value="FREE">FREE (Gratuito)</option>
                               <option value="SUBSCRIPTION">SUBSCRIPTION (Assinatura)</option>
                               <option value="POSTGRAD">POSTGRAD (Pós-Graduação)</option>
+                              <option value="SEMINAR">SEMINAR (Seminário)</option>
+                              <option value="INPERSON">INPERSON (Presencial)</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Modalidade de Ensino</label>
+                            <select className="form-input" name="modality" defaultValue={editingCourse.modality || (['INPERSON', 'SEMINAR'].includes(editingCourse.type) ? 'INPERSON' : 'ONLINE')}>
+                              <option value="ONLINE">💻 Online (100% EAD)</option>
+                              <option value="INPERSON">🏫 Presencial</option>
+                              <option value="HYBRID">🔄 Híbrido (Presencial + EAD)</option>
                             </select>
                           </div>
                           <div className="form-group">
@@ -7264,6 +7359,7 @@ NEWFILEENCODING:NONE
                             <th>ID</th>
                             <th>Título</th>
                             <th>Tipo</th>
+                            <th>Modalidade</th>
                             <th>Duração</th>
                             <th>Carga Horária</th>
                             <th>Ações</th>
@@ -7272,6 +7368,8 @@ NEWFILEENCODING:NONE
                         <tbody>
                           {mockDb.courses.map(c => {
                             const cargaHoraria = c.workload_hours || (c.duration_days ? c.duration_days * 2 : 180);
+                            const modLabel = c.modality === 'HYBRID' ? '🔄 Híbrido' : c.modality === 'INPERSON' || ['INPERSON', 'SEMINAR'].includes(c.type) ? '🏫 Presencial' : '💻 Online';
+                            const modBg = c.modality === 'HYBRID' ? '#8b5cf6' : c.modality === 'INPERSON' || ['INPERSON', 'SEMINAR'].includes(c.type) ? '#059669' : '#0284c7';
 
                             return (
                               <tr key={c.id}>
@@ -7280,6 +7378,11 @@ NEWFILEENCODING:NONE
                                   <strong>{c.title}</strong>
                                 </td>
                                 <td><span className="course-type-badge">{c.type}</span></td>
+                                <td>
+                                  <span className="course-type-badge" style={{ backgroundColor: modBg, color: '#ffffff' }}>
+                                    {modLabel}
+                                  </span>
+                                </td>
                                 <td>{c.duration_days} dias</td>
                                 <td><span className="badge-paid">⏱️ {cargaHoraria}h Didáticas</span></td>
                                 <td>
@@ -7378,7 +7481,7 @@ NEWFILEENCODING:NONE
                   <div className="card">
                     <div className="quiz-header mb-4">
                       <h3>Gerenciamento da Livraria (Livros)</h3>
-                      <button className="btn btn-primary" onClick={() => setEditingBook({})}>＋ Adicionar Novo Livro</button>
+                      <button className="btn btn-primary" onClick={() => { setEditingBook({}); setBookGalleryImages([]); setBookCoverImage(''); setNewGalleryUrl(''); }}>＋ Adicionar Novo Livro</button>
                     </div>
 
                     {editingBook && (
@@ -7394,6 +7497,117 @@ NEWFILEENCODING:NONE
                         <div className="form-group">
                           <label className="form-label">Autor</label>
                           <input className="form-input" name="author" defaultValue={editingBook.author || ''} required placeholder="ex: Dr. Rajan Sankaran" />
+                        </div>
+
+                        {/* UPLOAD / URL DA CAPA PRINCIPAL */}
+                        <div className="form-group mb-4">
+                          <label className="form-label">Capa Principal do Livro (Imagem)</label>
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <input
+                              className="form-input"
+                              name="image"
+                              value={bookCoverImage || editingBook.image || ''}
+                              onChange={(e) => setBookCoverImage(e.target.value)}
+                              placeholder="URL da imagem da capa..."
+                            />
+                            <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0, padding: '0.5rem 1rem' }}>
+                              Upload Capa
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => setBookCoverImage(reader.result);
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                          {(bookCoverImage || editingBook.image) && (
+                            <div style={{ marginTop: '0.5rem', borderRadius: '8px', overflow: 'hidden', maxHeight: '150px', maxWidth: '120px', border: '1px solid var(--color-border)' }}>
+                              <img src={bookCoverImage || editingBook.image} alt="Capa do Livro" style={{ width: '100%', height: '150px', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* SEÇÃO: GALERIA DE FOTOS DO LIVRO */}
+                        <div className="form-group mb-4" style={{ padding: '1.25rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                          <label className="form-label" style={{ fontWeight: '600', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            🖼️ Galeria de Fotos da Obra (Páginas, Sumário, Lombada)
+                          </label>
+                          <p className="text-muted mb-3" style={{ fontSize: 'var(--fs-sm)' }}>
+                            Adicione fotos adicionais do livro para que os alunos/leitores possam folhear a obra na página de detalhes.
+                          </p>
+
+                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem' }}>
+                            <input
+                              className="form-input"
+                              placeholder="Cole a URL de uma imagem para a galeria..."
+                              value={newGalleryUrl}
+                              onChange={(e) => setNewGalleryUrl(e.target.value)}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              style={{ whiteSpace: 'nowrap' }}
+                              onClick={() => {
+                                if (newGalleryUrl.trim()) {
+                                  setBookGalleryImages(prev => [...prev, newGalleryUrl.trim()]);
+                                  setNewGalleryUrl('');
+                                }
+                              }}
+                            >
+                              ＋ Adicionar URL
+                            </button>
+                            <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0 }}>
+                              Upload Foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      setBookGalleryImages(prev => [...prev, reader.result]);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* GRID DE MINIATURAS DA GALERIA DE FOTOS */}
+                          {bookGalleryImages.length > 0 ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
+                              {bookGalleryImages.map((imgUrl, idx) => (
+                                <div key={idx} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--color-border)', backgroundColor: '#ffffff', padding: '0.25rem' }}>
+                                  <img src={imgUrl} alt={`Foto ${idx + 1}`} style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '4px' }} />
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem', padding: '0 0.25rem' }}>
+                                    <small className="text-muted">Foto #{idx + 1}</small>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger"
+                                      style={{ padding: '0.1rem 0.35rem', fontSize: 'var(--fs-xs)', borderRadius: '3px' }}
+                                      onClick={() => setBookGalleryImages(prev => prev.filter((_, i) => i !== idx))}
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', fontStyle: 'italic', margin: 0 }}>
+                              Nenhuma imagem adicionada à galeria deste livro ainda.
+                            </p>
+                          )}
                         </div>
 
                         <div className="grid-2col">
@@ -7426,7 +7640,7 @@ NEWFILEENCODING:NONE
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                          <button className="btn btn-secondary flex-1" type="button" onClick={() => setEditingBook(null)}>Cancelar</button>
+                          <button className="btn btn-secondary flex-1" type="button" onClick={() => { setEditingBook(null); setBookGalleryImages([]); setBookCoverImage(''); setNewGalleryUrl(''); }}>Cancelar</button>
                           {editingBook.id && (
                             <button className="btn btn-danger flex-1" type="button" onClick={() => {
                               if (window.confirm('Tem certeza que deseja remover este livro da livraria?')) {
@@ -7469,7 +7683,7 @@ NEWFILEENCODING:NONE
                               <td><strong>R$ {b.price.toFixed(2)}</strong></td>
                               <td>
                                 <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => setEditingBook(b)}>Editar</button>
+                                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => { setEditingBook(b); setBookGalleryImages(b.images || []); setBookCoverImage(b.image || ''); setNewGalleryUrl(''); }}>Editar</button>
                                 </div>
                               </td>
                             </tr>
@@ -7654,41 +7868,118 @@ NEWFILEENCODING:NONE
                       <>
                         <div className="quiz-header mb-4">
                           <h3>Gerenciamento de Usuários</h3>
-                          <button className="btn btn-primary" onClick={startAddUser}>＋ Adicionar Novo Usuário</button>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => {
+                                const filteredUsers = mockDb.users.filter(u => {
+                                  const matchesRole = searchUserRole === 'ALL' || u.role === searchUserRole;
+                                  const matchesStatus = searchUserStatus === 'ALL' || u.status === searchUserStatus;
+                                  const matchesText = !searchUserText || u.name.toLowerCase().includes(searchUserText.toLowerCase()) || u.email.toLowerCase().includes(searchUserText.toLowerCase()) || (u.crm && u.crm.toLowerCase().includes(searchUserText.toLowerCase()));
+                                  return matchesRole && matchesStatus && matchesText;
+                                });
+                                setPrintingReport({
+                                  title: 'Relatório Oficial de Usuários e Matrículas',
+                                  subtitle: `Filtro: Perfil (${searchUserRole}), Status (${searchUserStatus}), Total: ${filteredUsers.length} cadastros`,
+                                  columns: ['Nome', 'Perfil / Função', 'E-mail', 'Registro / CRM', 'Status'],
+                                  rows: filteredUsers.map(u => [
+                                    u.name,
+                                    u.role === 'STUDENT' ? 'Aluno' : u.role === 'TEACHER' ? 'Professor' : 'Administrador',
+                                    u.email,
+                                    u.crm || u.registrationNumber || 'N/A',
+                                    u.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'
+                                  ])
+                                });
+                              }}
+                            >
+                              🖨️ Imprimir Relatório de Usuários
+                            </button>
+                            <button className="btn btn-primary" onClick={startAddUser}>＋ Adicionar Novo Usuário</button>
+                          </div>
                         </div>
                         <p className="course-card-description mb-4">
                           Adicione, edite, ative ou suspenda contas de usuários (alunos, professores e administradores) da plataforma.
                         </p>
 
+                        {/* FILTROS AVANÇADOS DE USUÁRIOS */}
+                        <div className="card p-3 mb-4" style={{ backgroundColor: '#f8fafc', border: '1px solid var(--color-border)' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
+                            <div>
+                              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>🔍 Buscar por Nome/Email/CRM</label>
+                              <input
+                                className="form-input"
+                                placeholder="Digite o nome, e-mail ou CRM..."
+                                value={searchUserText}
+                                onChange={(e) => setSearchUserText(e.target.value)}
+                                style={{ padding: '0.4rem 0.6rem', fontSize: 'var(--fs-sm)' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>👤 Perfil / Função</label>
+                              <select
+                                className="form-input"
+                                value={searchUserRole}
+                                onChange={(e) => setSearchUserRole(e.target.value)}
+                                style={{ padding: '0.4rem 0.6rem', fontSize: 'var(--fs-sm)' }}
+                              >
+                                <option value="ALL">Todos os Perfis</option>
+                                <option value="STUDENT">Alunos</option>
+                                <option value="TEACHER">Professores</option>
+                                <option value="ADMIN">Administradores</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>⚡ Status da Conta</label>
+                              <select
+                                className="form-input"
+                                value={searchUserStatus}
+                                onChange={(e) => setSearchUserStatus(e.target.value)}
+                                style={{ padding: '0.4rem 0.6rem', fontSize: 'var(--fs-sm)' }}
+                              >
+                                <option value="ALL">Todos os Status</option>
+                                <option value="ACTIVE">Ativos</option>
+                                <option value="SUSPENDED">Suspensos</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
                         <div className="table-responsive">
                           <table className="lms-table">
                             <thead>
                               <tr>
-                                <th style={{ width: '40%' }}>Nome</th>
+                                <th style={{ width: '35%' }}>Nome</th>
                                 <th style={{ width: '20%' }}>Função</th>
                                 <th style={{ width: '25%' }}>E-mail</th>
                                 <th style={{ width: '10%' }}>Status</th>
-                                <th style={{ width: '5%' }}>Ações</th>
+                                <th style={{ width: '10%' }}>Ações</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {mockDb.users.map(s => (
-                                <tr key={s.id}>
-                                  <td><strong>{s.name}</strong></td>
-                                  <td>
-                                    <span className="course-type-badge">{s.role === 'STUDENT' ? 'Aluno' : s.role === 'TEACHER' ? 'Professor' : 'Administrador'}</span>
-                                  </td>
-                                  <td>{s.email}</td>
-                                  <td>
-                                    <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
-                                      {s.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'}
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => startEditUser(s)}>Editar</button>
-                                  </td>
-                                </tr>
-                              ))}
+                              {mockDb.users
+                                .filter(s => {
+                                  const matchesRole = searchUserRole === 'ALL' || s.role === searchUserRole;
+                                  const matchesStatus = searchUserStatus === 'ALL' || s.status === searchUserStatus;
+                                  const matchesText = !searchUserText || s.name.toLowerCase().includes(searchUserText.toLowerCase()) || s.email.toLowerCase().includes(searchUserText.toLowerCase()) || (s.crm && s.crm.toLowerCase().includes(searchUserText.toLowerCase()));
+                                  return matchesRole && matchesStatus && matchesText;
+                                })
+                                .map(s => (
+                                  <tr key={s.id}>
+                                    <td><strong>{s.name}</strong></td>
+                                    <td>
+                                      <span className="course-type-badge">{s.role === 'STUDENT' ? 'Aluno' : s.role === 'TEACHER' ? 'Professor' : 'Administrador'}</span>
+                                    </td>
+                                    <td>{s.email}</td>
+                                    <td>
+                                      <span className={s.status === 'ACTIVE' ? 'badge-status-active' : 'badge-status-suspended'}>
+                                        {s.status === 'ACTIVE' ? 'Ativo' : 'Suspenso'}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                    </td>
+                                  </tr>
+                                ))}
                             </tbody>
                           </table>
                         </div>
@@ -7702,7 +7993,29 @@ NEWFILEENCODING:NONE
                 {adminActiveTab === 'finance' && (
                   <div className="card finance-module">
                     <div className="quiz-header mb-4">
-                      <h3>Gerenciar Contas</h3>
+                      <h3>Gerenciar Contas & Módulo Financeiro</h3>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          const orders = mockDb.orders || [];
+                          const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+                          setPrintingReport({
+                            title: 'Relatório Financeiro Geral de Vendas e Mensalidades',
+                            subtitle: `Total acumulado: R$ ${totalRevenue.toFixed(2)} | Total de pedidos/transações: ${orders.length}`,
+                            columns: ['ID Pedido', 'Aluno ID', 'Item / Tipo', 'Método', 'Valor Total', 'Status'],
+                            rows: orders.map(o => [
+                              o.id,
+                              o.student_id,
+                              o.item_type === 'course' ? 'Curso EAD' : 'Livro / Impresso',
+                              o.payment_method || 'PIX',
+                              `R$ ${(o.total_amount || 0).toFixed(2)}`,
+                              o.status === 'PAID' ? 'Pago' : 'Pendente'
+                            ])
+                          });
+                        }}
+                      >
+                        🖨️ Imprimir Relatório Financeiro
+                      </button>
                     </div>
 
                     <div className="finance-sub-tabs">
@@ -8490,9 +8803,42 @@ NEWFILEENCODING:NONE
                             </div>
                           </div>
 
-                          {/* SEÇÃO 2: ALUNOS DA TURMA */}
+                          {/* SEÇÃO 2: ALUNOS DA TURMA & CONTROLE LMS */}
                           <div className="card p-4" style={{ backgroundColor: '#fff', border: '1px solid var(--color-border)' }}>
-                            <h4 className="mb-3" style={{ color: 'var(--color-primary)', fontSize: 'var(--fs-md)' }}>🎓 Alunos Matriculados na Turma</h4>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                              <h4 style={{ color: 'var(--color-primary)', fontSize: 'var(--fs-md)', margin: 0 }}>🎓 Alunos & Controle de LMS (% Conclusão e Frequência)</h4>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.25rem 0.6rem', fontSize: 'var(--fs-xs)' }}
+                                onClick={() => {
+                                  const classStudents = mockDb.users.filter(u => (viewingClassDetails.student_ids || []).includes(u.id));
+                                  setPrintingReport({
+                                    title: `Ata Oficial de Frequência e Progresso - ${viewingClassDetails.name}`,
+                                    subtitle: `Curso: ${(mockDb.courses.find(c => c.id === viewingClassDetails.course_id) || {}).title || 'N/A'} | Total Matriculados: ${classStudents.length}`,
+                                    columns: ['Nome do Aluno', 'E-mail / CRM', 'Presenças Registradas', '% Frequência', '% Conclusão EAD', 'Situação'],
+                                    rows: classStudents.map(st => {
+                                      const attKey = `${viewingClassDetails.id}_${st.id}`;
+                                      const attCount = (mockDb.class_attendance?.[attKey] || []).length;
+                                      const courseModules = mockDb.modules?.[viewingClassDetails.course_id] || [];
+                                      let totL = 0, compL = 0;
+                                      courseModules.forEach(m => (m.lessons || []).forEach(l => { totL++; if (mockDb.lesson_progress?.[`${st.id}_${l.id}`]?.completed) compL++; }));
+                                      const progPct = totL > 0 ? Math.round((compL / totL) * 100) : 100;
+                                      return [
+                                        st.name,
+                                        st.crm || st.email,
+                                        `${attCount} encontros`,
+                                        `${attCount * 10}%`,
+                                        `${progPct}%`,
+                                        progPct >= 60 ? 'Aprovado' : 'Em Andamento'
+                                      ];
+                                    })
+                                  });
+                                }}
+                              >
+                                🖨️ Imprimir Ata da Turma
+                              </button>
+                            </div>
 
                             {/* Form de Adicionar Aluno com 1 Clique */}
                             <form
@@ -8520,26 +8866,131 @@ NEWFILEENCODING:NONE
                               </button>
                             </form>
 
-                            {/* Lista de Alunos Atuais */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '250px', overflowY: 'auto' }}>
+                            {/* Seletor de Data para Lançamento de Presença em Lote/Individual */}
+                            <div className="mb-3 p-2" style={{ backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <label className="form-label" style={{ margin: 0, fontSize: 'var(--fs-xs)' }}>📅 Data do Encontro:</label>
+                              <input
+                                type="date"
+                                className="form-input"
+                                value={selectedAttendanceDate}
+                                onChange={(e) => setSelectedAttendanceDate(e.target.value)}
+                                style={{ width: '150px', padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)' }}
+                              />
+                              <small className="text-muted" style={{ fontSize: 'var(--fs-xs)' }}>Clique em "+ Presença" no aluno para registrar este dia no histórico.</small>
+                            </div>
+
+                            {/* Lista de Alunos Atuais com % de Conclusão e Emissão de Certificado */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '350px', overflowY: 'auto' }}>
                               {mockDb.users
                                 .filter(u => (viewingClassDetails.student_ids || []).includes(u.id))
                                 .map(st => {
                                   const attendanceKey = `${viewingClassDetails.id}_${st.id}`;
-                                  const attendanceCount = (mockDb.class_attendance[attendanceKey] || []).length;
+                                  const attendanceList = mockDb.class_attendance?.[attendanceKey] || [];
+                                  const hasTodayAttendance = attendanceList.includes(selectedAttendanceDate);
+
+                                  // Cálculo de Progresso no EAD (% Conclusão)
+                                  const courseModules = mockDb.modules?.[viewingClassDetails.course_id] || [];
+                                  let totalLessons = 0;
+                                  let completedLessons = 0;
+                                  courseModules.forEach(m => (m.lessons || []).forEach(l => {
+                                    totalLessons++;
+                                    if (mockDb.lesson_progress?.[`${st.id}_${l.id}`]?.completed) {
+                                      completedLessons++;
+                                    }
+                                  }));
+                                  const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 100;
+                                  const targetCourse = mockDb.courses.find(c => c.id === viewingClassDetails.course_id) || {};
+
                                   return (
-                                    <div key={st.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: 'var(--fs-sm)' }}>
-                                      <div>
-                                        <strong>{st.name}</strong>
-                                        <div style={{ fontSize: 'var(--fs-xs)', color: '#64748b' }}>{st.email} | Presenças: {attendanceCount}</div>
+                                    <div key={st.id} style={{ padding: '0.75rem', backgroundColor: '#f1f5f9', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: 'var(--fs-sm)' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                        <div>
+                                          <strong>👨‍🎓 {st.name}</strong> <small className="text-muted">({st.email})</small>
+                                        </div>
+                                        <button
+                                          className="btn btn-danger"
+                                          style={{ padding: '0.15rem 0.4rem', fontSize: 'var(--fs-xs)' }}
+                                          onClick={() => handleRemoveStudentFromClass(viewingClassDetails.id, st.id)}
+                                        >
+                                          Remover Aluno
+                                        </button>
                                       </div>
-                                      <button
-                                        className="btn btn-danger"
-                                        style={{ padding: '0.2rem 0.5rem' }}
-                                        onClick={() => handleRemoveStudentFromClass(viewingClassDetails.id, st.id)}
-                                      >
-                                        Remover
-                                      </button>
+
+                                      {/* Barra de Progresso EAD (% Conclusão) */}
+                                      <div style={{ marginBottom: '0.5rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', marginBottom: '0.2rem' }}>
+                                          <span>📊 Progresso no Curso: <strong>{progressPct}% Concluído</strong> ({completedLessons}/{totalLessons || 1} aulas)</span>
+                                          <span style={{ color: progressPct >= 60 ? 'var(--color-success)' : 'var(--color-warning)', fontWeight: 'bold' }}>
+                                            {progressPct >= 60 ? '✓ Elegível' : 'Em Andamento'}
+                                          </span>
+                                        </div>
+                                        <div style={{ width: '100%', height: '6px', backgroundColor: '#cbd5e1', borderRadius: '3px', overflow: 'hidden' }}>
+                                          <div style={{ width: `${progressPct}%`, height: '100%', backgroundColor: progressPct >= 60 ? '#10b981' : '#3b82f6', transition: 'width 0.3s' }}></div>
+                                        </div>
+                                      </div>
+
+                                      {/* Presenças e Ações LMS */}
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', paddingTop: '0.4rem', borderTop: '1px dashed #cbd5e1' }}>
+                                        <div>
+                                          <span style={{ fontSize: 'var(--fs-xs)' }}>📅 Presenças Registradas: <strong>{attendanceList.length} encontros</strong></span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                          <button
+                                            type="button"
+                                            className={`btn ${hasTodayAttendance ? 'btn-success' : 'btn-secondary'}`}
+                                            style={{ padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)' }}
+                                            onClick={() => {
+                                              const updatedList = hasTodayAttendance
+                                                ? attendanceList.filter(d => d !== selectedAttendanceDate)
+                                                : [...attendanceList, selectedAttendanceDate];
+                                              setMockDb(prev => ({
+                                                ...prev,
+                                                class_attendance: {
+                                                  ...prev.class_attendance,
+                                                  [attendanceKey]: updatedList
+                                                }
+                                              }));
+                                              setSuccess(`Frequência de ${st.name} atualizada para a data ${selectedAttendanceDate}.`);
+                                            }}
+                                          >
+                                            {hasTodayAttendance ? '✓ Presente (Data)' : '＋ Marcar Presença'}
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            className="btn btn-primary"
+                                            style={{ padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)' }}
+                                            onClick={() => {
+                                              const code = `TOSB-2026-${st.id.slice(0, 4).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                                              const newCert = {
+                                                id: `cert-${Date.now()}`,
+                                                code,
+                                                student_id: st.id,
+                                                student_name: st.name,
+                                                student_registration: st.crm || st.registrationNumber || 'Estudante',
+                                                course_id: targetCourse.id || 'course-free',
+                                                course_title: targetCourse.title || 'Curso de Homeopatia',
+                                                workload_hours: targetCourse.workload_hours || 180,
+                                                class_id: viewingClassDetails.id,
+                                                class_name: viewingClassDetails.name,
+                                                issued_at: new Date().toISOString(),
+                                                status: 'ISSUED'
+                                              };
+
+                                              setMockDb(prev => ({
+                                                ...prev,
+                                                certificates: [newCert, ...(prev.certificates || [])]
+                                              }));
+
+                                              setPreviewingCertificate(newCert);
+                                              setSuccess(`Certificado emitido manualmente para ${st.name}!`);
+                                            }}
+                                          >
+                                            🎓 Emitir Certificado
+                                          </button>
+                                        </div>
+                                      </div>
                                     </div>
                                   );
                                 })}
@@ -8718,6 +9169,236 @@ NEWFILEENCODING:NONE
                           )}
                         </tbody>
                       </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* ABA DE GERENCIAMENTO E EDITOR DE CERTIFICADOS & TEMPLATES */}
+                {adminActiveTab === 'certificates' && (
+                  <div className="card">
+                    <div className="quiz-header mb-4">
+                      <h3>Gestão & Editor de Templates de Certificados</h3>
+                    </div>
+                    <p className="course-card-description mb-4">
+                      Personalize o layout visual do certificado oficial, adicione imagem de fundo do modelo, posicione os campos dinâmicos (Aluno, Curso, Data, Carga Horária) e emita relatórios ou vias impressas.
+                    </p>
+
+                    <div className="grid-2col" style={{ gap: '2rem', alignItems: 'start' }}>
+                      {/* COLUNA ESQUERDA: FORMULÁRIO EDITOR DE TEMPLATE */}
+                      <div className="card p-4" style={{ border: '1px solid var(--color-border)' }}>
+                        <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>⚙️ Personalização do Template</h4>
+
+                        {/* UPLOAD / URL DA IMAGEM DE FUNDO DO MODELO */}
+                        <div className="form-group mb-3">
+                          <label className="form-label">Imagem de Fundo do Modelo (Layout A4)</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                              className="form-input"
+                              value={certTemplate.bg_url || ''}
+                              onChange={(e) => setCertTemplate(prev => ({ ...prev, bg_url: e.target.value }))}
+                              placeholder="URL da imagem do modelo de certificado..."
+                            />
+                            <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0 }}>
+                              Upload
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => setCertTemplate(prev => ({ ...prev, bg_url: reader.result }));
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="form-group mb-3">
+                          <label className="form-label">Título Principal</label>
+                          <input
+                            className="form-input"
+                            value={certTemplate.title_text || ''}
+                            onChange={(e) => setCertTemplate(prev => ({ ...prev, title_text: e.target.value }))}
+                          />
+                        </div>
+
+                        <div className="form-group mb-3">
+                          <label className="form-label">Texto do Certificado (Placeholders: {"{NOME_ALUNO}"}, {"{NOME_CURSO}"}, {"{CARGA_HORARIA}"}, {"{REGISTRO}"})</label>
+                          <textarea
+                            className="form-input"
+                            rows="3"
+                            value={certTemplate.body_text || ''}
+                            onChange={(e) => setCertTemplate(prev => ({ ...prev, body_text: e.target.value }))}
+                          />
+                        </div>
+
+                        <div className="grid-2col mb-3">
+                          <div className="form-group">
+                            <label className="form-label">Nome do Diretor / Assinatura</label>
+                            <input
+                              className="form-input"
+                              value={certTemplate.director_name || ''}
+                              onChange={(e) => setCertTemplate(prev => ({ ...prev, director_name: e.target.value }))}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Cargo / Título</label>
+                            <input
+                              className="form-input"
+                              value={certTemplate.director_role || ''}
+                              onChange={(e) => setCertTemplate(prev => ({ ...prev, director_role: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        {/* AJUSTE DE POSICIONAMENTO VERTICAL (TOP %) */}
+                        <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>
+                          <label className="form-label" style={{ fontWeight: 'bold' }}>📐 Ajuste de Posições Verticais (% Top)</label>
+                          <div className="grid-2col" style={{ gap: '0.75rem', fontSize: 'var(--fs-xs)' }}>
+                            <div>
+                              <span>Título: <strong>{certTemplate.title_top}%</strong></span>
+                              <input type="range" min="10" max="40" value={certTemplate.title_top || 22} onChange={(e) => setCertTemplate(prev => ({ ...prev, title_top: parseInt(e.target.value) }))} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                              <span>Nome Aluno: <strong>{certTemplate.student_top}%</strong></span>
+                              <input type="range" min="30" max="60" value={certTemplate.student_top || 40} onChange={(e) => setCertTemplate(prev => ({ ...prev, student_top: parseInt(e.target.value) }))} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                              <span>Texto / Curso: <strong>{certTemplate.body_top}%</strong></span>
+                              <input type="range" min="45" max="75" value={certTemplate.body_top || 55} onChange={(e) => setCertTemplate(prev => ({ ...prev, body_top: parseInt(e.target.value) }))} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                              <span>Assinatura: <strong>{certTemplate.signatures_top}%</strong></span>
+                              <input type="range" min="70" max="95" value={certTemplate.signatures_top || 82} onChange={(e) => setCertTemplate(prev => ({ ...prev, signatures_top: parseInt(e.target.value) }))} style={{ width: '100%' }} />
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="btn btn-primary w-full"
+                          onClick={() => {
+                            localStorage.setItem('cert_template_config', JSON.stringify(certTemplate));
+                            setSuccess('Template do certificado gravado com sucesso!');
+                          }}
+                        >
+                          💾 Salvar Configurações do Template
+                        </button>
+                      </div>
+
+                      {/* COLUNA DIREITA: PREVIEW INTERATIVO DO CERTIFICADO */}
+                      <div>
+                        <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>👁️ Pré-visualização Interativa do Modelo</h4>
+
+                        <div style={{ position: 'relative', width: '100%', aspectRatio: '1.414', backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', border: '1px solid var(--color-border)' }}>
+                          <img
+                            src={certTemplate.bg_url}
+                            alt="Background Certificado"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+
+                          {/* CAMPO: TÍTULO */}
+                          <div style={{ position: 'absolute', top: `${certTemplate.title_top}%`, left: '5%', right: '5%', textAlign: 'center', color: certTemplate.font_color || '#1e293b', fontFamily: certTemplate.font_family }}>
+                            <h2 style={{ fontSize: '1.5rem', letterSpacing: '2px', textTransform: 'uppercase', margin: 0, color: 'var(--color-primary)' }}>{certTemplate.title_text}</h2>
+                          </div>
+
+                          {/* CAMPO: NOME DO ALUNO */}
+                          <div style={{ position: 'absolute', top: `${certTemplate.student_top}%`, left: '5%', right: '5%', textAlign: 'center' }}>
+                            <h3 style={{ fontSize: '1.6rem', fontFamily: 'Playfair Display, serif', fontStyle: 'italic', margin: 0, color: 'var(--color-primary)' }}>Dra. Ana Paula M. Santos</h3>
+                            <small style={{ color: '#64748b' }}>CRM-SP 98765</small>
+                          </div>
+
+                          {/* CAMPO: CORPO DE TEXTO */}
+                          <div style={{ position: 'absolute', top: `${certTemplate.body_top}%`, left: '8%', right: '8%', textAlign: 'center', fontSize: '0.85rem', lineHeight: '1.6', color: '#334155' }}>
+                            {(certTemplate.body_text || '')
+                              .replace('{NOME_ALUNO}', 'Dra. Ana Paula M. Santos')
+                              .replace('{REGISTRO}', 'CRM-SP 98765')
+                              .replace('{NOME_CURSO}', 'Pós-Graduação em Homeopatia Avançada')
+                              .replace('{CARGA_HORARIA}', '180')}
+                          </div>
+
+                          {/* CAMPO: DATA E ASSINATURA */}
+                          <div style={{ position: 'absolute', top: `${certTemplate.signatures_top}%`, left: '10%', right: '10%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.75rem' }}>
+                            <div style={{ textAlign: 'center', borderTop: '1px solid #94a3b8', paddingTop: '0.25rem', width: '220px' }}>
+                              <strong>{certTemplate.director_name}</strong>
+                              <div><small className="text-muted">{certTemplate.director_role}</small></div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                              <div>Curitiba, {new Date().toLocaleDateString('pt-BR')}</div>
+                              <small style={{ color: '#64748b', fontSize: '0.65rem' }}>Validação: <code>TOSB-2026-DEMO</code></small>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4" style={{ textAlign: 'center' }}>
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              const testCert = {
+                                id: 'cert-demo',
+                                code: 'TOSB-2026-DEMO',
+                                student_name: 'Dra. Ana Paula M. Santos',
+                                student_registration: 'CRM-SP 98765',
+                                course_title: 'Pós-Graduação em Homeopatia Avançada',
+                                workload_hours: 180,
+                                class_name: 'Turma Alfa 2026',
+                                issued_at: new Date().toISOString()
+                              };
+                              setPreviewingCertificate(testCert);
+                            }}
+                          >
+                            🖨️ Abrir Certificado de Demonstração para Impressão
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* HISTÓRICO DE CERTIFICADOS EMITIDOS */}
+                    <div className="mt-7">
+                      <h4 className="mb-3 font-serif-title">📜 Certificados Emitidos no LMS</h4>
+                      <div className="table-responsive">
+                        <table className="lms-table">
+                          <thead>
+                            <tr>
+                              <th>Código de Validação</th>
+                              <th>Aluno / Profissional</th>
+                              <th>Curso / Formação</th>
+                              <th>Turma</th>
+                              <th>Data Emissão</th>
+                              <th>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(mockDb.certificates || []).map(cert => (
+                              <tr key={cert.id}>
+                                <td><code>{cert.code}</code></td>
+                                <td><strong>{cert.student_name}</strong> <small className="text-muted">({cert.student_registration})</small></td>
+                                <td>{cert.course_title}</td>
+                                <td><span className="badge-paid">{cert.class_name || 'Geral'}</span></td>
+                                <td><small>{new Date(cert.issued_at).toLocaleDateString('pt-BR')}</small></td>
+                                <td>
+                                  <button
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.2rem 0.5rem', fontSize: 'var(--fs-xs)' }}
+                                    onClick={() => setPreviewingCertificate(cert)}
+                                  >
+                                    👁️ Visualizar / Imprimir
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {!(mockDb.certificates || []).length && (
+                              <tr>
+                                <td colSpan="6" className="text-center text-muted py-4">Nenhum certificado emitido até o momento.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -9136,6 +9817,119 @@ NEWFILEENCODING:NONE
           <span>&copy; {new Date().getFullYear()} The Other Song Brasil. Todos os direitos reservados.</span>
           <span>Plataforma Desenvolvida com Elevado Rigor Acadêmico.</span>
         </div>
+        {/* MODAL DE IMPRESSÃO / VISUALIZAÇÃO DE CERTIFICADO OFICIAL */}
+        {previewingCertificate && (
+          <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', width: '100%', maxWidth: '900px', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ color: '#ffffff', margin: 0 }}>📜 Certificado Oficial TOSB</h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => window.print()}
+                >
+                  🖨️ Imprimir / Baixar PDF (A4 Paisagem)
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setPreviewingCertificate(null)}
+                >
+                  ✕ Fechar
+                </button>
+              </div>
+            </div>
+
+            {/* CONTAINER CERTIFICADO COMPATÍVEL COM IMPRESSÃO */}
+            <div className="certificate-print-container" style={{ width: '100%', maxWidth: '900px', aspectRatio: '1.414', backgroundColor: '#ffffff', borderRadius: '8px', position: 'relative', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+              <img src={certTemplate.bg_url} alt="Capa Certificado" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
+              <div style={{ position: 'absolute', top: `${certTemplate.title_top}%`, left: '5%', right: '5%', textAlign: 'center', color: certTemplate.font_color }}>
+                <h1 style={{ fontSize: '2rem', letterSpacing: '3px', textTransform: 'uppercase', margin: 0, color: 'var(--color-primary)' }}>{certTemplate.title_text}</h1>
+              </div>
+
+              <div style={{ position: 'absolute', top: `${certTemplate.student_top}%`, left: '5%', right: '5%', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '2.2rem', fontFamily: 'Playfair Display, serif', fontStyle: 'italic', margin: 0, color: 'var(--color-primary)' }}>{previewingCertificate.student_name}</h2>
+                <small style={{ color: '#64748b', fontSize: '1rem' }}>Registro: {previewingCertificate.student_registration}</small>
+              </div>
+
+              <div style={{ position: 'absolute', top: `${certTemplate.body_top}%`, left: '8%', right: '8%', textAlign: 'center', fontSize: '1.05rem', lineHeight: '1.8', color: '#334155' }}>
+                {(certTemplate.body_text || '')
+                  .replace('{NOME_ALUNO}', previewingCertificate.student_name)
+                  .replace('{REGISTRO}', previewingCertificate.student_registration || 'Estudante')
+                  .replace('{NOME_CURSO}', previewingCertificate.course_title)
+                  .replace('{CARGA_HORARIA}', previewingCertificate.workload_hours || 180)}
+              </div>
+
+              <div style={{ position: 'absolute', top: `${certTemplate.signatures_top}%`, left: '10%', right: '10%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.9rem' }}>
+                <div style={{ textAlign: 'center', borderTop: '1px solid #94a3b8', paddingTop: '0.35rem', width: '260px' }}>
+                  <strong>{certTemplate.director_name}</strong>
+                  <div><small className="text-muted">{certTemplate.director_role}</small></div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div>Emitido em: {new Date(previewingCertificate.issued_at || Date.now()).toLocaleDateString('pt-BR')}</div>
+                  <small style={{ color: '#64748b', fontSize: '0.8rem' }}>Código Autenticidade: <code>{previewingCertificate.code}</code></small>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL DE IMPRESSÃO DE RELATÓRIO OFICIAL DO ADM */}
+        {printingReport && (
+          <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', width: '100%', maxWidth: '900px', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ color: '#ffffff', margin: 0 }}>🖨️ Visualização de Impressão de Relatório</h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="btn btn-primary" onClick={() => window.print()}>Confirmar Impressão / PDF</button>
+                <button className="btn btn-secondary" onClick={() => setPrintingReport(null)}>✕ Fechar</button>
+              </div>
+            </div>
+
+            <div className="card p-6" style={{ width: '100%', maxWidth: '900px', maxHeight: '85vh', overflowY: 'auto', backgroundColor: '#ffffff', color: '#000000' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-primary)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div>
+                  <h2 className="font-serif-title" style={{ margin: 0, color: 'var(--color-primary)' }}>🌿 The Other Song Brasil</h2>
+                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0', fontSize: 'var(--fs-sm)' }}>Escola Oficial do Método Sensação da Homeopatia no Brasil</p>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: 'var(--fs-xs)' }}>
+                  <div><strong>Data da Emissão:</strong> {new Date().toLocaleString('pt-BR')}</div>
+                  <div><strong>Emitido por:</strong> Administrador EAD</div>
+                </div>
+              </div>
+
+              <h3 className="mb-2" style={{ color: 'var(--color-primary)' }}>{printingReport.title}</h3>
+              <p className="text-muted mb-4" style={{ fontSize: 'var(--fs-sm)' }}>{printingReport.subtitle}</p>
+
+              <table className="lms-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9' }}>
+                    {printingReport.columns.map((col, idx) => (
+                      <th key={idx} style={{ padding: '0.6rem', border: '1px solid #cbd5e1', fontSize: 'var(--fs-sm)' }}>{col}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {printingReport.rows.map((row, rIdx) => (
+                    <tr key={rIdx} style={{ backgroundColor: rIdx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                      {row.map((cell, cIdx) => (
+                        <td key={cIdx} style={{ padding: '0.5rem 0.6rem', border: '1px solid #e2e8f0', fontSize: 'var(--fs-sm)' }}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  {printingReport.rows.length === 0 && (
+                    <tr>
+                      <td colSpan={printingReport.columns.length} style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b' }}>Nenhum registro retornado para os filtros aplicados.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: '#64748b' }}>
+                <div>Documento gerado automaticamente pelo LMS TOSB Brasil</div>
+                <div>Página 1 de 1</div>
+              </div>
+            </div>
+          </div>
+        )}
       </footer>
       {/* Botão Flutuante do WhatsApp */}
       <a

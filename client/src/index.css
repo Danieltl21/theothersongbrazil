@@ -3871,3 +3871,52 @@ table.syllabus-module-card tbody tr:last-child td {
 [class*="badge"], [class*="tag"] {
   font-family: var(--font-serif) !important;
 }
+
+/* STYLES PARA IMPRESSÃO OFICIAL E CERTIFICADOS (A4 LANDSCAPE & PORTRAIT) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+  
+  .tosb-header,
+  .tosb-footer,
+  .student-sidebar,
+  .btn,
+  .nav-dropdown,
+  .no-print,
+  button {
+    display: none !important;
+  }
+  
+  .student-panel-container {
+    display: block !important;
+  }
+  
+  .student-panel-content,
+  .card,
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .certificate-print-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    page-break-after: always;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+}
