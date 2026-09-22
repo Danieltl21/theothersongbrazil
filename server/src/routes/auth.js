@@ -398,6 +398,11 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     res.json({ message: 'Perfil atualizado com sucesso!' });
   } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+    res.status(500).json({ message: 'Erro ao atualizar dados do perfil.' });
+  }
+});
+
 // SOLICITAR REDEFINIÇÃO DE SENHA (ESQUECI A SENHA)
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
