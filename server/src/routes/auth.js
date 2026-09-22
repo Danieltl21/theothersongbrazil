@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 import pool from '../db/index.js';
 import { authenticateToken } from '../middlewares/auth.js';
 import { sendEmail } from '../utils/mailer.js';
@@ -80,27 +81,28 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'E-mail já cadastrado.' });
     }
 
-    // Criar hash da senha
+    // Criar hash da senha e ID único
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
+    const userId = uuidv4();
 
     // Inserir Usuário
-    const userInsert = await client.query(
+    await client.query(
       `INSERT INTO users (
-        name, email, password_hash, role, status, is_homeopath,
+        id, name, email, password_hash, role, status, is_homeopath,
         phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
         billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
         commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
         commercial_phone, terms_accepted, terms_accepted_at, general_terms_accepted, general_terms_accepted_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6,
-        $7, $8, $9, $10, $11, $12, $13, $14,
-        $15, $16, $17, $18, $19, $20, $21,
-        $22, $23, $24, $25, $26, $27, $28,
-        $29, $30, $31, $32, $33
-      ) RETURNING id`,
+        $1, $2, $3, $4, $5, $6, $7,
+        $8, $9, $10, $11, $12, $13, $14, $15,
+        $16, $17, $18, $19, $20, $21, $22,
+        $23, $24, $25, $26, $27, $28, $29,
+        $30, $31, $32, $33, $34
+      )`,
       [
-        name, email, passwordHash, 'STUDENT', 'ACTIVE', false, // por padrão começa desativado
+        userId, name, email, passwordHash, 'STUDENT', 'ACTIVE', false, // por padrão começa desativado
         phone, cpf, profession, isHealthProfession ? null : custom_profession,
         isHealthProfession ? council_type : null,
         isHealthProfession ? council_number : null,
@@ -121,14 +123,15 @@ router.post('/register', async (req, res) => {
         new Date()
       ]
     );
-    const userId = userInsert.rows[0].id;
 
     // Matricular o aluno automaticamente em um curso livre padrão para que ele já comece com acesso!
     const freeCourse = await client.query("SELECT id FROM courses WHERE type = 'FREE' LIMIT 1");
     if (freeCourse.rows.length > 0) {
+      const enrollmentId = uuidv4();
+      const expiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
       await client.query(
-        "INSERT INTO enrollments (student_id, course_id, expires_at, status) VALUES ($1, $2, NOW() + INTERVAL '180 days', 'ACTIVE')",
-        [userId, freeCourse.rows[0].id]
+        "INSERT INTO enrollments (id, student_id, course_id, expires_at, status) VALUES ($1, $2, $3, $4, 'ACTIVE')",
+        [enrollmentId, userId, freeCourse.rows[0].id, expiresAt]
       );
     }
 
