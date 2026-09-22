@@ -1158,7 +1158,6 @@ export default function App() {
         }
       ],
       temporary_unlocks: [],
-      orders: [],
       teacher_courses: [
         { id: 'tc-1', teacher_id: 'teacher-id', course_id: 'course-post', payment_type: 'hora_aula', payment_rate: 150.00 },
         { id: 'tc-2', teacher_id: 'teacher-id', course_id: 'course-free', payment_type: 'percentual', payment_rate: 15.00 },
