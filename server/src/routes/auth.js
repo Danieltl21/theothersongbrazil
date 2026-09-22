@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../db/index.js';
 import { authenticateToken } from '../middlewares/auth.js';
+import { sendEmail } from '../utils/mailer.js';
 
 const router = express.Router();
 
@@ -397,10 +398,122 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     res.json({ message: 'Perfil atualizado com sucesso!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao atualizar perfil.' });
+// SOLICITAR REDEFINIÇÃO DE SENHA (ESQUECI A SENHA)
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: 'E-mail é obrigatório.' });
+  }
+
+  try {
+    const userResult = await pool.query('SELECT id, name, email FROM users WHERE LOWER(email) = $1', [email.trim().toLowerCase()]);
+    if (userResult.rows.length === 0) {
+      return res.json({ message: 'Se o e-mail estiver cadastrado em nosso sistema, enviamos as instruções de redefinição para sua caixa de entrada.' });
+    }
+
+    const user = userResult.rows[0];
+    const token = 'RST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        token VARCHAR(255) NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await pool.query(
+      'INSERT INTO password_resets (email, token, expires_at) VALUES ($1, $2, $3)',
+      [user.email, token, expiresAt]
+    );
+
+    const clientOrigin = req.headers.origin || 'http://localhost:3000';
+    const resetLink = `${clientOrigin}/#redefinir-senha?token=${token}&email=${encodeURIComponent(user.email)}`;
+
+    // Disparar e-mail transacional via Resend
+    await sendEmail({
+      to: user.email,
+      subject: '🔑 Recuperação de Senha - The Other Song Brasil',
+      text: `Olá ${user.name},\n\nRecebemos uma solicitação para redefinir a senha da sua conta no portal EAD TOSB.\n\nCódigo do Token: ${token}\nLink Direto: ${resetLink}\n\nAtenciosamente,\nEquipe TOSB Brasil`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <h2 style="color: #1e293b; text-align: center;">🌿 The Other Song Brasil</h2>
+          <h3 style="color: #0f766e;">Recuperação de Senha de Acesso</h3>
+          <p>Olá <strong>${user.name}</strong>,</p>
+          <p>Recebemos uma solicitação para redefinir a senha da sua conta no portal de ensino EAD.</p>
+          <div style="background-color: #f1f5f9; padding: 15px; border-radius: 6px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 14px; color: #64748b; display: block; margin-bottom: 5px;">Seu Código do Token:</span>
+            <strong style="font-size: 24px; letter-spacing: 2px; color: #0f766e;">${token}</strong>
+          </div>
+          <div style="text-align: center; margin: 25px 0;">
+            <a href="${resetLink}" style="background-color: #0f766e; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Redefinir Senha Agora ➔</a>
+          </div>
+          <p style="font-size: 12px; color: #64748b;">Se você não solicitou a alteração de senha, pode desconsiderar esta mensagem com segurança.</p>
+        </div>
+      `
+    }).catch(err => console.error('[MAILER WARNING] Erro ao disparar e-mail:', err));
+
+    console.log(`[AUTH LOG] Solicitado reset de senha para ${user.email}. Token gerado: ${token}`);
+
+    res.json({
+      message: 'Se o e-mail estiver cadastrado em nosso sistema, enviamos as instruções e o código de verificação para sua caixa de entrada.'
+    });
+  } catch (error) {
+    console.error('Erro ao solicitar reset de senha:', error);
+    res.status(500).json({ message: 'Erro ao processar solicitação de senha.' });
   }
 });
+
+// CONFIRMAR E REDEFINIR A NOVA SENHA
+router.post('/reset-password', async (req, res) => {
+  const { email, token, newPassword } = req.body;
+
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ message: 'E-mail, token e nova senha são obrigatórios.' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'A nova senha deve ter no mínimo 6 caracteres.' });
+  }
+
+  try {
+    const resetResult = await pool.query(
+      `SELECT * FROM password_resets 
+       WHERE LOWER(email) = $1 AND token = $2 AND used = FALSE AND expires_at > NOW()
+       ORDER BY created_at DESC LIMIT 1`,
+      [email.trim().toLowerCase(), token.trim()]
+    );
+
+    if (resetResult.rows.length === 0) {
+      return res.status(400).json({ message: 'Código de token inválido, expirado ou já utilizado. Por favor, solicite um novo código.' });
+    }
+
+    const resetRecord = resetResult.rows[0];
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await pool.query(
+      'UPDATE users SET password_hash = $1 WHERE LOWER(email) = $2',
+      [passwordHash, email.trim().toLowerCase()]
+    );
+
+    await pool.query(
+      'UPDATE password_resets SET used = TRUE WHERE id = $1',
+      [resetRecord.id]
+    );
+
+    res.json({ message: 'Senha redefinida com sucesso! Você já pode realizar o login com sua nova senha.' });
+  } catch (error) {
+    console.error('Erro ao redefinir senha:', error);
+    res.status(500).json({ message: 'Erro ao salvar nova senha.' });
+  }
+});
+
+
 
 // Atualizar Usuário por ADM (Incluindo Dados Bancários e Moeda de Pagamento)
 router.put('/admin/users/:id', authenticateToken, async (req, res) => {

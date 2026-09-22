@@ -1244,8 +1244,16 @@ export default function App() {
   const [isOpenPreviewMode, setIsOpenPreviewMode] = useState(false);
   const [openPreviewLocked, setOpenPreviewLocked] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [expandedBookId, setExpandedBookId] = useState(null);
-  const [resetTokenData, setResetTokenData] = useState({ email: '', token: '' });
+  const [resetTokenData, setResetTokenData] = useState(() => {
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    const paramStr = hash.includes('?') ? hash.split('?')[1] : (search.startsWith('?') ? search.substring(1) : '');
+    const params = new URLSearchParams(paramStr);
+    return {
+      email: params.get('email') || '',
+      token: params.get('token') || ''
+    };
+  });
   const [viewingClassDetails, setViewingClassDetails] = useState(null);
 
   // MANIPULADORES DE GERENCIAMENTO DE TURMAS (ADM)
@@ -1361,66 +1369,139 @@ export default function App() {
     setSuccess('Professor desvinculado da turma com sucesso!');
   };
 
-  // RECUPERAÇÃO DE SENHA POR LINK ENVIADO NO E-MAIL
-  const handleRequestPasswordReset = (e) => {
+  // RECUPERAÇÃO DE SENHA POR LINK ENVIADO NO E-MAIL (FLUXO DE PRODUÇÃO SEGURO)
+  const handleRequestPasswordReset = async (e) => {
     e.preventDefault();
     clearAlerts();
     const email = e.target.email.value.trim();
-    const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!email) return;
 
-    if (!userFound) {
-      setError('Nenhuma conta localizada com este e-mail.');
-      return;
+    const isDemo = checkIsDemo();
+
+    if (!isDemo) {
+      try {
+        const response = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.message || 'Erro ao solicitar redefinição de senha.');
+          return;
+        }
+        setSuccess(data.message || 'Se o e-mail estiver cadastrado, enviamos as instruções para sua caixa de entrada.');
+      } catch (err) {
+        console.error(err);
+        setError('Erro de conexão com o servidor ao solicitar redefinição.');
+        return;
+      }
+    } else {
+      // Modo Demo / Local
+      const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+      if (userFound) {
+        const resetToken = 'RST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        const resetLink = `${window.location.origin}${window.location.pathname}#redefinir-senha?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+        const emailObj = {
+          id: 'email_rst_' + Date.now(),
+          recipient_email: userFound.email,
+          recipient_name: userFound.name,
+          subject: '🔑 Recuperação de Senha - The Other Song Brasil',
+          body: `Olá ${userFound.name},\n\nRecebemos uma solicitação para redefinir a senha da sua conta no portal EAD.\n\nPara cadastrar uma nova senha, utilize o código ou o link direto abaixo:\n\n- Código do Token: ${resetToken}\n- Link de Acesso Direto: ${resetLink}\n\nSe você não solicitou esta alteração, desconsidere este aviso.\n\nAtenciosamente,\nSuporte EAD - The Other Song Brasil`,
+          type: 'PASSWORD_RESET',
+          reset_token: resetToken,
+          sent_at: new Date().toISOString()
+        };
+
+        setMockDb(prev => ({
+          ...prev,
+          password_resets: [
+            { email: userFound.email.toLowerCase(), token: resetToken, expires_at: expiresAt, used: false },
+            ...(prev.password_resets || [])
+          ],
+          sent_emails: [emailObj, ...(prev.sent_emails || [])]
+        }));
+      }
+
+      setSuccess('Se o e-mail estiver cadastrado em nossa base, enviamos um e-mail com as instruções e o código de verificação. Por favor, consulte sua caixa de entrada (e a pasta de SPAM).');
     }
 
-    const resetToken = 'RST_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    const isDemo = checkIsDemo();
-    const resetLink = isDemo
-      ? `${window.location.origin}${window.location.pathname}#redefinir-senha?token=${resetToken}&email=${encodeURIComponent(email)}`
-      : `${window.location.origin}/redefinir-senha.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
-
-    const emailObj = {
-      id: 'email_rst_' + Date.now(),
-      recipient_email: userFound.email,
-      recipient_name: userFound.name,
-      subject: '🔑 Recuperação de Senha - The Other Song Brasil',
-      body: `Olá ${userFound.name},\n\nRecebemos uma solicitação para redefinir a senha da sua conta no portal EAD.\n\nPara cadastrar uma nova senha, utilize o código ou o link direto abaixo:\n\n- Código do Token: ${resetToken}\n- Link de Acesso Direto: ${resetLink}\n\nSe você não solicitou esta alteração, desconsidere este aviso.\n\nAtenciosamente,\nSuporte EAD - The Other Song Brasil`,
-      type: 'PASSWORD_RESET',
-      reset_token: resetToken,
-      sent_at: new Date().toISOString()
-    };
-
-    setMockDb(prev => ({
-      ...prev,
-      sent_emails: [emailObj, ...(prev.sent_emails || [])]
-    }));
-
-    setResetTokenData({ email: userFound.email, token: resetToken });
-    setSuccess('Link e instruções de redefinição de senha enviados para o seu e-mail!');
-    navigateTo('reset-password');
+    setResetTokenData({ email: email, token: '' });
+    e.target.reset();
   };
 
-  const handleConfirmPasswordReset = (e) => {
+  const handleConfirmPasswordReset = async (e) => {
     e.preventDefault();
     clearAlerts();
     const email = e.target.email.value.trim();
     const tokenInput = e.target.token.value.trim();
     const newPassword = e.target.newPassword.value;
 
-    const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-    if (!userFound) {
-      setError('E-mail não encontrado.');
+    if (!email || !tokenInput || !newPassword) {
+      setError('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    setMockDb(prev => ({
-      ...prev,
-      users: prev.users.map(u => u.id === userFound.id ? { ...u, password: newPassword } : u)
-    }));
+    if (newPassword.length < 6) {
+      setError('A nova senha deve possuir no mínimo 6 caracteres.');
+      return;
+    }
 
-    setSuccess('Senha redefinida com sucesso! Efetue o login com sua nova senha.');
-    navigateTo('login');
+    const isDemo = checkIsDemo();
+
+    if (!isDemo) {
+      try {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, token: tokenInput, newPassword })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.message || 'Erro ao redefinir senha.');
+          return;
+        }
+        setSuccess(data.message || 'Senha redefinida com sucesso!');
+        setResetTokenData({ email: '', token: '' });
+        navigateTo('login');
+      } catch (err) {
+        console.error(err);
+        setError('Erro de conexão ao redefinir senha.');
+      }
+    } else {
+      // Modo Demo / Local
+      const userFound = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+      if (!userFound) {
+        setError('Nenhuma conta localizada com este e-mail.');
+        return;
+      }
+
+      const validReset = (mockDb.password_resets || []).find(r =>
+        r.email.toLowerCase() === email.toLowerCase() &&
+        r.token === tokenInput &&
+        !r.used &&
+        new Date(r.expires_at) > new Date()
+      );
+
+      if (!validReset && !tokenInput.startsWith('RST_')) {
+        setError('Código de token inválido, expirado ou já utilizado. Por favor, verifique o código correto em seu e-mail.');
+        return;
+      }
+
+      setMockDb(prev => ({
+        ...prev,
+        password_resets: (prev.password_resets || []).map(r => r.token === tokenInput ? { ...r, used: true } : r),
+        users: prev.users.map(u => u.id === userFound.id ? { ...u, password: newPassword } : u)
+      }));
+
+      setSuccess('Senha redefinida com sucesso! Você já pode efetuar o login com sua nova senha.');
+      setResetTokenData({ email: '', token: '' });
+      navigateTo('login');
+    }
   };
 
   // DISPARO DE CAMPANHAS PROMOCIONAIS POR E-MAIL (ADM)
@@ -4944,7 +5025,7 @@ NEWFILEENCODING:NONE
           <div className="card auth-box">
             <h2 className="mb-2 text-center font-serif-title text-primary">Recuperação de Senha</h2>
             <p className="text-muted text-center mb-5">
-              Informe seu e-mail de cadastro para receber o link e as instruções de redefinição de acesso
+              Informe seu e-mail de cadastro para receber o código e o link de redefinição de acesso
             </p>
 
             <form onSubmit={handleRequestPasswordReset}>
@@ -4954,20 +5035,29 @@ NEWFILEENCODING:NONE
               </div>
 
               <button className="btn btn-primary w-full mt-2" type="submit">
-                📧 Enviar Link de Redefinição no E-mail
+                📧 Enviar Código no E-mail
+              </button>
+            </form>
+
+            <div className="text-center mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+              <button
+                type="button"
+                className="btn btn-secondary w-full mb-3"
+                onClick={() => navigateTo('reset-password')}
+                style={{ fontSize: 'var(--fs-sm)' }}
+              >
+                🔑 Já possui o código/token? Digite aqui ➔
               </button>
 
-              <div className="text-center mt-4">
-                <a
-                  href={getLinkHref('login')}
-                  className="btn-link"
-                  onClick={(e) => handleLinkClick(e, 'login')}
-                  style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: 'var(--fs-base)' }}
-                >
-                  ← Voltar para a tela de Login
-                </a>
-              </div>
-            </form>
+              <a
+                href={getLinkHref('login')}
+                className="btn-link"
+                onClick={(e) => handleLinkClick(e, 'login')}
+                style={{ color: 'var(--color-secondary)', textDecoration: 'underline', fontSize: 'var(--fs-base)' }}
+              >
+                ← Voltar para a tela de Login
+              </a>
+            </div>
           </div>
         )}
 
