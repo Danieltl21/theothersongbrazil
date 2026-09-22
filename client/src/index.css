@@ -2,7 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oranienbaum&display=swap');
 
 :root {
-  /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
+  /* --- V2 Variables Promoted to Global --- */
+
+  --gradient-brand: linear-gradient(135deg, var(--tosb-green-800) 0%, var(--tosb-green-900) 100%);
+  --gradient-placeholder: linear-gradient(135deg, var(--tosb-cream-300) 0%, var(--tosb-muted) 100%);
   --tosb-green-950: #07180F;
   --tosb-green-900: #0B2418;
   --tosb-green-800: #123523;
@@ -21,19 +24,70 @@
   --tosb-muted: #625E54;
   --tosb-white: #FFFFFF;
 
-  /* Mapeamento de Variáveis Globais (Usando Apenas Cores da Tabela) */
-  --gradient-brand: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-sidebar-bg) 100%);
-  --gradient-placeholder: linear-gradient(135deg, #B3B6A8 0%, #82A591 100%);
-  --color-primary: #1C5F20;
-  --color-primary-light: #39733C;
-  --color-secondary: #0B2B18;
-  --color-accent: #D3702C;
-  --color-sidebar-bg: #26402B;
-  --color-bg-base: #F1EDE6;
-  --color-bg-card: #FFFFFF;
-  --color-text-main: #383838;
-  --color-text-muted: #383838;
-  --color-border: #B3B6A8;
+  --color-bg-page: var(--tosb-cream-100);
+  --color-bg-surface: var(--tosb-cream-50);
+  --color-bg-brand: var(--tosb-green-950);
+  --color-bg-brand-soft: var(--tosb-green-900);
+  --color-text-primary: var(--tosb-ink);
+  --color-text-secondary: var(--tosb-muted);
+  --color-text-inverse: var(--tosb-cream-50);
+  --color-accent: var(--tosb-gold-600);
+  --color-accent-strong: var(--tosb-gold-700);
+  --color-border: rgba(154, 106, 24, 0.30);
+  --color-focus: var(--tosb-gold-500);
+
+  --color-primary: var(--tosb-green-900);
+  --color-primary-light: var(--tosb-cream-200);
+  --color-secondary: var(--tosb-green-950);
+  --color-sidebar-bg: var(--tosb-green-900);
+  --color-bg-base: var(--tosb-cream-100);
+  --color-bg-card: var(--tosb-cream-50);
+  --color-text-main: var(--tosb-ink);
+  --color-text-muted: var(--tosb-muted);
+
+  --font-display: "Oswald";
+  --font-ui: "Montserrat";
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-ui);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 22px;
+
+  --shadow-sm: 0 4px 12px rgba(7, 24, 15, 0.10);
+  --shadow-md: 0 10px 28px rgba(7, 24, 15, 0.14);
+  --shadow-lg: 0 16px 36px rgba(7, 24, 15, 0.20);
+  --shadow-brand: 0 8px 20px rgba(7, 24, 15, 0.28);
+  --shadow-gold: 0 0 0 1px rgba(182, 138, 53, .35), 0 8px 18px rgba(154, 106, 24, .16);
+
+  --gradient-brand: linear-gradient(135deg, #07180F 0%, #0B2418 58%, #123523 100%);
+  --gradient-gold-line: linear-gradient(90deg, transparent 0%, #B68A35 24%, #E8CC8D 50%, #B68A35 76%, transparent 100%);
+  --gradient-cream: linear-gradient(180deg, #FFFDF8 0%, #FAF2E6 100%);
+
+  /* -------------------------------------- */
+
+  /* Tokens Oficiais TOSB - Paleta Exclusiva da Tabela */
+  --tosb-green-950: #07180F;
+  --tosb-green-900: #0B2418;
+  --tosb-green-800: #123523;
+  --tosb-green-700: #214B33;
+
+  --tosb-gold-700: #9A6A18;
+  --tosb-gold-600: #B68A35;
+  --tosb-gold-500: #D0A54E;
+  --tosb-gold-300: #E8CC8D;
+
+  --tosb-cream-50: #FFFDF8;
+  --tosb-cream-100: #FAF2E6;
+  --tosb-cream-200: #F3EADA;
+  --tosb-cream-300: #DDD2BD;
+  --tosb-ink: #121913;
+  --tosb-muted: #625E54;
+  --tosb-white: #FFFFFF;
 
   /* Mensagens de Sucesso, Erro e Aviso (Exceções autorizadas pelo usuário) */
   --color-success: #166534;
@@ -81,7 +135,6 @@
   }
 }
 
-
 /* Reset básico */
 * {
   margin: 0;
@@ -99,7 +152,6 @@ body {
   color: var(--color-text-main);
   font-size: var(--fs-md);
   font-weight: 500;
-  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -113,62 +165,41 @@ h4 {
 }
 
 /* Regras de Tipografia base para temas v2 e v3 (TOSB) */
-.theme-tosb-v2 h1,
-.theme-tosb-v2 h2,
-.theme-tosb-v2 h3,
-.theme-tosb-v2 .section-title,
-.theme-tosb-v2 .hero-title {
+h1,
+h2,
+h3,
+.section-title,
+.hero-title {
   font-family: var(--font-display);
   color: var(--tosb-green-950);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.theme-tosb-v2 h4,
-.theme-tosb-v2 h5,
-.theme-tosb-v2 h6 {
+h4,
+h5,
+h6 {
   font-family: var(--font-ui);
   color: var(--tosb-green-900);
   font-weight: 600;
 }
 
-.theme-tosb-v2 p,
-.theme-tosb-v2 span,
-.theme-tosb-v2 div,
-.theme-tosb-v2 li {
+p,
+span,
+div,
+li {
   font-family: var(--font-ui);
 }
 
-.theme-tosb-v3 p,
-.theme-tosb-v3 span:not(.logo-title):not(.layout-badge),
-.theme-tosb-v3 li {
-  font-family: 'Oranienbaum', serif !important;
+font-family: 'Oranienbaum',
+serif !important;
 }
 
-.theme-tosb-v3 .nav-link,
-.theme-tosb-v3 .btn,
-.theme-tosb-v3 h1,
-.theme-tosb-v3 h2,
-.theme-tosb-v3 h3,
-.theme-tosb-v3 h4,
-.theme-tosb-v3 h5,
-.theme-tosb-v3 h6,
-.theme-tosb-v3 .badge-paid,
-.theme-tosb-v3 .badge-pending,
-.theme-tosb-v3 .badge-overdue {
-  font-family: var(--font-display) !important;
-  letter-spacing: 0.05em;
+font-family: var(--font-display) !important;
+letter-spacing: 0.05em;
 }
 
-.theme-tosb-v3 h1,
-.theme-tosb-v3 h2,
-.theme-tosb-v3 h3,
-.theme-tosb-v3 h4,
-.theme-tosb-v3 h5,
-.theme-tosb-v3 h6,
-.theme-tosb-v3 .form-label,
-.theme-tosb-v3 label {
-  color: #795738;
+color: #795738;
 }
 
 /* Layout Geral */
@@ -194,7 +225,7 @@ h4 {
 }
 
 .tosb-header .btn-secondary,
-.tosb-header .layout-switcher-pill,
+
 .tosb-header .btn-primary,
 .tosb-header .btn {
   background-color: transparent !important;
@@ -203,13 +234,7 @@ h4 {
   color: white !important;
 }
 
-.tosb-header .btn-secondary:hover,
-.tosb-header .layout-switcher-pill:hover,
-.tosb-header .btn:hover {
-  background-color: var(--color-primary-light) !important;
-  border-color: transparent !important;
-  color: white !important;
-}
+
 
 .logo-container {
   display: flex;
@@ -256,6 +281,7 @@ h4 {
   color: white;
   background-color: transparent;
   border: none;
+  border-bottom: 2px solid transparent;
   font-family: var(--font-menu);
   font-weight: 500;
   font-size: var(--fs-md);
@@ -314,7 +340,7 @@ h4 {
 }
 
 /* Design 2 (Guia TOSB) */
-.theme-tosb-v2 .btn-secondary {
+.btn-secondary {
   background-color: white;
   color: var(--tosb-green-950);
   border-radius: var(--radius-md);
@@ -323,23 +349,20 @@ h4 {
   transition: all 220ms ease;
 }
 
-.theme-tosb-v2 .btn-secondary:hover {
+.btn-secondary:hover {
   background-color: var(--tosb-cream-200);
   color: var(--tosb-green-900);
 }
 
 /* Design 3 (Novo) */
-.theme-tosb-v3 .btn-secondary,
-.theme-tosb-v3 .layout-switcher-pill {
-  background-color: #FFFFFF !important;
-  border: 2px solid #9BB19B !important;
-  color: #91AD61 !important;
+
+background-color: #FFFFFF !important;
+border: 2px solid #9BB19B !important;
+color: #91AD61 !important;
 }
 
-.theme-tosb-v3 .btn-secondary:hover,
-.theme-tosb-v3 .layout-switcher-pill:hover {
-  background-color: #9BB19B !important;
-  color: #394D25 !important;
+background-color: #9BB19B !important;
+color: #394D25 !important;
 }
 
 /* ========================================================== */
@@ -585,7 +608,7 @@ h4 {
 }
 
 /* Responsividade simples */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .nav-links {
     width: 100%;
     justify-content: center;
@@ -1288,9 +1311,9 @@ h4 {
   background-color: var(--color-primary);
   padding: 0.5rem 0.75rem;
   border-radius: 24px;
-  border: 1px solid var(--color-secondary);
+  border: 2px solid var(--color-secondary);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  z-index: 1000;
+  z-index: 200;
   white-space: nowrap;
 }
 
@@ -1418,28 +1441,28 @@ body.high-contrast .nav-link.active {
   text-align: left;
   background: transparent;
   border: none;
-  padding: 0.8rem 1rem;
+  padding: 0.45rem 0.75rem;
   font-family: var(--font-menu);
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
   font-weight: 500;
   letter-spacing: 0.05em;
   color: white;
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .student-sidebar-item button:hover {
-  background-color: var(--color-primary-light);
-  color: white;
+  background-color: var(--tosb-green-800);
+  color: var(--tosb-gold-300);
 }
 
 .student-sidebar-item.active button {
-  background-color: var(--color-primary-light);
-  color: white;
+  background-color: var(--tosb-green-800);
+  color: var(--tosb-gold-300);
 }
 
 .student-panel-content {
@@ -1527,27 +1550,25 @@ body.high-contrast .nav-link.active {
 }
 
 /* Design 2 (Guia TOSB) */
-.theme-tosb-v2 .hero-section {
+.hero-section {
   border-radius: 22px;
   box-shadow: 0 12px 32px rgba(7, 24, 15, 0.15);
   border-bottom: 4px solid var(--tosb-gold-500);
 }
 
-.theme-tosb-v2 .hero-section .hero-subtitle {
+.hero-section .hero-subtitle {
   color: var(--tosb-cream-200);
 }
 
 /* Design 3 (Novo) */
-.theme-tosb-v3 .hero-section {
-  border-radius: var(--border-radius-lg);
-  box-shadow: none;
-  border-bottom: 5px solid #91AD61;
+border-radius: var(--border-radius-lg);
+box-shadow: none;
+border-bottom: 5px solid #91AD61;
 }
 
-.theme-tosb-v3 .hero-section h1,
-.theme-tosb-v3 .hero-section .hero-title {
-  font-family: 'Oranienbaum', serif !important;
-  color: #FFFFFF !important;
+font-family: 'Oranienbaum',
+serif !important;
+color: #FFFFFF !important;
 }
 
 /* ====================================================== */
@@ -2335,7 +2356,7 @@ table.syllabus-module-card tbody tr:last-child td {
    MEDIA QUERIES PARA DISPOSITIVOS MÓVEIS (CELULARES)
    ========================================================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
   /* Header e Menu hamburger */
   .hamburger-btn {
@@ -2502,7 +2523,7 @@ table.syllabus-module-card tbody tr:last-child td {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .desktop-only-block {
     display: none !important;
   }
@@ -2688,127 +2709,7 @@ table.syllabus-module-card tbody tr:last-child td {
 
 .badge-modality-hibrido {
   background-color: #f3e8ff;
-  color: #6b21a8;
-}
-
-/* Badges de Homeopatas */
-.badge-homeopath-reg {
-  display: inline-block;
-  padding: 0.25rem 0.6rem;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  border-radius: 4px;
-  background-color: var(--color-bg-base);
-  color: var(--color-accent);
-}
-
-.badge-homeopath-rqe {
-  display: inline-block;
-  padding: 0.25rem 0.6rem;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  border-radius: 4px;
-  background-color: var(--color-bg-base);
-  color: var(--color-accent);
-}
-
-/* Trava de Prévia do Vídeo (20%) */
-.video-player-container {
-  position: relative;
-  width: 100%;
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-}
-
-.video-locked-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 20;
-  padding: 1.5rem;
-  text-align: center;
-  color: #ffffff;
-}
-
-.locked-card {
-  max-width: 420px;
-  background-color: var(--color-bg-card);
-  color: var(--color-text-main);
-  padding: 2rem;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.locked-card h3 {
-  font-family: var(--font-serif);
-  color: var(--color-primary);
-  margin-top: 0.5rem;
-}
-
-.locked-card p {
-  font-size: var(--fs-base);
-  color: var(--color-text-muted);
-}
-
-
-
-
-/* Finance Module Specific Styles */
-.finance-sub-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.finance-sub-tabs .btn {
-  border-radius: 20px;
-  padding: 0.4rem 1rem;
-  font-size: var(--fs-base);
-}
-
-.finance-kpi-grid {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.finance-kpi-grid .admin-stat-card {
-  padding: 1.25rem;
-}
-
-.finance-kpi-grid .stat-title {
-  font-size: var(--fs-sm);
-  color: var(--color-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: bold;
-}
-
-.finance-kpi-grid .stat-value {
-  font-size: var(--fs-2xl);
-  font-weight: 800;
-}
-
-/* ==========================================================================
-   TOSB - GUIA TÉCNICO DE IDENTIDADE VISUAL DIGITAL v1.0 (DESIGN 2)
-   Especificação completa para Design System, Cores, Tipografia e Componentes
-   ========================================================================== */
-
-.theme-tosb-v2 {
-  /* Design Tokens de Cores Oficiais */
-  --gradient-brand: linear-gradient(135deg, var(--tosb-green-800) 0%, var(--tosb-green-900) 100%);
-  --gradient-placeholder: linear-gradient(135deg, var(--tosb-cream-300) 0%, var(--tosb-muted) 100%);
+  color: # --gradient-placeholder: linear-gradient(135deg, var(--tosb-cream-300) 0%, var(--tosb-muted) 100%);
   --tosb-green-950: #07180F;
   --tosb-green-900: #0B2418;
   --tosb-green-800: #123523;
@@ -2881,27 +2782,16 @@ table.syllabus-module-card tbody tr:last-child td {
   font-family: var(--font-ui);
 }
 
-
 /* Cabeçalho Institucional - Design 2 TOSB */
-.theme-tosb-v2 .tosb-header {
+.tosb-header {
   background: var(--color-primary);
   border-bottom: 2px solid var(--tosb-gold-600);
   box-shadow: var(--shadow-brand);
   padding: 0.5rem 2rem 0.5rem 0rem;
 }
 
-.theme-tosb-v2 .tosb-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--gradient-gold-line);
-  opacity: 0.75;
-}
 
-.theme-tosb-v2 .logo-title {
+.logo-title {
   font-family: var(--font-display);
   font-size: var(--fs-2xl);
   font-weight: 700;
@@ -2909,7 +2799,7 @@ table.syllabus-module-card tbody tr:last-child td {
   letter-spacing: 0.06em;
 }
 
-.theme-tosb-v2 .logo-subtitle {
+.logo-subtitle {
   font-family: var(--font-ui);
   font-size: var(--fs-xs);
   color: var(--tosb-cream-200);
@@ -2917,59 +2807,49 @@ table.syllabus-module-card tbody tr:last-child td {
   opacity: 0.9;
 }
 
-.theme-tosb-v2 .nav-link,
-.theme-tosb-v2 .nav-dropdown-content .dropdown-item,
-.theme-tosb-v2 .tosb-header .btn,
-.theme-tosb-v2 .tosb-header .btn-primary,
-.theme-tosb-v2 .tosb-header .btn-secondary,
-.theme-tosb-v2 .tosb-header .layout-switcher-pill {
-  font-family: var(--font-menu) !important;
-  font-size: var(--fs-md) !important;
+.nav-link,
+.nav-dropdown-content .dropdown-item,
+.tosb-header .btn,
+.tosb-header .btn-primary,
+.tosb-header .btn-secondary,
+.tosb-header .tosb-header .btn span,
+font-family: var(--font-menu) !important;
 }
 
-.theme-tosb-v2 .tosb-header .btn span,
-.theme-tosb-v2 .tosb-header .layout-switcher-pill span {
-  font-family: var(--font-menu) !important;
+.tosb-header .btn:hover,
+.tosb-header .btn-acc:hover,
+.tosb-header .tosb-header .btn:hover span:not(.badge-paid):not(.cart-count),
+color: var(--tosb-gold-300) !important;
 }
 
-.theme-tosb-v2 .tosb-header .btn:hover,
-.theme-tosb-v2 .tosb-header .btn-acc:hover,
-.theme-tosb-v2 .tosb-header .layout-switcher-pill:hover {
-  background-color: var(--tosb-green-800) !important;
-  color: var(--tosb-gold-300) !important;
-}
-
-.theme-tosb-v2 .tosb-header .btn:hover span:not(.badge-paid):not(.cart-count),
-.theme-tosb-v2 .tosb-header .layout-switcher-pill:hover span {
-  color: var(--tosb-gold-300) !important;
-}
-
-.theme-tosb-v2 .nav-link {
+.nav-link {
   color: var(--tosb-cream-100);
+  border: none;
+  border-bottom: 2px solid transparent;
   font-weight: 500;
   border-radius: var(--radius-sm);
   transition: all var(--duration-normal, 220ms) ease;
 }
 
-.theme-tosb-v2 .nav-link:hover,
-.theme-tosb-v2 .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--tosb-gold-300);
   background-color: var(--tosb-green-800);
   border-bottom: 2px solid var(--tosb-gold-500);
 }
 
-.theme-tosb-v2 .nav-dropdown-content {
+.nav-dropdown-content {
   background-color: var(--tosb-green-800) !important;
   border-color: var(--tosb-gold-600);
 }
 
-.theme-tosb-v2 .nav-dropdown-content .dropdown-item:hover {
+.nav-dropdown-content .dropdown-item:hover {
   color: var(--tosb-gold-300) !important;
   background-color: var(--color-primary) !important;
 }
 
 /* Botões do Sistema - TOSB v2 */
-.theme-tosb-v2 .btn-primary {
+.btn-primary {
   background: var(--tosb-green-900);
   color: var(--tosb-cream-50);
   border-radius: var(--radius-md);
@@ -2979,7 +2859,7 @@ table.syllabus-module-card tbody tr:last-child td {
   transition: background-color 220ms ease, box-shadow 220ms ease, transform 160ms ease;
 }
 
-.theme-tosb-v2 .btn-primary:hover {
+.btn-primary:hover {
   background: var(--tosb-green-800);
   color: var(--tosb-cream-50);
   box-shadow: var(--shadow-gold);
@@ -2988,7 +2868,7 @@ table.syllabus-module-card tbody tr:last-child td {
 
 /* .btn-secondary transferido para o bloco unificado */
 
-.theme-tosb-v2 .btn-accent {
+.btn-accent {
   background: var(--tosb-gold-600);
   color: var(--tosb-green-950);
   border: 1px solid var(--tosb-gold-300);
@@ -2997,17 +2877,17 @@ table.syllabus-module-card tbody tr:last-child td {
   font-weight: 500;
 }
 
-.theme-tosb-v2 .btn-accent:hover {
+.btn-accent:hover {
   background: var(--tosb-gold-500);
   box-shadow: var(--shadow-gold);
 }
 
 /* Cards e Superfícies Elevadas - TOSB v2 */
-.theme-tosb-v2 .card,
-.theme-tosb-v2 .dashboard-card,
-.theme-tosb-v2 .course-card,
-.theme-tosb-v2 .book-card,
-.theme-tosb-v2 .stat-card {
+.card,
+.dashboard-card,
+.course-card,
+.book-card,
+.stat-card {
   background-color: var(--tosb-cream-50);
   border: 1px solid rgba(182, 138, 53, 0.30);
   border-radius: var(--radius-lg);
@@ -3015,25 +2895,25 @@ table.syllabus-module-card tbody tr:last-child td {
   transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
-.theme-tosb-v2 .card-hover:hover,
-.theme-tosb-v2 .course-card:hover,
-.theme-tosb-v2 .book-card:hover {
+.card-hover:hover,
+.course-card:hover,
+.book-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-gold);
   border-color: var(--tosb-gold-600);
 }
 
 /* Menu Lateral / Painel do Aluno - TOSB v2 */
-.theme-tosb-v2 .student-sidebar,
-.theme-tosb-v2 .sidebar {
+.student-sidebar,
+.sidebar {
   background: var(--color-sidebar-bg);
   border-right: 1px solid rgba(182, 138, 53, 0.35);
   color: var(--tosb-cream-100);
   border-radius: var(--radius-lg);
 }
 
-.theme-tosb-v2 .sidebar-nav-item,
-.theme-tosb-v2 .nav-item {
+.sidebar-nav-item,
+.nav-item {
   color: var(--tosb-cream-200);
   font-family: var(--font-ui);
   font-size: var(--fs-base);
@@ -3043,23 +2923,23 @@ table.syllabus-module-card tbody tr:last-child td {
   min-height: 48px;
 }
 
-.theme-tosb-v2 .sidebar-nav-item.active,
-.theme-tosb-v2 .nav-item.active {
+.sidebar-nav-item.active,
+.nav-item.active {
   background: var(--tosb-green-800);
   color: var(--tosb-cream-50);
   border-left: 3px solid var(--tosb-gold-500);
   box-shadow: 0 4px 14px rgba(7, 24, 15, 0.3);
 }
 
-.theme-tosb-v2 .sidebar-nav-item:hover {
+.sidebar-nav-item:hover {
   background: rgba(18, 53, 35, 0.7);
   color: var(--tosb-gold-300);
 }
 
 /* Formulários e Inputs - TOSB v2 */
-.theme-tosb-v2 .form-input,
-.theme-tosb-v2 select.form-input,
-.theme-tosb-v2 textarea.form-input {
+.form-input,
+select.form-input,
+textarea.form-input {
   background-color: var(--tosb-cream-50);
   border: 1px solid var(--tosb-cream-300);
   border-radius: var(--radius-sm);
@@ -3068,14 +2948,14 @@ table.syllabus-module-card tbody tr:last-child td {
   min-height: 44px;
 }
 
-.theme-tosb-v2 .form-input:focus {
+.form-input:focus {
   border-color: var(--tosb-gold-500);
   outline: 2px solid var(--tosb-gold-500);
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(208, 165, 78, 0.18);
 }
 
-.theme-tosb-v2 .form-label {
+.form-label {
   font-family: var(--font-ui);
   font-weight: 600;
   font-size: var(--fs-sm);
@@ -3083,8 +2963,7 @@ table.syllabus-module-card tbody tr:last-child td {
 }
 
 /* Badges e Destaques - TOSB v2 */
-.theme-tosb-v2 .badge-paid,
-.theme-tosb-v2 .badge-active {
+.badge-active {
   background-color: var(--tosb-green-900);
   color: var(--tosb-cream-50);
   border: 1px solid var(--tosb-gold-600);
@@ -3092,15 +2971,8 @@ table.syllabus-module-card tbody tr:last-child td {
   font-family: var(--font-ui);
 }
 
-.theme-tosb-v2 .badge-pending {
-  background-color: var(--tosb-cream-200);
-  color: var(--tosb-gold-700);
-  border: 1px solid var(--tosb-gold-500);
-  border-radius: var(--radius-pill);
-}
-
 /* Rodapé Institucional - TOSB v2 */
-.theme-tosb-v2 .tosb-footer {
+.tosb-footer {
   background: var(--tosb-green-950);
   border-top: 2px solid var(--tosb-gold-600);
   color: var(--tosb-cream-200);
@@ -3108,7 +2980,7 @@ table.syllabus-module-card tbody tr:last-child td {
   overflow: hidden;
 }
 
-.theme-tosb-v2 .tosb-footer::before {
+.tosb-footer::before {
   content: '';
   position: absolute;
   top: 0;
@@ -3118,7 +2990,7 @@ table.syllabus-module-card tbody tr:last-child td {
   background: var(--gradient-gold-line);
 }
 
-.theme-tosb-v2 .footer-section h4 {
+.footer-section h4 {
   font-family: var(--font-display);
   color: var(--tosb-gold-300);
   font-size: var(--fs-lg);
@@ -3126,68 +2998,35 @@ table.syllabus-module-card tbody tr:last-child td {
   padding-bottom: 0.5rem;
 }
 
-.theme-tosb-v2 .footer-link {
+.footer-link {
   color: var(--tosb-cream-200);
   font-family: var(--font-ui);
 }
 
-.theme-tosb-v2 .footer-link:hover {
+.footer-link:hover {
   color: var(--tosb-gold-300);
 }
 
-.theme-tosb-v2 .footer-bottom {
+.footer-bottom {
   border-top: 1px solid rgba(232, 204, 141, 0.2);
   color: var(--tosb-cream-300);
   font-size: var(--fs-sm);
 }
 
 /* Componente do Seletor de Layout (Design Switcher) */
-.layout-switcher-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(7, 24, 15, 0.85);
-  border: 1px solid var(--tosb-gold-500);
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  color: var(--tosb-gold-300);
-  font-family: var(--font-ui);
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.layout-switcher-pill:hover {
-  background: var(--tosb-green-900);
-  color: #FFFFFF;
-  border-color: var(--tosb-gold-300);
-  box-shadow: 0 0 12px rgba(208, 165, 78, 0.35);
-  transform: translateY(-1px);
-}
-
-.layout-badge {
-  background: white;
-  color: var(--tosb-green-950);
-  padding: 0.15rem 0.45rem;
-  border-radius: 6px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 
 /* ==========================================================================
    ESTILOS ESPECÍFICOS REPLICANDO A CAPA DO PDF DA TOSB (PAGE 1)
    ========================================================================== */
 
-.theme-tosb-v2 .dashboard-header {
+.dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.theme-tosb-v2 .dashboard-header h1 {
+.dashboard-header h1 {
   font-family: var(--font-display);
   font-size: var(--fs-4xl);
   font-weight: 700;
@@ -3195,14 +3034,14 @@ table.syllabus-module-card tbody tr:last-child td {
   margin-bottom: 0.25rem;
 }
 
-.theme-tosb-v2 .student-panel-container {
+.student-panel-container {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 2rem;
   align-items: start;
 }
 
-.theme-tosb-v2 .student-sidebar {
+.student-sidebar {
   border: 1px solid rgba(182, 138, 53, 0.45);
   border-radius: 22px;
   padding: 1rem;
@@ -3212,32 +3051,33 @@ table.syllabus-module-card tbody tr:last-child td {
   min-height: 480px;
 }
 
-.theme-tosb-v2 .student-sidebar-menu {
+.student-sidebar-menu {
   list-style: none;
   gap: 0.6rem;
   position: relative;
   z-index: 2;
 }
 
-.theme-tosb-v2 .student-sidebar-item button {
+.student-sidebar-item button {
   width: 100%;
   text-align: left;
   background: transparent;
-  border: 1px solid transparent;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
   color: #FAF2E6 !important;
-  font-family: var(--font-display);
-  font-size: var(--fs-md);
+  font-family: var(--font-menu);
+  font-size: var(--fs-sm);
   font-weight: 500;
-  border-radius: 12px;
+  border-radius: var(--border-radius-sm);
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.5rem;
   cursor: pointer;
   transition: all 200ms ease;
-  padding: 0.85rem 1.1rem;
+  padding: 0.45rem 0.75rem;
 }
 
-.theme-tosb-v2 .student-sidebar-item button span {
+.student-sidebar-item button span {
   width: auto !important;
   border: none !important;
   background: transparent !important;
@@ -3246,33 +3086,36 @@ table.syllabus-module-card tbody tr:last-child td {
   margin: 0 !important;
 }
 
-.theme-tosb-v2 .student-sidebar-item.active button {
-  background: #0B2418 !important;
-  border: 1px solid #B68A35 !important;
-  color: #FFFDF8 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 0 8px rgba(182, 138, 53, 0.2);
-}
-
-.theme-tosb-v2 .student-sidebar-item button:hover {
-  color: #E8CC8D !important;
-  border-color: rgba(182, 138, 53, 0.35);
-}
-
-.theme-tosb-v2 .nav-dropdown>button.nav-link {
-  background: transparent !important;
-  color: #FAF2E6 !important;
-  border: none !important;
+.student-sidebar-item.active button {
+  background: var(--tosb-green-800) !important;
+  border-bottom: 2px solid var(--tosb-gold-500) !important;
+  color: var(--tosb-gold-300) !important;
   box-shadow: none !important;
 }
 
-.theme-tosb-v2 .nav-dropdown>button.nav-link:hover,
-.theme-tosb-v2 .nav-dropdown>button.nav-link.active {
+.student-sidebar-item button:hover {
+  background: var(--tosb-green-800) !important;
+  color: var(--tosb-gold-300) !important;
+  border-bottom: 2px solid var(--tosb-gold-500) !important;
+}
+
+.nav-dropdown>button.nav-link {
+  background: transparent !important;
+  color: #FAF2E6 !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.nav-dropdown>button.nav-link:hover,
+.nav-dropdown>button.nav-link.active {
   color: #E8CC8D !important;
   background: rgba(18, 53, 35, 0.7) !important;
+  border-bottom: 2px solid var(--tosb-gold-500) !important;
 }
 
 /* Painel de Conteúdo e Cards de Ação Exatos do PDF */
-.theme-tosb-v2 .tosb-panel-card {
+.tosb-panel-card {
   background: var(--tosb-cream-50);
   border: 1px solid rgba(182, 138, 53, 0.35);
   border-radius: 22px;
@@ -3295,22 +3138,20 @@ table.syllabus-module-card tbody tr:last-child td {
   margin-top: 2rem;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 900px) {
   .tosb-action-cards-grid {
     grid-template-columns: 1fr;
   }
 
-  .theme-tosb-v2 .student-panel-container,
-  .theme-tosb-v3 .student-panel-container {
-    display: flex;
-    flex-direction: column;
-  }
+  .student-panel-container,
+  display: flex;
+  flex-direction: column;
+}
 
-  .theme-tosb-v2 .student-sidebar,
-  .theme-tosb-v3 .student-sidebar {
-    width: 100%;
-    min-height: auto;
-  }
+.student-sidebar,
+width: 100%;
+min-height: auto;
+}
 }
 
 .tosb-action-card {
@@ -3409,7 +3250,7 @@ table.syllabus-module-card tbody tr:last-child td {
 }
 
 /* Faixa de Rodapé da Capa (Page 1) */
-.theme-tosb-v2 .tosb-page1-footer-bar {
+.tosb-page1-footer-bar {
   background: var(--tosb-green-950);
   border-top: 2px solid var(--tosb-gold-600);
   padding: 1.5rem 2.5rem;
@@ -3422,7 +3263,7 @@ table.syllabus-module-card tbody tr:last-child td {
   overflow: hidden;
 }
 
-.theme-tosb-v2 .tosb-quote-text {
+.tosb-quote-text {
   font-family: var(--font-display);
   font-style: italic;
   color: var(--tosb-gold-300);
@@ -3430,7 +3271,7 @@ table.syllabus-module-card tbody tr:last-child td {
   margin-bottom: 0.25rem;
 }
 
-.theme-tosb-v2 .tosb-subquote-text {
+.tosb-subquote-text {
   font-family: var(--font-ui);
   color: var(--tosb-cream-200);
   font-size: var(--fs-sm);
@@ -3450,7 +3291,7 @@ table.syllabus-module-card tbody tr:last-child td {
   display: flex !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .desktop-only-nav {
     display: none !important;
   }
@@ -3479,307 +3320,227 @@ table.syllabus-module-card tbody tr:last-child td {
 
   /* ================== Mobile Menu Colors (Match Desktop) ================== */
 
-  /* Design 1 (Base Classic) */
-  .mobile-only-nav {
-    background-color: var(--color-primary) !important;
-    border-bottom: 2px solid var(--color-secondary) !important;
-  }
-
-  .mobile-only-nav .nav-link {
-    background-color: transparent !important;
-    color: #FFFFFF !important;
-    border: none !important;
-  }
-
-  .mobile-only-nav .nav-link:hover,
-  .mobile-only-nav .nav-link.active {
-    background-color: var(--color-primary-light) !important;
-    color: #FFFFFF !important;
-  }
-
-  .mobile-only-nav .dropdown-item {
-    color: #FFFFFF !important;
-    background-color: transparent !important;
-  }
-
-  .mobile-only-nav .dropdown-item:hover {
-    background-color: var(--color-primary-light) !important;
-    color: #FFFFFF !important;
-  }
-
-  .mobile-only-nav .mobile-only-block {
-    border-top-color: rgba(255, 255, 255, 0.2) !important;
-  }
-
   /* Design 2 (theme-tosb-v2) */
-  .theme-tosb-v2 .mobile-only-nav {
+  .mobile-only-nav {
     background: var(--gradient-brand) !important;
     border-bottom: 2px solid var(--tosb-gold-600) !important;
     padding: 1.25rem 1.5rem !important;
   }
 
-  .theme-tosb-v2 .mobile-only-nav .nav-link {
+  .mobile-only-nav .nav-link {
     background-color: transparent !important;
     color: var(--tosb-cream-100) !important;
     border: none !important;
+    border-bottom: 2px solid transparent !important;
   }
 
-  .theme-tosb-v2 .mobile-only-nav .nav-link:hover,
-  .theme-tosb-v2 .mobile-only-nav .nav-link.active {
+  .mobile-only-nav .nav-link:hover,
+  .mobile-only-nav .nav-link.active {
     background-color: var(--tosb-green-800) !important;
     color: var(--tosb-gold-300) !important;
     border-bottom: 2px solid var(--tosb-gold-500) !important;
   }
 
-  .theme-tosb-v2 .mobile-only-nav .dropdown-item {
+  .mobile-only-nav .dropdown-item {
     color: var(--tosb-cream-100) !important;
     background-color: transparent !important;
   }
 
-  .theme-tosb-v2 .mobile-only-nav .dropdown-item:hover {
+  .mobile-only-nav .dropdown-item:hover {
     color: var(--tosb-gold-300) !important;
     background-color: var(--tosb-green-800) !important;
   }
 
-  .theme-tosb-v2 .mobile-only-nav .mobile-only-block {
+  .mobile-only-nav .mobile-only-block {
     border-top-color: rgba(232, 204, 141, 0.3) !important;
   }
 
   /* Design 3 (theme-tosb-v3) */
-  .theme-tosb-v3 .mobile-only-nav {
-    background: #394D25 !important;
-    border-bottom: 2px solid #91AD61 !important;
-    padding: 1.25rem 1.5rem !important;
-  }
+  background: #394D25 !important;
+  border-bottom: 2px solid #91AD61 !important;
+  padding: 1.25rem 1.5rem !important;
+}
 
-  .theme-tosb-v3 .mobile-only-nav .nav-link {
-    background-color: transparent !important;
-    color: #FFFFFF !important;
-    border: none !important;
-  }
+background-color: transparent !important;
+color: #FFFFFF !important;
+border: none !important;
+}
 
-  .theme-tosb-v3 .mobile-only-nav .nav-link:hover,
-  .theme-tosb-v3 .mobile-only-nav .nav-link.active {
-    background-color: rgba(0, 0, 0, 0.2) !important;
-    color: #9BB19B !important;
-  }
+background-color: rgba(0, 0, 0, 0.2) !important;
+color: #9BB19B !important;
+}
 
-  .theme-tosb-v3 .mobile-only-nav .dropdown-item {
-    color: #FFFFFF !important;
-    background-color: transparent !important;
-  }
+color: #FFFFFF !important;
+background-color: transparent !important;
+}
 
-  .theme-tosb-v3 .mobile-only-nav .dropdown-item:hover {
-    color: #9BB19B !important;
-    background-color: rgba(0, 0, 0, 0.2) !important;
-  }
+color: #9BB19B !important;
+background-color: rgba(0, 0, 0, 0.2) !important;
+}
 
-  .theme-tosb-v3 .mobile-only-nav .mobile-only-block {
-    border-top-color: rgba(145, 173, 97, 0.3) !important;
-  }
+border-top-color: rgba(145, 173, 97, 0.3) !important;
+}
 
 }
 
-.theme-tosb-v3 {
-  /* Design Tokens - Design 3 */
-  --gradient-brand: linear-gradient(135deg, var(--tosb-green-light) 0%, var(--tosb-green-dark) 100%);
-  --gradient-placeholder: linear-gradient(135deg, #F3EADA 0%, #9D8978 100%);
-  --tosb-green-dark: #394D25;
-  --tosb-green-light: #91AD61;
-  --tosb-green-pale: #9BB19B;
-  --tosb-brown-dark: #503A25;
-  --tosb-brown-light: #9D8978;
+/* Design Tokens - Design 3 */
+--gradient-brand: linear-gradient(135deg, var(--tosb-green-light) 0%, var(--tosb-green-dark) 100%);
+--gradient-placeholder: linear-gradient(135deg, #F3EADA 0%, #9D8978 100%);
+--tosb-green-dark: #394D25;
+--tosb-green-light: #91AD61;
+--tosb-green-pale: #9BB19B;
+--tosb-brown-dark: #503A25;
+--tosb-brown-light: #9D8978;
 
-  --tosb-bg-light: #F6F4F0;
-  --tosb-white: #FFFFFF;
+--tosb-bg-light: #F6F4F0;
+--tosb-white: #FFFFFF;
 
-  /* Mapeamento para Legado e V2 */
-  --color-bg-base: var(--tosb-bg-light);
-  --color-bg-card: var(--tosb-white);
-  --color-bg-brand: var(--tosb-brown-dark);
-  --color-primary: var(--tosb-green-dark);
-  --color-primary-light: var(--tosb-green-pale);
-  --color-secondary: var(--tosb-brown-dark);
-  --color-sidebar-bg: var(--color-primary);
-  --color-accent: var(--tosb-green-light);
-  --color-text-main: var(--tosb-ink);
-  --color-text-muted: var(--tosb-muted);
-  --color-border: rgba(121, 87, 56, 0.3);
+/* Mapeamento para Legado e V2 */
+--color-bg-base: var(--tosb-bg-light);
+--color-bg-card: var(--tosb-white);
+--color-bg-brand: var(--tosb-brown-dark);
+--color-primary: var(--tosb-green-dark);
+--color-primary-light: var(--tosb-green-pale);
+--color-secondary: var(--tosb-brown-dark);
+--color-sidebar-bg: var(--color-primary);
+--color-accent: var(--tosb-green-light);
+--color-text-main: var(--tosb-ink);
+--color-text-muted: var(--tosb-muted);
+--color-border: rgba(121, 87, 56, 0.3);
 
-  /* Fontes - Design 3 */
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-ui: 'Bebas Neue', sans-serif;
-  --font-serif: 'Oranienbaum', serif;
-  --font-sans: 'Oranienbaum', serif;
-  font-family: 'Oranienbaum', serif !important;
+/* Fontes - Design 3 */
+--font-display: 'Bebas Neue',
+sans-serif;
+--font-ui: 'Bebas Neue',
+sans-serif;
+--font-serif: 'Oranienbaum',
+serif;
+--font-sans: 'Oranienbaum',
+serif;
+font-family: 'Oranienbaum',
+serif !important;
 }
 
-
-.theme-tosb-v3 .nav-link {
-  font-size: var(--fs-md) !important;
+font-size: var(--fs-md) !important;
 }
 
-.theme-tosb-v3 .btn {
-  font-size: var(--fs-lg) !important;
-  text-transform: uppercase;
+font-size: var(--fs-lg) !important;
+text-transform: uppercase;
 }
 
 /* Menu: fundo sólido #394D25, borda inferior #91AD61 */
-.theme-tosb-v3 .tosb-header {
-  background: #394D25 !important;
-  border-bottom: 2px solid #91AD61 !important;
+background: #394D25 !important;
+border-bottom: 2px solid #91AD61 !important;
 }
 
-.theme-tosb-v3 .tosb-header .btn {
-  font-size: var(--fs-md) !important;
+font-size: var(--fs-md) !important;
 }
 
-.theme-tosb-v3 .nav-link {
-  color: #FFFFFF !important;
+color: #FFFFFF !important;
 }
 
-.theme-tosb-v3 .nav-dropdown>button.nav-link {
-  color: #FFFFFF !important;
-  background-color: transparent !important;
-  border-bottom: none !important;
+color: #FFFFFF !important;
+background-color: transparent !important;
+border-bottom: none !important;
 }
 
-.theme-tosb-v3 .nav-link:hover,
-.theme-tosb-v3 .nav-link.active,
-.theme-tosb-v3 .nav-dropdown>button.nav-link:hover,
-.theme-tosb-v3 .nav-dropdown>button.nav-link.active {
-  color: #9BB19B !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
-  border-bottom: none !important;
+color: #9BB19B !important;
+background-color: rgba(0, 0, 0, 0.2) !important;
+border-bottom: none !important;
 }
 
-.theme-tosb-v3 .logo-title,
-.theme-tosb-v3 .tosb-header span {
-  color: #FFFFFF !important;
+color: #FFFFFF !important;
 }
 
 /* Correção: Botões no cabeçalho sem fundo e com texto branco (como os links) */
-.theme-tosb-v3 .tosb-header .btn,
-.theme-tosb-v3 .tosb-header .btn-acc,
-.theme-tosb-v3 .tosb-header .layout-switcher-pill {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: #FFFFFF !important;
-  font-family: var(--font-display) !important;
+
+background: transparent !important;
+border: none !important;
+box-shadow: none !important;
+color: #FFFFFF !important;
+font-family: var(--font-display) !important;
 }
 
-.theme-tosb-v3 .tosb-header .layout-badge {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  color: inherit !important;
-  font-family: var(--font-display) !important;
+background: transparent !important;
+border: none !important;
+padding: 0 !important;
+color: inherit !important;
+font-family: var(--font-display) !important;
 }
 
 /* Força herança de fonte e cor para spans dentro dos botões (ex: E-mails e Layout) */
-.theme-tosb-v3 .tosb-header .btn span:not(.badge-paid):not(.cart-count),
-.theme-tosb-v3 .tosb-header .layout-switcher-pill span {
-  font-family: var(--font-display) !important;
-  color: inherit !important;
+
+font-family: var(--font-display) !important;
+color: inherit !important;
 }
 
 /* Ajustes da letra Aa (Acessibilidade) */
-.theme-tosb-v3 .tosb-header .btn-acc {
-  font-family: 'Oranienbaum', serif !important;
+font-family: 'Oranienbaum',
+serif !important;
 }
 
-.theme-tosb-v3 .tosb-header .btn:hover,
-.theme-tosb-v3 .tosb-header .btn-acc:hover,
-.theme-tosb-v3 .tosb-header .layout-switcher-pill:hover {
-  background: rgba(0, 0, 0, 0.2) !important;
-  color: #9BB19B !important;
+background: rgba(0, 0, 0, 0.2) !important;
+color: #9BB19B !important;
 }
 
-.theme-tosb-v3 .tosb-header .btn:hover span:not(.badge-paid):not(.cart-count),
-.theme-tosb-v3 .tosb-header .layout-switcher-pill:hover span {
-  color: #9BB19B !important;
+color: #9BB19B !important;
 }
 
 /* Botões paleta escura */
-.theme-tosb-v3 .btn-primary {
-  background-color: #91AD61 !important;
-  border: 2px solid #91AD61 !important;
-  color: #394D25 !important;
+background-color: #91AD61 !important;
+border: 2px solid #91AD61 !important;
+color: #394D25 !important;
 }
 
-.theme-tosb-v3 .btn-primary:hover {
-  background-color: #394D25 !important;
-  border-color: #394D25 !important;
-  color: #FFFFFF !important;
+background-color: #394D25 !important;
+border-color: #394D25 !important;
+color: #FFFFFF !important;
 }
 
 /* .btn-secondary transferido para o bloco unificado */
 
 /* Fundo cards claros e escuros */
-.theme-tosb-v3 .card,
-.theme-tosb-v3 .dashboard-card,
-.theme-tosb-v3 .course-card {
-  background-color: #FFFFFF !important;
-  border: 1px solid #9BB19B !important;
+
+background-color: #FFFFFF !important;
+border: 1px solid #9BB19B !important;
 }
 
 /* Cor da data e local nos cards premium (Seminário) */
-.theme-tosb-v3 .premium-card-footer div {
-  color: #503A25 !important;
+color: #503A25 !important;
 }
 
-.theme-tosb-v3 .stat-card {
-  background-color: #795738 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #394D25 !important;
+background-color: #795738 !important;
+color: #FFFFFF !important;
+border: 1px solid #394D25 !important;
 }
 
-.theme-tosb-v3 .stat-card h3,
-.theme-tosb-v3 .stat-card p,
-.theme-tosb-v3 .stat-card div {
-  color: #FFFFFF !important;
+color: #FFFFFF !important;
 }
 
 /* Painel do Usuário (Dropdown) e Popover de Acessibilidade */
-.theme-tosb-v3 .nav-dropdown-content,
-.theme-tosb-v3 .accessibility-popover {
-  background-color: #394D25 !important;
-  border: 1px solid #91AD61 !important;
+
+background-color: #394D25 !important;
+border: 1px solid #91AD61 !important;
 }
 
-.theme-tosb-v3 .nav-dropdown-content a,
-.theme-tosb-v3 .nav-dropdown-content button,
-.theme-tosb-v3 .nav-dropdown-content .dropdown-item,
-.theme-tosb-v3 .accessibility-popover .btn-acc {
-  color: #FFFFFF !important;
-  background-color: transparent !important;
+color: #FFFFFF !important;
+background-color: transparent !important;
 }
 
-.theme-tosb-v3 .nav-dropdown-content a:hover,
-.theme-tosb-v3 .nav-dropdown-content button:hover,
-.theme-tosb-v3 .nav-dropdown-content .dropdown-item:hover,
-.theme-tosb-v3 .accessibility-popover .btn-acc:hover {
-  color: #9BB19B !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
+color: #9BB19B !important;
+background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Rodapé */
-.theme-tosb-v3 .tosb-footer {
-  background-color: #394D25 !important;
-  border-top: 2px solid #91AD61 !important;
-  color: #FFFFFF !important;
+background-color: #394D25 !important;
+border-top: 2px solid #91AD61 !important;
+color: #FFFFFF !important;
 }
 
-.theme-tosb-v3 .tosb-footer h4,
-.theme-tosb-v3 .tosb-footer p,
-.theme-tosb-v3 .tosb-footer span,
-.theme-tosb-v3 .tosb-footer a {
-  color: #FFFFFF !important;
+color: #FFFFFF !important;
 }
 
-.theme-tosb-v3 .tosb-footer a:hover {
-  color: #9BB19B !important;
+color: #9BB19B !important;
 }
 
 /* Normalização de letter-spacing do menu e botões (Bebas Neue) em todos os designs */
@@ -3788,7 +3549,7 @@ table.syllabus-module-card tbody tr:last-child td {
 .btn-primary,
 .btn-secondary,
 .btn-accent,
-.layout-switcher-pill,
+
 .dropdown-item,
 .nav-dropdown-content .dropdown-item {
   letter-spacing: 0.05em !important;
@@ -3796,13 +3557,11 @@ table.syllabus-module-card tbody tr:last-child td {
 }
 
 /* Normalização de padding dos botões do Design 3 no cabeçalho */
-.theme-tosb-v3 .tosb-header .btn,
-.theme-tosb-v3 .tosb-header .layout-switcher-pill {
-  padding: 0.6rem 1.25rem !important;
+
+padding: 0.6rem 1.25rem !important;
 }
 
-.theme-tosb-v3 .nav-link {
-  padding: 0.5rem 0.75rem !important;
+padding: 0.5rem 0.75rem !important;
 }
 
 /* Formatação de botões em tabelas de painéis (User Request) */
@@ -3868,7 +3627,8 @@ table.syllabus-module-card tbody tr:last-child td {
 }
 
 /* Aplicar fonte serifada em todos os badges e tags */
-[class*="badge"], [class*="tag"] {
+[class*="badge"],
+[class*="tag"] {
   font-family: var(--font-serif) !important;
 }
 
@@ -3879,7 +3639,7 @@ table.syllabus-module-card tbody tr:last-child td {
     color: #000000 !important;
     font-size: 12pt !important;
   }
-  
+
   .tosb-header,
   .tosb-footer,
   .student-sidebar,
@@ -3889,11 +3649,11 @@ table.syllabus-module-card tbody tr:last-child td {
   button {
     display: none !important;
   }
-  
+
   .student-panel-container {
     display: block !important;
   }
-  
+
   .student-panel-content,
   .card,
   .print-area {
@@ -3919,4 +3679,60 @@ table.syllabus-module-card tbody tr:last-child td {
     size: A4 landscape;
     margin: 0;
   }
+}
+
+/* Tipografia Serifada para Controles de Acessibilidade */
+.accessibility-popover-wrapper>button.nav-link,
+.accessibility-popover .btn-acc {
+  font-family: var(--font-serif) !important;
+}
+
+/* Formatação do Popover de Acessibilidade (Igual ao Dropdown) */
+.accessibility-popover {
+  background-color: var(--tosb-green-800) !important;
+  border: 2px solid var(--tosb-gold-600) !important;
+  border-top: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Remover a setinha (opcional, mas dropdowns não tem) */
+.accessibility-popover::after {
+  display: none !important;
+}
+
+/* Botões do Popover */
+.accessibility-popover .btn-acc {
+  border-radius: var(--border-radius-sm) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  background-color: transparent !important;
+  height: auto !important;
+  width: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  color: var(--tosb-cream-100) !important;
+}
+
+.accessibility-popover .btn-acc:hover {
+  background-color: var(--color-primary) !important;
+  color: var(--tosb-gold-300) !important;
+  border-bottom: 2px solid var(--tosb-gold-500) !important;
+}
+
+/* Correção final de alinhamento vertical do Popover */
+.accessibility-popover {
+  /* Compensa exatamente o padding inferior (0.5rem) e a borda inferior (2px) do cabeçalho */
+  top: calc(100% + 0.5rem + 2px) !important;
+}
+
+/* Correção definitiva baseada no nav-dropdown */
+.accessibility-popover-wrapper {
+  position: static !important;
+}
+
+.accessibility-popover {
+  top: 100% !important;
+  margin-top: 0 !important;
+  left: auto !important;
+  right: auto !important;
 }

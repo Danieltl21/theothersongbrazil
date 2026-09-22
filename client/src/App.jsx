@@ -818,16 +818,6 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
 
 export default function App() {
   // Controle do Layout / Identidade Visual (Design 1 - Clássico vs Design 2 - Novo Guia TOSB)
-  const [layoutMode, setLayoutMode] = useState(() => {
-    return localStorage.getItem('tosb_layout_mode') || 'tosb-v2';
-  });
-
-  const toggleLayoutMode = () => {
-    const nextMode = layoutMode === 'tosb-v2' ? 'tosb-v3' : layoutMode === 'tosb-v3' ? 'classic' : 'tosb-v2';
-    setLayoutMode(nextMode);
-    localStorage.setItem('tosb_layout_mode', nextMode);
-  };
-
   const [headerOffset, setHeaderOffset] = useState(0);
 
   useEffect(() => {
@@ -4271,17 +4261,16 @@ NEWFILEENCODING:NONE
   }
 
   return (
-    <div className={`app-container ${layoutMode !== 'classic' ? 'theme-tosb-v2 theme-' + layoutMode : ''}`}>
+    <div className="app-container">
       {/* Cabeçalho */}
       <header className="tosb-header" style={{ top: `${headerOffset}px` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <a href={getLinkHref('home')} className="logo-container" onClick={(e) => handleLinkClick(e, 'home')}>
-            {layoutMode === 'tosb-v3' || layoutMode === 'classic' ? (
-              <svg version="1.1" width="160" height="70" viewBox="0 0 1200 456" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" style={{ enableBackground: 'new 0 0 1157.06 481.06' }} xmlSpace="preserve">
-                <style>{`.st0{fill:#FFFFFF;}`}</style>
+            <svg version="1.1" width="160" height="70" viewBox="0 0 1200 456" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" style={{ enableBackground: 'new 0 0 1157.06 481.06' }} xmlSpace="preserve">
+              <style>{`.st0{fill:#FFFFFF;}`}</style>
+              <g>
                 <g>
-                  <g>
-                    <path className="st0" d="M978.06,144.64c-13.69-12.19-12.44-36.83-6.72-49.77c5.72-12.94,15.93-14.43,22.89-34.09
+                  <path className="st0" d="M978.06,144.64c-13.69-12.19-12.44-36.83-6.72-49.77c5.72-12.94,15.93-14.43,22.89-34.09
                       c6.01-16.95-1.86-40.37-4.14-46.5c-7.7-1.13-15.57-1.73-23.58-1.73c-8.19,0-16.24,0.62-24.11,1.8
                       c-2.31,6.24-10.1,29.53-4.11,46.42c6.97,19.66,17.17,21.15,22.89,34.09c5.72,12.94,6.97,37.58-6.72,49.77
                       c-13.69,12.19-1.99,31.11-1.99,31.11s12.37,19.66,12.78,32.6l0.66,2.89l1.36-2.89c0.41-12.94,12.78-32.6,12.78-32.6
@@ -4375,58 +4364,58 @@ NEWFILEENCODING:NONE
                       S930.34,74.21,924.11,78.94z M935.46,76.29c2.99,12.1,10.33,9.63,13.5,19.8c3.17,10.17-4.53,20.68-4.53,20.68
                       c-2.36-12.15-7.37-8.57-11.46-20.42C928.88,84.5,935.46,76.29,935.46,76.29z M930.71,114.96c8.14,5.19,7.94,16.03,3.7,22.98
                       c0,0-21.52-17.39-11.05-37.01C923.36,100.92,922.57,109.77,930.71,114.96z"></path>
-                  </g>
-                  <g>
-                    <path className="st0" d="M78.75,406.67v6.5H58.28v54.29h-6.76v-54.29H31.05v-6.5H78.75z"></path>
-                    <path className="st0" d="M133.21,433.99v-27.32h6.76v60.79h-6.76V440.4H95.44v27.06h-6.76v-60.79h6.76v27.32H133.21z"></path>
-                    <path className="st0" d="M194.61,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H194.61z"></path>
-                    <path className="st0" d="M257.24,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
+                </g>
+                <g>
+                  <path className="st0" d="M78.75,406.67v6.5H58.28v54.29h-6.76v-54.29H31.05v-6.5H78.75z"></path>
+                  <path className="st0" d="M133.21,433.99v-27.32h6.76v60.79h-6.76V440.4H95.44v27.06h-6.76v-60.79h6.76v27.32H133.21z"></path>
+                  <path className="st0" d="M194.61,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H194.61z"></path>
+                  <path className="st0" d="M257.24,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
                       c-18.71,0-30.92-12.74-30.92-31.45v-0.09c0-18.62,12.21-31.36,30.92-31.36H257.24z M257.24,462.19c14.49,0,24.07-10.1,24.07-25.12
                       v-0.09c0-14.93-9.58-25.04-24.07-25.04h-0.09c-14.58,0-24.16,10.1-24.16,25.04v0.09c0,15.02,9.58,25.12,24.16,25.12H257.24z"></path>
-                    <path className="st0" d="M338.76,406.67v6.5h-20.47v54.29h-6.76v-54.29h-20.47v-6.5H338.76z"></path>
-                    <path className="st0" d="M393.22,433.99v-27.32h6.76v60.79h-6.76V440.4h-37.77v27.06h-6.76v-60.79h6.76v27.32H393.22z"></path>
-                    <path className="st0" d="M454.62,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H454.62z"></path>
-                    <path className="st0" d="M513.92,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
+                  <path className="st0" d="M338.76,406.67v6.5h-20.47v54.29h-6.76v-54.29h-20.47v-6.5H338.76z"></path>
+                  <path className="st0" d="M393.22,433.99v-27.32h6.76v60.79h-6.76V440.4h-37.77v27.06h-6.76v-60.79h6.76v27.32H393.22z"></path>
+                  <path className="st0" d="M454.62,406.67v6.32h-32.94v21.08h29.96v6.32h-29.96v20.73h32.94v6.32h-39.71v-60.79H454.62z"></path>
+                  <path className="st0" d="M513.92,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
                       v0.09c0,9.31-5.09,15.99-14.58,18.36L513.92,467.46z M472.89,412.82v27.32h16.69c10.45,0,16.16-5.09,16.16-13.44v-0.09
                       c0-8.61-5.71-13.79-16.16-13.79H472.89z"></path>
-                    <path className="st0" d="M586.56,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.02,0-15.64,3.95-15.64,9.84
+                  <path className="st0" d="M586.56,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.02,0-15.64,3.95-15.64,9.84
                       c0,4.13,2.46,7.99,10.37,10.01l14.23,3.51c10.98,2.64,13.97,9.75,13.97,16.95c0,9.93-8.52,16.51-22.66,16.51h-0.09
                       c-12.47,0-21.17-5.1-24.77-14.23l5.62-3.87c3.25,8.17,9.84,12.03,19.33,12.03h0.09c10.19,0,15.64-4.3,15.64-10.54
                       c0-4.83-2.64-8.96-9.93-10.81l-15.02-3.87c-10.01-2.64-13.62-8.7-13.62-15.55c0-10.01,8.43-16.08,22.75-16.08h0.09
                       c10.89,0,18.45,4.57,21.7,11.77L586.56,422.13z"></path>
-                    <path className="st0" d="M630.22,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
+                  <path className="st0" d="M630.22,405.61c18.71,0,30.83,12.74,30.83,31.36v0.09c0,18.71-12.12,31.45-30.83,31.45h-0.09
                       c-18.71,0-30.92-12.74-30.92-31.45v-0.09c0-18.62,12.21-31.36,30.92-31.36H630.22z M630.22,462.19c14.5,0,24.07-10.1,24.07-25.12
                       v-0.09c0-14.93-9.58-25.04-24.07-25.04h-0.09c-14.58,0-24.16,10.1-24.16,25.04v0.09c0,15.02,9.58,25.12,24.16,25.12H630.22z"></path>
-                    <path className="st0" d="M717.09,406.67h6.68v60.79h-6.59l-38.04-49.81v49.81h-6.68v-60.79h6.59l38.04,49.81V406.67z"></path>
-                    <path className="st0" d="M784.12,417.3c-4.39-3.6-10.63-5.36-17.04-5.36h-0.09c-15.29,0-25.04,10.37-25.04,25.04v0.09
+                  <path className="st0" d="M717.09,406.67h6.68v60.79h-6.59l-38.04-49.81v49.81h-6.68v-60.79h6.59l38.04,49.81V406.67z"></path>
+                  <path className="st0" d="M784.12,417.3c-4.39-3.6-10.63-5.36-17.04-5.36h-0.09c-15.29,0-25.04,10.37-25.04,25.04v0.09
                       c0,14.58,9.75,25.12,23.98,25.12h0.09c10.37,0,17.22-4.83,17.74-11.95v-7.38h-15.11v-5.62h20.91v30.22h-4.39l-0.35-8.35
                       c-2.99,6.06-9.84,9.4-19.33,9.4h-0.09c-18.18,0-30.22-12.83-30.22-31.45v-0.09c0-18.45,12.21-31.36,31.8-31.36h0.09
                       c7.64,0,15.11,1.84,20.82,6.59L784.12,417.3z"></path>
-                    <path className="st0" d="M871.78,451.12c0,11.77-8.17,16.34-21.35,16.34h-24.86v-60.79h22.75c14.14,0,21.26,4.48,21.26,15.81
+                  <path className="st0" d="M871.78,451.12c0,11.77-8.17,16.34-21.35,16.34h-24.86v-60.79h22.75c14.14,0,21.26,4.48,21.26,15.81
                       c0,8.35-3.95,12.47-11.33,13.97C867.21,437.94,871.78,442.68,871.78,451.12z M832.34,412.64v20.99h15.81
                       c9.84,0,14.76-2.81,14.76-10.28c0-8.26-5.01-10.72-14.58-10.72H832.34z M832.34,461.48h18.1c9.66,0,14.58-2.99,14.58-11.07
                       c0-7.2-4.39-11.33-15.02-11.33h-17.66V461.48z"></path>
-                    <path className="st0" d="M931.16,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
+                  <path className="st0" d="M931.16,467.46h-7.55l-15.02-21.43h-1.76h-16.69v21.43h-6.76v-60.79h23.45c14.85,0,22.93,7.91,22.93,19.94
                       v0.09c0,9.31-5.1,15.99-14.58,18.36L931.16,467.46z M890.14,412.82v27.32h16.69c10.45,0,16.16-5.09,16.16-13.44v-0.09
                       c0-8.61-5.71-13.79-16.16-13.79H890.14z"></path>
-                    <path className="st0" d="M996.34,467.46h-7.2l-6.68-15.64h-32.41l-6.68,15.64h-7.2l26.53-60.79h7.2L996.34,467.46z M966.3,413.78
+                  <path className="st0" d="M996.34,467.46h-7.2l-6.68-15.64h-32.41l-6.68,15.64h-7.2l26.53-60.79h7.2L996.34,467.46z M966.3,413.78
                       l-13.97,31.98h27.85L966.3,413.78z"></path>
-                    <path className="st0" d="M1044.22,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.01,0-15.64,3.95-15.64,9.84
+                  <path className="st0" d="M1044.22,422.13c-2.81-6.32-8.61-10.45-17.83-10.45h-0.09c-10.01,0-15.64,3.95-15.64,9.84
                       c0,4.13,2.46,7.99,10.37,10.01l14.23,3.51c10.98,2.64,13.97,9.75,13.97,16.95c0,9.93-8.52,16.51-22.66,16.51h-0.09
                       c-12.47,0-21.17-5.1-24.77-14.23l5.62-3.87c3.25,8.17,9.84,12.03,19.33,12.03h0.09c10.19,0,15.64-4.3,15.64-10.54
                       c0-4.83-2.64-8.96-9.93-10.81l-15.02-3.87c-10.01-2.64-13.62-8.7-13.62-15.55c0-10.01,8.43-16.08,22.75-16.08h0.09
                       c10.89,0,18.45,4.57,21.7,11.77L1044.22,422.13z"></path>
-                    <path className="st0" d="M1060.38,467.46v-60.79h6.76v60.79H1060.38z"></path>
-                    <path className="st0" d="M1088.84,406.67v54.29h35.58v6.5h-42.34v-60.79H1088.84z"></path>
-                  </g>
+                  <path className="st0" d="M1060.38,467.46v-60.79h6.76v60.79H1060.38z"></path>
+                  <path className="st0" d="M1088.84,406.67v54.29h35.58v6.5h-42.34v-60.79H1088.84z"></path>
+                </g>
+                <g>
                   <g>
-                    <g>
-                      <path className="st0" d="M169.77,279.41l0.32,0.32c-6.18,9.8-14.64,17.68-25.39,23.64c-10.76,5.96-23.05,8.94-36.89,8.94
+                    <path className="st0" d="M169.77,279.41l0.32,0.32c-6.18,9.8-14.64,17.68-25.39,23.64c-10.76,5.96-23.05,8.94-36.89,8.94
                         c-18.53,0-32-5.32-40.41-15.97c-8.41-10.65-12.62-26.62-12.62-47.91v-90.71H30.19v-0.32l88.48-69.63v64.84h45.04v5.11h-45.04
                         v74.42c0,18.53,2.45,31.62,7.35,39.29c4.9,7.67,13.2,11.5,24.91,11.5C157.74,282.93,164.02,281.76,169.77,279.41z"></path>
-                    </g>
-                    <g>
-                      <path className="st0" d="M263.04,312.31c-11.29,0-22.31-1.97-33.06-5.91c-10.76-3.94-20.23-9.63-28.43-17.09
+                  </g>
+                  <g>
+                    <path className="st0" d="M263.04,312.31c-11.29,0-22.31-1.97-33.06-5.91c-10.76-3.94-20.23-9.63-28.43-17.09
                         c-8.2-7.45-14.69-16.4-19.48-26.83c-4.79-10.43-7.19-21.82-7.19-34.18c0-11.07,2.13-21.67,6.39-31.78
                         c4.26-10.11,10.33-18.9,18.21-26.35c7.88-7.45,17.25-13.31,28.11-17.57c10.86-4.26,22.57-6.39,35.14-6.39
                         c12.99,0,25.07,1.92,36.25,5.75c11.18,3.83,20.81,9.37,28.91,16.61c8.09,7.24,14.37,15.97,18.85,26.19
@@ -4435,9 +4424,9 @@ NEWFILEENCODING:NONE
                         c0-6.6-2.93-16.87-8.78-30.82c-5.86-13.94-13.21-28.37-22.04-43.28c-8.84-14.9-17.89-27.41-27.15-37.53
                         c-9.26-10.11-17.2-15.17-23.8-15.17c-4.05,0-7.19,1.39-9.42,4.15c-2.24,2.77-3.35,6.6-3.35,11.5c0,7.46,2.98,18.32,8.94,32.58
                         c5.96,14.27,13.42,28.7,22.36,43.28c8.94,14.59,17.99,26.83,27.15,36.73C284.97,295.86,292.63,300.81,298.81,300.81z"></path>
-                    </g>
-                    <g>
-                      <path className="st0" d="M429.46,312.31c-20.44,0-39.93-2.77-58.45-8.3l9.9-52.07h0.32l39.61,53.02c3.83,1.07,7.35,1.6,10.54,1.6
+                  </g>
+                  <g>
+                    <path className="st0" d="M429.46,312.31c-20.44,0-39.93-2.77-58.45-8.3l9.9-52.07h0.32l39.61,53.02c3.83,1.07,7.35,1.6,10.54,1.6
                         c7.03,0,12.72-1.81,17.09-5.43c4.36-3.62,6.55-8.62,6.55-15.01c0-3.4-1.07-6.81-3.19-10.22c-2.13-3.4-7.46-7.35-15.97-11.82
                         l-21.08-11.18c-13.42-7.03-23.32-14.74-29.71-23.16c-6.39-8.41-9.58-18.47-9.58-30.19c0-16.18,6.17-29.12,18.53-38.81
                         c12.35-9.69,29.07-14.53,50.15-14.53c18.53,0,36.2,3.09,53.02,9.26l-12.46,50.47h-0.32l-37.05-52.7
@@ -4445,32 +4434,18 @@ NEWFILEENCODING:NONE
                         s9.74,9.05,18.69,13.74l23.96,12.78c10.86,5.75,19.17,12.67,24.91,20.76c5.75,8.1,8.62,17.04,8.62,26.83
                         c0,7.88-1.92,15.17-5.75,21.88c-3.83,6.71-9.1,12.46-15.81,17.25c-6.71,4.79-14.53,8.41-23.48,10.86S439.04,312.31,429.46,312.31
                         z"></path>
-                    </g>
-                    <g>
-                      <path className="st0" d="M645.38,146.22c16.61,0,30.24,6.66,40.89,19.96c10.65,13.31,15.97,31.89,15.97,55.74
+                  </g>
+                  <g>
+                    <path className="st0" d="M645.38,146.22c16.61,0,30.24,6.66,40.89,19.96c10.65,13.31,15.97,31.89,15.97,55.74
                         c0,28.96-8.31,51.27-24.91,66.92c-16.61,15.65-40.78,23.48-72.51,23.48c-11.5,0-24.71-1.12-39.61-3.35
                         c-14.91-2.24-28-5.16-39.29-8.78V113.95L507.71,98.3l82.09-28.75v105.09c8.51-8.73,17.67-15.65,27.47-20.76
                         C627.06,148.77,636.43,146.22,645.38,146.22z M605.45,305.92c8.73,0,15.65-5.48,20.76-16.45c5.11-10.96,7.67-27.41,7.67-49.35
                         c0-21.51-2.51-37.58-7.51-48.23c-5.01-10.65-12.73-15.97-23.16-15.97c-4.05,0-8.52,1.07-13.42,3.19v122.02
                         C594.27,304.33,599.49,305.92,605.45,305.92z"></path>
-                    </g>
                   </g>
                 </g>
-              </svg>
-            ) : layoutMode === 'tosb-v2' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <span className="logo-title" style={{ fontSize: 'var(--fs-4xl)', fontFamily: 'var(--font-display)', color: '#E8CC8D', letterSpacing: '0.08em', lineHeight: '1.1' }}>TOSB</span>
-                  <img
-                    src={window.location.pathname.endsWith('demo.html') || window.location.protocol === 'file:' ? 'client/public/images/logo.png' : '/images/logo.png'}
-                    alt="TOSB"
-                    style={{ height: '48px', objectFit: 'contain', display: 'block' }}
-                  />
-                </div>
-                <span className="logo-subtitle">The Other Song Brasil</span>
-              </div>
-            ) : null}
-
+              </g>
+            </svg>
           </a>
 
 
@@ -4496,13 +4471,14 @@ NEWFILEENCODING:NONE
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveDropdown(activeDropdown === 'about' ? null : 'about');
+                setFontMenuOpen(false);
               }}
             >
               Quem Somos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'about' ? 'open' : ''}`}>
-              <a href={getLinkHref('about')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'about')}>Sobre Nós & Galeria</a>
-              <a href={getLinkHref('homeopaths')} className="dropdown-item" onClick={(e) => handleLinkClick(e, 'homeopaths')}>Lista de Homeopatas</a>
+              <a href={getLinkHref('about')} className="nav-link dropdown-item" onClick={(e) => handleLinkClick(e, 'about')}>Sobre Nós & Galeria</a>
+              <a href={getLinkHref('homeopaths')} className="nav-link dropdown-item" onClick={(e) => handleLinkClick(e, 'homeopaths')}>Lista de Homeopatas</a>
             </div>
           </div>
 
@@ -4513,15 +4489,15 @@ NEWFILEENCODING:NONE
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveDropdown(activeDropdown === 'courses' ? null : 'courses');
+                setFontMenuOpen(false);
               }}
             >
               Cursos ▾
             </button>
             <div className={`nav-dropdown-content ${activeDropdown === 'courses' ? 'open' : ''}`}>
-              <a href={getLinkHref('agenda')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
-              <a href={getLinkHref('online-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
-              <a href={getLinkHref('inperson-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'inperson-courses'); }}>Cursos Presenciais</a>
-              <a href={getLinkHref('hybrid-courses')} className="dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'hybrid-courses'); }}>Cursos Híbridos</a>
+              <a href={getLinkHref('agenda')} className="nav-link dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
+              <a href={getLinkHref('online-courses')} className="nav-link dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
+              <a href={getLinkHref('inperson-courses')} className="nav-link dropdown-item" onClick={(e) => { setActiveDropdown(null); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
             </div>
           </div>
 
@@ -4541,8 +4517,7 @@ NEWFILEENCODING:NONE
           {/* Cursos Submenu achatado */}
           <a href={getLinkHref('agenda')} className={`nav-link ${currentPage === 'agenda' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'agenda'); }}>Agenda Geral</a>
           <a href={getLinkHref('online-courses')} className={`nav-link ${currentPage === 'online-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'online-courses'); }}>Cursos Online</a>
-          <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Cursos Presenciais</a>
-          <a href={getLinkHref('hybrid-courses')} className={`nav-link ${currentPage === 'hybrid-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'hybrid-courses'); }}>Cursos Híbridos</a>
+          <a href={getLinkHref('inperson-courses')} className={`nav-link ${currentPage === 'inperson-courses' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'inperson-courses'); }}>Presenciais & Híbridos</a>
 
           <a href={getLinkHref('books')} className={`nav-link ${currentPage === 'books' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'books'); }}>Livros</a>
           <a href={getLinkHref('synergy')} className={`nav-link ${currentPage === 'synergy' ? 'active' : ''}`} onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, 'synergy'); }}>Synergy</a>
@@ -4571,28 +4546,14 @@ NEWFILEENCODING:NONE
         {/* Painel do Usuário, Carrinho, Alternador de Layout e Acessibilidade */}
         <div className="desktop-only-block" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
 
-          {/* Seletor de Layout / Identidade Visual (Design 1 vs Design 2) */}
-          <button
-            type="button"
-            className={layoutMode !== 'classic' ? 'layout-switcher-pill' : 'btn btn-secondary'}
-            onClick={toggleLayoutMode}
-            title="Alternar entre o Design Clássico e o Novo Guia de Identidade Visual TOSB"
-            style={{
-              marginLeft: '0.25rem',
-              marginRight: '0.25rem'
-            }}
-          >
-            <span>Layout:</span>
-            <span className="layout-badge" style={{ fontSize: 'var(--fs-xs)' }}>
-              {layoutMode === 'tosb-v3' ? 'Design 3' : layoutMode === 'tosb-v2' ? 'Design 2' : 'Design 1'}
-            </span>
-          </button>
-
           {/* Controles de Acessibilidade */}
           <div className="accessibility-popover-wrapper">
             <button
-              className="btn-acc"
-              onClick={() => setFontMenuOpen(!fontMenuOpen)}
+              className="nav-link"
+              onClick={() => {
+                setFontMenuOpen(!fontMenuOpen);
+                setActiveDropdown(null);
+              }}
               title="Tamanho da Fonte (Acessibilidade)"
               aria-label="Tamanho da Fonte"
             >
@@ -4610,7 +4571,7 @@ NEWFILEENCODING:NONE
           {/* Carrinho de Compras */}
           <a
             href={getLinkHref('cart')}
-            className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'} cart-badge-nav`}
+            className={`nav-link cart-badge-nav`}
             onClick={(e) => handleLinkClick(e, 'cart')}
             aria-label="Carrinho de Compras"
             style={{ padding: '0.5rem' }}
@@ -4627,7 +4588,7 @@ NEWFILEENCODING:NONE
           <div className="mobile-only-flex header-mobile-actions" style={{ alignItems: 'center', gap: '0.35rem' }}>
             <a
               href={getLinkHref(user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
-              className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`nav-link`}
               style={{ padding: '0.35rem 0.6rem', height: 'auto', minHeight: 'unset', textTransform: 'none' }}
               onClick={(e) => handleLinkClick(e, user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
             >
@@ -4639,7 +4600,7 @@ NEWFILEENCODING:NONE
           <div className="nav-links desktop-only-block" style={{ gap: '0.5rem' }}>
             <a
               href={getLinkHref(user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
-              className={`btn ${layoutMode !== 'classic' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`nav-link`}
               style={{ padding: '0.5rem 0.75rem' }}
               onClick={(e) => handleLinkClick(e, user ? (user.role === 'ADMIN' ? 'admin-dash' : user.role === 'TEACHER' ? 'teacher-dash' : 'student-dash') : 'login')}
             >
@@ -5631,7 +5592,7 @@ NEWFILEENCODING:NONE
               <p className="mb-4">
                 A <strong>The Other Song</strong>, sediada em Mumbai, Índia, é um centro internacional dedicado ao ensino, à prática clínica e à pesquisa em Homeopatia, sob a direção do <strong>Dr. Rajan Sankaran</strong>, um dos principais nomes da Homeopatia contemporânea e pioneiro do Método da Sensação.
               </p>
-              
+
               <hr style={{ borderTop: '1px solid var(--color-border)', margin: '3rem 0' }} />
 
 
@@ -5766,9 +5727,9 @@ NEWFILEENCODING:NONE
                       </div>
                     </div>
                   ))}
-                  {mockDb.courses.filter(c => c.modality === 'ONLINE').filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).length === 0 && (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum curso online encontrado.</div>
-                  )}
+                {mockDb.courses.filter(c => c.modality === 'ONLINE').filter(course => !searchOnlineCourses || course.title.toLowerCase().includes(searchOnlineCourses.toLowerCase())).length === 0 && (
+                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#64748b' }}>Nenhum curso online encontrado.</div>
+                )}
               </div>
             </div>
           </div>
@@ -6996,7 +6957,7 @@ NEWFILEENCODING:NONE
               <aside className="student-sidebar">
                 <ul className="student-sidebar-menu">
                   <li className={`student-sidebar-item ${adminActiveTab === 'stats' ? 'active' : ''}`}>
-                    <button onClick={() => setAdminActiveTab('stats')}>📊 Estatísticas & OFX</button>
+                    <button onClick={() => setAdminActiveTab('stats')}>📊 Estatísticas</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'courses' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('courses')}>🌿 Gerenciar Cursos</button>
@@ -7008,7 +6969,7 @@ NEWFILEENCODING:NONE
                     <button onClick={() => setAdminActiveTab('classes')}>🎓 Gerenciar Turmas</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'certificates' ? 'active' : ''}`}>
-                    <button onClick={() => setAdminActiveTab('certificates')}>📜 Certificados & Templates</button>
+                    <button onClick={() => setAdminActiveTab('certificates')}>📜 Certificados</button>
                   </li>
                   <li className={`student-sidebar-item ${adminActiveTab === 'students' ? 'active' : ''}`}>
                     <button onClick={() => setAdminActiveTab('students')}>👥 Gerenciar Usuários</button>
@@ -7029,9 +6990,7 @@ NEWFILEENCODING:NONE
                     <button onClick={() => setAdminActiveTab('promotions')}>📢 Disparo de Ofertas</button>
                   </li>
                   <li className="student-sidebar-item">
-                    <button onClick={() => { clearAlerts(); handleLogout(); }} className="text-danger" style={{ fontWeight: '500' }}>
-                      <span style={{ fontSize: 'var(--fs-lg)' }}>🚪</span> Sair da Conta
-                    </button>
+                    <button onClick={() => { clearAlerts(); handleLogout(); }}>🚪Sair da Conta</button>
                   </li>
                 </ul>
               </aside>
