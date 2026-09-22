@@ -16,15 +16,16 @@ INSERT INTO `platform_settings` (`key`, `value`) VALUES
 ('support_email', 'contato@theothersongbrazil.com.br'),
 ('asaas_environment', 'sandbox');
 
--- 2. Inserir Usuários (Senhas hash para 'senha123': $2a$10$w8T.NnK/Mv8g.R8V0sHwEu4H7T4b8bS.H/gHqg4oJ/H5uG5sV1YtG ou similar via bcrypt)
--- Administrador principal
+-- 2. Inserir Usuários
+-- Admin: admin@theothersongbrazil.com.br / senha: admin123
+-- Professores e Alunos: senha: senha123
 INSERT INTO `users` (
     `id`, `name`, `email`, `password_hash`, `role`, `status`, `is_homeopath`, `phone`, `cpf`,
     `profession`, `billing_zip`, `billing_street`, `billing_number`, `billing_neighborhood`, `billing_city`, `billing_state`,
     `terms_accepted`, `general_terms_accepted`
 ) VALUES (
     'usr-admin-001', 'Administração TOSB', 'admin@theothersongbrazil.com.br',
-    '$2a$10$q0.17hHn0e2HwS4lV0eBjeX/K4f/7D1s9T2g5H8j0K2l4M6n8P0qS', -- admin123 hash
+    '$2a$10$4nSfW/4I243At.Uh6E6l6.PII14ZNgb2XqeXMOQaqs7s.7s5fSRSa', -- admin123
     'ADMIN', 'ACTIVE', 1, '(11) 99999-0000', '000.000.000-00',
     'Administrador', '01310-100', 'Av. Paulista', '1000', 'Bela Vista', 'São Paulo', 'SP',
     1, 1
@@ -40,7 +41,7 @@ INSERT INTO `users` (
 ) VALUES 
 (
     'usr-teacher-001', 'Dr. Rajan Sankaran', 'rajan@theothersongbrazil.com.br',
-    '$2a$10$q0.17hHn0e2HwS4lV0eBjeX/K4f/7D1s9T2g5H8j0K2l4M6n8P0qS',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
     'TEACHER', 'ACTIVE', 1, '(11) 98888-1111', '111.111.111-11',
     'médico(a)', 'CRM', '123456', 'SP', 'Homeopatia Geral e Método Sensação',
     'Fundador da escola The Other Song e criador do Método Sensação Vital em Homeopatia.',
@@ -50,7 +51,7 @@ INSERT INTO `users` (
 ),
 (
     'usr-teacher-002', 'Prof. Lucas Miranda', 'lucas@theothersongbrazil.com.br',
-    '$2a$10$q0.17hHn0e2HwS4lV0eBjeX/K4f/7D1s9T2g5H8j0K2l4M6n8P0qS',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
     'TEACHER', 'ACTIVE', 1, '(21) 97777-2222', '222.222.222-22',
     'farmaceutico(a)', 'CRF', '654321', 'RJ', 'Homeopatia Farmacêutica e Matéria Médica',
     'Farmacêutico e pesquisador especialista em reinos homeopáticos e dinamização.',
@@ -69,7 +70,7 @@ INSERT INTO `users` (
 ) VALUES 
 (
     'usr-student-001', 'Dra. Ana Paula Silva', 'anapaula@gmail.com',
-    '$2a$10$q0.17hHn0e2HwS4lV0eBjeX/K4f/7D1s9T2g5H8j0K2l4M6n8P0qS',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
     'STUDENT', 'ACTIVE', 1, '(11) 96666-3333', '333.333.333-33',
     'médico(a)', 'CRM', '98765', 'SP', 'Pediatria e Homeopatia',
     '04571-010', 'Rua Berrini', '150', 'Brooklin', 'São Paulo', 'SP',
@@ -78,13 +79,14 @@ INSERT INTO `users` (
 ),
 (
     'usr-student-002', 'Dr. Carlos Eduardo Rocha', 'carloseduardo@gmail.com',
-    '$2a$10$q0.17hHn0e2HwS4lV0eBjeX/K4f/7D1s9T2g5H8j0K2l4M6n8P0qS',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
     'STUDENT', 'ACTIVE', 1, '(31) 95555-4444', '444.444.444-44',
     'odontologista', 'CRO', '54321', 'MG', 'Odontologia Integrativa',
     '30130-000', 'Av. Afonso Pena', '800', 'Centro', 'Belo Horizonte', 'MG',
     '30130-000', 'Av. Afonso Pena', '800', 'Centro', 'Belo Horizonte', 'MG', '(31) 3333-4444',
     1, 1
 );
+
 
 -- 3. Inserir Cursos
 INSERT INTO `courses` (
