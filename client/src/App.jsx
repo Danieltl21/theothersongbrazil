@@ -343,31 +343,31 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
       <h4 className="mb-3 section-title-underlined-thin">Informações de Login e Identificação</h4>
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">Nome Completo <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">Nome Completo <span className="text-error">*</span></label>
           <input className="form-input" type="text" name="name" defaultValue={targetUser?.name || ''} required={isAdmin || isReq('name')} placeholder="Dra. Roberta Silva" />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Email (Login) <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">Email (Login) <span className="text-error">*</span></label>
           <input className="form-input" type="email" name="email" defaultValue={targetUser?.email || ''} required={isAdmin || isReq('email')} placeholder="contato@robertasilva.med.br" />
         </div>
       </div>
 
       {(isAdmin || !targetUser?.id) && (
         <div className="form-group">
-          <label className="form-label">Senha de Acesso <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">Senha de Acesso <span className="text-error">*</span></label>
           <input className="form-input" type="password" name="password" defaultValue={targetUser?.password || ''} required={isAdmin && !targetUser?.id} placeholder="Digite a senha" />
         </div>
       )}
 
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">Telefone de Contato {isReq('phone') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Telefone de Contato {isReq('phone') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="phone" defaultValue={targetUser?.phone || ''} required={isReq('phone')} placeholder="ex: (11) 99999-9999" />
         </div>
 
         <div className="form-group">
-          <label className="form-label">CPF {isReq('cpf') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">CPF {isReq('cpf') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="cpf" defaultValue={targetUser?.cpf || targetUser?.cpf_cnpj || ''} required={isReq('cpf')} placeholder="ex: 000.000.000-00" />
         </div>
       </div>
@@ -376,18 +376,18 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">CEP {isReq('billing_zip') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">CEP {isReq('billing_zip') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="billing_zip" defaultValue={targetUser?.billing_zip || targetUser?.address_zip || ''} required={isReq('billing_zip')} placeholder="00000-000" />
         </div>
         <div className="form-group">
-          <label className="form-label">Logradouro {isReq('billing_street') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Logradouro {isReq('billing_street') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="billing_street" defaultValue={targetUser?.billing_street || targetUser?.address_street || ''} required={isReq('billing_street')} placeholder="Rua, Avenida, etc." />
         </div>
       </div>
 
       <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label">Número {isReq('billing_number') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Número {isReq('billing_number') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="billing_number" defaultValue={targetUser?.billing_number || targetUser?.address_number || ''} required={isReq('billing_number')} placeholder="123" />
         </div>
         <div className="form-group">
@@ -395,18 +395,18 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           <input className="form-input" type="text" name="billing_complement" defaultValue={targetUser?.billing_complement || targetUser?.address_complement || ''} placeholder="Apto, Bloco, etc." />
         </div>
         <div className="form-group">
-          <label className="form-label">Bairro {isReq('billing_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Bairro {isReq('billing_neighborhood') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="billing_neighborhood" defaultValue={targetUser?.billing_neighborhood || targetUser?.address_neighborhood || ''} required={isReq('billing_neighborhood')} placeholder="Centro" />
         </div>
       </div>
 
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">Cidade {isReq('billing_city') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Cidade {isReq('billing_city') && <span className="text-error">*</span>}</label>
           <input className="form-input" type="text" name="billing_city" defaultValue={targetUser?.billing_city || targetUser?.address_city || ''} required={isReq('billing_city')} placeholder="Curitiba" />
         </div>
         <div className="form-group">
-          <label className="form-label">Estado (UF) {isReq('billing_state') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Estado (UF) {isReq('billing_state') && <span className="text-error">*</span>}</label>
           <select className="form-input" name="billing_state" required={isReq('billing_state')} defaultValue={targetUser?.billing_state || targetUser?.address_state || 'PR'}>
             {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
           </select>
@@ -417,7 +417,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
       <div className="grid-2col">
         <div className="form-group">
-          <label className="form-label">Profissão {isReq('profession') && <span style={{ color: 'red' }}>*</span>}</label>
+          <label className="form-label">Profissão {isReq('profession') && <span className="text-error">*</span>}</label>
           <select
             className="form-input"
             name="profession"
@@ -435,7 +435,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
         {(currentProfession === 'outro' || currentProfession === 'Outro') && (
           <div className="form-group">
-            <label className="form-label">Nome da Profissão {isReq('custom_profession') && <span style={{ color: 'red' }}>*</span>}</label>
+            <label className="form-label">Nome da Profissão {isReq('custom_profession') && <span className="text-error">*</span>}</label>
             <input className="form-input" type="text" name="custom_profession" defaultValue={targetUser?.custom_profession || ''} required={isReq('custom_profession')} placeholder="ex: Fisioterapeuta" />
           </div>
         )}
@@ -450,14 +450,14 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
             </div>
 
             <div className="form-group">
-              <label className="form-label">UF do Conselho {isReq('council_state') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">UF do Conselho {isReq('council_state') && <span className="text-error">*</span>}</label>
               <select className="form-input" name="council_state" required={isReq('council_state')} defaultValue={targetUser?.council_state || 'PR'}>
                 {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
               </select>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Número do Conselho {isReq('council_number') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Número do Conselho {isReq('council_number') && <span className="text-error">*</span>}</label>
               <input
                 className="form-input"
                 type="text"
@@ -477,7 +477,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
           <div className="grid-2col" style={{ marginTop: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">RQE (Registro de Especialidade) {(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">RQE (Registro de Especialidade) {(targetUser?.role === 'TEACHER' || (isAdmin && formUserRole === 'TEACHER')) && <span className="text-error">*</span>}</label>
               <input
                 className="form-input"
                 type="text"
@@ -503,18 +503,18 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
 
           <div className="grid-2col">
             <div className="form-group">
-              <label className="form-label">CEP {isReq('commercial_zip') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">CEP {isReq('commercial_zip') && <span className="text-error">*</span>}</label>
               <input className="form-input" type="text" name="commercial_zip" defaultValue={targetUser?.commercial_zip || ''} required={isReq('commercial_zip')} placeholder="00000-000" />
             </div>
             <div className="form-group">
-              <label className="form-label">Logradouro {isReq('commercial_street') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Logradouro {isReq('commercial_street') && <span className="text-error">*</span>}</label>
               <input className="form-input" type="text" name="commercial_street" defaultValue={targetUser?.commercial_street || ''} required={isReq('commercial_street')} placeholder="Rua, Avenida, etc." />
             </div>
           </div>
 
           <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             <div className="form-group">
-              <label className="form-label">Número {isReq('commercial_number') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Número {isReq('commercial_number') && <span className="text-error">*</span>}</label>
               <input className="form-input" type="text" name="commercial_number" defaultValue={targetUser?.commercial_number || ''} required={isReq('commercial_number')} placeholder="123" />
             </div>
             <div className="form-group">
@@ -522,18 +522,18 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
               <input className="form-input" type="text" name="commercial_complement" defaultValue={targetUser?.commercial_complement || ''} placeholder="Sala, Andar, etc." />
             </div>
             <div className="form-group">
-              <label className="form-label">Bairro {isReq('commercial_neighborhood') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Bairro {isReq('commercial_neighborhood') && <span className="text-error">*</span>}</label>
               <input className="form-input" type="text" name="commercial_neighborhood" defaultValue={targetUser?.commercial_neighborhood || ''} required={isReq('commercial_neighborhood')} placeholder="Centro" />
             </div>
           </div>
 
           <div className="grid-2col">
             <div className="form-group">
-              <label className="form-label">Cidade {isReq('commercial_city') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Cidade {isReq('commercial_city') && <span className="text-error">*</span>}</label>
               <input className="form-input" type="text" name="commercial_city" defaultValue={targetUser?.commercial_city || ''} required={isReq('commercial_city')} placeholder="Curitiba" />
             </div>
             <div className="form-group">
-              <label className="form-label">Estado (UF) {isReq('commercial_state') && <span style={{ color: 'red' }}>*</span>}</label>
+              <label className="form-label">Estado (UF) {isReq('commercial_state') && <span className="text-error">*</span>}</label>
               <select className="form-input" name="commercial_state" required={isReq('commercial_state')} defaultValue={targetUser?.commercial_state || 'PR'}>
                 {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
               </select>
@@ -541,7 +541,7 @@ const renderProfileFormFields = (targetUser, isAdmin = false, currentProfession,
           </div>
 
           <div className="form-group">
-            <label className="form-label">Telefone {isReq('commercial_phone') && <span style={{ color: 'red' }}>*</span>}</label>
+            <label className="form-label">Telefone {isReq('commercial_phone') && <span className="text-error">*</span>}</label>
             <input className="form-input" type="text" name="commercial_phone" defaultValue={targetUser?.commercial_phone || ''} required={isReq('commercial_phone')} placeholder="ex: (11) 5555-5555" />
           </div>
 
@@ -4253,7 +4253,7 @@ NEWFILEENCODING:NONE
       <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--color-bg)' }}>
         <div style={{ textAlign: 'center' }}>
           <span style={{ fontSize: 'var(--fs-6xl)', animation: 'spin 2s linear infinite', display: 'inline-block' }}>🌿</span>
-          <h2 className="font-serif-title mt-4" style={{ color: 'var(--color-primary)' }}>Carregando Portal...</h2>
+          <h2 className="font-serif-title mt-4 text-primary">Carregando Portal...</h2>
           <p className="text-muted">Verificando credenciais acadêmicas de segurança.</p>
         </div>
       </div>
@@ -4689,7 +4689,7 @@ NEWFILEENCODING:NONE
             <p className="text-muted text-center mb-1">
               Preencha os campos abaixo para criar sua conta.
             </p>
-            <p className="text-muted text-center mb-5" style={{ fontSize: 'var(--fs-sm)' }}>
+            <p className="text-muted text-center mb-5 text-sm">
               Campos com <span style={{ color: 'red', fontWeight: 'bold' }}>*</span> são de preenchimento obrigatório.
             </p>
 
@@ -4698,29 +4698,29 @@ NEWFILEENCODING:NONE
 
               <div className="grid-2col">
                 <div className="form-group">
-                  <label className="form-label">Nome Completo <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Nome Completo <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="name" required placeholder="Dra. Roberta Silva" />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Email (Login) <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Email (Login) <span className="text-error">*</span></label>
                   <input className="form-input" type="email" name="email" required placeholder="contato@robertasilva.med.br" />
                 </div>
               </div>
 
               <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Senha de Acesso <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Senha de Acesso <span className="text-error">*</span></label>
                   <input className="form-input" type="password" name="password" required placeholder="Mínimo 6 caracteres" />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Telefone de Contato <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Telefone de Contato <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="phone" required placeholder="ex: (11) 99999-9999" />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">CPF <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">CPF <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="cpf" required placeholder="ex: 000.000.000-00" />
                 </div>
               </div>
@@ -4729,18 +4729,18 @@ NEWFILEENCODING:NONE
 
               <div className="grid-2col">
                 <div className="form-group">
-                  <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">CEP <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="billing_zip" required placeholder="00000-000" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Logradouro <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Logradouro <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="billing_street" required placeholder="Rua, Avenida, etc." />
                 </div>
               </div>
 
               <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Número <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Número <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="billing_number" required placeholder="123" />
                 </div>
                 <div className="form-group">
@@ -4748,18 +4748,18 @@ NEWFILEENCODING:NONE
                   <input className="form-input" type="text" name="billing_complement" placeholder="Apto, Bloco, etc." />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Bairro <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Bairro <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="billing_neighborhood" required placeholder="Centro" />
                 </div>
               </div>
 
               <div className="grid-2col">
                 <div className="form-group">
-                  <label className="form-label">Cidade <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Cidade <span className="text-error">*</span></label>
                   <input className="form-input" type="text" name="billing_city" required placeholder="Curitiba" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Estado (UF) <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Estado (UF) <span className="text-error">*</span></label>
                   <select className="form-input" name="billing_state" required defaultValue="PR">
                     {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
                   </select>
@@ -4770,7 +4770,7 @@ NEWFILEENCODING:NONE
 
               <div className="grid-2col">
                 <div className="form-group">
-                  <label className="form-label">Profissão <span style={{ color: 'red' }}>*</span></label>
+                  <label className="form-label">Profissão <span className="text-error">*</span></label>
                   <select
                     className="form-input"
                     name="profession"
@@ -4788,7 +4788,7 @@ NEWFILEENCODING:NONE
 
                 {(regProfession === 'outro' || regProfession === 'Outro') && (
                   <div className="form-group">
-                    <label className="form-label">Nome da Profissão <span style={{ color: 'red' }}>*</span></label>
+                    <label className="form-label">Nome da Profissão <span className="text-error">*</span></label>
                     <input className="form-input" type="text" name="custom_profession" required placeholder="ex: Fisioterapeuta" />
                   </div>
                 )}
@@ -4804,14 +4804,14 @@ NEWFILEENCODING:NONE
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">UF do Conselho <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">UF do Conselho <span className="text-error">*</span></label>
                       <select className="form-input" name="council_state" required defaultValue="PR">
                         {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Número do Conselho <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Número do Conselho <span className="text-error">*</span></label>
                       <input
                         className="form-input"
                         type="text"
@@ -4832,18 +4832,18 @@ NEWFILEENCODING:NONE
 
                   <div className="grid-2col">
                     <div className="form-group">
-                      <label className="form-label">CEP <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">CEP <span className="text-error">*</span></label>
                       <input className="form-input" type="text" name="commercial_zip" required placeholder="00000-000" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Logradouro <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Logradouro <span className="text-error">*</span></label>
                       <input className="form-input" type="text" name="commercial_street" required placeholder="Rua, Avenida, etc." />
                     </div>
                   </div>
 
                   <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Número <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Número <span className="text-error">*</span></label>
                       <input className="form-input" type="text" name="commercial_number" required placeholder="123" />
                     </div>
                     <div className="form-group">
@@ -4851,18 +4851,18 @@ NEWFILEENCODING:NONE
                       <input className="form-input" type="text" name="commercial_complement" placeholder="Sala, Andar, etc." />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Bairro <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Bairro <span className="text-error">*</span></label>
                       <input className="form-input" type="text" name="commercial_neighborhood" required placeholder="Centro" />
                     </div>
                   </div>
 
                   <div className="grid-2col">
                     <div className="form-group">
-                      <label className="form-label">Cidade <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Cidade <span className="text-error">*</span></label>
                       <input className="form-input" type="text" name="commercial_city" required placeholder="Curitiba" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Estado (UF) <span style={{ color: 'red' }}>*</span></label>
+                      <label className="form-label">Estado (UF) <span className="text-error">*</span></label>
                       <select className="form-input" name="commercial_state" required defaultValue="PR">
                         {ESTADOS_BRASIL.map(uf => <option key={uf} value={uf}>{uf}</option>)}
                       </select>
@@ -4870,7 +4870,7 @@ NEWFILEENCODING:NONE
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Telefone <span style={{ color: 'red' }}>*</span></label>
+                    <label className="form-label">Telefone <span className="text-error">*</span></label>
                     <input className="form-input" type="text" name="commercial_phone" required placeholder="ex: (11) 5555-5555" />
                   </div>
 
@@ -4881,7 +4881,7 @@ NEWFILEENCODING:NONE
                     </div>
                     <div className="flex-center-gap">
                       <input type="checkbox" id="acceptSigiloTerms" name="acceptSigiloTerms" required />
-                      <label htmlFor="acceptSigiloTerms" className="cursor-pointer">Declaro que li e aceito as condições de sigilo de dados profissionais e científicos. <span style={{ color: 'red' }}>*</span></label>
+                      <label htmlFor="acceptSigiloTerms" className="cursor-pointer">Declaro que li e aceito as condições de sigilo de dados profissionais e científicos. <span className="text-error">*</span></label>
                     </div>
                   </div>
                 </>
@@ -4894,7 +4894,7 @@ NEWFILEENCODING:NONE
                 </div>
                 <div className="flex-center-gap">
                   <input type="checkbox" id="acceptGeneralTerms" name="acceptGeneralTerms" required />
-                  <label htmlFor="acceptGeneralTerms" className="cursor-pointer">Li e aceito os Termos Gerais de Uso do site. <span style={{ color: 'red' }}>*</span></label>
+                  <label htmlFor="acceptGeneralTerms" className="cursor-pointer">Li e aceito os Termos Gerais de Uso do site. <span className="text-error">*</span></label>
                 </div>
               </div>
 
@@ -4942,7 +4942,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: RECUPERAR SENHA */}
         {currentPage === 'forgot-password' && (
           <div className="card auth-box">
-            <h2 className="mb-2 text-center font-serif-title" style={{ color: 'var(--color-primary)' }}>Recuperação de Senha</h2>
+            <h2 className="mb-2 text-center font-serif-title text-primary">Recuperação de Senha</h2>
             <p className="text-muted text-center mb-5">
               Informe seu e-mail de cadastro para receber o link e as instruções de redefinição de acesso
             </p>
@@ -4974,7 +4974,7 @@ NEWFILEENCODING:NONE
         {/* PÁGINA: REDEFINIR SENHA */}
         {currentPage === 'reset-password' && (
           <div className="card auth-box">
-            <h2 className="mb-2 text-center font-serif-title" style={{ color: 'var(--color-primary)' }}>Cadastrar Nova Senha</h2>
+            <h2 className="mb-2 text-center font-serif-title text-primary">Cadastrar Nova Senha</h2>
             <p className="text-muted text-center mb-5">
               Informe o e-mail, o código do token recebido e sua nova senha de acesso
             </p>
@@ -5418,7 +5418,7 @@ NEWFILEENCODING:NONE
                           ▶
                         </button>
                       </div>
-                      <p className="text-muted mt-2" style={{ fontSize: 'var(--fs-sm)' }}>{bookGalleryIndex + 1} / {selectedDetailBook.images.length} (Clique para ampliar)</p>
+                      <p className="text-muted mt-2 text-sm">{bookGalleryIndex + 1} / {selectedDetailBook.images.length} (Clique para ampliar)</p>
                     </div>
                   </div>
                 )}
@@ -5659,7 +5659,7 @@ NEWFILEENCODING:NONE
                       </div>
                       <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{displayProfession}</div>
                       <div className="homeopath-contact-item" style={{ marginBottom: '0.25rem', fontSize: 'var(--fs-sm)' }}>📍 {h.city}</div>
-                      {h.phone && <div className="homeopath-contact-item" style={{ fontSize: 'var(--fs-sm)' }}>📞 {h.phone}</div>}
+                      {h.phone && <div className="homeopath-contact-item text-sm">📞 {h.phone}</div>}
                     </div>
                   </div>
                 );
@@ -6907,7 +6907,7 @@ NEWFILEENCODING:NONE
                       {renderProfileFormFields(user, false, profileProfession, setProfileProfession)}
 
                       {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR */}
-                      <h4 className="mt-5 mb-3 section-title-underlined-thin" style={{ color: 'var(--color-primary)' }}>
+                      <h4 className="mt-5 mb-3 section-title-underlined-thin text-primary">
                         🏦 Informações Bancárias para Repasses & Honorários
                       </h4>
                       <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '1rem' }}>
@@ -6937,7 +6937,7 @@ NEWFILEENCODING:NONE
                           <input className="form-input" type="text" name="pix_key" defaultValue={user?.pix_key || ''} placeholder="ex: carlos@tosb.com ou CPF 000.000.000-00" disabled readOnly style={{ backgroundColor: '#e2e8f0', cursor: 'not-allowed' }} />
                         </div>
                       </div>
-                      <div className="error-text-bold mb-4" style={{ fontSize: 'var(--fs-sm)' }}>⚠️ Para alterar seus dados bancários, solicite à administração.</div>
+                      <div className="error-text-bold mb-4 text-sm">⚠️ Para alterar seus dados bancários, solicite à administração.</div>
                       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                         <button className="btn btn-primary" type="submit">Atualizar Meus Dados</button>
                       </div>
@@ -7203,7 +7203,7 @@ NEWFILEENCODING:NONE
                           <h4 className="mb-2" style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             💰 Valores & Remuneração dos Professores Cadastrados
                           </h4>
-                          <p className="text-muted mb-4" style={{ fontSize: 'var(--fs-sm)' }}>
+                          <p className="text-muted mb-4 text-sm">
                             Defina os honorários para cada professor vinculado a este curso. Selecione se é <strong>Hora Aula</strong>, <strong>Valor Fixo</strong> ou <strong>Percentual</strong>. As alterações são gravadas no histórico para consulta.
                           </p>
 
@@ -7232,7 +7232,7 @@ NEWFILEENCODING:NONE
 
                                   <div className="grid-3col" style={{ gap: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                                     <div>
-                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Modalidade</label>
+                                      <label className="form-label text-sm">Modalidade</label>
                                       <select
                                         className="form-input"
                                         name={`payment_type_${t.id}`}
@@ -7247,7 +7247,7 @@ NEWFILEENCODING:NONE
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Unidade</label>
+                                      <label className="form-label text-sm">Unidade</label>
                                       <select
                                         className="form-input"
                                         name={`payment_unit_${t.id}`}
@@ -7270,7 +7270,7 @@ NEWFILEENCODING:NONE
                                     </div>
 
                                     <div>
-                                      <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor / Taxa</label>
+                                      <label className="form-label text-sm">Valor / Taxa</label>
                                       <input
                                         className="form-input"
                                         type="number"
@@ -7414,7 +7414,7 @@ NEWFILEENCODING:NONE
                                           <td><small className="text-muted">{dateStr}</small></td>
                                           <td><strong>{h.teacher_name}</strong></td>
                                           <td><span className="course-type-badge">{typeLabel}</span></td>
-                                          <td><strong style={{ color: 'var(--color-primary)' }}>{rateStr}</strong></td>
+                                          <td><strong className="text-primary">{rateStr}</strong></td>
                                           <td><small>{h.notes || 'Atualização no cadastro'}</small></td>
                                         </tr>
                                       );
@@ -7498,7 +7498,7 @@ NEWFILEENCODING:NONE
                           <label className="form-label" style={{ fontWeight: '600', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             🖼️ Galeria de Fotos da Obra (Páginas, Sumário, Lombada)
                           </label>
-                          <p className="text-muted mb-3" style={{ fontSize: 'var(--fs-sm)' }}>
+                          <p className="text-muted mb-3 text-sm">
                             Adicione fotos adicionais do livro para que os alunos/leitores possam folhear a obra na página de detalhes.
                           </p>
 
@@ -7662,7 +7662,7 @@ NEWFILEENCODING:NONE
 
                         <div className="grid-2col" style={{ marginBottom: '1.5rem' }}>
                           <div className="form-group">
-                            <label className="form-label">Perfil <span style={{ color: 'red' }}>*</span></label>
+                            <label className="form-label">Perfil <span className="text-error">*</span></label>
                             <select
                               className="form-input"
                               name="role"
@@ -7681,7 +7681,7 @@ NEWFILEENCODING:NONE
                             </select>
                           </div>
                           <div className="form-group">
-                            <label className="form-label">Status da conta <span style={{ color: 'red' }}>*</span></label>
+                            <label className="form-label">Status da conta <span className="text-error">*</span></label>
                             <select
                               className="form-input"
                               name="status"
@@ -7728,7 +7728,7 @@ NEWFILEENCODING:NONE
                             </div>
 
                             {/* SEÇÃO: DADOS BANCÁRIOS DO PROFESSOR PARA ADM */}
-                            <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
+                            <h5 className="section-title-underlined-thin mt-4 mb-3 text-primary">
                               🏦 Informações Bancárias do Docente (Para Depósito de Honorários)
                             </h5>
                             <div className="grid-2col">
@@ -7753,7 +7753,7 @@ NEWFILEENCODING:NONE
                             </div>
 
                             {/* SEÇÃO: FORMA DE RECEBIMENTO DO PROFESSOR POR CURSO */}
-                            <h5 className="section-title-underlined-thin mt-4 mb-3" style={{ color: 'var(--color-primary)' }}>
+                            <h5 className="section-title-underlined-thin mt-4 mb-3 text-primary">
                               💰 Forma de Recebimento do Docente por Curso Vinculado
                             </h5>
                             <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: '1rem' }}>
@@ -7770,7 +7770,7 @@ NEWFILEENCODING:NONE
                                     </div>
                                     <div className="grid-2col" style={{ gap: '0.5rem' }}>
                                       <div>
-                                        <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Forma de Recebimento</label>
+                                        <label className="form-label text-sm">Forma de Recebimento</label>
                                         <select
                                           className="form-input"
                                           name={`payment_type_${c.id}`}
@@ -7783,7 +7783,7 @@ NEWFILEENCODING:NONE
                                         </select>
                                       </div>
                                       <div>
-                                        <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Valor da Remuneração / Taxa</label>
+                                        <label className="form-label text-sm">Valor da Remuneração / Taxa</label>
                                         <input
                                           className="form-input"
                                           type="number"
@@ -7987,22 +7987,22 @@ NEWFILEENCODING:NONE
                       {financeTab === 'overview' ? (
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', maxWidth: '500px' }}>
                           <div style={{ flex: 1 }}>
-                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Data Inicial (De)</label>
+                            <label className="form-label text-sm">Data Inicial (De)</label>
                             <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Data Final (Até)</label>
+                            <label className="form-label text-sm">Data Final (Até)</label>
                             <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
                           </div>
                         </div>
                       ) : (
                         <div className="grid-3col">
                           <div className="form-group mb-0">
-                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Pesquisar (Aluno, Transação, Descrição)</label>
+                            <label className="form-label text-sm">Pesquisar (Aluno, Transação, Descrição)</label>
                             <input type="text" className="form-input" style={{ padding: '0.4rem' }} value={financeSearch} onChange={(e) => setFinanceSearch(e.target.value)} placeholder="Ex: ASAAS_123..." />
                           </div>
                           <div className="form-group mb-0">
-                            <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Status / Tipo</label>
+                            <label className="form-label text-sm">Status / Tipo</label>
                             <select className="form-input" style={{ padding: '0.4rem' }} value={financeFilter} onChange={(e) => setFinanceFilter(e.target.value)}>
                               <option value="ALL">Todos</option>
                               <option value="CONFIRMED">Confirmado</option>
@@ -8013,11 +8013,11 @@ NEWFILEENCODING:NONE
                           </div>
                           <div className="form-group mb-0" style={{ display: 'flex', gap: '0.5rem' }}>
                             <div style={{ flex: 1 }}>
-                              <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>De</label>
+                              <label className="form-label text-sm">De</label>
                               <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.start} onChange={(e) => setFinanceDateRange({ ...financeDateRange, start: e.target.value })} />
                             </div>
                             <div style={{ flex: 1 }}>
-                              <label className="form-label" style={{ fontSize: 'var(--fs-sm)' }}>Até</label>
+                              <label className="form-label text-sm">Até</label>
                               <input type="date" className="form-input" style={{ padding: '0.4rem' }} value={financeDateRange.end} onChange={(e) => setFinanceDateRange({ ...financeDateRange, end: e.target.value })} />
                             </div>
                           </div>
@@ -8120,7 +8120,7 @@ NEWFILEENCODING:NONE
 
                         {editingPayment && (
                           <form onSubmit={handleSavePayment} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
-                            <h4 className="mb-4" style={{ color: 'var(--color-primary)' }}>{editingPayment.id ? 'Editar Entrada / Fatura' : 'Cadastrar Nova Entrada'}</h4>
+                            <h4 className="mb-4 text-primary">{editingPayment.id ? 'Editar Entrada / Fatura' : 'Cadastrar Nova Entrada'}</h4>
                             <input type="hidden" name="id" defaultValue={editingPayment.id || ''} />
 
                             <div className="grid-2col mb-3">
@@ -8692,7 +8692,7 @@ NEWFILEENCODING:NONE
                       <div className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '2px solid var(--color-primary)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
                           <div>
-                            <span className="badge-paid" style={{ fontSize: 'var(--fs-sm)' }}>Painel de Gestão da Turma</span>
+                            <span className="badge-paid text-sm">Painel de Gestão da Turma</span>
                             <h3 style={{ margin: '0.25rem 0 0 0', color: 'var(--color-primary)' }}>🏫 {viewingClassDetails.name}</h3>
                             {(() => {
                               const crs = mockDb.courses.find(c => c.id === viewingClassDetails.course_id);
@@ -8757,7 +8757,7 @@ NEWFILEENCODING:NONE
                                   </div>
                                 ))}
                               {!(viewingClassDetails.teacher_ids || []).length && (
-                                <p className="text-muted text-center py-3" style={{ fontSize: 'var(--fs-sm)' }}>Nenhum professor alocado nesta turma ainda.</p>
+                                <p className="text-muted text-center py-3 text-sm">Nenhum professor alocado nesta turma ainda.</p>
                               )}
                             </div>
                           </div>
@@ -8954,7 +8954,7 @@ NEWFILEENCODING:NONE
                                   );
                                 })}
                               {!(viewingClassDetails.student_ids || []).length && (
-                                <p className="text-muted text-center py-3" style={{ fontSize: 'var(--fs-sm)' }}>Nenhum aluno matriculado nesta turma ainda.</p>
+                                <p className="text-muted text-center py-3 text-sm">Nenhum aluno matriculado nesta turma ainda.</p>
                               )}
                             </div>
                           </div>
@@ -9145,7 +9145,7 @@ NEWFILEENCODING:NONE
                     <div className="grid-2col" style={{ gap: '2rem', alignItems: 'start' }}>
                       {/* COLUNA ESQUERDA: FORMULÁRIO EDITOR DE TEMPLATE */}
                       <div className="card p-4" style={{ border: '1px solid var(--color-border)' }}>
-                        <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>⚙️ Personalização do Template</h4>
+                        <h4 className="mb-3 text-primary">⚙️ Personalização do Template</h4>
 
                         {/* UPLOAD / URL DA IMAGEM DE FUNDO DO MODELO */}
                         <div className="form-group mb-3">
@@ -9251,7 +9251,7 @@ NEWFILEENCODING:NONE
 
                       {/* COLUNA DIREITA: PREVIEW INTERATIVO DO CERTIFICADO */}
                       <div>
-                        <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>👁️ Pré-visualização Interativa do Modelo</h4>
+                        <h4 className="mb-3 text-primary">👁️ Pré-visualização Interativa do Modelo</h4>
 
                         <div style={{ position: 'relative', width: '100%', aspectRatio: '1.414', backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', border: '1px solid var(--color-border)' }}>
                           <img
@@ -9478,7 +9478,7 @@ NEWFILEENCODING:NONE
 
                     {/* Form de Concessão de Liberação Temporária */}
                     <form onSubmit={handleGrantTemporaryUnlock} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
-                      <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Conceder Nova Liberação Temporária</h4>
+                      <h4 className="mb-3 text-primary">Conceder Nova Liberação Temporária</h4>
 
                       <div className="grid-2col mb-3">
                         <div className="form-group">
@@ -9592,7 +9592,7 @@ NEWFILEENCODING:NONE
 
                     {/* Formulário de Disparo da Oferta */}
                     <form onSubmit={handleSendPromotionalCampaign} className="card p-5 mb-5" style={{ backgroundColor: '#f8fafc', border: '1px dashed var(--color-primary)' }}>
-                      <h4 className="mb-3" style={{ color: 'var(--color-primary)' }}>Criar Nova Campanha de E-mail Marketing</h4>
+                      <h4 className="mb-3 text-primary">Criar Nova Campanha de E-mail Marketing</h4>
 
                       <div className="grid-2col mb-3">
                         <div className="form-group">
@@ -9855,8 +9855,8 @@ NEWFILEENCODING:NONE
                 </div>
               </div>
 
-              <h3 className="mb-2" style={{ color: 'var(--color-primary)' }}>{printingReport.title}</h3>
-              <p className="text-muted mb-4" style={{ fontSize: 'var(--fs-sm)' }}>{printingReport.subtitle}</p>
+              <h3 className="mb-2 text-primary">{printingReport.title}</h3>
+              <p className="text-muted mb-4 text-sm">{printingReport.subtitle}</p>
 
               <table className="lms-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
                 <thead>
