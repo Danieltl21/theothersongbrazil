@@ -17,16 +17,24 @@ INSERT INTO `platform_settings` (`key`, `value`) VALUES
 ('asaas_environment', 'sandbox');
 
 -- 2. Inserir Usuários
--- Admin: admin@theothersongbrazil.com.br / senha: admin123
+-- Admin: admin@theothersongbrazil.com.br / admin@lms.com (senha: admin123 ou senha123)
 -- Professores e Alunos: senha: senha123
 INSERT INTO `users` (
     `id`, `name`, `email`, `password_hash`, `role`, `status`, `is_homeopath`, `phone`, `cpf`,
     `profession`, `billing_zip`, `billing_street`, `billing_number`, `billing_neighborhood`, `billing_city`, `billing_state`,
     `terms_accepted`, `general_terms_accepted`
-) VALUES (
+) VALUES 
+(
     'usr-admin-001', 'Administração TOSB', 'admin@theothersongbrazil.com.br',
     '$2a$10$4nSfW/4I243At.Uh6E6l6.PII14ZNgb2XqeXMOQaqs7s.7s5fSRSa', -- admin123
     'ADMIN', 'ACTIVE', 1, '(11) 99999-0000', '000.000.000-00',
+    'Administrador', '01310-100', 'Av. Paulista', '1000', 'Bela Vista', 'São Paulo', 'SP',
+    1, 1
+),
+(
+    'usr-admin-002', 'Admin Principal', 'admin@lms.com',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
+    'ADMIN', 'ACTIVE', 1, '(11) 99999-0001', '000.000.000-01',
     'Administrador', '01310-100', 'Av. Paulista', '1000', 'Bela Vista', 'São Paulo', 'SP',
     1, 1
 );
@@ -58,6 +66,16 @@ INSERT INTO `users` (
     '22041-001', 'Av. Copacabana', '200', 'Copacabana', 'Rio de Janeiro', 'RJ',
     '22041-001', 'Av. Copacabana', '200', 'Copacabana', 'Rio de Janeiro', 'RJ', '(21) 2222-2222',
     1, 1
+),
+(
+    'usr-teacher-003', 'Dr. Carlos Eduardo (TOSB)', 'carlos@tosb.com',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
+    'TEACHER', 'ACTIVE', 1, '(41) 98888-3333', '123.456.789-00',
+    'médico(a)', 'CRM', '12345', 'PR', 'Homeopatia e Método Sensação',
+    'Médico Homeopata especialista no Método Sensação.',
+    '80000-000', 'Rua XV de Novembro', '100', 'Centro', 'Curitiba', 'PR',
+    '80000-000', 'Rua XV de Novembro', '100', 'Centro', 'Curitiba', 'PR', '(41) 3333-5555',
+    1, 1
 );
 
 -- Alunos
@@ -78,12 +96,30 @@ INSERT INTO `users` (
     1, 1
 ),
 (
-    'usr-student-002', 'Dr. Carlos Eduardo Rocha', 'carloseduardo@gmail.com',
+    'usr-student-002', 'Dra. Ana Paula (Aluna)', 'ana@lms.com',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
+    'STUDENT', 'ACTIVE', 1, '(11) 96666-3333', '333.333.333-34',
+    'médico(a)', 'CRM', '98765', 'SP', 'Pediatria e Homeopatia',
+    '04571-010', 'Rua Berrini', '150', 'Brooklin', 'São Paulo', 'SP',
+    '04571-010', 'Rua Berrini', '150', 'Brooklin', 'São Paulo', 'SP', '(11) 4444-3333',
+    1, 1
+),
+(
+    'usr-student-003', 'Dr. Carlos Eduardo Rocha', 'carloseduardo@gmail.com',
     '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
     'STUDENT', 'ACTIVE', 1, '(31) 95555-4444', '444.444.444-44',
     'odontologista', 'CRO', '54321', 'MG', 'Odontologia Integrativa',
     '30130-000', 'Av. Afonso Pena', '800', 'Centro', 'Belo Horizonte', 'MG',
     '30130-000', 'Av. Afonso Pena', '800', 'Centro', 'Belo Horizonte', 'MG', '(31) 3333-4444',
+    1, 1
+),
+(
+    'usr-student-004', 'Dr. Lucas Mendes (Inadimplente)', 'lucas.inadimplente@lms.com',
+    '$2a$10$EcirFwafp41hRkpsFPw.7estfeTDBmI.qZFf9stH/xBQuZbSMmGXK', -- senha123
+    'STUDENT', 'SUSPENDED', 1, '(21) 94444-5555', '555.555.555-55',
+    'médico(a)', 'CRM', '44556', 'RJ', 'Homeopatia Clínica',
+    '20000-000', 'Av. Rio Branco', '100', 'Centro', 'Rio de Janeiro', 'RJ',
+    '20000-000', 'Av. Rio Branco', '100', 'Centro', 'Rio de Janeiro', 'RJ', '(21) 2222-5555',
     1, 1
 );
 

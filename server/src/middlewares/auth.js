@@ -42,25 +42,27 @@ export const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ message: 'Sessão expirada ou invalidada por outro login.' });
     }
 
-    // Atualizar última atividade da sessão
-    await pool.query(
-      'UPDATE active_sessions SET last_activity = NOW() WHERE token = $2',
-      [user.id, token]
-    );
-
-    // Registrar o log de acesso básico para segurança
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-    const userAgent = req.headers['user-agent'] || 'Desconhecido';
-    
-    await pool.query(
-      'INSERT INTO access_logs (user_id, ip_address, user_agent, content_accessed) VALUES ($1, $2, $3, $4)',
-      [user.id, ip, userAgent, req.originalUrl]
-    );
+    // Atualizar última atividade da sessão e registrar log (não bloqueante)
+    try {
+      await pool.query(
+        'UPDATE active_sessions SET last_activity = NOW() WHERE token = $1',
+        [token]
+      );
+      const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+      const userAgent = req.headers['user-agent'] || 'Desconhecido';
+      await pool.query(
+        'INSERT INTO access_logs (user_id, ip_address, user_agent, content_accessed) VALUES ($1, $2, $3, $4)',
+        [user.id, ip, userAgent, req.originalUrl]
+      );
+    } catch (auditErr) {
+      console.warn('[Auth Middleware Warning]: Falha ao atualizar estatísticas da sessão:', auditErr.message);
+    }
 
     req.user = user;
     req.token = token;
     next();
   } catch (error) {
+    console.error('[Auth Middleware Error]:', error.message);
     return res.status(403).json({ message: 'Token inválido ou expirado.' });
   }
 };

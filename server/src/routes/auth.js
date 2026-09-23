@@ -78,6 +78,7 @@ router.post('/register', async (req, res) => {
     // Verificar se e-mail já existe
     const checkEmail = await client.query('SELECT id FROM users WHERE email = $1', [email]);
     if (checkEmail.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'E-mail já cadastrado.' });
     }
 
@@ -189,7 +190,7 @@ router.post('/login', async (req, res) => {
       await pool.query("UPDATE users SET status = 'SUSPENDED' WHERE id = $1", [user.id]);
       // Remove todas as sessões ativas
       await pool.query('DELETE FROM active_sessions WHERE user_id = $1', [user.id]);
-      
+
       // Registrar log de bloqueio de segurança
       await pool.query(
         'INSERT INTO access_logs (user_id, ip_address, user_agent, content_accessed) VALUES ($1, $2, $3, $4)',
@@ -523,6 +524,67 @@ router.post('/reset-password', async (req, res) => {
 
 
 
+// Listar Todos os Usuários por ADM
+router.get('/admin/users', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  try {
+    const result = await pool.query('SELECT * FROM users ORDER BY name ASC');
+    const users = result.rows.map(u => {
+      delete u.password_hash;
+      return u;
+    });
+    res.json(users);
+  } catch (error) {
+    console.error('Erro ao listar usuários ADM:', error);
+    res.status(500).json({ message: 'Erro ao carregar lista de usuários.' });
+  }
+});
+
+// Criar Usuário por ADM
+router.post('/admin/users', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const { name, email, password, role, status, is_homeopath, phone, cpf, profession } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Nome e e-mail são obrigatórios.' });
+  }
+
+  try {
+    const checkEmail = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (checkEmail.rows.length > 0) {
+      return res.status(400).json({ message: 'E-mail já cadastrado.' });
+    }
+
+    const userId = req.body.id || uuidv4();
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password || 'senha123', salt);
+
+    await pool.query(
+      `INSERT INTO users (id, name, email, password_hash, role, status, is_homeopath, phone, cpf, profession)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        userId,
+        name,
+        email,
+        passwordHash,
+        role || 'STUDENT',
+        status || 'ACTIVE',
+        is_homeopath !== undefined ? !!is_homeopath : false,
+        phone || '',
+        cpf || '',
+        profession || ''
+      ]
+    );
+
+    const newUser = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    delete newUser.rows[0].password_hash;
+    res.status(201).json({ message: 'Usuário criado com sucesso!', user: newUser.rows[0] });
+  } catch (error) {
+    console.error('Erro ao criar usuário por ADM:', error);
+    res.status(500).json({ message: 'Erro ao criar usuário.' });
+  }
+});
+
 // Atualizar Usuário por ADM (Incluindo Dados Bancários e Moeda de Pagamento)
 router.put('/admin/users/:id', authenticateToken, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
@@ -571,6 +633,20 @@ router.put('/admin/users/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Excluir Usuário por ADM
+router.delete('/admin/users/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const targetId = req.params.id;
+
+  try {
+    await pool.query('DELETE FROM users WHERE id = $1', [targetId]);
+    res.json({ message: 'Usuário excluído com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error);
+    res.status(500).json({ message: 'Erro ao excluir usuário.' });
+  }
+});
+
 // Obter lista de homeopatas cadastrados (Público)
 router.get('/homeopaths', async (req, res) => {
   try {
@@ -583,16 +659,16 @@ router.get('/homeopaths', async (req, res) => {
       ORDER BY name ASC
     `;
     const result = await pool.query(queryStr);
-    
+
     const homeopaths = result.rows.map(row => {
       let reg = '';
       if (row.council_type && row.council_number) {
         reg = `${row.council_type}-${row.council_state || ''} ${row.council_number}`;
       }
-      
+
       let specialty = row.specialty || '';
       let city = (row.commercial_city && row.commercial_state) ? `${row.commercial_city} - ${row.commercial_state}` : 'Não informado';
-      
+
       return {
         name: row.name,
         reg: reg.trim(),
@@ -603,7 +679,7 @@ router.get('/homeopaths', async (req, res) => {
         email: row.email
       };
     });
-    
+
     res.json(homeopaths);
   } catch (error) {
     console.error(error);

@@ -1,10 +1,11 @@
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import pool from '../db/index.js';
 import { authenticateToken } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// Listar Cursos
+// 1. Listar Cursos
 router.get('/', authenticateToken, async (req, res) => {
   const { type } = req.query;
   try {
@@ -20,7 +21,7 @@ router.get('/', authenticateToken, async (req, res) => {
     const coursesResult = await pool.query(queryText, queryParams);
 
     // Cruzar com matrículas do usuário logado se for estudante
-    if (req.user.role === 'STUDENT') {
+    if (req.user && req.user.role === 'STUDENT') {
       const enrollResult = await pool.query(
         'SELECT course_id, expires_at, status FROM enrollments WHERE student_id = $1',
         [req.user.id]
@@ -46,18 +47,104 @@ router.get('/', authenticateToken, async (req, res) => {
 
     res.json(coursesResult.rows);
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao listar cursos:', error);
     res.status(500).json({ message: 'Erro ao buscar cursos.' });
   }
 });
 
-// Matricular aluno em Curso Livre (6 meses de acesso grátis)
+// Listar todos os cursos para Administradores e Professores
+router.get('/all-admin', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM courses ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao listar todos os cursos:', error);
+    res.status(500).json({ message: 'Erro ao carregar lista de cursos.' });
+  }
+});
+
+// 2. Criar Curso (ADM)
+router.post('/admin', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const { title, description, type, duration_days, finishing_message, active, teacher_id } = req.body;
+
+  if (!title || !type) {
+    return res.status(400).json({ message: 'Título e tipo de curso são obrigatórios.' });
+  }
+
+  try {
+    const courseId = req.body.id || `course-${Date.now()}`;
+    await pool.query(
+      `INSERT INTO courses (id, title, description, type, duration_days, finishing_message, active, teacher_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        courseId,
+        title,
+        description || '',
+        type,
+        duration_days || 180,
+        finishing_message || '',
+        active !== undefined ? active : true,
+        teacher_id || null
+      ]
+    );
+
+    const newCourse = await pool.query('SELECT * FROM courses WHERE id = $1', [courseId]);
+    res.status(201).json({ message: 'Curso criado com sucesso!', course: newCourse.rows[0] });
+  } catch (error) {
+    console.error('Erro ao criar curso:', error);
+    res.status(500).json({ message: 'Erro interno ao criar curso.' });
+  }
+});
+
+// 3. Editar Curso (ADM)
+router.put('/admin/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const courseId = req.params.id;
+  const { title, description, type, duration_days, finishing_message, active, teacher_id } = req.body;
+
+  try {
+    await pool.query(
+      `UPDATE courses SET
+        title = COALESCE($1, title),
+        description = COALESCE($2, description),
+        type = COALESCE($3, type),
+        duration_days = COALESCE($4, duration_days),
+        finishing_message = COALESCE($5, finishing_message),
+        active = COALESCE($6, active),
+        teacher_id = COALESCE($7, teacher_id)
+       WHERE id = $8`,
+      [title, description, type, duration_days, finishing_message, active, teacher_id, courseId]
+    );
+
+    const updatedCourse = await pool.query('SELECT * FROM courses WHERE id = $1', [courseId]);
+    res.json({ message: 'Curso atualizado com sucesso!', course: updatedCourse.rows[0] });
+  } catch (error) {
+    console.error('Erro ao atualizar curso:', error);
+    res.status(500).json({ message: 'Erro ao atualizar curso.' });
+  }
+});
+
+// 4. Excluir Curso (ADM)
+router.delete('/admin/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const courseId = req.params.id;
+
+  try {
+    await pool.query('DELETE FROM courses WHERE id = $1', [courseId]);
+    res.json({ message: 'Curso excluído com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir curso:', error);
+    res.status(500).json({ message: 'Erro ao excluir curso.' });
+  }
+});
+
+// 5. Matricular aluno em Curso Livre
 router.post('/:id/enroll-free', authenticateToken, async (req, res) => {
   const courseId = req.params.id;
   const studentId = req.user.id;
 
   try {
-    // Verificar se o curso é grátis
     const courseResult = await pool.query('SELECT type FROM courses WHERE id = $1', [courseId]);
     if (courseResult.rows.length === 0) {
       return res.status(404).json({ message: 'Curso não encontrado.' });
@@ -65,23 +152,23 @@ router.post('/:id/enroll-free', authenticateToken, async (req, res) => {
 
     const course = courseResult.rows[0];
     if (course.type !== 'FREE') {
-      return res.status(400).json({ message: 'Este curso exige pagamento e não pode ser adquirido gratuitamente.' });
+      return res.status(400).json({ message: 'Este curso exige pagamento.' });
     }
 
-    // Verificar se já está matriculado
     const checkEnroll = await pool.query(
       'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
       [studentId, courseId]
     );
 
     if (checkEnroll.rows.length > 0) {
-      return res.status(400).json({ message: 'Você já possui uma matrícula ativa ou expirada neste curso.' });
+      return res.status(400).json({ message: 'Você já possui uma matrícula neste curso.' });
     }
 
-    // Inserir matrícula por 6 meses (180 dias)
+    const enrollmentId = uuidv4();
+    const expiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
     await pool.query(
-      "INSERT INTO enrollments (student_id, course_id, expires_at, status) VALUES ($1, $2, NOW() + INTERVAL '180 days', 'ACTIVE')",
-      [studentId, courseId]
+      "INSERT INTO enrollments (id, student_id, course_id, expires_at, status) VALUES ($1, $2, $3, $4, 'ACTIVE')",
+      [enrollmentId, studentId, courseId, expiresAt]
     );
 
     res.json({ message: 'Matrícula realizada com sucesso! Acesso liberado por 6 meses.' });
@@ -91,7 +178,7 @@ router.post('/:id/enroll-free', authenticateToken, async (req, res) => {
   }
 });
 
-// Detalhes do Curso (Módulos e Aulas)
+// 6. Detalhes do Curso (Módulos e Aulas)
 router.get('/:id', authenticateToken, async (req, res) => {
   const courseId = req.params.id;
   const userId = req.user.id;
@@ -103,8 +190,6 @@ router.get('/:id', authenticateToken, async (req, res) => {
     }
 
     const course = courseResult.rows[0];
-
-    // Se for estudante, validar se possui matrícula ativa
     let hasAccess = req.user.role !== 'STUDENT';
     let enrollmentDetails = null;
 
@@ -132,12 +217,11 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     if (!hasAccess) {
       return res.status(403).json({
-        message: 'Você não tem uma matrícula ativa neste curso ou seu acesso de 6 meses expirou.',
+        message: 'Você não tem uma matrícula ativa neste curso ou seu acesso expirou.',
         enrollment: enrollmentDetails
       });
     }
 
-    // Buscar Módulos e Aulas
     const modulesResult = await pool.query(
       'SELECT * FROM modules WHERE course_id = $1 ORDER BY display_order ASC',
       [courseId]
@@ -147,16 +231,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     for (let i = 0; i < modules.length; i++) {
       const lessonsResult = await pool.query(
-        'SELECT l.*, p.seconds_watched, p.completed FROM lessons l ' +
-        'LEFT JOIN lesson_progress p ON p.lesson_id = l.id AND p.student_id = $2 ' +
-        'WHERE l.module_id = $1 ORDER BY l.display_order ASC',
-        [modules[i].id, userId]
+        'SELECT * FROM lessons WHERE module_id = $1 ORDER BY display_order ASC',
+        [modules[i].id]
       );
-      modules[i].lessons = lessonsResult.rows.map(lesson => ({
-        ...lesson,
-        completed: lesson.completed || false,
-        seconds_watched: lesson.seconds_watched || 0
-      }));
+      modules[i].lessons = lessonsResult.rows;
     }
 
     res.json({
@@ -170,222 +248,182 @@ router.get('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Atualizar progresso da aula e marcar conclusão
-router.post('/lessons/:lessonId/progress', authenticateToken, async (req, res) => {
-  const { lessonId } = req.params;
-  const { secondsWatched } = req.body;
-  const studentId = req.user.id;
-
-  if (secondsWatched === undefined) {
-    return res.status(400).json({ message: 'O tempo assistido é obrigatório.' });
+// 7. MÓDULOS E AULAS - CRUD
+router.post('/admin/:courseId/modules', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
   }
+  const { courseId } = req.params;
+  const { title, display_order } = req.body;
 
   try {
-    // Buscar duração total do vídeo
-    const lessonResult = await pool.query('SELECT duration_seconds FROM lessons WHERE id = $1', [lessonId]);
-    if (lessonResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Aula não encontrada.' });
-    }
-
-    const { duration_seconds } = lessonResult.rows[0];
-    
-    // Regra da pós-graduação ou padrão: 60% assistido = Completo
-    const targetSeconds = Math.floor(duration_seconds * 0.60);
-    const completed = secondsWatched >= targetSeconds;
-
-    // UPSERT no lesson_progress
-    const progressResult = await pool.query(
-      'INSERT INTO lesson_progress (student_id, lesson_id, seconds_watched, completed, updated_at) ' +
-      'VALUES ($1, $2, $3, $4, NOW()) ' +
-      'ON CONFLICT (student_id, lesson_id) ' +
-      'DO UPDATE SET seconds_watched = GREATEST(lesson_progress.seconds_watched, EXCLUDED.seconds_watched), ' +
-      'completed = CASE WHEN lesson_progress.completed THEN TRUE ELSE EXCLUDED.completed END, ' +
-      'updated_at = NOW() ' +
-      'RETURNING completed, seconds_watched',
-      [studentId, lessonId, secondsWatched, completed]
-    );
-
-    res.json({
-      message: 'Progresso salvo.',
-      progress: progressResult.rows[0]
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao registrar progresso.' });
-  }
-});
-
-// Detalhes do Quiz (Oculta respostas corretas do aluno)
-router.get('/lessons/:lessonId/quiz', authenticateToken, async (req, res) => {
-  const { lessonId } = req.params;
-  const studentId = req.user.id;
-
-  try {
-    const quizResult = await pool.query('SELECT * FROM quizzes WHERE lesson_id = $1', [lessonId]);
-    if (quizResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Esta aula não possui um Quiz associado.' });
-    }
-
-    const quiz = quizResult.rows[0];
-
-    // Buscar questões
-    const questionsResult = await pool.query(
-      'SELECT id, question_text, options FROM quiz_questions WHERE quiz_id = $1',
-      [quiz.id]
-    );
-
-    // Buscar tentativas prévias do aluno
-    const attemptsResult = await pool.query(
-      'SELECT score, passed, attempt_number, completed_at FROM quiz_attempts WHERE student_id = $1 AND quiz_id = $2 ORDER BY attempt_number DESC',
-      [studentId, quiz.id]
-    );
-
-    res.json({
-      quiz: {
-        id: quiz.id,
-        title: quiz.title,
-        max_attempts: quiz.max_attempts,
-        passing_score: quiz.passing_score,
-        questions: questionsResult.rows
-      },
-      attempts: attemptsResult.rows
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao carregar o quiz.' });
-  }
-});
-
-// Responder Quiz (2 tentativas, aprovação mínima de 70%)
-router.post('/quizzes/:quizId/submit', authenticateToken, async (req, res) => {
-  const { quizId } = req.params;
-  const { answers } = req.body; // Array de inteiros indicando os índices selecionados [1, 2]
-  const studentId = req.user.id;
-
-  if (!answers || !Array.isArray(answers)) {
-    return res.status(400).json({ message: 'Respostas devem ser enviadas como uma lista ordenada.' });
-  }
-
-  try {
-    // Buscar definições do quiz
-    const quizResult = await pool.query('SELECT * FROM quizzes WHERE id = $1', [quizId]);
-    if (quizResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Quiz não encontrado.' });
-    }
-    const quiz = quizResult.rows[0];
-
-    // Contar tentativas anteriores
-    const attemptsCountResult = await pool.query(
-      'SELECT COUNT(*)::int as count FROM quiz_attempts WHERE student_id = $1 AND quiz_id = $2',
-      [studentId, quizId]
-    );
-    const attemptNumber = attemptsCountResult.rows[0].count + 1;
-
-    if (attemptNumber > quiz.max_attempts) {
-      return res.status(403).json({
-        message: `Você já esgotou o número máximo de tentativas (${quiz.max_attempts}) para esta avaliação.`
-      });
-    }
-
-    // Buscar questões gabaritadas
-    const questionsResult = await pool.query(
-      'SELECT id, correct_option_index FROM quiz_questions WHERE quiz_id = $1 ORDER BY id ASC',
-      [quizId]
-    );
-
-    const questions = questionsResult.rows;
-    if (questions.length === 0) {
-      return res.status(400).json({ message: 'O Quiz não possui questões cadastradas.' });
-    }
-
-    let correctCount = 0;
-    questions.forEach((q, idx) => {
-      if (answers[idx] !== undefined && answers[idx] === q.correct_option_index) {
-        correctCount++;
-      }
-    });
-
-    const score = parseFloat(((correctCount / questions.length) * 100).toFixed(2));
-    const passed = score >= parseFloat(quiz.passing_score);
-
-    // Gravar tentativa
+    const moduleId = uuidv4();
     await pool.query(
-      'INSERT INTO quiz_attempts (student_id, quiz_id, score, passed, attempt_number) VALUES ($1, $2, $3, $4, $5)',
-      [studentId, quizId, score, passed, attemptNumber]
+      'INSERT INTO modules (id, course_id, title, display_order) VALUES ($1, $2, $3, $4)',
+      [moduleId, courseId, title || 'Novo Módulo', display_order || 1]
     );
-
-    res.json({
-      message: passed ? 'Parabéns, você foi aprovado!' : 'Infelizmente você não atingiu a nota mínima de 70%.',
-      score,
-      passed,
-      attemptNumber,
-      remainingAttempts: quiz.max_attempts - attemptNumber
-    });
+    const newModule = await pool.query('SELECT * FROM modules WHERE id = $1', [moduleId]);
+    res.status(201).json({ message: 'Módulo criado com sucesso!', module: newModule.rows[0] });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao processar quiz.' });
+    console.error('Erro ao criar módulo:', error);
+    res.status(500).json({ message: 'Erro ao criar módulo.' });
   }
 });
 
-// --- PLATFORM SETTINGS (Modelo de Certificado) ---
-router.get('/platform-settings', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT key, value FROM platform_settings');
-    const settings = {};
-    result.rows.forEach(r => { settings[r.key] = r.value; });
-    res.json(settings);
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar configurações.' });
+router.put('/admin/modules/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
   }
-});
+  const { id } = req.params;
+  const { title, display_order } = req.body;
 
-router.post('/admin-certificate-template', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
-  const { certificate_template_url } = req.body;
   try {
     await pool.query(
-      'INSERT INTO platform_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
-      ['certificate_template_url', certificate_template_url]
+      'UPDATE modules SET title = COALESCE($1, title), display_order = COALESCE($2, display_order) WHERE id = $3',
+      [title, display_order, id]
     );
-    res.json({ message: 'Modelo de certificado atualizado com sucesso!' });
+    res.json({ message: 'Módulo atualizado com sucesso!' });
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao salvar modelo de certificado.' });
+    console.error('Erro ao atualizar módulo:', error);
+    res.status(500).json({ message: 'Erro ao atualizar módulo.' });
   }
 });
 
-// --- GESTÃO DE LIVROS COM MÚLTIPLAS FOTOS ---
+router.delete('/admin/modules/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
+  }
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM modules WHERE id = $1', [id]);
+    res.json({ message: 'Módulo excluído com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir módulo:', error);
+    res.status(500).json({ message: 'Erro ao excluir módulo.' });
+  }
+});
+
+router.post('/admin/modules/:moduleId/lessons', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
+  }
+  const { moduleId } = req.params;
+  const { title, video_url, duration_seconds, display_order } = req.body;
+
+  try {
+    const lessonId = uuidv4();
+    await pool.query(
+      'INSERT INTO lessons (id, module_id, title, video_url, duration_seconds, display_order) VALUES ($1, $2, $3, $4, $5, $6)',
+      [lessonId, moduleId, title || 'Nova Aula', video_url || '', duration_seconds || 1800, display_order || 1]
+    );
+    const newLesson = await pool.query('SELECT * FROM lessons WHERE id = $1', [lessonId]);
+    res.status(201).json({ message: 'Aula criada com sucesso!', lesson: newLesson.rows[0] });
+  } catch (error) {
+    console.error('Erro ao criar aula:', error);
+    res.status(500).json({ message: 'Erro ao criar aula.' });
+  }
+});
+
+router.put('/admin/lessons/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
+  }
+  const { id } = req.params;
+  const { title, video_url, duration_seconds, display_order } = req.body;
+
+  try {
+    await pool.query(
+      `UPDATE lessons SET
+        title = COALESCE($1, title),
+        video_url = COALESCE($2, video_url),
+        duration_seconds = COALESCE($3, duration_seconds),
+        display_order = COALESCE($4, display_order)
+       WHERE id = $5`,
+      [title, video_url, duration_seconds, display_order, id]
+    );
+    res.json({ message: 'Aula atualizada com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao atualizar aula:', error);
+    res.status(500).json({ message: 'Erro ao atualizar aula.' });
+  }
+});
+
+router.delete('/admin/lessons/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER') {
+    return res.status(403).json({ message: 'Acesso negado.' });
+  }
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM lessons WHERE id = $1', [id]);
+    res.json({ message: 'Aula excluída com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir aula:', error);
+    res.status(500).json({ message: 'Erro ao excluir aula.' });
+  }
+});
+
+// 8. LIVROS - CRUD
 router.get('/books/all', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM books ORDER BY title ASC');
+    const result = await pool.query('SELECT * FROM books ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (error) {
+    console.error('Erro ao listar livros:', error);
     res.status(500).json({ message: 'Erro ao listar livros.' });
   }
 });
 
 router.post('/admin-books', authenticateToken, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
-  const { id, title, author, price, description, page_count, content_table, images } = req.body;
+  const { id, title, author, price, desc, page_count, content_table, images, image } = req.body;
+
+  if (!title || !author) {
+    return res.status(400).json({ message: 'Título e autor são obrigatórios.' });
+  }
+
   try {
     const bookId = id || `book-${Date.now()}`;
-    const imagesJson = JSON.stringify(images || []);
-    await pool.query(
-      `INSERT INTO books (id, title, author, price, description, page_count, content_table, images)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (id) DO UPDATE SET
-         title = EXCLUDED.title,
-         author = EXCLUDED.author,
-         price = EXCLUDED.price,
-         description = EXCLUDED.description,
-         page_count = EXCLUDED.page_count,
-         content_table = EXCLUDED.content_table,
-         images = EXCLUDED.images`,
-      [bookId, title, author, price, description, page_count, content_table, imagesJson]
-    );
-    res.json({ message: 'Livro salvo com sucesso!' });
+    const contentTableJson = typeof content_table === 'string' ? content_table : JSON.stringify(content_table || []);
+    const imagesJson = typeof images === 'string' ? images : JSON.stringify(images || []);
+    const coverImage = image || (Array.isArray(images) && images.length > 0 ? images[0] : '');
+
+    // Verificar se livro ja existe para UPDATE ou INSERT
+    const checkBook = await pool.query('SELECT id FROM books WHERE id = $1', [bookId]);
+
+    if (checkBook.rows.length > 0) {
+      await pool.query(
+        `UPDATE books SET
+          title = $1, author = $2, price = $3, \`desc\` = $4, page_count = $5,
+          content_table = $6, images = $7, image = $8
+         WHERE id = $9`,
+        [title, author, price || 0, desc || '', page_count || 0, contentTableJson, imagesJson, coverImage, bookId]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO books (id, title, author, price, \`desc\`, page_count, content_table, images, image)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [bookId, title, author, price || 0, desc || '', page_count || 0, contentTableJson, imagesJson, coverImage]
+      );
+    }
+
+    const updatedBook = await pool.query('SELECT * FROM books WHERE id = $1', [bookId]);
+    res.json({ message: 'Livro salvo com sucesso no banco de dados!', book: updatedBook.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao salvar livro:', error);
     res.status(500).json({ message: 'Erro ao salvar livro.' });
+  }
+});
+
+router.delete('/admin-books/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ message: 'Acesso negado.' });
+  const bookId = req.params.id;
+
+  try {
+    await pool.query('DELETE FROM books WHERE id = $1', [bookId]);
+    res.json({ message: 'Livro excluído com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao excluir livro:', error);
+    res.status(500).json({ message: 'Erro ao excluir livro.' });
   }
 });
 

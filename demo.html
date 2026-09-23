@@ -3305,6 +3305,7 @@ textarea.form-input {
   <!-- Lógica React Completa -->
   <script type="text/babel">
 const { useState, useEffect, useRef } = React;
+import api from './api.js';
 
 // Termo de Sigilo Científico formatado com quebras de linha para profissionais da saúde
 const SIGILO_TERMS_TEXT = `TERMO DE SIGILO CIENTÍFICO PARA PROFISSIONAIS DA SAÚDE
@@ -4541,9 +4542,39 @@ function App() {
   // Estado da aba ativa no Dashboard do Aluno
   const [studentActiveTab, setStudentActiveTab] = useState('panel'); // panel, courses, payments, account, agenda
 
-  // Estados de Negócio
   const [courses, setCourses] = useState([]);
   const [books, setBooks] = useState([]);
+
+  // Carregar dados nativos do MySQL
+  useEffect(() => {
+    const fetchApiData = async () => {
+      try {
+        const fetchedBooks = await api.getBooks();
+        if (fetchedBooks && Array.isArray(fetchedBooks) && fetchedBooks.length > 0) {
+          setBooks(fetchedBooks);
+          setMockDb(prev => ({ ...prev, books: fetchedBooks }));
+        }
+      } catch (err) { }
+
+      try {
+        const fetchedCourses = await api.getCourses();
+        if (fetchedCourses && Array.isArray(fetchedCourses) && fetchedCourses.length > 0) {
+          setCourses(fetchedCourses);
+          setMockDb(prev => ({ ...prev, courses: fetchedCourses }));
+        }
+      } catch (err) { }
+
+      if (user && user.role === 'ADMIN') {
+        try {
+          const fetchedUsers = await api.getAdminUsers();
+          if (fetchedUsers && Array.isArray(fetchedUsers) && fetchedUsers.length > 0) {
+            setMockDb(prev => ({ ...prev, users: fetchedUsers }));
+          }
+        } catch (err) { }
+      }
+    };
+    fetchApiData();
+  }, [user]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [isOpenPreviewMode, setIsOpenPreviewMode] = useState(false);
@@ -5861,6 +5892,7 @@ function App() {
       setUser(foundUser);
       setToken(foundUser.id);
       localStorage.setItem('token', foundUser.id);
+      localStorage.setItem('tosb_token', foundUser.id);
       setSuccess('Login efetuado (Modo Simulação)!');
       redirectToDashboard(foundUser.role);
     } else {
@@ -5884,6 +5916,7 @@ function App() {
           setUser(data.user);
           setToken(data.token);
           localStorage.setItem('token', data.token);
+          localStorage.setItem('tosb_token', data.token);
           setSuccess('Login efetuado!');
           redirectToDashboard(data.user.role);
         } else {
@@ -6109,7 +6142,7 @@ function App() {
   };
 
   // Handlers do CRUD do Administrador
-  const handleSaveCourse = (e) => {
+  const handleSaveCourse = async (e) => {
     e.preventDefault();
     clearAlerts();
     const id = e.target.id?.value;
@@ -6132,164 +6165,96 @@ function App() {
     // Mantendo teacher_id para compatibilidade legada se for apenas um
     const teacher_id = teacher_ids.length > 0 ? teacher_ids[0] : (e.target.teacher_id?.value || '');
 
-    const targetCourseId = id || ('course-' + Date.now());
+    const coursePayload = {
+      title,
+      description,
+      full_description,
+      type,
+      modality,
+      duration_days,
+      workload_hours,
+      min_attendance_pct,
+      banner_url,
+      finishing_message,
+      teacher_id,
+      teacher_ids
+    };
 
-    setMockDb(prev => {
-      let updatedCourses;
+    try {
       if (id) {
-        updatedCourses = prev.courses.map(c => {
-          if (c.id === id) {
-            return {
-              ...c,
-              title,
-              description,
-              full_description,
-              type,
-              modality,
-              duration_days,
-              workload_hours,
-              min_attendance_pct,
-              banner_url,
-              finishing_message,
-              teacher_id,
-              teacher_ids
-            };
-          }
-          return c;
-        });
+        await api.updateCourse(id, coursePayload);
+        setSuccess('Curso e valores salvos com sucesso no banco de dados!');
       } else {
-        const newCourse = {
-          id: targetCourseId,
-          title,
-          description,
-          full_description,
-          type,
-          modality,
-          duration_days,
-          workload_hours,
-          min_attendance_pct,
-          banner_url,
-          finishing_message,
-          teacher_id,
-          teacher_ids,
-          active: true
-        };
-        updatedCourses = [...prev.courses, newCourse];
+        await api.createCourse(coursePayload);
+        setSuccess('Curso cadastrado com sucesso no banco de dados!');
       }
-
-      // Atualizar Valores dos Professores para este curso e registrar no Histórico
-      let updatedTeacherCourses = [...(prev.teacher_courses || [])];
-      let updatedHistory = [...(prev.teacher_payment_history || [])];
-
-      const teachers = prev.users.filter(u => u.role === 'TEACHER');
-      teachers.forEach(t => {
-        const typeInput = e.target[`payment_type_${t.id}`];
-        const rateInput = e.target[`payment_rate_${t.id}`];
-        const unitInput = e.target[`payment_unit_${t.id}`];
-
-        if (typeInput && rateInput) {
-          const newType = typeInput.value;
-          const newRate = parseFloat(rateInput.value) || 0;
-          const newUnit = unitInput ? unitInput.value : 'BRL';
-
-          // Verificar configuração atual
-          const existingConfigIndex = updatedTeacherCourses.findIndex(tc => tc.teacher_id === t.id && tc.course_id === targetCourseId);
-          const currentConfig = existingConfigIndex > -1 ? updatedTeacherCourses[existingConfigIndex] : null;
-
-          // Se mudou ou é novo, adiciona ao histórico permanentemente para consulta
-          if (!currentConfig || currentConfig.payment_type !== newType || currentConfig.payment_rate !== newRate || currentConfig.payment_unit !== newUnit) {
-            const historyEntry = {
-              id: 'tph-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-              course_id: targetCourseId,
-              teacher_id: t.id,
-              teacher_name: t.name,
-              payment_type: newType,
-              payment_rate: newRate,
-              created_at: new Date().toISOString(),
-              notes: id ? 'Atualização de valor na Gestão de Cursos' : 'Valores definidos na criação do curso'
-            };
-            updatedHistory.unshift(historyEntry);
-          }
-
-          const newTcObj = {
-            id: currentConfig ? currentConfig.id : `tc_${t.id}_${targetCourseId}`,
-            teacher_id: t.id,
-            course_id: targetCourseId,
-            payment_type: newType,
-            payment_rate: newRate,
-            updated_at: new Date().toISOString()
-          };
-
-          if (existingConfigIndex > -1) {
-            updatedTeacherCourses[existingConfigIndex] = newTcObj;
-          } else {
-            updatedTeacherCourses.push(newTcObj);
-          }
-        }
-      });
-
-      return {
+      const freshCourses = await api.getCourses();
+      setMockDb(prev => ({
         ...prev,
-        courses: updatedCourses,
-        teacher_courses: updatedTeacherCourses,
-        teacher_payment_history: updatedHistory
-      };
-    });
-
-    setSuccess(id ? 'Curso e valores de pagamento docentes salvos no histórico!' : 'Curso cadastrado com valores docentes no histórico!');
-    setEditingCourse(null);
+        courses: freshCourses
+      }));
+      setEditingCourse(null);
+    } catch (err) {
+      setError(err.message || 'Erro ao salvar curso no banco de dados.');
+    }
   };
 
-  const handleDeleteCourse = (courseId) => {
-    setMockDb(prev => ({
-      ...prev,
-      courses: (prev.courses || []).filter(c => c.id !== courseId)
-    }));
-    setSuccess('Curso removido com sucesso.');
+  const handleDeleteCourse = async (courseId) => {
+    if (!confirm('Tem certeza que deseja remover este curso?')) return;
+    clearAlerts();
+    try {
+      await api.deleteCourse(courseId);
+      setMockDb(prev => ({
+        ...prev,
+        courses: (prev.courses || []).filter(c => c.id !== courseId)
+      }));
+      setSuccess('Curso removido com sucesso do banco de dados.');
+    } catch (err) {
+      setError(err.message || 'Erro ao remover curso.');
+    }
   };
 
-  const handleSaveBook = (e) => {
+  const handleSaveBook = async (e) => {
     e.preventDefault();
     clearAlerts();
-    const id = e.target.id.value || 'book_' + Date.now();
+    const id = e.target.id?.value || '';
     const title = e.target.title.value;
     const author = e.target.author.value;
     const price = parseFloat(e.target.price.value);
     const desc = e.target.desc.value;
-    const full_description = e.target['hidden_full_desc_book_' + (e.target.id.value || 'new')]?.value || '';
+    const full_description = e.target['hidden_full_desc_book_' + (e.target.id?.value || 'new')]?.value || '';
     const page_count = parseInt(e.target.page_count?.value) || 0;
     const image = e.target.image?.value || bookCoverImage || '';
     const images = bookGalleryImages && bookGalleryImages.length > 0 ? bookGalleryImages : (image ? [image] : []);
 
-    setMockDb(prev => {
-      let updatedBooks;
-      const exists = (prev.books || BOOKS_DATA).some(b => b.id === id);
-      if (exists) {
-        updatedBooks = (prev.books || BOOKS_DATA).map(b => b.id === id ? { ...b, title, author, price, desc, full_description, page_count, image, images } : b);
-        setSuccess('Livro atualizado com sucesso!');
-      } else {
-        const newBook = { id, title, author, price, desc, full_description, page_count, image, images };
-        updatedBooks = [...(prev.books || BOOKS_DATA), newBook];
-        setSuccess('Livro adicionado com sucesso!');
-      }
-      return { ...prev, books: updatedBooks };
-    });
+    const bookData = { id, title, author, price, desc, full_description, page_count, image, images };
 
-    setEditingBook(null);
-    setBookGalleryImages([]);
-    setBookCoverImage('');
-    setNewGalleryUrl('');
-    e.target.reset();
+    try {
+      await api.saveBook(bookData);
+      const freshBooks = await api.getBooks();
+      setMockDb(prev => ({ ...prev, books: freshBooks }));
+      setSuccess(id ? 'Livro atualizado no banco de dados com sucesso!' : 'Livro adicionado ao banco de dados com sucesso!');
+      setEditingBook(null);
+      setBookGalleryImages([]);
+      setBookCoverImage('');
+      setNewGalleryUrl('');
+      if (e.target.reset) e.target.reset();
+    } catch (err) {
+      setError(err.message || 'Erro ao salvar livro.');
+    }
   };
 
-  const handleDeleteBook = (id) => {
+  const handleDeleteBook = async (id) => {
     clearAlerts();
     if (confirm('Tem certeza que deseja remover este livro da livraria?')) {
-      setMockDb(prev => {
-        const updatedBooks = (prev.books || BOOKS_DATA).filter(b => b.id !== id);
-        return { ...prev, books: updatedBooks };
-      });
-      setSuccess('Livro removido com sucesso!');
+      try {
+        await api.deleteBook(id);
+        const freshBooks = await api.getBooks();
+        setMockDb(prev => ({ ...prev, books: freshBooks }));
+        setSuccess('Livro removido do banco de dados com sucesso!');
+      } catch (err) {
+        setError(err.message || 'Erro ao remover livro.');
+      }
     }
   };
 
@@ -7190,41 +7155,43 @@ NEWFILEENCODING:NONE
   };
 
   // Funções de Gerenciamento do Administrador
-  const toggleUserStatus = (userId) => {
-    setMockDb(prev => {
-      const updatedUsers = prev.users.map(u => {
-        if (u.id === userId) {
-          const newStatus = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-          return { ...u, status: newStatus };
-        }
-        return u;
-      });
-      const updatedEnrollments = prev.enrollments.map(e => {
-        if (e.student_id === userId) {
-          const userObj = updatedUsers.find(u => u.id === userId);
-          return { ...e, status: userObj.status };
-        }
-        return e;
-      });
-      return {
-        ...prev,
-        users: updatedUsers,
-        enrollments: updatedEnrollments
-      };
-    });
-    setSuccess('Status do usuário atualizado com sucesso.');
+  const toggleUserStatus = async (userId) => {
+    clearAlerts();
+    const userObj = mockDb.users.find(u => u.id === userId);
+    if (!userObj) return;
+    const newStatus = userObj.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    try {
+      await api.updateAdminUser(userId, { status: newStatus });
+      const freshUsers = await api.getAdminUsers();
+      setMockDb(prev => ({ ...prev, users: freshUsers }));
+      setSuccess('Status do usuário atualizado no banco de dados com sucesso.');
+    } catch (err) {
+      setError(err.message || 'Erro ao alterar status do usuário.');
+    }
   };
 
-  const handleSaveUser = (e) => {
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Tem certeza que deseja remover este usuário do banco de dados?')) return;
+    clearAlerts();
+    try {
+      await api.deleteAdminUser(userId);
+      const freshUsers = await api.getAdminUsers();
+      setMockDb(prev => ({ ...prev, users: freshUsers }));
+      setSuccess('Usuário removido do banco de dados com sucesso.');
+    } catch (err) {
+      setError(err.message || 'Erro ao remover usuário.');
+    }
+  };
+
+  const handleSaveUser = async (e) => {
     e.preventDefault();
     clearAlerts();
     const name = e.target.name.value;
     const email = e.target.email.value;
-    const password = e.target.password.value;
+    const password = e.target.password?.value || '';
     const role = e.target.role.value;
     const status = e.target.status.value;
 
-    // Ler os campos comuns e de endereço do formulário
     const phone = e.target.phone?.value || '';
     const cpf = e.target.cpf?.value || '';
     const profession = e.target.profession?.value || '';
@@ -7268,82 +7235,29 @@ NEWFILEENCODING:NONE
       registrationNumber = e.target.registrationNumber?.value || '';
     }
 
-    let errorOccurred = false;
+    const userData = {
+      name, email, password, role, status, is_homeopath,
+      phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
+      registrationType, registrationNumber, crm, rqe, bio,
+      bank_name, bank_agency, bank_account, pix_key,
+      billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
+      commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
+      commercial_phone
+    };
 
-    setMockDb(prev => {
-      const existingUser = prev.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.id !== editingUser.id);
-      if (existingUser) {
-        errorOccurred = true;
-        return prev;
-      }
-
-      let updatedUsers;
-      if (editingUser.id) {
-        updatedUsers = prev.users.map(u => {
-          if (u.id === editingUser.id) {
-            return {
-              ...u,
-              name, email, password, role, status, is_homeopath,
-              phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
-              registrationType, registrationNumber, crm, rqe, bio,
-              bank_name, bank_agency, bank_account, pix_key,
-              billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
-              commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
-              commercial_phone
-            };
-          }
-          return u;
-        });
+    try {
+      if (editingUser?.id) {
+        await api.updateAdminUser(editingUser.id, userData);
+        setSuccess('Usuário atualizado no banco de dados com sucesso!');
       } else {
-        const newUser = {
-          id: 'user-' + Date.now(),
-          name, email, password, role, status, is_homeopath,
-          phone, cpf, profession, custom_profession, council_type, council_number, council_state, specialty,
-          registrationType, registrationNumber, crm, rqe, bio,
-          bank_name, bank_agency, bank_account, pix_key,
-          billing_zip, billing_street, billing_number, billing_complement, billing_neighborhood, billing_city, billing_state,
-          commercial_zip, commercial_street, commercial_number, commercial_complement, commercial_neighborhood, commercial_city, commercial_state,
-          commercial_phone
-        };
-        updatedUsers = [...prev.users, newUser];
+        await api.createAdminUser(userData);
+        setSuccess('Usuário criado no banco de dados com sucesso!');
       }
-
-      let updatedTeacherCourses = prev.teacher_courses || [];
-      const targetTeacherId = editingUser.id || ('user-' + Date.now());
-
-      if (role === 'TEACHER') {
-        const newConfigs = [];
-        (prev.courses || []).forEach(c => {
-          const typeVal = e.target[`payment_type_${c.id}`]?.value;
-          const rateVal = parseFloat(e.target[`payment_rate_${c.id}`]?.value) || 0;
-          if (typeVal) {
-            newConfigs.push({
-              id: `tc_${targetTeacherId}_${c.id}`,
-              teacher_id: targetTeacherId,
-              course_id: c.id,
-              payment_type: typeVal,
-              payment_rate: rateVal
-            });
-          }
-        });
-        updatedTeacherCourses = [
-          ...updatedTeacherCourses.filter(tc => tc.teacher_id !== targetTeacherId),
-          ...newConfigs
-        ];
-      }
-
-      return {
-        ...prev,
-        users: updatedUsers,
-        teacher_courses: updatedTeacherCourses
-      };
-    });
-
-    if (errorOccurred) {
-      setError('E-mail já cadastrado por outro usuário.');
-    } else {
-      setSuccess(editingUser.id ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!');
+      const freshUsers = await api.getAdminUsers();
+      setMockDb(prev => ({ ...prev, users: freshUsers }));
       setEditingUser(null);
+    } catch (err) {
+      setError(err.message || 'Erro ao salvar usuário no banco de dados.');
     }
   };
 
@@ -8587,7 +8501,7 @@ NEWFILEENCODING:NONE
                       <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>{book.title}</h3>
                       <p className="premium-card-text">{book.desc}</p>
                       <div className="premium-card-footer">
-                        <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                        <span className="premium-card-price">R$ {parseFloat(book.price || 0).toFixed(2)}</span>
                         <button className="btn btn-primary" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>Informações</button>
                       </div>
                     </div>
@@ -9116,7 +9030,7 @@ NEWFILEENCODING:NONE
                         <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
                         <p className="premium-card-text">{course.description}</p>
                         <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
-                          <span className="premium-card-price">{course.type === 'FREE' ? 'Gratuito' : course.price ? `R$ ${course.price.toFixed(2)}` : (course.type === 'SUBSCRIPTION' ? 'R$ 99,00/mês' : 'R$ 3.600,00')}</span>
+                          <span className="premium-card-price">{course.type === 'FREE' ? 'Gratuito' : course.price ? `R$ ${parseFloat(course.price).toFixed(2)}` : (course.type === 'SUBSCRIPTION' ? 'R$ 99,00/mês' : 'R$ 3.600,00')}</span>
                           <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
                         </div>
                       </div>
@@ -9161,7 +9075,7 @@ NEWFILEENCODING:NONE
                         <h3 className="premium-card-title cursor-pointer mt-2" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>{course.title}</h3>
                         <p className="premium-card-text">{course.description}</p>
                         <div className="premium-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
-                          <span className="premium-card-price">R$ {course.price ? course.price.toFixed(2) : '1.200,00'}</span>
+                          <span className="premium-card-price">R$ {course.price ? parseFloat(course.price).toFixed(2) : '1.200,00'}</span>
                           <button className="btn btn-primary" onClick={() => navigateTo('course-detail', 'id=' + course.id)}>Inscrição</button>
                         </div>
                       </div>
@@ -9194,7 +9108,7 @@ NEWFILEENCODING:NONE
                       <p className="premium-card-text">{book.desc}</p>
 
                       <div className="premium-card-footer">
-                        <span className="premium-card-price">R$ {book.price.toFixed(2)}</span>
+                        <span className="premium-card-price">R$ {parseFloat(book.price || 0).toFixed(2)}</span>
                         <button className="btn btn-primary" onClick={() => navigateTo('book-detail', 'id=' + book.id)}>Informações</button>
                       </div>
                     </div>
@@ -11034,7 +10948,7 @@ NEWFILEENCODING:NONE
                                   <span className="text-muted">Sem sumário</span>
                                 )}
                               </td>
-                              <td><strong>R$ {b.price.toFixed(2)}</strong></td>
+                              <td><strong>R$ {parseFloat(b.price || 0).toFixed(2)}</strong></td>
                               <td>
                                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                                   <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => { setEditingBook(b); setBookGalleryImages(b.images || []); setBookCoverImage(b.image || ''); setNewGalleryUrl(''); }}>Editar</button>
@@ -11330,7 +11244,10 @@ NEWFILEENCODING:NONE
                                       </span>
                                     </td>
                                     <td>
-                                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} onClick={() => startEditUser(s)}>Editar</button>
+                                        <button className="btn btn-secondary text-error" style={{ padding: '0.25rem 0.5rem' }} onClick={() => handleDeleteUser(s.id)}>Excluir</button>
+                                      </div>
                                     </td>
                                   </tr>
                                 ))}
